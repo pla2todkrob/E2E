@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>@ViewBag.Title - E2E Service</title>
+    @Styles.Render("~/bundles/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <div id="objSpin"></div>
+    <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
+            <div class="modal-content" id="modalContent">
+
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/js")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

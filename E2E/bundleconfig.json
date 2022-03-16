@@ -1,0 +1,20 @@
+[
+  {
+    "outputFileName": "Content/css/select2-bootstrap4.min.css",
+    "inputFiles": [
+      "Content/css/select2-bootstrap4.css"
+    ]
+  },
+  {
+    "outputFileName": "Content/Site.min.css",
+    "inputFiles": [
+      "Content/Site.css"
+    ]
+  },
+  {
+    "outputFileName": "Scripts/Site.min.js",
+    "inputFiles": [
+      "Scripts/Site.js"
+    ]
+  }
+]
