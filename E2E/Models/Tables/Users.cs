@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -38,15 +39,11 @@ namespace E2E.Models.Tables
 
         public virtual Master_LineWorks Master_LineWorks { get; set; }
 
-        public virtual Master_Nationalities Master_Nationalities { get; set; }
-
         public virtual Master_Plants Master_Plants { get; set; }
 
         public virtual Master_Processes Master_Processes { get; set; }
 
         public virtual Master_Sections Master_Sections { get; set; }
-
-        public Guid? Nationality_Id { get; set; }
 
         [Required]
         public Guid Plant_Id { get; set; }
@@ -62,9 +59,9 @@ namespace E2E.Models.Tables
 
         public DateTime? Update { get; set; }
 
-        [Required]
+        [Description("Employee code"), Display(Name = "Code"), Required]
         public string User_Code { get; set; }
-
+        [Description("Employee email"), Display(Name = "Email")]
         public string User_Email { get; set; }
 
         [Key]

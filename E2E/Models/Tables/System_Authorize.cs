@@ -12,6 +12,7 @@ namespace E2E.Models.Tables
         public Guid Authorize_Id { get; set; }
 
         public int Authorize_Index { get; set; }
+        [Display(Name = "Authorize")]
         public string Authorize_Name { get; set; }
 
         public System_Authorize()
@@ -19,7 +20,7 @@ namespace E2E.Models.Tables
             Authorize_Id = Guid.NewGuid();
         }
 
-        public List<System_Authorize> DefaultList()
+        public static List<System_Authorize> DefaultList()
         {
             List<System_Authorize> list = new List<System_Authorize>();
             list.Add(new System_Authorize() { Authorize_Index = 1, Authorize_Name = "Approved" });

@@ -1,5 +1,6 @@
 ﻿namespace E2E.Migrations
 {
+    using E2E.Models;
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
@@ -15,10 +16,7 @@
 
         protected override void Seed(E2E.Models.clsContext context)
         {
-            //  This method will be called after migrating to the latest version.
-
-            //  You can use the DbSet<T>.AddOrUpdate() helper extension method
-            //  to avoid creating duplicate seed data.
+            clsDefaultSystem.Generate();
         }
     }
 }

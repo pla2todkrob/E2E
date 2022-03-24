@@ -21,8 +21,8 @@ namespace E2E
 
             bundles.Add(new ScriptBundle("~/bundles/js").Include(
                       "~/Scripts/bootstrap.bundle.min.js",
-                      "~/Scripts/DataTables/dataTables.bootstrap4.min.js",
                       "~/Scripts/DataTables/jquery.dataTables.min.js",
+                      "~/Scripts/DataTables/dataTables.bootstrap4.min.js",
                       "~/Scripts/moment.min.js",
                       "~/Scripts/select2.min.js",
                       "~/Scripts/spin.min.js",
@@ -30,10 +30,13 @@ namespace E2E
 
             bundles.Add(new StyleBundle("~/bundles/css").Include(
                       "~/Content/bootstrap.min.css",
+                      "~/Content/font-awesome.min.css",
                       "~/Content/css/select2.min.css",
                       "~/Content/css/select2-bootstrap4.min.css",
                       "~/Content/DataTables/css/dataTables.bootstrap4.min.css",
                       "~/Content/Site.min.css"));
+
+            BundleTable.EnableOptimizations = true;
         }
     }
 }

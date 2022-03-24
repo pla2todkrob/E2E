@@ -1,0 +1,37 @@
+﻿@model IEnumerable<E2E.Models.Views.clsSections>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th class="fit"></th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.Section_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Department_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Division_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Plant_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Active)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <button class="btn btn-outline-warning">Edit</button>
+                </td>
+                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td>@Html.DisplayFor(i => item.Section_Name)</td>
+                <td>@Html.DisplayFor(i => item.Department_Name)</td>
+                <td>@Html.DisplayFor(i => item.Division_Name)</td>
+                <td>@Html.DisplayFor(i => item.Plant_Name)</td>
+                <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
+                <td>@Html.DisplayFor(i => item.Update)</td>
+            </tr>
+        }
+    </tbody>
+</table>

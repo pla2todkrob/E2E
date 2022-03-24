@@ -19,7 +19,7 @@ namespace E2E.Models.Tables
             Role_Id = Guid.NewGuid();
         }
 
-        public List<System_Roles> DefaultList()
+        public static List<System_Roles> DefaultList()
         {
             List<System_Roles> list = new List<System_Roles>();
             list.Add(new System_Roles() { Role_Index = 1, Role_Name = "Admin" });

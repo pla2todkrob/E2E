@@ -1,0 +1,47 @@
+﻿
+@{
+    ViewBag.Title = "Line works";
+}
+
+@section scripts{
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit','#SaveForm',  function () {
+            callSubmit('@Url.Action("LineWorks_Form", "Masters")');
+            return false;
+        });
+
+        function reloadTable() {
+            callTable('@Url.Action("LineWorks_Table", "Masters")', true, true, 1);
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb " class="mt-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Master</li>
+            <li class="breadcrumb-item active" aria-current="page">Line Works</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex">
+            <div class="mr-auto"></div>
+            <div class="ml-auto">
+                <button class="btn btn-secondary" onclick="callModal('@Url.Action("LineWorks_Form","Masters")')"><i class="fa fa-plus"></i>&nbsp;Add</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row" id="datalist">
+        </div>
+    </div>
+</div>

@@ -8,6 +8,7 @@ using E2E.Models.Tables;
 using E2E.Models.Views;
 using System.Transactions;
 using OfficeOpenXml;
+using System.Data.Entity.Validation;
 
 namespace E2E.Controllers
 {
@@ -20,17 +21,26 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        public ActionResult Departments_Table()
+        {
+            return View(data.Department_GetAllView());
+        }
         public ActionResult Divisions()
         {
             return View();
         }
-
+        public ActionResult Divisions_Table()
+        {
+            return View(data.Division_GetAllView());
+        }
         public ActionResult Grades()
         {
             return View();
         }
-
+        public ActionResult Grades_Table()
+        {
+            return View(data.Grades_GetAllView());
+        }
         public ActionResult Index()
         {
             return View();
@@ -41,43 +51,30 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Nationalities()
+        public ActionResult LineWorks_Form(Guid? id)
         {
-            return View();
-        }
-
-        public ActionResult Plants()
-        {
-            return View();
-        }
-
-        public ActionResult Processes()
-        {
-            return View();
-        }
-
-        public ActionResult Sections()
-        {
-            return View();
-        }
-
-        public ActionResult Users()
-        {
-            return View();
-        }
-
-        public ActionResult Users_Form(Guid? id)
-        {
-            if (id != null)
+            ViewBag.AuthorizeList = db.System_Authorizes
+                .OrderBy(o => o.Authorize_Index)
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Authorize_Id.ToString(),
+                    Text = s.Authorize_Name
+                }).ToList();
+            bool isNew = true;
+            Master_LineWorks master_LineWorks = new Master_LineWorks();
+            if (id.HasValue)
             {
-                return View(data.UserDetail_Get(id.Value));
+                master_LineWorks = data.LineWorks_Get(id.Value);
+                isNew = false;
             }
 
-            return View(new UserDetails());
+            ViewBag.IsNew = isNew;
+
+            return View(master_LineWorks);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Users_Form(UserDetails model)
+        public ActionResult LineWorks_Form(Master_LineWorks model)
         {
             clsSwal swal = new clsSwal();
             if (ModelState.IsValid)
@@ -86,7 +83,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.User_Save(model))
+                        if (data.LineWork_Save(model))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -95,16 +92,34 @@ namespace E2E.Controllers
                             swal.title = "Successful";
                         }
                     }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
                     catch (Exception ex)
                     {
                         swal.title = ex.TargetSite.Name;
                         swal.text = ex.Message;
                         if (ex.InnerException != null)
                         {
-                            swal.text += "\n " + ex.InnerException.Message;
+                            swal.text = ex.InnerException.Message;
                             if (ex.InnerException.InnerException != null)
                             {
-                                swal.text += "\n " + ex.InnerException.InnerException.Message;
+                                swal.text = ex.InnerException.InnerException.Message;
                             }
                         }
                     }
@@ -135,10 +150,226 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult LineWorks_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    clsSaveResult clsSaveResult = data.User_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
 
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult LineWorks_Table()
+        {
+            return View(data.LineWorks_GetAll());
+        }
+        public ActionResult Plants()
+        {
+            return View();
+        }
+        public ActionResult Plants_Table()
+        {
+            return View(data.Plant_GetAll());
+        }
+        public ActionResult Processes()
+        {
+            return View();
+        }
+        public ActionResult Processes_Table()
+        {
+            return View(data.Process_GetAllView());
+        }
+        public ActionResult Sections()
+        {
+            return View();
+        }
+        public ActionResult Sections_Table()
+        {
+            return View(data.Section_GetAllView());
+        }
+        public ActionResult Users()
+        {
+            return View();
+        }
+
+        public ActionResult Users_Form(Guid? id)
+        {
+            ViewBag.RoleList = data.SelectListItems_Role();
+            ViewBag.LineWorkList = data.SelectListItems_LineWork();
+            ViewBag.GradeList = new List<SelectListItem>();
+            ViewBag.PlantList = data.SelectListItems_Plant();
+            ViewBag.DivisionList = new List<SelectListItem>();
+            ViewBag.DepartmentList = new List<SelectListItem>();
+            ViewBag.SectionList = new List<SelectListItem>();
+            ViewBag.ProcessList = new List<SelectListItem>();
+
+            ViewBag.PrefixTHList = data.SelectListItems_PrefixTH();
+            ViewBag.PrefixENList = data.SelectListItems_PrefixEN();
+            ViewBag.IsNew = true;
+
+            UserDetails userDetails = new UserDetails();
+            userDetails.Users = new Users();
+            if (id.HasValue)
+            {
+                userDetails = data.UserDetail_Get(id.Value);
+                ViewBag.GradeList = data.SelectListItems_Grade(userDetails.Users.LineWork_Id);
+                ViewBag.DivisionList = data.SelectListItems_Division(userDetails.Users.Plant_Id);
+                ViewBag.DepartmentList = data.SelectListItems_Department(userDetails.Users.Division_Id);
+                ViewBag.SectionList = data.SelectListItems_Section(userDetails.Users.Department_Id);
+                ViewBag.ProcessList = data.SelectListItems_Process(userDetails.Users.Section_Id);
+                ViewBag.IsNew = false;
+            }
+
+            return View(userDetails);
+        }
+        
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Users_Form(UserDetails model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.User_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Users_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    clsSaveResult clsSaveResult = data.User_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
         public ActionResult Users_Table()
         {
-            return View(data.User_GetAll());
+            return View(data.User_GetAllView());
         }
 
         public ActionResult Users_Upload()
@@ -146,37 +377,98 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpPost]
-        public ActionResult Users_Upload(HttpPostedFileBase file)
+        [HttpPost,ValidateAntiForgeryToken]
+        public ActionResult Users_UploadExcel()
         {
+
+            var files = Request.Files;
             clsSwal swal = new clsSwal();
-            using (TransactionScope scope = new TransactionScope())
+
+            TransactionOptions options = new TransactionOptions();
+            options.IsolationLevel = IsolationLevel.ReadCommitted;
+            options.Timeout = TimeSpan.MaxValue;
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required,options))
             {
                 try
                 {
-                    using (ExcelPackage package = new ExcelPackage(file.InputStream))
+                    bool doComplete = new bool();
+                    foreach (var item in files)
                     {
-                        foreach (var sheet in package.Workbook.Worksheets)
+                        HttpPostedFileBase file = Request.Files[item.ToString()];
+                        using (ExcelPackage package = new ExcelPackage(file.InputStream))
                         {
-                            for (int row = 1; row <= sheet.Dimension.End.Row; row++)
+                            foreach (var sheet in package.Workbook.Worksheets)
                             {
-                                if (row > 3)
+                                for (int row = 1; row <= sheet.Dimension.End.Row; row++)
                                 {
-                                    UserDetails userDetails = new UserDetails();
-                                    userDetails.Detail_EN_FirstName = sheet.Cells[row, 4].Text;
-                                    userDetails.Detail_EN_LastName = sheet.Cells[row, 5].Text;
-                                    userDetails.Detail_EN_Prefix = sheet.Cells[row, 3].Text;
-                                    userDetails.Detail_TH_FirstName = sheet.Cells[row, 7].Text;
-                                    userDetails.Detail_TH_LastName = sheet.Cells[row, 8].Text;
-                                    userDetails.Detail_TH_Prefix = sheet.Cells[row, 6].Text;
-                                    userDetails.Users.LineWork_Id = data.LineWork_GetId(sheet.Cells[row, 10].Text, true).Value;
-                                    userDetails.Users.Grade_Id = data.Grade_GetId(userDetails.Users.LineWork_Id, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                    userDetails.Users.Plant_Id = data.Plant_GetId(sheet.Cells[row, 13].Text, true).Value;
-                                    userDetails.Users.Division_Id = data.Division_GetId(userDetails.Users.Plant_Id, sheet.Cells[row, 14].Text, true);
-                                    userDetails.Users.Department_Id = data.Department_GetId(userDetails.Users.Division_Id.Value,sheet.Cells[row, 15].Text,true);
-                                    userDetails.Users.Section_Id = data.Section_GetId(userDetails.Users.Department_Id.Value, sheet.Cells[row, 16].Text,true);
-                                    userDetails.Users.Process_Id = 
+                                    if (row > 3)
+                                    {
+                                        if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
+                                        {
+                                            goto EndProcess;
+                                        }
+                                        UserDetails userDetails = new UserDetails();
+                                        userDetails.Detail_EN_FirstName = sheet.Cells[row, 4].Text;
+                                        userDetails.Detail_EN_LastName = sheet.Cells[row, 5].Text;
+                                        userDetails.Prefix_EN_Id = data.Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value;
+                                        userDetails.Detail_TH_FirstName = sheet.Cells[row, 7].Text;
+                                        userDetails.Detail_TH_LastName = sheet.Cells[row, 8].Text;
+                                        userDetails.Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value;
+                                        userDetails.Users = new Users();
+                                        userDetails.Users.LineWork_Id = data.LineWork_GetId(sheet.Cells[row, 10].Text, true).Value;
+                                        userDetails.Users.Grade_Id = data.Grade_GetId(userDetails.Users.LineWork_Id, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
+                                        userDetails.Users.Plant_Id = data.Plant_GetId(sheet.Cells[row, 13].Text, true).Value;
+                                        userDetails.Users.Division_Id = data.Division_GetId(userDetails.Users.Plant_Id, sheet.Cells[row, 14].Text, true);
+                                        userDetails.Users.Department_Id = data.Department_GetId(userDetails.Users.Division_Id.Value, sheet.Cells[row, 15].Text, true);
+                                        userDetails.Users.Section_Id = data.Section_GetId(userDetails.Users.Department_Id.Value, sheet.Cells[row, 16].Text, true);
+                                        userDetails.Users.Process_Id = data.Process_GetId(userDetails.Users.Section_Id.Value, sheet.Cells[row, 17].Text, true);
+                                        userDetails.Users.Role_Id = data.Role_UserId();
+                                        userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
+                                        if (data.User_Save(userDetails))
+                                        {
+                                            doComplete = true;
+                                        }
+                                        else
+                                        {
+                                            goto EndProcess;
+                                        }
+                                    }
                                 }
+                            }
+                        }
+                    }
+
+                    EndProcess:
+                    if (doComplete)
+                    {
+                        scope.Complete();
+                        swal.icon = "success";
+                        swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                        swal.dangerMode = false;
+                    }
+                    else
+                    {
+                        scope.Dispose();
+                        swal.icon = "warning";
+                        swal.text = "กรุณาตรวจสอบข้อมูลอีกครั้ง";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
                             }
                         }
                     }
@@ -187,16 +479,38 @@ namespace E2E.Controllers
                     swal.text = ex.Message;
                     if (ex.InnerException != null)
                     {
-                        swal.text += "\n " + ex.InnerException.Message;
+                        swal.text = ex.InnerException.Message;
                         if (ex.InnerException.InnerException != null)
                         {
-                            swal.text += "\n " + ex.InnerException.InnerException.Message;
+                            swal.text = ex.InnerException.InnerException.Message;
                         }
                     }
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Users_GetSelectGrades(Guid? id)
+        {
+            return Json(data.SelectListItems_Grade(id), JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Users_GetSelectDivisions(Guid? id)
+        {
+            return Json(data.SelectListItems_Division(id), JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Users_GetSelectDepartments(Guid? id)
+        {
+            return Json(data.SelectListItems_Department(id), JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Users_GetSelectSections(Guid? id)
+        {
+            return Json(data.SelectListItems_Section(id), JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Users_GetSelectProcesses(Guid? id)
+        {
+            return Json(data.SelectListItems_Process(id), JsonRequestBehavior.AllowGet);
         }
     }
 }

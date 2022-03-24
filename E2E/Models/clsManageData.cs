@@ -1,10 +1,12 @@
 ﻿using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
+using System.Web.Mvc;
 
 namespace E2E.Models
 {
@@ -12,7 +14,169 @@ namespace E2E.Models
     {
         private clsContext db = new clsContext();
 
-        public Guid? Process_GetId(Guid sectionId,string val,bool create = false)
+        public Guid? Prefix_EN_GetId(string val, bool create = false)
+        {
+            try
+            {
+                Guid? res = null;
+            FindModel:
+                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
+                system_Prefix_EN = db.System_Prefix_ENs
+                    .Where(w => w.Prefix_EN_Name.ToLower() == val.ToLower().Trim())
+                    .FirstOrDefault();
+                if (system_Prefix_EN != null)
+                {
+                    res = system_Prefix_EN.Prefix_EN_Id;
+                }
+                else
+                {
+                    if (create)
+                    {
+                        if (!string.IsNullOrEmpty(val))
+                        {
+                            if (Prefix_EN_Save(val))
+                            {
+                                goto FindModel;
+                            }
+                        }
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Prefix_EN_Save(string val)
+        {
+            try
+            {
+                bool res = new bool();
+                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
+                system_Prefix_EN.Prefix_EN_Name = val.Trim();
+                db.System_Prefix_ENs.Add(system_Prefix_EN);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Guid? Prefix_TH_GetId(string val, bool create = false)
+        {
+            try
+            {
+                Guid? res = null;
+            FindModel:
+                System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
+                system_Prefix_TH = db.System_Prefix_THs
+                    .Where(w => w.Prefix_TH_Name.ToLower() == val.ToLower().Trim())
+                    .FirstOrDefault();
+                if (system_Prefix_TH != null)
+                {
+                    res = system_Prefix_TH.Prefix_TH_Id;
+                }
+                else
+                {
+                    if (create)
+                    {
+                        if (!string.IsNullOrEmpty(val))
+                        {
+                            if (Prefix_TH_Save(val))
+                            {
+                                goto FindModel;
+                            }
+                        }
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Prefix_TH_Save(string val)
+        {
+            try
+            {
+                bool res = new bool();
+                System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
+                system_Prefix_TH.Prefix_TH_Name = val.Trim();
+                db.System_Prefix_THs.Add(system_Prefix_TH);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Guid Role_AdminId()
+        {
+            try
+            {
+                return db.System_Roles
+                    .Where(w => w.Role_Index == 1)
+                    .Select(s => s.Role_Id)
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Guid Role_UserId()
+        {
+            try
+            {
+                return db.System_Roles
+                    .Where(w => w.Role_Index == 2)
+                    .Select(s => s.Role_Id)
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public Master_Processes Process_Get(Guid id)
+        {
+            return db.Master_Processes.Find(id);
+        }
+        public List<Master_Processes> Process_GetAll()
+        {
+            return db.Master_Processes.ToList();
+        }
+        public List<clsProcesses> Process_GetAllView()
+        {
+            return db.Master_Processes
+                .Select(s => new clsProcesses()
+                {
+                    Active = s.Active,
+                    Create = s.Create,
+                    Department_Name = s.Master_Sections.Master_Departments.Department_Name,
+                    Division_Name = s.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
+                    Plant_Name = s.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Process_Name = s.Process_Name,
+                    Section_Name = s.Master_Sections.Section_Name,
+                    Update = s.Update
+                }).ToList();
+        }
+        public Guid? Process_GetId(Guid sectionId, string val, bool create = false)
         {
             try
             {
@@ -33,7 +197,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Process_Save(sectionId,val))
+                            if (Process_Save(sectionId, val))
                             {
                                 goto FindModel;
                             }
@@ -45,12 +209,11 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
 
-        public bool Process_Save(Guid sectionId,string val)
+        public bool Process_Save(Guid sectionId, string val)
         {
             try
             {
@@ -68,11 +231,32 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
-        public Guid? Section_GetId(Guid departmentId,string val,bool create = false)
+        public Master_Sections Section_Get(Guid id)
+        {
+            return db.Master_Sections.Find(id);
+        }
+        public List<Master_Sections> Section_GetAll()
+        {
+            return db.Master_Sections.ToList();
+        }
+        public List<clsSections> Section_GetAllView()
+        {
+            return db.Master_Sections
+                .Select(s => new clsSections()
+                {
+                    Active = s.Active,
+                    Create = s.Create,
+                    Department_Name = s.Master_Departments.Department_Name,
+                    Division_Name = s.Master_Departments.Master_Divisions.Division_Name,
+                    Plant_Name = s.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Section_Name = s.Section_Name,
+                    Update = s.Update
+                }).ToList();
+        }
+        public Guid? Section_GetId(Guid departmentId, string val, bool create = false)
         {
             try
             {
@@ -93,7 +277,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Section_Save(departmentId,val))
+                            if (Section_Save(departmentId, val))
                             {
                                 goto FindModel;
                             }
@@ -105,12 +289,11 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
 
-        public bool Section_Save(Guid departmentId,string val)
+        public bool Section_Save(Guid departmentId, string val)
         {
             try
             {
@@ -129,10 +312,34 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
+        public Master_Departments Department_Get(Guid id)
+        {
+            return db.Master_Departments.Find(id);
+        }
+
+        public List<Master_Departments> Department_GetAll()
+        {
+            return db.Master_Departments.ToList();
+        }
+
+        public List<clsDepartments> Department_GetAllView()
+        {
+            return db.Master_Departments
+                .Select(s => new clsDepartments()
+                {
+                    Active = s.Active,
+                    Create = s.Create,
+                    Department_Name = s.Department_Name,
+                    Division_Name = s.Master_Divisions.Division_Name,
+                    Plant_Name = s.Master_Divisions.Master_Plants.Plant_Name,
+                    Update = s.Update
+                }).ToList();
+        }
+
         public Guid? Department_GetId(Guid divisionId, string val, bool create = false)
         {
             try
@@ -141,7 +348,7 @@ namespace E2E.Models
             FindModel:
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments
-                    .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() && 
+                    .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() &&
                     w.Division_Id == divisionId)
                     .FirstOrDefault();
                 if (master_Departments != null)
@@ -154,7 +361,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Department_Save(divisionId,val))
+                            if (Department_Save(divisionId, val))
                             {
                                 goto FindModel;
                             }
@@ -170,7 +377,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Department_Save(Guid divisionId,string val)
+        public bool Department_Save(Guid divisionId, string val)
         {
             try
             {
@@ -203,6 +410,19 @@ namespace E2E.Models
             return db.Master_Divisions.ToList();
         }
 
+        public List<clsDivisions> Division_GetAllView()
+        {
+            return db.Master_Divisions
+                .Select(s => new clsDivisions()
+                {
+                    Active = s.Active,
+                    Create = s.Create,
+                    Division_Name = s.Division_Name,
+                    Plant_Name = s.Master_Plants.Plant_Name,
+                    Update = s.Update
+                }).ToList();
+        }
+
         public Guid? Division_GetId(Guid plantId, string val, bool create = false)
         {
             try
@@ -224,7 +444,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Division_Save(plantId,val))
+                            if (Division_Save(plantId, val))
                             {
                                 goto FindModel;
                             }
@@ -240,7 +460,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Division_Save(Guid plantId,string val)
+        public bool Division_Save(Guid plantId, string val)
         {
             try
             {
@@ -259,9 +479,32 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
+        }
+
+        public Master_Grades Grades_Get(Guid id)
+        {
+            return db.Master_Grades.Find(id);
+        }
+
+        public List<Master_Grades> Grades_GetAll()
+        {
+            return db.Master_Grades.ToList();
+        }
+
+        public List<clsGrades> Grades_GetAllView()
+        {
+            return db.Master_Grades
+                .Select(s => new clsGrades()
+                {
+                    Active = s.Active,
+                    Create = s.Create,
+                    Grade_Name = s.Grade_Name,
+                    Grade_Position = s.Grade_Position,
+                    LineWork_Name = s.Master_LineWorks.LineWork_Name,
+                    Update = s.Update
+                }).ToList();
         }
 
         public Guid? Grade_GetId(Guid lineWorkId, string grade, string position, bool create = false)
@@ -287,7 +530,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(grade) && !string.IsNullOrEmpty(position))
                         {
-                            if (Grade_Save(grade, position))
+                            if (Grade_Save(lineWorkId, grade, position))
                             {
                                 goto FindModel;
                             }
@@ -303,7 +546,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Grade_Save(string grade, string position)
+        public bool Grade_Save(Guid lineWorkId, string grade, string position)
         {
             try
             {
@@ -311,6 +554,7 @@ namespace E2E.Models
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades.Grade_Name = grade.Trim();
                 master_Grades.Grade_Position = position.Trim();
+                master_Grades.LineWork_Id = lineWorkId;
                 db.Master_Grades.Add(master_Grades);
                 if (db.SaveChanges() > 0)
                 {
@@ -323,6 +567,16 @@ namespace E2E.Models
             {
                 throw;
             }
+        }
+
+        public Master_LineWorks LineWorks_Get(Guid id)
+        {
+            return db.Master_LineWorks.Find(id);
+        }
+
+        public List<Master_LineWorks> LineWorks_GetAll()
+        {
+            return db.Master_LineWorks.ToList();
         }
 
         public Guid? LineWork_GetId(string val, bool create = false)
@@ -345,7 +599,9 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (LineWork_Save(val))
+                            master_LineWorks = new Master_LineWorks();
+                            master_LineWorks.LineWork_Name = val;
+                            if (LineWork_Save(master_LineWorks))
                             {
                                 goto FindModel;
                             }
@@ -361,14 +617,45 @@ namespace E2E.Models
             }
         }
 
-        public bool LineWork_Save(string val)
+        public bool LineWork_Save(Master_LineWorks model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_LineWorks master_LineWorks = new Master_LineWorks();
+                master_LineWorks = db.Master_LineWorks
+                    .Where(w => w.LineWork_Id == model.LineWork_Id)
+                    .FirstOrDefault();
+                if (master_LineWorks != null )
+                {
+                    res = LineWork_Update(model);
+                }
+                else
+                {
+                    res = LineWork_Insert(model);
+                }
+                
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool LineWork_Insert(Master_LineWorks model)
         {
             try
             {
                 bool res = new bool();
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks.Code = db.Master_LineWorks.Count() + 1;
-                master_LineWorks.LineWork_Name = val.Trim();
+                master_LineWorks.LineWork_Name = model.LineWork_Name.Trim();
+                if (model.Authorize_Id.HasValue)
+                {
+                    master_LineWorks.Authorize_Id = model.Authorize_Id;
+                }
                 db.Master_LineWorks.Add(master_LineWorks);
                 if (db.SaveChanges() > 0)
                 {
@@ -379,8 +666,47 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+
                 throw;
             }
+        }
+
+        protected bool LineWork_Update(Master_LineWorks model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_LineWorks master_LineWorks = new Master_LineWorks();
+                master_LineWorks = db.Master_LineWorks
+                    .Where(w => w.LineWork_Id == model.LineWork_Id)
+                    .FirstOrDefault();
+                master_LineWorks.Active = model.Active;
+                master_LineWorks.Authorize_Id = model.Authorize_Id;
+                master_LineWorks.LineWork_Name = model.LineWork_Name;
+                master_LineWorks.Update = DateTime.Now;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public Master_Plants Plant_Get(Guid id)
+        {
+            return db.Master_Plants.Find(id);
+        }
+
+        public List<Master_Plants> Plant_GetAll()
+        {
+            return db.Master_Plants.ToList();
         }
 
         public Guid? Plant_GetId(string val, bool create = false)
@@ -451,6 +777,28 @@ namespace E2E.Models
             return db.Users.ToList();
         }
 
+        public List<clsUsers> User_GetAllView()
+        {
+            return db.Users
+                .Select(s => new clsUsers()
+                {
+                    User_Id = s.User_Id,
+                    Active = s.Active,
+                    Create = s.Create,
+                    Department_Name = s.Master_Departments.Department_Name,
+                    Division_Name = s.Master_Divisions.Division_Name,
+                    Grade_Name = s.Master_Grades.Grade_Name,
+                    Grade_Position = s.Master_Grades.Grade_Position,
+                    LineWork_Name = s.Master_LineWorks.LineWork_Name,
+                    Plant_Name = s.Master_Plants.Plant_Name,
+                    Process_Name = s.Master_Processes.Process_Name,
+                    Section_Name = s.Master_Sections.Section_Name,
+                    Update = s.Update,
+                    User_Code = s.User_Code,
+                    User_Email = s.User_Email
+                }).ToList();
+        }
+
         public bool User_Save(UserDetails model)
         {
             try
@@ -477,7 +825,50 @@ namespace E2E.Models
         {
             return db.UserDetails.Where(w => w.User_Id == id).FirstOrDefault();
         }
+        public clsSaveResult User_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                db.UserDetails.Remove(db.UserDetails.FirstOrDefault(f => f.User_Id == id));
+                db.Users.Remove(db.Users.Find(id));
+                if (db.SaveChanges() > 0)
+                {
+                    res.CanSave = true;
+                }
+            }
+            catch (DbEntityValidationException ex)
+            {
+                foreach (var item in ex.EntityValidationErrors)
+                {
+                    foreach (var item2 in item.ValidationErrors)
+                    {
+                        if (string.IsNullOrEmpty(res.Message))
+                        {
+                            res.Message = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            res.Message += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    res.Message = ex.InnerException.Message;
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        res.Message = ex.InnerException.InnerException.Message;
+                    }
+                }
+            }
 
+            return res;
+        }
         protected bool User_Insert(UserDetails model)
         {
             try
@@ -485,15 +876,15 @@ namespace E2E.Models
                 bool res = new bool();
 
                 Users users = new Users();
-                users.Department_Id = model.Users.Department_Id;
-                users.Division_Id = model.Users.Division_Id;
+                users.User_Code = model.Users.User_Code.Trim();
+                users.LineWork_Id = model.Users.LineWork_Id;
                 users.Grade_Id = model.Users.Grade_Id;
-                users.Nationality_Id = model.Users.Nationality_Id;
                 users.Plant_Id = model.Users.Plant_Id;
+                users.Division_Id = model.Users.Division_Id;
+                users.Department_Id = model.Users.Department_Id;
+                users.Section_Id = model.Users.Section_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.Role_Id = model.Users.Role_Id;
-                users.Section_Id = model.Users.Section_Id;
-                users.User_Code = model.Users.User_Code.Trim();
 
                 if (!string.IsNullOrEmpty(model.Users.User_Email))
                 {
@@ -505,11 +896,12 @@ namespace E2E.Models
                 UserDetails userDetails = new UserDetails();
                 userDetails.Detail_EN_FirstName = model.Detail_EN_FirstName.Trim();
                 userDetails.Detail_EN_LastName = model.Detail_EN_LastName.Trim();
-                userDetails.Detail_EN_Prefix = model.Detail_EN_Prefix.Trim();
+                userDetails.Prefix_EN_Id = model.Prefix_EN_Id;
 
                 if (!string.IsNullOrEmpty(model.Detail_Password))
                 {
                     userDetails.Detail_Password = User_Password(model.Detail_Password.Trim());
+                    userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 }
 
                 if (!string.IsNullOrEmpty(model.Detail_Tel))
@@ -519,8 +911,8 @@ namespace E2E.Models
 
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
                 userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
-                userDetails.Detail_TH_Prefix = model.Detail_TH_Prefix.Trim();
-                userDetails.User_Id = model.Users.User_Id;
+                userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
+                userDetails.User_Id = users.User_Id;
                 db.UserDetails.Add(userDetails);
 
                 if (db.SaveChanges() > 0)
@@ -572,7 +964,6 @@ namespace E2E.Models
                 users.Department_Id = model.Users.Department_Id;
                 users.Division_Id = model.Users.Division_Id;
                 users.Grade_Id = model.Users.Grade_Id;
-                users.Nationality_Id = model.Users.Nationality_Id;
                 users.Plant_Id = model.Users.Plant_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.Role_Id = model.Users.Role_Id;
@@ -590,7 +981,7 @@ namespace E2E.Models
                 UserDetails userDetails = db.UserDetails.Where(w => w.User_Id == users.User_Id).FirstOrDefault();
                 userDetails.Detail_EN_FirstName = model.Detail_EN_FirstName.Trim();
                 userDetails.Detail_EN_LastName = model.Detail_EN_LastName.Trim();
-                userDetails.Detail_EN_Prefix = model.Detail_EN_Prefix.Trim();
+                userDetails.Prefix_EN_Id = model.Prefix_EN_Id;
 
                 if (!string.IsNullOrEmpty(model.Detail_Tel))
                 {
@@ -599,8 +990,8 @@ namespace E2E.Models
 
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
                 userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
-                userDetails.Detail_TH_Prefix = model.Detail_TH_Prefix.Trim();
-
+                userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
+                userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -612,6 +1003,145 @@ namespace E2E.Models
             {
                 throw;
             }
+        }
+
+        public List<SelectListItem> SelectListItems_Role()
+        {
+            return db.System_Roles
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Role_Id.ToString(),
+                    Text = s.Role_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+        public List<SelectListItem> SelectListItems_LineWork()
+        {
+            return db.Master_LineWorks
+                .Where(w => w.Active)
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.LineWork_Id.ToString(),
+                    Text = s.LineWork_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+        public List<SelectListItem> SelectListItems_Grade(Guid? lineworkId)
+        {
+            IQueryable<Master_Grades> query = db.Master_Grades
+                .Where(w => w.Active);
+            if (lineworkId != null)
+            {
+                query = query
+                    .Where(w => w.LineWork_Id == lineworkId.Value);
+            }
+
+            return query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Grade_Id.ToString(),
+                    Text = s.Grade_Name + " (" + s.Grade_Position + ")"
+                }).OrderBy(o => o.Text).ToList();
+        }
+
+        public List<SelectListItem> SelectListItems_Plant()
+        {
+            return db.Master_Plants
+                .Where(w => w.Active)
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Plant_Id.ToString(),
+                    Text = s.Plant_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+
+        public List<SelectListItem> SelectListItems_Division(Guid? plantId)
+        {
+            IQueryable<Master_Divisions> query = db.Master_Divisions
+                .Where(w => w.Active);
+            if (plantId != null)
+            {
+                query = query
+                    .Where(w => w.Plant_Id == plantId.Value);
+            }
+
+            return query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Division_Id.ToString(),
+                    Text = s.Division_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+
+        public List<SelectListItem> SelectListItems_Department(Guid? divisionId)
+        {
+            IQueryable<Master_Departments> query = db.Master_Departments
+                .Where(w => w.Active);
+            if (divisionId != null)
+            {
+                query = query
+                    .Where(w => w.Division_Id == divisionId.Value);
+            }
+
+            return query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Department_Id.ToString(),
+                    Text = s.Department_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+        public List<SelectListItem> SelectListItems_Section(Guid? departmentId)
+        {
+            IQueryable<Master_Sections> query = db.Master_Sections
+                .Where(w => w.Active);
+            if (departmentId != null)
+            {
+                query = query
+                    .Where(w => w.Department_Id == departmentId.Value);
+            }
+
+            return query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Section_Id.ToString(),
+                    Text = s.Section_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+
+        public List<SelectListItem> SelectListItems_Process(Guid? sectionId)
+        {
+            IQueryable<Master_Processes> query = db.Master_Processes
+                .Where(w => w.Active);
+            if (sectionId != null)
+            {
+                query = query
+                    .Where(w => w.Section_Id == sectionId.Value);
+            }
+
+            return query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Process_Id.ToString(),
+                    Text = s.Process_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+
+        public List<SelectListItem> SelectListItems_PrefixTH()
+        {
+            return db.System_Prefix_THs
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Prefix_TH_Id.ToString(),
+                    Text = s.Prefix_TH_Name
+                }).OrderBy(o => o.Text).ToList();
+        }
+
+        public List<SelectListItem> SelectListItems_PrefixEN()
+        {
+            return db.System_Prefix_ENs
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Prefix_EN_Id.ToString(),
+                    Text = s.Prefix_EN_Name
+                }).OrderBy(o => o.Text).ToList();
         }
     }
 }

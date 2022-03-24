@@ -12,7 +12,7 @@
     <div id="objSpin"></div>
     <div class="container-fluid">
         <div class="row flex-nowrap">
-            <div class="col-4 col-md-3 col-lg-2 bg-light vh-100 sticky-top" id="sidebar">
+            <div class="col-4 col-md-3 col-lg-2 vh-100 sticky-top" id="sidebar">
                 <div class="row">
                     <nav class="col-12 navbar navbar-light justify-content-center shadow" id="brand">
                         @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
@@ -20,16 +20,13 @@
                     @{ Html.RenderAction("_Navbar", "Configurations"); }
                 </div>
             </div>
-            <div class="col-8 col-md-9 col-lg-10 bg-secondary" id="content">
+            <div class="col-8 col-md-9 col-lg-10 bg-light" id="content">
                 <div class="row min-vh-100">
                     <div class="d-flex flex-column col-12">
-                        <div>
-                            @RenderSection("breadcrumb", required: false)
-                            @RenderSection("toolbar", required: false)
-                            @RenderBody()
-                        </div>
+                        @RenderSection("breadcrumb", required: false)
+                        @RenderBody()
                     </div>
-                    <footer class="bg-light col-12 mt-auto">
+                    <footer class="bg-light col-12 mt-3">
                         <small class="col-12">&copy; @DateTime.Now.Year - Thai Parkerizing</small>
                     </footer>
                 </div>
@@ -46,6 +43,7 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/js")
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

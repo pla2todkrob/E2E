@@ -1,0 +1,49 @@
+﻿@model IEnumerable<E2E.Models.Views.clsUsers>
+
+@{ 
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover table-striped nowrap w-100">
+    <thead>
+        <tr>
+            <th class="fit"></th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.User_Code)</th>
+            <th>@Html.DisplayNameFor(m => m.User_Email)</th>
+            <th>@Html.DisplayNameFor(m => m.LineWork_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Grade_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Grade_Position)</th>
+            <th>@Html.DisplayNameFor(m => m.Plant_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Division_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Department_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Section_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Process_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Active)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <button class="btn btn-outline-warning" onclick="callModalUser('@Url.Action("Users_Form","Masters",new { id = item.User_Id })',true);">Edit</button>
+                </td>
+                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td>@Html.DisplayFor(i => item.User_Code)</td>
+                <td>@Html.DisplayFor(i => item.User_Email)</td>
+                <td>@Html.DisplayFor(i => item.LineWork_Name)</td>
+                <td>@Html.DisplayFor(i => item.Grade_Name)</td>
+                <td>@Html.DisplayFor(i => item.Grade_Position)</td>
+                <td>@Html.DisplayFor(i => item.Plant_Name)</td>
+                <td>@Html.DisplayFor(i => item.Division_Name)</td>
+                <td>@Html.DisplayFor(i => item.Department_Name)</td>
+                <td>@Html.DisplayFor(i => item.Section_Name)</td>
+                <td>@Html.DisplayFor(i => item.Process_Name)</td>
+                <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
+                <td>@Html.DisplayFor(i => item.Update)</td>
+            </tr>
+        }
+    </tbody>
+</table>
