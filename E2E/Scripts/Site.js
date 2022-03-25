@@ -154,14 +154,12 @@ function callSubmit(urlAjax, reloadPage = false) {
             });
             if (res.icon == 'success') {
                 $('#modalArea').modal('hide');
-                $('.swal-button--confirm').click(function () {
-                    if (reloadPage) {
-                        location.reload();
-                    }
-                    else {
-                        reloadTable();
-                    }
-                });
+                if (reloadPage) {
+                    location.reload();
+                }
+                else {
+                    reloadTable();
+                }
             }
         }
     });
@@ -196,14 +194,12 @@ function callFileSubmit(urlAjax, fileId, reloadPage = false) {
             });
             if (res.icon == 'success') {
                 $('#modalArea').modal('hide');
-                $('.swal-button--confirm').click(function () {
-                    if (reloadPage) {
-                        location.reload();
-                    }
-                    else {
-                        reloadTable();
-                    }
-                });
+                if (reloadPage) {
+                    location.reload();
+                }
+                else {
+                    reloadTable();
+                }
             }
         }
     });
@@ -373,14 +369,12 @@ function callDeleteItem(urlAjax,reloadPage = false) {
                     });
                     if (res.icon == 'success') {
                         $('#modalArea').modal('hide');
-                        $('.swal-button--confirm').click(function () {
-                            if (reloadPage) {
-                                location.reload();
-                            }
-                            else {
-                                reloadTable();
-                            }
-                        });
+                        if (reloadPage) {
+                            location.reload();
+                        }
+                        else {
+                            reloadTable();
+                        }
                     }
                 }
             });

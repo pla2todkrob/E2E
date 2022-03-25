@@ -503,7 +503,8 @@ namespace E2E.Models
                     Grade_Name = s.Grade_Name,
                     Grade_Position = s.Grade_Position,
                     LineWork_Name = s.Master_LineWorks.LineWork_Name,
-                    Update = s.Update
+                    Update = s.Update,
+                    Grade_Id = s.Grade_Id
                 }).ToList();
         }
 
@@ -530,7 +531,12 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(grade) && !string.IsNullOrEmpty(position))
                         {
-                            if (Grade_Save(lineWorkId, grade, position))
+                            master_Grades = new Master_Grades();
+                            master_Grades.Grade_Name = grade;
+                            master_Grades.Grade_Position = position;
+                            master_Grades.LineWork_Id = lineWorkId;
+
+                            if (Grade_Save(master_Grades))
                             {
                                 goto FindModel;
                             }
@@ -546,15 +552,52 @@ namespace E2E.Models
             }
         }
 
-        public bool Grade_Save(Guid lineWorkId, string grade, string position)
+        public bool Grade_Save(Master_Grades model)
         {
             try
             {
                 bool res = new bool();
                 Master_Grades master_Grades = new Master_Grades();
-                master_Grades.Grade_Name = grade.Trim();
-                master_Grades.Grade_Position = position.Trim();
-                master_Grades.LineWork_Id = lineWorkId;
+                master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
+
+                if (master_Grades == null)
+                {
+                    res = Grade_Insert(model);
+                }
+                else
+                {
+                    res = Grade_Update(model);
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Grade_Insert(Master_Grades model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Grades master_Grades = new Master_Grades();
+                master_Grades.LineWork_Id = model.LineWork_Id;
+                master_Grades.Grade_Name = model.Grade_Name.Trim();
+                master_Grades.Grade_Position = model.Grade_Position.Trim();
+                master_Grades.Active = model.Active;
+
+                var query = db.Master_Grades.FirstOrDefault();
+
+                if (query == null)
+                {
+                    master_Grades.Code = 1;
+                }
+                else
+                {
+                    master_Grades.Code = db.Master_Grades.Max(m => m.Code) + 1;
+                }
+                
                 db.Master_Grades.Add(master_Grades);
                 if (db.SaveChanges() > 0)
                 {
@@ -565,6 +608,67 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+
+                throw;
+            }
+        }
+
+        protected bool Grade_Update(Master_Grades model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Grades master_Grades = new Master_Grades();
+                master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
+
+                master_Grades.LineWork_Id = model.LineWork_Id;
+                master_Grades.Grade_Name = model.Grade_Name.Trim();
+                master_Grades.Grade_Position = model.Grade_Position.Trim();
+                master_Grades.Active = model.Active;
+                master_Grades.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Grades_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Grades master_Grades = new Master_Grades();
+                master_Grades = db.Master_Grades.Where(w => w.Grade_Id == id).FirstOrDefault();
+
+                int userCount = db.Users.Where(w => w.Grade_Id == id).Count();
+
+                if (userCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Grades.Remove(master_Grades);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+
                 throw;
             }
         }
@@ -691,6 +795,40 @@ namespace E2E.Models
 
                 return res;
 
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Lineworks_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                int gradeCount = db.Master_Grades.Where(w => w.Grade_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Grade_Id == id).Count();
+                if (gradeCount > 0 && userCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    
+                    Master_LineWorks master_LineWorks = new Master_LineWorks();
+
+                    master_LineWorks = db.Master_LineWorks
+                            .Where(w => w.LineWork_Id == id).FirstOrDefault();
+                    db.Master_LineWorks.Remove(master_LineWorks);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
             }
             catch (Exception)
             {
