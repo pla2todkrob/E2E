@@ -37,9 +37,144 @@ namespace E2E.Controllers
         {
             return View();
         }
+        public ActionResult Grades_Form(Guid? id)
+        {
+            ViewBag.LineWorkList = data.SelectListItems_LineWork();
+
+            bool isNew = true;
+            Master_Grades master_Grades = new Master_Grades();
+            if (id.HasValue)
+            {
+                master_Grades = data.Grades_Get(id.Value);
+                isNew = false;
+            }
+
+            ViewBag.IsNew = isNew;
+
+            return View(master_Grades);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Grades_Form(Master_Grades model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                       
+
+                        if (data.Grade_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
         public ActionResult Grades_Table()
         {
             return View(data.Grades_GetAllView());
+        }
+        public ActionResult Grades_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+
+                    clsSaveResult clsSaveResult = data.Grades_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
         }
         public ActionResult Index()
         {
@@ -60,6 +195,7 @@ namespace E2E.Controllers
                     Value = s.Authorize_Id.ToString(),
                     Text = s.Authorize_Name
                 }).ToList();
+
             bool isNew = true;
             Master_LineWorks master_LineWorks = new Master_LineWorks();
             if (id.HasValue)
@@ -150,6 +286,10 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult LineWorks_Table()
+        {
+            return View(data.LineWorks_GetAll());
+        }
         public ActionResult LineWorks_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -157,7 +297,8 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-                    clsSaveResult clsSaveResult = data.User_Delete(id);
+
+                    clsSaveResult clsSaveResult = data.Lineworks_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
                         scope.Complete();
@@ -188,10 +329,6 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
-        public ActionResult LineWorks_Table()
-        {
-            return View(data.LineWorks_GetAll());
-        }
         public ActionResult Plants()
         {
             return View();
@@ -220,7 +357,6 @@ namespace E2E.Controllers
         {
             return View();
         }
-
         public ActionResult Users_Form(Guid? id)
         {
             ViewBag.RoleList = data.SelectListItems_Role();
@@ -251,7 +387,7 @@ namespace E2E.Controllers
 
             return View(userDetails);
         }
-        
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Users_Form(UserDetails model)
         {
@@ -336,6 +472,7 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
+
                     clsSaveResult clsSaveResult = data.User_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -377,7 +514,7 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpPost,ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Users_UploadExcel()
         {
 
@@ -387,7 +524,7 @@ namespace E2E.Controllers
             TransactionOptions options = new TransactionOptions();
             options.IsolationLevel = IsolationLevel.ReadCommitted;
             options.Timeout = TimeSpan.MaxValue;
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required,options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
             {
                 try
                 {
@@ -438,7 +575,7 @@ namespace E2E.Controllers
                         }
                     }
 
-                    EndProcess:
+                EndProcess:
                     if (doComplete)
                     {
                         scope.Complete();
