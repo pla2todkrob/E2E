@@ -33,6 +33,144 @@ namespace E2E.Controllers
         {
             return View(data.Division_GetAllView());
         }
+        public ActionResult Divisions_Form(Guid? id)
+        {
+            ViewBag.PlantList = data.SelectListItems_Plant();
+
+            bool isNew = true;
+            Master_Divisions master_Divisions = new Master_Divisions();
+            if (id.HasValue)
+            {
+                master_Divisions = data.Division_Get(id.Value);
+                isNew = false;
+            }
+
+            ViewBag.IsNew = isNew;
+
+            return View(master_Divisions);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Divisions_Form(Master_Divisions model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Division_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Divisions_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    clsSaveResult clsSaveResult = data.Division_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
         public ActionResult Grades()
         {
             return View();
@@ -73,6 +211,12 @@ namespace E2E.Controllers
                             swal.icon = "success";
                             swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
                             swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
                         }
                     }
                     catch (DbEntityValidationException ex)
@@ -227,6 +371,12 @@ namespace E2E.Controllers
                             swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
                             swal.title = "Successful";
                         }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
                     }
                     catch (DbEntityValidationException ex)
                     {
@@ -332,6 +482,144 @@ namespace E2E.Controllers
         public ActionResult Plants()
         {
             return View();
+        }
+
+        public ActionResult Plants_Form(Guid? id)
+        {
+            bool isNew = true;
+            Master_Plants master_Plants = new Master_Plants();
+            if (id.HasValue)
+            {
+                master_Plants = data.Plant_Get(id.Value);
+                isNew = false;
+            }
+
+            ViewBag.IsNew = isNew;
+
+            return View(master_Plants);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Plants_Form(Master_Plants model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Plant_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Plants_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+
+                    clsSaveResult clsSaveResult = data.Plants_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
         }
         public ActionResult Plants_Table()
         {

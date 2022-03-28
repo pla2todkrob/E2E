@@ -699,6 +699,8 @@
     <Content Include="Views\Masters\Users_Form.cshtml" />
     <Content Include="Views\Masters\LineWorks_Form.cshtml" />
     <Content Include="Views\Masters\Grades_Form.cshtml" />
+    <Content Include="Views\Masters\Plants_Form.cshtml" />
+    <Content Include="Views\Masters\Divisions_Form.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

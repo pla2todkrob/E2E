@@ -13,6 +13,11 @@
         function reloadTable() {
             callTable('@Url.Action("Plants_Table", "Masters")', true, true, 1);
         }
+
+        $(document).on('submit','#SaveForm',  function () {
+            callSubmit('@Url.Action("Plants_Form", "Masters")');
+            return false;
+        });
     </script>
 }
 
@@ -31,7 +36,7 @@
         <div class="d-flex">
             <div class="mr-auto"></div>
             <div class="ml-auto">
-                <button class="btn btn-secondary"><i class="fa fa-plus"></i>&nbsp;Add</button>
+                <button class="btn btn-secondary" onclick="callModal('@Url.Action("Plants_Form","Masters")')"><i class="fa fa-plus"></i>&nbsp;Add</button>
             </div>
         </div>
     </div>

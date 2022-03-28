@@ -8,6 +8,7 @@ namespace E2E.Models.Views
 {
     public class clsDivisions
     {
+        public Guid Division_Id { get; set; }
         public DateTime Create { get; set; }
         [Display(Name = "Division")]
         public string Division_Name { get; set; }
