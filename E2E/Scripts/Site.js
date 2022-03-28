@@ -103,7 +103,6 @@ function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blo
             });
         }
     });
-
     return false;
 }
 
@@ -236,21 +235,25 @@ function callModalUser(urlAjax, bigSize = false) {
             $('#Users_Plant_Id').on('select2:select', function () {
                 var objSelect = $('#Users_Division_Id');
                 getDivisions(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
             });
 
             $('#Users_Division_Id').on('select2:select', function () {
                 var objSelect = $('#Users_Department_Id');
                 getDepartments(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
             });
 
             $('#Users_Department_Id').on('select2:select', function () {
                 var objSelect = $('#Users_Section_Id');
                 getSections(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
             });
 
             $('#Users_Section_Id').on('select2:select', function () {
                 var objSelect = $('#Users_Process_Id');
                 getProcesses(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
             });
         }
     });
@@ -260,90 +263,103 @@ function callModalUser(urlAjax, bigSize = false) {
 function getGrades(objSelect, selectVal) {
     objSelect.empty();
     objSelect.append(new Option('Select Grade', ''));
-    $.ajax({
-        url: '/Masters/Users_GetSelectGrades',
-        data: {
-            id: selectVal
-        },
-        async: true,
-        success: function (res) {
-            $.each(res, function (n, v) {
-                objSelect.append(new Option(v.Text, v.Value));
-            });
-        }
-    });
+    if (selectVal != '') {
+        $.ajax({
+            url: '/Masters/Users_GetSelectGrades',
+            data: {
+                id: selectVal
+            },
+            async: true,
+            success: function (res) {
+                $.each(res, function (n, v) {
+                    objSelect.append(new Option(v.Text, v.Value));
+                });
+            }
+        });
+    }
+
     return false;
 }
 
 function getDivisions(objSelect, selectVal) {
     objSelect.empty();
     objSelect.append(new Option('Select Division', ''));
-    $.ajax({
-        url: '/Masters/Users_GetSelectDivisions',
-        data: {
-            id: selectVal
-        },
-        async: true,
-        success: function (res) {
-            $.each(res, function (n, v) {
-                objSelect.append(new Option(v.Text, v.Value));
-            });
-        }
-    });
+    if (selectVal != '') {
+        $.ajax({
+            url: '/Masters/Users_GetSelectDivisions',
+            data: {
+                id: selectVal
+            },
+            async: true,
+            success: function (res) {
+                $.each(res, function (n, v) {
+                    objSelect.append(new Option(v.Text, v.Value));
+                });
+            }
+        });
+    }
     return false;
 }
 
 function getDepartments(objSelect, selectVal) {
     objSelect.empty();
     objSelect.append(new Option('Select Department', ''));
-    $.ajax({
-        url: '/Masters/Users_GetSelectDepartments',
-        data: {
-            id: selectVal
-        },
-        async: true,
-        success: function (res) {
-            $.each(res, function (n, v) {
-                objSelect.append(new Option(v.Text, v.Value));
-            });
-        }
-    });
+    if (selectVal != '') {
+        $.ajax({
+            url: '/Masters/Users_GetSelectDepartments',
+            data: {
+                id: selectVal
+            },
+            async: true,
+            success: function (res) {
+                $.each(res, function (n, v) {
+                    objSelect.append(new Option(v.Text, v.Value));
+                });
+            }
+        });
+    }
     return false;
 }
 
 function getSections(objSelect, selectVal) {
     objSelect.empty();
     objSelect.append(new Option('Select Section', ''));
-    $.ajax({
-        url: '/Masters/Users_GetSelectSections',
-        data: {
-            id: selectVal
-        },
-        async: true,
-        success: function (res) {
-            $.each(res, function (n, v) {
-                objSelect.append(new Option(v.Text, v.Value));
-            });
-        }
-    });
+    if (selectVal != '') {
+        $.ajax({
+            url: '/Masters/Users_GetSelectSections',
+            data: {
+                id: selectVal
+            },
+            async: true,
+            success: function (res) {
+                $.each(res, function (n, v) {
+                    objSelect.append(new Option(v.Text, v.Value));
+                });
+            }
+        });
+    }
+   
     return false;
 }
 
 function getProcesses(objSelect, selectVal) {
     objSelect.empty();
     objSelect.append(new Option('Select Process', ''));
-    $.ajax({
-        url: '/Masters/Users_GetSelectProcesses',
-        data: {
-            id: selectVal
-        },
-        async: true,
-        success: function (res) {
-            $.each(res, function (n, v) {
-                objSelect.append(new Option(v.Text, v.Value));
-            });
-        }
-    });
+    if (selectVal != '') {
+        $.ajax({
+            url: '/Masters/Users_GetSelectProcesses',
+            data: {
+                id: selectVal
+            },
+            async: true,
+            success: function (res) {
+                $.each(res, function (n, v) {
+                    objSelect.append(new Option(v.Text, v.Value));
+                });
+            }
+        });
+    }
+
     return false;
 }
 
