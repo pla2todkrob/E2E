@@ -2,7 +2,10 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity.Validation;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -1337,6 +1340,10 @@ namespace E2E.Models
                 {
                     users.User_Email = model.Users.User_Email.Trim();
                 }
+                else
+                {
+                    users.User_Email = GetEmailAD(model.Users.User_Code);
+                }
 
                 db.Users.Add(users);
 
@@ -1375,7 +1382,7 @@ namespace E2E.Models
             }
         }
 
-        protected string User_Password(string val)
+        public string User_Password(string val)
         {
             try
             {
@@ -1452,6 +1459,35 @@ namespace E2E.Models
             }
         }
 
+        private string GetEmailAD(string code)
+        {
+            try
+            {
+                string res = string.Empty;
+                string domainName = ConfigurationManager.AppSettings["DomainName"];
+                using (var context = new PrincipalContext(ContextType.Domain, domainName))
+                {
+                    UserPrincipal user = new UserPrincipal(context);
+                    user.Description = code.Trim();
+
+                    PrincipalSearcher searcher = new PrincipalSearcher();
+                    searcher.QueryFilter = user;
+                    Principal principal = searcher.FindOne();
+                    if (principal != null)
+                    {
+                        DirectoryEntry entry = principal.GetUnderlyingObject() as DirectoryEntry;
+                        res = entry.Properties["mail"].Value.ToString();
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public List<SelectListItem> SelectListItems_Role()
         {
             return db.System_Roles

@@ -80,6 +80,8 @@
       <HintPath>..\packages\System.ComponentModel.Annotations.4.7.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
     <Reference Include="System.Threading.Tasks" />
@@ -174,6 +176,7 @@
     <Compile Include="Controllers\SelectController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -192,12 +195,15 @@
     <Compile Include="Models\Tables\System_Configurations.cs" />
     <Compile Include="Models\Tables\System_Prefix_EN.cs" />
     <Compile Include="Models\Tables\System_Prefix_TH.cs" />
+    <Compile Include="Models\Tables\System_Statuses.cs" />
+    <Compile Include="Models\Tables\Tasks.cs" />
     <Compile Include="Models\Tables\UserDetails.cs" />
     <Compile Include="Models\Tables\Users.cs" />
     <Compile Include="Models\Tables\System_Roles.cs" />
     <Compile Include="Models\Views\clsDepartments.cs" />
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsGrades.cs" />
+    <Compile Include="Models\Views\clsLogin.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
@@ -701,6 +707,7 @@
     <Content Include="Views\Masters\Grades_Form.cshtml" />
     <Content Include="Views\Masters\Plants_Form.cshtml" />
     <Content Include="Views\Masters\Divisions_Form.cshtml" />
+    <Content Include="Views\Users\Login.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

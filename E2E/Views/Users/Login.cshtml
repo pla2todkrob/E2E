@@ -1,0 +1,47 @@
+﻿@model E2E.Models.Views.clsLogin
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+@section scripts{
+    <script>
+        $(function () {
+            $('#modalArea').modal('show');
+
+            $('#modalArea').on('shown.bs.modal', function (e) {
+                $('#Username').trigger('focus');
+            });
+
+            $('#modalArea').on('hidden.bs.modal', function (e) {
+                $(this).modal('show');
+            });
+        });
+    </script>
+}
+
+@using (Html.BeginForm("Login", "Users", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-header">
+        <h5 class="modal-title">LOGIN</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            @Html.LabelFor(m => m.Username)
+            @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Password)
+            @Html.TextBoxFor(m => m.Password, new { @class = "form-control", type = "password" })
+        </div>
+        <div class="form-check">
+            @Html.CheckBoxFor(m => m.Remember, new { @class = "form-check-input" })
+            @Html.LabelFor(m => m.Remember, new { @class = "form-check-label" })
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </div>
+}
