@@ -103,7 +103,6 @@ function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blo
             });
         }
     });
-
     return false;
 }
 
