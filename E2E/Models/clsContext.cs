@@ -26,6 +26,8 @@ namespace E2E.Models
         public DbSet<System_Prefix_EN> System_Prefix_ENs { get; set; }
         public DbSet<System_Prefix_TH> System_Prefix_THs { get; set; }
         public DbSet<System_Roles> System_Roles { get; set; }
+        public DbSet<System_Statuses> System_Statuses { get; set; }
+        public DbSet<Tasks> Tasks { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
         public DbSet<Users> Users { get; set; }
 

@@ -20,6 +20,10 @@ namespace E2E.Models
             {
                 Role_Save();
             }
+            if (db.System_Statuses.Count() != System_Statuses.DefaultList().Count())
+            {
+                Status_Save();
+            }
         }
 
         private static void Authorize_Save()
@@ -41,6 +45,18 @@ namespace E2E.Models
                 if (db.System_Roles.Where(w => w.Role_Name == item.Role_Name).Count() == 0)
                 {
                     db.System_Roles.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Status_Save()
+        {
+            foreach (var item in System_Statuses.DefaultList())
+            {
+                if (db.System_Statuses.Where(w => w.Status_Name == item.Status_Name).Count() == 0)
+                {
+                    db.System_Statuses.Add(item);
                     db.SaveChanges();
                 }
             }
