@@ -415,6 +415,7 @@ namespace E2E.Models
             return db.Master_Divisions
                 .Select(s => new clsDivisions()
                 {
+                    Division_Id = s.Division_Id,
                     Active = s.Active,
                     Create = s.Create,
                     Division_Name = s.Division_Name,
@@ -444,7 +445,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Division_Save(plantId, val))
+                            if (Division_Save_GetId(plantId, val))
                             {
                                 goto FindModel;
                             }
@@ -459,8 +460,7 @@ namespace E2E.Models
                 throw;
             }
         }
-
-        public bool Division_Save(Guid plantId, string val)
+        public bool Division_Save_GetId(Guid plantId, string val)
         {
             try
             {
@@ -479,6 +479,143 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+        public bool Division_Save(Master_Divisions model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Divisions master_Divisions = new Master_Divisions();
+                master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == model.Division_Id).FirstOrDefault();
+
+                if (master_Divisions != null)
+                {
+                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Id != model.Division_Id && w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim() && w.Plant_Id == model.Plant_Id).FirstOrDefault();
+                    if (master_Divisions != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Division_Update(model);
+                    }
+
+                }
+                else
+                {
+                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim() && w.Plant_Id == model.Plant_Id).FirstOrDefault();
+
+                    if (master_Divisions != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Division_Insert(model);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Division_Insert(Master_Divisions model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Divisions master_Divisions = new Master_Divisions();
+                master_Divisions.Division_Name = model.Division_Name;
+                master_Divisions.Active = model.Active;
+                master_Divisions.Plant_Id = model.Plant_Id;
+
+                var query = db.Master_Plants.FirstOrDefault();
+
+                if (query == null)
+                {
+                    master_Divisions.Code = 1;
+                }
+                else
+                {
+                    master_Divisions.Code = db.Master_Plants.Max(m => m.Code) + 1;
+                }
+
+                db.Master_Divisions.Add(master_Divisions);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        protected bool Division_Update(Master_Divisions model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Divisions master_Divisions = new Master_Divisions();
+                master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == model.Division_Id).FirstOrDefault();
+
+                master_Divisions.Division_Name = model.Division_Name.Trim();
+                master_Divisions.Active = model.Active;
+                master_Divisions.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Division_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Divisions master_Divisions = new Master_Divisions();
+                master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == id).FirstOrDefault();
+
+                int userCount = db.Users.Where(w => w.Division_Id == id).Count();
+                int deptCount = db.Master_Departments.Where(w => w.Division_Id == id).Count();
+
+                if (userCount > 0 || deptCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Divisions.Remove(master_Divisions);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+
                 throw;
             }
         }
@@ -560,14 +697,33 @@ namespace E2E.Models
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
 
-                if (master_Grades == null)
+                if (master_Grades != null)
                 {
-                    res = Grade_Insert(model);
+                    master_Grades = db.Master_Grades.Where(w => w.Grade_Id != model.Grade_Id && w.Grade_Name.ToLower() == model.Grade_Name.ToLower().Trim() && w.Grade_Position.ToLower() == model.Grade_Position.ToLower().Trim() && w.LineWork_Id == model.LineWork_Id).FirstOrDefault();
+                    if (master_Grades != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Grade_Update(model);
+                    }
+
                 }
                 else
                 {
-                    res = Grade_Update(model);
+                    master_Grades = db.Master_Grades.Where(w => w.Grade_Name.ToLower() == model.Grade_Name.ToLower().Trim() && w.Grade_Position.ToLower() == model.Grade_Position.Trim().ToLower() && w.LineWork_Id == model.LineWork_Id).FirstOrDefault();
+
+                    if (master_Grades != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Grade_Insert(model);
+                    }
                 }
+
                 return res;
             }
             catch (Exception)
@@ -727,18 +883,34 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
-                master_LineWorks = db.Master_LineWorks
-                    .Where(w => w.LineWork_Id == model.LineWork_Id)
-                    .FirstOrDefault();
-                if (master_LineWorks != null )
+                master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Id == model.LineWork_Id).FirstOrDefault();
+
+                if (master_LineWorks != null)
                 {
-                    res = LineWork_Update(model);
+                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Id != model.LineWork_Id && w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim() && w.Authorize_Id == model.Authorize_Id).FirstOrDefault();
+                    if (master_LineWorks != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = LineWork_Update(model);
+                    }
+
                 }
                 else
                 {
-                    res = LineWork_Insert(model);
+                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim() && w.Authorize_Id == model.Authorize_Id).FirstOrDefault();
+
+                    if (master_LineWorks != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = LineWork_Insert(model);
+                    }
                 }
-                
 
                 return res;
             }
@@ -867,7 +1039,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Plant_Save(val))
+                            if (Plant_Save_GetID(val))
                             {
                                 goto FindModel;
                             }
@@ -883,7 +1055,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Plant_Save(string val)
+        public bool Plant_Save_GetID(string val)
         {
             try
             {
@@ -901,6 +1073,143 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public bool Plant_Save(Master_Plants model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Plants master_Plants = new Master_Plants();
+                master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
+
+                if (master_Plants != null)
+                {
+                    master_Plants = db.Master_Plants.Where(w => w.Plant_Id != model.Plant_Id && w.Plant_Name.ToLower() == model.Plant_Name.ToLower().Trim()).FirstOrDefault();
+                    if (master_Plants != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Plant_Update(model);
+                    }
+                  
+                }
+                else
+                {
+                    master_Plants = db.Master_Plants.Where(w => w.Plant_Name.ToLower() == model.Plant_Name.ToLower().Trim()).FirstOrDefault();
+
+                    if (master_Plants != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Plant_Insert(model);
+                    }
+                }
+ 
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Plant_Insert(Master_Plants model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Plants master_Plants = new Master_Plants();
+                master_Plants.Plant_Name = model.Plant_Name;
+                master_Plants.Active = model.Active;
+
+                var query = db.Master_Plants.FirstOrDefault();
+
+                if (query == null)
+                {
+                    master_Plants.Code = 1;
+                }
+                else
+                {
+                    master_Plants.Code = db.Master_Plants.Max(m => m.Code) + 1;
+                }
+
+                db.Master_Plants.Add(master_Plants);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        protected bool Plant_Update(Master_Plants model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Plants master_Plants = new Master_Plants();
+                master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
+
+                master_Plants.Plant_Name = model.Plant_Name.Trim();
+                master_Plants.Active = model.Active;
+                master_Plants.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Plants_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Plants master_Plants = new Master_Plants();
+                master_Plants = db.Master_Plants.Where(w => w.Plant_Id == id).FirstOrDefault();
+
+                int divisionCount = db.Master_Divisions.Where(w => w.Plant_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Plant_Id == id).Count();
+
+                if (userCount > 0 || divisionCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Plants.Remove(master_Plants);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+
                 throw;
             }
         }
