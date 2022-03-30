@@ -26,11 +26,11 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Division_Id { get; set; }
 
-        [Description("Division"), Display(Name = "Division"), Required]
+        [Description("Division"), Display(Name = "Division")]
         public string Division_Name { get; set; }
 
         public virtual Master_Plants Master_Plants { get; set; }
-        [Required,Display(Name ="Plant")]
+        [Display(Name ="Plant")]
         public Guid? Plant_Id { get; set; }
         public DateTime? Update { get; set; }
     }

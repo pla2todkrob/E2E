@@ -12,7 +12,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Section_Id { get; set; }
 
-        [Description("Section name"), Display(Name = "Section"), Required]
+        [Description("Section name"), Display(Name = "Section")]
         public string Section_Name { get; set; }
 
         [Description("Autorun number")]

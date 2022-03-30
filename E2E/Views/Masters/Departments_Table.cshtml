@@ -21,7 +21,7 @@
         {
             <tr>
                 <td>
-                    <button class="btn btn-outline-warning">Edit</button>
+                    <button class="btn btn-outline-warning" onclick="callModalDepartment('@Url.Action("Departments_Form","Masters",new { id = Html.ValueFor(m => item.Department_Id) })')">Edit</button>
                 </td>
                 <td>@Html.DisplayFor(i => item.Create)</td>
                 <td>@Html.DisplayFor(i => item.Department_Name)</td>

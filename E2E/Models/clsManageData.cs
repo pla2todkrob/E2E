@@ -169,6 +169,7 @@ namespace E2E.Models
             return db.Master_Processes
                 .Select(s => new clsProcesses()
                 {
+                    Processes_Id = s.Process_Id,
                     Active = s.Active,
                     Create = s.Create,
                     Department_Name = s.Master_Sections.Master_Departments.Department_Name,
@@ -200,7 +201,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Process_Save(sectionId, val))
+                            if (Process_Save_GetId(sectionId, val))
                             {
                                 goto FindModel;
                             }
@@ -216,7 +217,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Process_Save(Guid sectionId, string val)
+        public bool Process_Save_GetId(Guid sectionId, string val)
         {
             try
             {
@@ -237,6 +238,146 @@ namespace E2E.Models
                 throw;
             }
         }
+
+        public bool Process_Save(Master_Processes model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Processes master_Processes = new Master_Processes();
+                master_Processes = db.Master_Processes.Where(w => w.Process_Id == model.Process_Id).FirstOrDefault();
+
+                if (master_Processes != null)
+                {
+                    master_Processes = db.Master_Processes.Where(w => w.Process_Id != model.Process_Id && w.Process_Name.ToLower() == model.Process_Name.ToLower().Trim() && w.Section_Id == model.Section_Id).FirstOrDefault();
+                    if (master_Processes != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Process_Update(model);
+                    }
+
+                }
+                else
+                {
+                    master_Processes = db.Master_Processes.Where(w => w.Process_Name.ToLower() == model.Process_Name.ToLower().Trim() && w.Section_Id == model.Section_Id).FirstOrDefault();
+
+                    if (master_Processes != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Process_Insert(model);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Process_Insert(Master_Processes model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Processes master_Processes = new Master_Processes();
+                master_Processes.Process_Name = model.Process_Name;
+                master_Processes.Active = model.Active;
+                master_Processes.Section_Id = model.Section_Id;
+
+                var query = db.Master_Processes.FirstOrDefault();
+
+                if (query == null)
+                {
+                    master_Processes.Code = 1;
+                }
+                else
+                {
+                    master_Processes.Code = db.Master_Processes.Max(m => m.Code) + 1;
+                }
+
+                db.Master_Processes.Add(master_Processes);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        protected bool Process_Update(Master_Processes model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Processes master_Processes = new Master_Processes();
+                master_Processes = db.Master_Processes.Where(w => w.Process_Id == model.Process_Id).FirstOrDefault();
+
+                master_Processes.Process_Name = model.Process_Name.Trim();
+                master_Processes.Section_Id = model.Section_Id;
+                master_Processes.Active = model.Active;
+                master_Processes.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Process_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Processes master_Processes = new Master_Processes();
+                master_Processes = db.Master_Processes.Where(w => w.Process_Id == id).FirstOrDefault();
+
+                int userCount = db.Users.Where(w => w.Process_Id == id).Count();
+   
+
+                if (userCount > 0 )
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Processes.Remove(master_Processes);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
         public Master_Sections Section_Get(Guid id)
         {
             return db.Master_Sections.Find(id);
@@ -250,6 +391,7 @@ namespace E2E.Models
             return db.Master_Sections
                 .Select(s => new clsSections()
                 {
+                    Section_Id = s.Section_Id,
                     Active = s.Active,
                     Create = s.Create,
                     Department_Name = s.Master_Departments.Department_Name,
@@ -280,7 +422,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Section_Save(departmentId, val))
+                            if (Section_Save_GetId(departmentId, val))
                             {
                                 goto FindModel;
                             }
@@ -296,7 +438,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Section_Save(Guid departmentId, string val)
+        public bool Section_Save_GetId(Guid departmentId, string val)
         {
             try
             {
@@ -319,6 +461,145 @@ namespace E2E.Models
             }
         }
 
+        public bool Section_Save(Master_Sections model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Sections master_Sections = new Master_Sections();
+                master_Sections = db.Master_Sections.Where(w => w.Section_Id == model.Section_Id).FirstOrDefault();
+
+                if (master_Sections != null)
+                {
+                    master_Sections = db.Master_Sections.Where(w => w.Section_Id != model.Section_Id && w.Section_Name.ToLower() == model.Section_Name.ToLower().Trim() && w.Department_Id == model.Department_Id).FirstOrDefault();
+                    if (master_Sections != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Section_Update(model);
+                    }
+
+                }
+                else
+                {
+                    master_Sections = db.Master_Sections.Where(w => w.Section_Name.ToLower() == model.Section_Name.ToLower().Trim() && w.Department_Id == model.Department_Id).FirstOrDefault();
+
+                    if (master_Sections != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Section_Insert(model);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Section_Insert(Master_Sections model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Sections master_Sections = new Master_Sections();
+                master_Sections.Section_Name = model.Section_Name;
+                master_Sections.Active = model.Active;
+                master_Sections.Department_Id = model.Department_Id;
+
+                var query = db.Master_Sections.FirstOrDefault();
+
+                if (query == null)
+                {
+                    master_Sections.Code = 1;
+                }
+                else
+                {
+                    master_Sections.Code = db.Master_Sections.Max(m => m.Code) + 1;
+                }
+
+                db.Master_Sections.Add(master_Sections);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        protected bool Section_Update(Master_Sections model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Sections master_Sections = new Master_Sections();
+                master_Sections = db.Master_Sections.Where(w => w.Section_Id == model.Section_Id).FirstOrDefault();
+
+                master_Sections.Section_Name = model.Section_Name.Trim();
+                master_Sections.Department_Id = model.Department_Id;
+                master_Sections.Active = model.Active;
+                master_Sections.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Section_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Sections master_Sections = new Master_Sections();
+                master_Sections = db.Master_Sections.Where(w => w.Section_Id == id).FirstOrDefault();
+
+                int userCount = db.Users.Where(w => w.Section_Id == id).Count();
+                int ProcessesCount = db.Master_Processes.Where(w => w.Section_Id == id).Count();
+
+                if (userCount > 0 || ProcessesCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Sections.Remove(master_Sections);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
         public Master_Departments Department_Get(Guid id)
         {
             return db.Master_Departments.Find(id);
@@ -334,6 +615,7 @@ namespace E2E.Models
             return db.Master_Departments
                 .Select(s => new clsDepartments()
                 {
+                    Department_Id = s.Department_Id,
                     Active = s.Active,
                     Create = s.Create,
                     Department_Name = s.Department_Name,
@@ -364,7 +646,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Department_Save(divisionId, val))
+                            if (Department_Save_GetId(divisionId, val))
                             {
                                 goto FindModel;
                             }
@@ -380,7 +662,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Department_Save(Guid divisionId, string val)
+        public bool Department_Save_GetId(Guid divisionId, string val)
         {
             try
             {
@@ -399,6 +681,144 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public bool Department_Save(Master_Departments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Departments master_Departments = new Master_Departments();
+                master_Departments = db.Master_Departments.Where(w => w.Department_Id == model.Department_Id).FirstOrDefault();
+
+                if (master_Departments != null)
+                {
+                    master_Departments = db.Master_Departments.Where(w => w.Department_Id != model.Department_Id && w.Department_Name.ToLower() == model.Department_Name.ToLower().Trim() && w.Division_Id == model.Division_Id).FirstOrDefault();
+                    if (master_Departments != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Department_Update(model);
+                    }
+
+                }
+                else
+                {
+                    master_Departments = db.Master_Departments.Where(w => w.Department_Name.ToLower() == model.Department_Name.ToLower().Trim() && w.Division_Id == model.Division_Id).FirstOrDefault();
+
+                    if (master_Departments != null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        res = Department_Insert(model);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Department_Insert(Master_Departments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Departments master_Departments = new Master_Departments();
+                master_Departments.Department_Name = model.Department_Name;
+                master_Departments.Active = model.Active;
+                master_Departments.Division_Id = model.Division_Id;
+
+                var query = db.Master_Plants.FirstOrDefault();
+
+                if (query == null)
+                {
+                    master_Departments.Code = 1;
+                }
+                else
+                {
+                    master_Departments.Code = db.Master_Departments.Max(m => m.Code) + 1;
+                }
+
+                db.Master_Departments.Add(master_Departments);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        protected bool Department_Update(Master_Departments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Departments master_Departments = new Master_Departments();
+                master_Departments = db.Master_Departments.Where(w => w.Department_Id == model.Department_Id).FirstOrDefault();
+
+                master_Departments.Department_Name = model.Department_Name.Trim();
+                master_Departments.Active = model.Active;
+                master_Departments.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult Department_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Departments master_Departments = new Master_Departments();
+                master_Departments = db.Master_Departments.Where(w => w.Department_Id == id).FirstOrDefault();
+
+                int userCount = db.Users.Where(w => w.Department_Id == id).Count();
+                int deptCount = db.Master_Sections.Where(w => w.Department_Id == id).Count();
+
+                if (userCount > 0 || deptCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Departments.Remove(master_Departments);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+
                 throw;
             }
         }
@@ -1475,8 +1895,7 @@ namespace E2E.Models
                     Principal principal = searcher.FindOne();
                     if (principal != null)
                     {
-                        DirectoryEntry entry = principal.GetUnderlyingObject() as DirectoryEntry;
-                        res = entry.Properties["mail"].Value.ToString();
+                        res = principal.UserPrincipalName;
                     }
                 }
 

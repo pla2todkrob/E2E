@@ -12,12 +12,12 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Department_Id { get; set; }
 
-        [Description("Department"), Display(Name = "Department"), Required]
+        [Description("Department"), Display(Name = "Department")]
         public string Department_Name { get; set; }
 
         [Description("Autorun number")]
         public int Code { get; set; }
-        [Required,Display(Name ="Division")]
+        [Display(Name ="Division")]
         public Guid? Division_Id { get; set; }
         public virtual Master_Divisions Master_Divisions { get; set; }
         public bool Active { get; set; }
