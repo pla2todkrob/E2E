@@ -12,9 +12,7 @@
         if (classEmpty) {
             if (urlRegExp.test(this.href.replace(/\/$/, ''))) {
                 $(this).addClass('active');
-                if ($(this).hasClass('dropdown-item')) {
-                    $(this).parents('li').addClass('active');
-                }
+                $(this).parent('li').addClass('bg-light');
                 classEmpty = false;
             }
         }
