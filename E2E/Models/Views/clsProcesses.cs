@@ -8,6 +8,7 @@ namespace E2E.Models.Views
 {
     public class clsProcesses
     {
+        public Guid Processes_Id { get; set; }
         public DateTime Create { get; set; }
         [Display(Name = "Process")]
         public string Process_Name { get; set; }

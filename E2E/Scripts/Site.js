@@ -131,6 +131,126 @@ function callModal(urlAjax, bigSize = false) {
     return false;
 }
 
+function callModalDepartment(urlAjax, bigSize = false) {
+    $('#Master_Divisions_Plant_Id').trigger('select2:select');
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            if (bigSize) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+            else {
+                $('#modalContent').parent().removeClass('modal-lg');
+            }
+            $('#modalContent').html(res);
+            $('#modalContent').find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
+
+            $('#modalArea').modal('show');
+           
+            $('#Master_Divisions_Plant_Id').on('select2:select', function () {
+                var objSelect = $('#Division_Id');
+                getDivisions(objSelect, $(this).val());
+            });
+            
+        }
+    });
+    return false;
+}
+
+function callModalSection(urlAjax, bigSize = false) {
+    $('#Master_Departments_Master_Divisions_Plant_Id').trigger('select2:select');
+    $('#Master_Departments_Division_Id').trigger('select2:select');
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            if (bigSize) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+            else {
+                $('#modalContent').parent().removeClass('modal-lg');
+            }
+            $('#modalContent').html(res);
+            $('#modalContent').find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
+
+            $('#modalArea').modal('show');
+
+            $('#Master_Departments_Division_Id').on('select2:select', function () {
+                var objSelect = $('#Department_Id');
+                getDepartments(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
+            });
+
+            $('#Master_Departments_Master_Divisions_Plant_Id').on('select2:select', function () {
+                var objSelect = $('#Master_Departments_Division_Id');
+                getDivisions(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
+            });
+
+        }
+    });
+    return false;
+}
+
+function callModalProcesses(urlAjax, bigSize = false) {
+    $('#Master_Sections_Master_Departments_Master_Divisions_Plant_Id').trigger('select2:select');
+    $('#Master_Sections_Master_Departments_Division_Id').trigger('select2:select');
+    $('#Master_Sections_Department_Id').trigger('select2:select');
+
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            if (bigSize) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+            else {
+                $('#modalContent').parent().removeClass('modal-lg');
+            }
+            $('#modalContent').html(res);
+            $('#modalContent').find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
+
+            $('#modalArea').modal('show');
+
+            $('#Master_Sections_Master_Departments_Division_Id').on('select2:select', function () {
+                var objSelect = $('#Master_Sections_Department_Id');
+                getDepartments(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
+            });
+
+            $('#Master_Sections_Master_Departments_Master_Divisions_Plant_Id').on('select2:select', function () {
+                var objSelect = $('#Master_Sections_Master_Departments_Division_Id');
+                getDivisions(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
+            });
+
+            $('#Master_Sections_Department_Id').on('select2:select', function () {
+                var objSelect = $('#Section_Id');
+                getSections(objSelect, $(this).val());
+                objSelect.trigger('select2:select');
+            });
+
+        }
+    });
+    return false;
+}
+
 function callSubmit(urlAjax, reloadPage = false) {
     var form = $('form')[0];
     var fd = new FormData(form);
