@@ -8,6 +8,7 @@ namespace E2E.Models.Views
 {
     public class clsSections
     {
+        public Guid Section_Id { get; set; }
         public DateTime Create { get; set; }
         [Display(Name = "Section")]
         public string Section_Name { get; set; }

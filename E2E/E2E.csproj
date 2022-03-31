@@ -708,6 +708,9 @@
     <Content Include="Views\Masters\Plants_Form.cshtml" />
     <Content Include="Views\Masters\Divisions_Form.cshtml" />
     <Content Include="Views\Users\Login.cshtml" />
+    <Content Include="Views\Masters\Departments_Form.cshtml" />
+    <Content Include="Views\Masters\Sections_Form.cshtml" />
+    <Content Include="Views\Masters\Processes_Form.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

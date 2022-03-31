@@ -10,6 +10,11 @@
 
         });
 
+        $(document).on('submit','#SaveForm',  function () {
+            callSubmit('@Url.Action("Processes_Form", "Masters")');
+            return false;
+        });
+
         function reloadTable() {
             callTable('@Url.Action("Processes_Table", "Masters")', true, true, 1);
         }
@@ -31,7 +36,7 @@
         <div class="d-flex">
             <div class="mr-auto"></div>
             <div class="ml-auto">
-                <button class="btn btn-secondary"><i class="fa fa-plus"></i>&nbsp;Add</button>
+                <button class="btn btn-secondary" onclick="callModalProcesses('@Url.Action("Processes_Form","Masters")')"><i class="fa fa-plus"></i>&nbsp;Add</button>
             </div>
         </div>
     </div>

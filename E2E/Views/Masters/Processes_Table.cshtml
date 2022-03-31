@@ -23,7 +23,7 @@
         {
             <tr>
                 <td>
-                    <button class="btn btn-outline-warning">Edit</button>
+                    <button class="btn btn-outline-warning" onclick="callModalProcesses('@Url.Action("Processes_Form","Masters",new { id = Html.ValueFor(m => item.Processes_Id) })')">Edit</button>
                 </td>
                 <td>@Html.DisplayFor(i => item.Create)</td>
                 <td>@Html.DisplayFor(i => item.Process_Name)</td>
