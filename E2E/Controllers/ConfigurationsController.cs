@@ -8,6 +8,7 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
+    [Authorize]
     public class ConfigurationsController : Controller
     {
         private clsContext db = new clsContext();
@@ -36,6 +37,26 @@ namespace E2E.Controllers
             int res = new int();
             res = 1;
             return PartialView("_Navbar", res);
+        }
+
+        public ActionResult _Profile()
+        {
+            try
+            {
+                string res = string.Empty;
+                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
+                res = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.User_Code)
+                    .FirstOrDefault();
+
+                return PartialView("_Profile", res);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

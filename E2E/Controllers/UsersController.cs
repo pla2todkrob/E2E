@@ -141,5 +141,11 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
+        public ActionResult Signout()
+        {
+            FormsAuthentication.SignOut();
+            return Redirect(FormsAuthentication.LoginUrl);
+        }
     }
 }

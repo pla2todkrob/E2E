@@ -9,6 +9,7 @@ using System.Web.Http;
 
 namespace E2E.Controllers
 {
+    [Authorize]
     public class SelectController : ApiController
     {
         private clsManageData data = new clsManageData();

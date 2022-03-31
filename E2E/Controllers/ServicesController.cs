@@ -6,6 +6,7 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
+    [Authorize]
     public class ServicesController : Controller
     {
         // GET: Services
