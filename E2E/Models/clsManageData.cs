@@ -323,6 +323,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int ProcessCount = db.Users.Where(w => w.Process_Id == model.Process_Id).Count();
+
+                if (ProcessCount > 0)
+                {
+                    return res;
+                }
+
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes.Where(w => w.Process_Id == model.Process_Id).FirstOrDefault();
 
@@ -354,9 +361,9 @@ namespace E2E.Models
                 master_Processes = db.Master_Processes.Where(w => w.Process_Id == id).FirstOrDefault();
 
                 int userCount = db.Users.Where(w => w.Process_Id == id).Count();
-   
 
-                if (userCount > 0 )
+
+                if (userCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
                     res.CanSave = false;
@@ -545,6 +552,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int SectionCount = db.Users.Where(w => w.Section_Id == model.Section_Id).Count();
+
+                if (SectionCount > 0)
+                {
+                    return res;
+                }
+
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections.Where(w => w.Section_Id == model.Section_Id).FirstOrDefault();
 
@@ -769,6 +783,14 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int DepartmentCount = db.Users.Where(w => w.Department_Id == model.Department_Id).Count();
+
+                if (DepartmentCount > 0)
+                {
+                    return res;
+                }
+
+        
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments.Where(w => w.Department_Id == model.Department_Id).FirstOrDefault();
 
@@ -989,6 +1011,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int DivisionCount = db.Users.Where(w => w.Division_Id == model.Division_Id).Count();
+
+                if (DivisionCount > 0)
+                {
+                    return res;
+                }
+
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == model.Division_Id).FirstOrDefault();
 
@@ -1176,7 +1205,7 @@ namespace E2E.Models
                 {
                     master_Grades.Code = db.Master_Grades.Max(m => m.Code) + 1;
                 }
-                
+
                 db.Master_Grades.Add(master_Grades);
                 if (db.SaveChanges() > 0)
                 {
@@ -1197,6 +1226,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int GradesCount = db.Users.Where(w => w.Grade_Id == model.Grade_Id).Count();
+
+                if (GradesCount > 0)
+                {
+                    return res;
+                }
+
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
 
@@ -1310,7 +1346,7 @@ namespace E2E.Models
 
                 if (master_LineWorks != null)
                 {
-                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Id != model.LineWork_Id && w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim() && w.Authorize_Id == model.Authorize_Id).FirstOrDefault();
+                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Id != model.LineWork_Id && w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim()).FirstOrDefault();
                     if (master_LineWorks != null)
                     {
                         return false;
@@ -1323,7 +1359,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim() && w.Authorize_Id == model.Authorize_Id).FirstOrDefault();
+                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim()).FirstOrDefault();
 
                     if (master_LineWorks != null)
                     {
@@ -1347,6 +1383,7 @@ namespace E2E.Models
         {
             try
             {
+
                 bool res = new bool();
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks.Code = db.Master_LineWorks.Count() + 1;
@@ -1375,13 +1412,22 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int LineWorksCount = db.Users.Where(w => w.LineWork_Id == model.LineWork_Id).Count();
+
+                if (LineWorksCount > 0)
+                {
+                    return res;
+                }
+
+
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks = db.Master_LineWorks
                     .Where(w => w.LineWork_Id == model.LineWork_Id)
                     .FirstOrDefault();
-                master_LineWorks.Active = model.Active;
+
                 master_LineWorks.Authorize_Id = model.Authorize_Id;
                 master_LineWorks.LineWork_Name = model.LineWork_Name;
+                master_LineWorks.Active = model.Active;
                 master_LineWorks.Update = DateTime.Now;
                 if (db.SaveChanges() > 0)
                 {
@@ -1412,7 +1458,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    
+
                     Master_LineWorks master_LineWorks = new Master_LineWorks();
 
                     master_LineWorks = db.Master_LineWorks
@@ -1519,7 +1565,7 @@ namespace E2E.Models
                     {
                         res = Plant_Update(model);
                     }
-                  
+
                 }
                 else
                 {
@@ -1534,7 +1580,7 @@ namespace E2E.Models
                         res = Plant_Insert(model);
                     }
                 }
- 
+
                 return res;
             }
             catch (Exception)
@@ -1583,6 +1629,14 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                int PlantCount = db.Users.Where(w => w.Plant_Id == model.Plant_Id).Count();
+
+                if (PlantCount > 0)
+                {
+                    return res;
+                }
+
+            
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
 
