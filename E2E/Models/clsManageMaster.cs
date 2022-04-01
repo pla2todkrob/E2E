@@ -9,6 +9,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Models
@@ -323,12 +324,16 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int ProcessCount = db.Users.Where(w => w.Process_Id == model.Process_Id).Count();
-
-                if (ProcessCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int ProcessCount = db.Users.Where(w => w.Process_Id == model.Process_Id).Count();
+
+                    if (ProcessCount > 0)
+                    {
+                        return res;
+                    }
                 }
+
 
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes.Where(w => w.Process_Id == model.Process_Id).FirstOrDefault();
@@ -552,12 +557,16 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int SectionCount = db.Users.Where(w => w.Section_Id == model.Section_Id).Count();
-
-                if (SectionCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int SectionCount = db.Users.Where(w => w.Section_Id == model.Section_Id).Count();
+
+                    if (SectionCount > 0)
+                    {
+                        return res;
+                    }
                 }
+
 
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections.Where(w => w.Section_Id == model.Section_Id).FirstOrDefault();
@@ -783,12 +792,16 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int DepartmentCount = db.Users.Where(w => w.Department_Id == model.Department_Id).Count();
-
-                if (DepartmentCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int DepartmentCount = db.Users.Where(w => w.Department_Id == model.Department_Id).Count();
+
+                    if (DepartmentCount > 0)
+                    {
+                        return res;
+                    }
                 }
+
 
         
                 Master_Departments master_Departments = new Master_Departments();
@@ -1011,12 +1024,16 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int DivisionCount = db.Users.Where(w => w.Division_Id == model.Division_Id).Count();
-
-                if (DivisionCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int DivisionCount = db.Users.Where(w => w.Division_Id == model.Division_Id).Count();
+
+                    if (DivisionCount > 0)
+                    {
+                        return res;
+                    }
                 }
+
 
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == model.Division_Id).FirstOrDefault();
@@ -1226,12 +1243,18 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int GradesCount = db.Users.Where(w => w.Grade_Id == model.Grade_Id).Count();
-
-                if (GradesCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int GradesCount = db.Users.Where(w => w.Grade_Id == model.Grade_Id).Count();
+
+                    if (GradesCount > 0)
+                    {
+                        return res;
+                    }
                 }
+
+
+                Guid userid = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
@@ -1412,11 +1435,15 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int LineWorksCount = db.Users.Where(w => w.LineWork_Id == model.LineWork_Id).Count();
 
-                if (LineWorksCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int LineWorksCount = db.Users.Where(w => w.LineWork_Id == model.LineWork_Id).Count();
+
+                    if (LineWorksCount > 0)
+                    {
+                        return res;
+                    }
                 }
 
 
@@ -1629,12 +1656,16 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                int PlantCount = db.Users.Where(w => w.Plant_Id == model.Plant_Id).Count();
-
-                if (PlantCount > 0)
+                if (!model.Active)
                 {
-                    return res;
+                    int PlantCount = db.Users.Where(w => w.Plant_Id == model.Plant_Id).Count();
+
+                    if (PlantCount > 0)
+                    {
+                        return res;
+                    }
                 }
+
 
             
                 Master_Plants master_Plants = new Master_Plants();
