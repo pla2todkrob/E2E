@@ -66,5 +66,9 @@ namespace E2E.Models.Tables
 
         [Key]
         public Guid User_Id { get; set; }
+        [Display(Name ="Point")]
+        public int User_Point { get; set; }
+        [Display(Name = "Cost center")]
+        public string User_CostCenter { get; set; }
     }
 }

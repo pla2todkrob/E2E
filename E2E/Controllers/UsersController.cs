@@ -16,7 +16,7 @@ namespace E2E.Controllers
     public class UsersController : Controller
     {
         private clsContext db = new clsContext();
-        private clsManageData data = new clsManageData();
+        private clsManageMaster data = new clsManageMaster();
         // GET: Users
         public ActionResult Index()
         {

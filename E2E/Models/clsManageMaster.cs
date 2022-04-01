@@ -13,7 +13,7 @@ using System.Web.Mvc;
 
 namespace E2E.Models
 {
-    public class clsManageData
+    public class clsManageMaster
     {
         private clsContext db = new clsContext();
 

@@ -183,7 +183,8 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\clsContext.cs" />
     <Compile Include="Models\clsDefaultSystem.cs" />
-    <Compile Include="Models\clsManageData.cs" />
+    <Compile Include="Models\clsManageMaster.cs" />
+    <Compile Include="Models\clsManageTopic.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
     <Compile Include="Models\Tables\Master_LineWorks.cs" />
@@ -197,6 +198,10 @@
     <Compile Include="Models\Tables\System_Prefix_TH.cs" />
     <Compile Include="Models\Tables\System_Statuses.cs" />
     <Compile Include="Models\Tables\Tasks.cs" />
+    <Compile Include="Models\Tables\TopicComments.cs" />
+    <Compile Include="Models\Tables\TopicFiles.cs" />
+    <Compile Include="Models\Tables\TopicGalleries.cs" />
+    <Compile Include="Models\Tables\Topics.cs" />
     <Compile Include="Models\Tables\UserDetails.cs" />
     <Compile Include="Models\Tables\Users.cs" />
     <Compile Include="Models\Tables\System_Roles.cs" />
