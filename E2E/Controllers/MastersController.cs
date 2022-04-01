@@ -15,7 +15,7 @@ namespace E2E.Controllers
     [Authorize]
     public class MastersController : Controller
     {
-        private clsManageData data = new clsManageData();
+        private clsManageMaster data = new clsManageMaster();
         private clsContext db = new clsContext();
 
         public ActionResult Departments()
