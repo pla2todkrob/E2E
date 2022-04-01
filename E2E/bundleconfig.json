@@ -16,5 +16,11 @@
     "inputFiles": [
       "Scripts/Site.js"
     ]
+  },
+  {
+    "outputFileName": "Asset/Master.min.js",
+    "inputFiles": [
+      "Asset/Master.js"
+    ]
   }
 ]

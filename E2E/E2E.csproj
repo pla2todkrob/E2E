@@ -217,6 +217,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Asset\Master.js" />
+    <Content Include="Asset\Master.min.js">
+      <DependentUpon>Master.js</DependentUpon>
+    </Content>
+    <Content Include="Asset\Topic.js" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-reboot.css" />
