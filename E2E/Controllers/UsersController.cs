@@ -17,6 +17,7 @@ namespace E2E.Controllers
     {
         private clsContext db = new clsContext();
         private clsManageMaster data = new clsManageMaster();
+
         // GET: Users
         public ActionResult Index()
         {
@@ -28,6 +29,7 @@ namespace E2E.Controllers
         {
             try
             {
+                ViewBag.ReturnUrl = Request.QueryString["ReturnUrl"];
                 if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
                     if (!string.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
@@ -49,7 +51,7 @@ namespace E2E.Controllers
         }
 
         [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Login(clsLogin model)
+        public ActionResult Login(clsLogin model, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -102,19 +104,18 @@ namespace E2E.Controllers
                     }
 
                 SetAuthen:
-                    if (!string.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
+                    FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
+                    if (!string.IsNullOrEmpty(returnUrl))
                     {
-                        FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
-                        Response.Redirect(Request.QueryString["ReturnUrl"]);
+                        return Redirect(returnUrl);
                     }
                     else
                     {
-                        FormsAuthentication.RedirectFromLoginPage(users.User_Id.ToString(), model.Remember);
+                        return Redirect(FormsAuthentication.DefaultUrl);
                     }
                 }
                 catch (Exception)
                 {
-
                     throw;
                 }
             }
@@ -137,7 +138,6 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

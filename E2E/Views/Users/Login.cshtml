@@ -21,7 +21,7 @@
     </script>
 }
 
-@using (Html.BeginForm("Login", "Users", FormMethod.Post))
+@using (Html.BeginForm("Login", "Users", new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
 {
     @Html.AntiForgeryToken()
     <div class="modal-header">

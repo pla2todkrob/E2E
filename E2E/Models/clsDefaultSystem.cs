@@ -24,6 +24,11 @@ namespace E2E.Models
             {
                 Status_Save();
             }
+
+            if (db.System_Priorities.Count() != System_Priorities.DefaultList().Count())
+            {
+                Priority_Save();
+            }
         }
 
         private static void Authorize_Save()
@@ -57,6 +62,18 @@ namespace E2E.Models
                 if (db.System_Statuses.Where(w => w.Status_Name == item.Status_Name).Count() == 0)
                 {
                     db.System_Statuses.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Priority_Save()
+        {
+            foreach (var item in System_Priorities.DefaultList())
+            {
+                if (db.System_Priorities.Where(w => w.Priority_Name == item.Priority_Name).Count() == 0)
+                {
+                    db.System_Priorities.Add(item);
                     db.SaveChanges();
                 }
             }
