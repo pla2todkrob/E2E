@@ -23,28 +23,29 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td>
-                @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
+            <tr>
+                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td>
+                    @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
 
-                @{
-                    if (string.Equals(item.Users.User_Code , ViewBag.Usercode))
-                    {
-                       <a href="#" onclick="alert('OK')" class="text-dark"><i class="fa fa-pencil"></i></a>
+                    @{
+                        if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                        {
+                            <a href="#" onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })',true)" class="text-dark"><i class="fa fa-pencil"></i></a>
+                        }
+
                     }
 
-                }
+                </td>
 
-            </td>
-
-            <td>@Html.DisplayFor(i => item.Count_View)</td>
-            <td>@Html.DisplayFor(i => item.Count_Comment)</td>
+                <td>@Html.DisplayFor(i => item.Count_View)</td>
+                <td>@Html.DisplayFor(i => item.Count_Comment)</td>
 
 
-            <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
-            <td>@Html.DisplayFor(i => item.Update)</td>
-        </tr>
+                <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
+                <td>@Html.DisplayFor(i => item.Update)</td>
+            </tr>
         }
     </tbody>
 </table>
+

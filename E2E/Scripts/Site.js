@@ -127,6 +127,34 @@ function callModal(urlAjax, bigSize = false) {
     return false;
 }
 
+function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            $(blockId).html(res);
+            $(blockId).find('table').each(function () {
+
+                if (hasDate) {
+                    $(this).DataTable({
+                        "columnDefs": [{ "targets": dateCol, "type": "date" }],
+                        "ordering": false,
+                        "scrollX": true
+                    });
+                }
+
+                else {
+                    $(this).DataTable({
+                        "ordering": false,
+                        "scrollX": true
+                    });
+                }
+            });
+        }
+    });
+    return false;
+}
+
 function callSubmit(urlAjax, reloadPage = false) {
     var form = $('form')[0];
     var fd = new FormData(form);

@@ -31,7 +31,7 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Boards_Table()
+        public ActionResult Boards_Table(bool val)
         {
             
             Guid id = Guid.Parse(HttpContext.User.Identity.Name);
@@ -40,11 +40,33 @@ namespace E2E.Controllers
                 .Select(s => s.User_Code)
                 .FirstOrDefault();
 
-            return View(db.Topics.OrderByDescending(o=> new {o.Topic_Pin,o.Create }).ToList());
+            Topics topics = new Topics();
+            var sql = db.Topics.Where(w => w.Topic_Pin == val).ToList();
+            if (val)
+            {
+                foreach (var item in sql.Where(w=>w.Topic_Pin_EndDate < DateTime.Today))
+                {
+                    item.Topic_Pin = false;
+                    item.Topic_Pin_EndDate = null;
+                    db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                    db.SaveChanges();
+                }
+                sql = sql.Where(w => w.Topic_Pin_EndDate > DateTime.Today).ToList();
+            }
+           
+
+            return View(sql);
         }
 
-        public ActionResult Boards_Create()
+        public ActionResult Boards_Create(Guid? id)
         {
+            if (id.HasValue)
+            {
+                Topics topics = new Topics();
+                topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
+                return View(topics);
+            }
+
             return View(new Topics());
         }
 
