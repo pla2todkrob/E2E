@@ -184,6 +184,7 @@
     <Compile Include="Models\clsContext.cs" />
     <Compile Include="Models\clsDefaultSystem.cs" />
     <Compile Include="Models\clsManageMaster.cs" />
+    <Compile Include="Models\clsManageService.cs" />
     <Compile Include="Models\clsManageTopic.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
@@ -192,12 +193,16 @@
     <Compile Include="Models\Tables\Master_Departments.cs" />
     <Compile Include="Models\Tables\Master_Sections.cs" />
     <Compile Include="Models\Tables\Master_Processes.cs" />
+    <Compile Include="Models\Tables\ServiceCommentFiles.cs" />
+    <Compile Include="Models\Tables\ServiceComments.cs" />
+    <Compile Include="Models\Tables\ServiceFiles.cs" />
+    <Compile Include="Models\Tables\Services.cs" />
     <Compile Include="Models\Tables\System_Authorize.cs" />
     <Compile Include="Models\Tables\System_Configurations.cs" />
     <Compile Include="Models\Tables\System_Prefix_EN.cs" />
     <Compile Include="Models\Tables\System_Prefix_TH.cs" />
+    <Compile Include="Models\Tables\System_Priorities.cs" />
     <Compile Include="Models\Tables\System_Statuses.cs" />
-    <Compile Include="Models\Tables\Tasks.cs" />
     <Compile Include="Models\Tables\TopicComments.cs" />
     <Compile Include="Models\Tables\TopicFiles.cs" />
     <Compile Include="Models\Tables\TopicGalleries.cs" />
@@ -212,6 +217,7 @@
     <Compile Include="Models\Views\clsProcesses.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
+    <Compile Include="Models\Views\clsServices.cs" />
     <Compile Include="Models\Views\clsSwal.cs" />
     <Compile Include="Models\Views\clsTopic.cs" />
     <Compile Include="Models\Views\clsUsers.cs" />
