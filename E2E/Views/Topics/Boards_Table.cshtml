@@ -1,0 +1,50 @@
+﻿@model IEnumerable<E2E.Models.Tables.Topics>
+
+
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover table-striped nowrap w-100">
+    <thead>
+        <tr>
+            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.Topic_Title)</th>
+
+            <th class="fit"><i class="fa fa-eye"></i></th>
+            <th class="fit"><i class="fa fa-commenting-o" aria-hidden="true"></i></th>
+
+
+            <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>
+                @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
+
+                @{
+                    if (string.Equals(item.Users.User_Code , ViewBag.Usercode))
+                    {
+                       <a href="#" onclick="alert('OK')" class="text-dark"><i class="fa fa-pencil"></i></a>
+                    }
+
+                }
+
+            </td>
+
+            <td>@Html.DisplayFor(i => item.Count_View)</td>
+            <td>@Html.DisplayFor(i => item.Count_Comment)</td>
+
+
+            <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
+        }
+    </tbody>
+</table>
