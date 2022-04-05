@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewBag.Title = "Boards";
+}
+
+@section scripts{
+
+    <script src="~/Asset/Master.min.js"></script>
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit','#SaveForm',  function () {
+            callSubmit('@Url.Action("Boards_Create", "Topics")');
+            return false;
+        });
+
+        function reloadTable() {
+            callTable_NoSort('@Url.Action("Boards_Table", "Topics")', true,  0);
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb " class="mt-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Topics</li>
+            <li class="breadcrumb-item active" aria-current="page">Board</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex">
+            <div class="mr-auto"></div>
+            <div class="ml-auto">
+                <button class="btn btn-secondary" onclick="callModal('@Url.Action("Boards_Create","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Add</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row" id="datalist">
+        </div>
+    </div>
+</div>

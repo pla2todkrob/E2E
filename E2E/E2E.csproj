@@ -213,6 +213,7 @@
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
     <Compile Include="Models\Views\clsSwal.cs" />
+    <Compile Include="Models\Views\clsTopic.cs" />
     <Compile Include="Models\Views\clsUsers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -722,6 +723,11 @@
     <Content Include="Views\Masters\Sections_Form.cshtml" />
     <Content Include="Views\Masters\Processes_Form.cshtml" />
     <Content Include="Views\Shared\_Profile.cshtml" />
+    <Content Include="Views\Topics\Boards.cshtml" />
+    <Content Include="Views\Topics\Boards_Table.cshtml" />
+    <Content Include="Views\Masters\Grades_Detail.cshtml" />
+    <Content Include="Views\Topics\Boards_Form.cshtml" />
+    <Content Include="Views\Topics\Boards_Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
