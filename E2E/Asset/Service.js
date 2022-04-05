@@ -17,7 +17,22 @@
                     width: '100%'
                 });
             });
+
+            $('#Ref_Service_Id').on('select2:select', function () {
+            });
+
             $('#modalArea').modal('show');
+        }
+    });
+    return false;
+}
+
+function getOwner(val) {
+    $.ajax({
+        url: '/Services/GetOwner/' + val,
+        async: true,
+        success: function (res) {
+            $('#User_Id').val(res);
         }
     });
     return false;

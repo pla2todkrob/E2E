@@ -1,5 +1,7 @@
-﻿@model string
+﻿@model E2E.Models.Views.clsUsers
+
 @{
     Layout = null;
 }
-@Model
+
+@Html.DisplayFor(m => m.User_Code) [@Html.DisplayNameFor(m => m.User_Point): @Html.DisplayFor(m => m.User_Point)]

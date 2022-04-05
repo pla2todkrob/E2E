@@ -157,14 +157,17 @@ namespace E2E.Models
                 throw;
             }
         }
+
         public Master_Processes Process_Get(Guid id)
         {
             return db.Master_Processes.Find(id);
         }
+
         public List<Master_Processes> Process_GetAll()
         {
             return db.Master_Processes.ToList();
         }
+
         public List<clsProcesses> Process_GetAllView()
         {
             return db.Master_Processes
@@ -181,6 +184,7 @@ namespace E2E.Models
                     Update = s.Update
                 }).ToList();
         }
+
         public Guid? Process_GetId(Guid sectionId, string val, bool create = false)
         {
             try
@@ -259,7 +263,6 @@ namespace E2E.Models
                     {
                         res = Process_Update(model);
                     }
-
                 }
                 else
                 {
@@ -314,7 +317,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -334,7 +336,6 @@ namespace E2E.Models
                     }
                 }
 
-
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes.Where(w => w.Process_Id == model.Process_Id).FirstOrDefault();
 
@@ -352,7 +353,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -366,7 +366,6 @@ namespace E2E.Models
                 master_Processes = db.Master_Processes.Where(w => w.Process_Id == id).FirstOrDefault();
 
                 int userCount = db.Users.Where(w => w.Process_Id == id).Count();
-
 
                 if (userCount > 0)
                 {
@@ -385,7 +384,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -394,10 +392,12 @@ namespace E2E.Models
         {
             return db.Master_Sections.Find(id);
         }
+
         public List<Master_Sections> Section_GetAll()
         {
             return db.Master_Sections.ToList();
         }
+
         public List<clsSections> Section_GetAllView()
         {
             return db.Master_Sections
@@ -413,6 +413,7 @@ namespace E2E.Models
                     Update = s.Update
                 }).ToList();
         }
+
         public Guid? Section_GetId(Guid departmentId, string val, bool create = false)
         {
             try
@@ -492,7 +493,6 @@ namespace E2E.Models
                     {
                         res = Section_Update(model);
                     }
-
                 }
                 else
                 {
@@ -547,7 +547,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -567,7 +566,6 @@ namespace E2E.Models
                     }
                 }
 
-
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections.Where(w => w.Section_Id == model.Section_Id).FirstOrDefault();
 
@@ -585,7 +583,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -618,7 +615,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -727,7 +723,6 @@ namespace E2E.Models
                     {
                         res = Department_Update(model);
                     }
-
                 }
                 else
                 {
@@ -782,7 +777,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -802,8 +796,6 @@ namespace E2E.Models
                     }
                 }
 
-
-        
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments.Where(w => w.Department_Id == model.Department_Id).FirstOrDefault();
 
@@ -820,7 +812,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -853,7 +844,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -918,6 +908,7 @@ namespace E2E.Models
                 throw;
             }
         }
+
         public bool Division_Save_GetId(Guid plantId, string val)
         {
             try
@@ -940,6 +931,7 @@ namespace E2E.Models
                 throw;
             }
         }
+
         public bool Division_Save(Master_Divisions model)
         {
             try
@@ -959,7 +951,6 @@ namespace E2E.Models
                     {
                         res = Division_Update(model);
                     }
-
                 }
                 else
                 {
@@ -1014,7 +1005,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -1034,7 +1024,6 @@ namespace E2E.Models
                     }
                 }
 
-
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == model.Division_Id).FirstOrDefault();
 
@@ -1051,7 +1040,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1084,7 +1072,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -1177,7 +1164,6 @@ namespace E2E.Models
                     {
                         res = Grade_Update(model);
                     }
-
                 }
                 else
                 {
@@ -1233,7 +1219,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1252,7 +1237,6 @@ namespace E2E.Models
                         return res;
                     }
                 }
-
 
                 Guid userid = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -1274,7 +1258,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1306,7 +1289,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -1378,7 +1360,6 @@ namespace E2E.Models
                     {
                         res = LineWork_Update(model);
                     }
-
                 }
                 else
                 {
@@ -1406,7 +1387,6 @@ namespace E2E.Models
         {
             try
             {
-
                 bool res = new bool();
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks.Code = db.Master_LineWorks.Count() + 1;
@@ -1425,7 +1405,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1446,7 +1425,6 @@ namespace E2E.Models
                     }
                 }
 
-
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks = db.Master_LineWorks
                     .Where(w => w.LineWork_Id == model.LineWork_Id)
@@ -1462,11 +1440,9 @@ namespace E2E.Models
                 }
 
                 return res;
-
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1485,7 +1461,6 @@ namespace E2E.Models
                 }
                 else
                 {
-
                     Master_LineWorks master_LineWorks = new Master_LineWorks();
 
                     master_LineWorks = db.Master_LineWorks
@@ -1500,7 +1475,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1592,7 +1566,6 @@ namespace E2E.Models
                     {
                         res = Plant_Update(model);
                     }
-
                 }
                 else
                 {
@@ -1646,7 +1619,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1666,8 +1638,6 @@ namespace E2E.Models
                     }
                 }
 
-
-            
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
 
@@ -1684,7 +1654,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1717,7 +1686,6 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }
@@ -1750,7 +1718,8 @@ namespace E2E.Models
                     Section_Name = s.Master_Sections.Section_Name,
                     Update = s.Update,
                     User_Code = s.User_Code,
-                    User_Email = s.User_Email
+                    User_Email = s.User_Email,
+                    User_CostCenter = s.User_CostCenter
                 }).ToList();
         }
 
@@ -1780,6 +1749,7 @@ namespace E2E.Models
         {
             return db.UserDetails.Where(w => w.User_Id == id).FirstOrDefault();
         }
+
         public clsSaveResult User_Delete(Guid id)
         {
             clsSaveResult res = new clsSaveResult();
@@ -1824,6 +1794,7 @@ namespace E2E.Models
 
             return res;
         }
+
         protected bool User_Insert(UserDetails model)
         {
             try
@@ -1840,6 +1811,7 @@ namespace E2E.Models
                 users.Section_Id = model.Users.Section_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.Role_Id = model.Users.Role_Id;
+                users.User_CostCenter = model.Users.User_CostCenter.Trim();
 
                 if (!string.IsNullOrEmpty(model.Users.User_Email))
                 {
@@ -1928,6 +1900,7 @@ namespace E2E.Models
                 users.Role_Id = model.Users.Role_Id;
                 users.Section_Id = model.Users.Section_Id;
                 users.User_Code = model.Users.User_Code.Trim();
+                users.User_CostCenter = model.Users.User_CostCenter.Trim();
 
                 if (!string.IsNullOrEmpty(model.Users.User_Email))
                 {
@@ -1988,10 +1961,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public List<SelectListItem> SelectListItems_Role()
         {
             return db.System_Roles
@@ -2001,6 +1974,7 @@ namespace E2E.Models
                     Text = s.Role_Name
                 }).OrderBy(o => o.Text).ToList();
         }
+
         public List<SelectListItem> SelectListItems_LineWork()
         {
             return db.Master_LineWorks
@@ -2011,6 +1985,7 @@ namespace E2E.Models
                     Text = s.LineWork_Name
                 }).OrderBy(o => o.Text).ToList();
         }
+
         public List<SelectListItem> SelectListItems_Grade(Guid? lineworkId)
         {
             IQueryable<Master_Grades> query = db.Master_Grades
@@ -2075,6 +2050,7 @@ namespace E2E.Models
                     Text = s.Department_Name
                 }).OrderBy(o => o.Text).ToList();
         }
+
         public List<SelectListItem> SelectListItems_Section(Guid? departmentId)
         {
             IQueryable<Master_Sections> query = db.Master_Sections

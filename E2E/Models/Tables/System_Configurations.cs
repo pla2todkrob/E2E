@@ -15,6 +15,7 @@ namespace E2E.Models.Tables
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
         public DateTime CreateDateTime { get; set; }
+        public int Configuration_Point { get; set; }
 
         public System_Configurations()
         {

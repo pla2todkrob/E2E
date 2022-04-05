@@ -9,6 +9,7 @@ namespace E2E.Models
     public static class clsDefaultSystem
     {
         private static clsContext db = new clsContext();
+
         public static void Generate()
         {
             if (db.System_Authorizes.Count() != System_Authorize.DefaultList().Count())
@@ -28,6 +29,28 @@ namespace E2E.Models
             if (db.System_Priorities.Count() != System_Priorities.DefaultList().Count())
             {
                 Priority_Save();
+            }
+
+            if (db.Users.Count() > 0)
+            {
+                int thisYear = DateTime.Today.Year;
+                List<Users> users = new List<Users>();
+                users = db.Users
+                    .Where(w => w.YearSetPoint != thisYear)
+                    .ToList();
+                if (users.Count > 0)
+                {
+                    int setPoint = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).Select(s => s.Configuration_Point).FirstOrDefault();
+
+                    foreach (var item in users)
+                    {
+                        item.User_Point = setPoint;
+                        item.YearSetPoint = thisYear;
+                        db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                    }
+                }
+
+                db.SaveChanges();
             }
         }
 

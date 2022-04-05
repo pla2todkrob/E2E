@@ -1,5 +1,6 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,14 +44,17 @@ namespace E2E.Controllers
         {
             try
             {
-                string res = string.Empty;
+                clsUsers clsUsers = new clsUsers();
                 Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-                res = db.Users
+                clsUsers = db.Users
                     .Where(w => w.User_Id == id)
-                    .Select(s => s.User_Code)
-                    .FirstOrDefault();
+                    .Select(s => new clsUsers()
+                    {
+                        User_Code = s.User_Code,
+                        User_Point = s.User_Point
+                    }).FirstOrDefault();
 
-                return PartialView("_Profile", res);
+                return PartialView("_Profile", clsUsers);
             }
             catch (Exception)
             {
