@@ -28,5 +28,11 @@
     "inputFiles": [
       "Asset/Service.js"
     ]
+  },
+  {
+    "outputFileName": "Asset/Topic.min.js",
+    "inputFiles": [
+      "Asset/Topic.js"
+    ]
   }
 ]
