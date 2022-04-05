@@ -76,14 +76,12 @@ function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blo
                 if (hasDate && hasButton) {
                     $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }, { "targets": 0, "orderable": false }],
-                        "order": [[dateCol, "desc"]],
                         "scrollX": true
                     });
                 }
                 else if (hasDate) {
                     $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
-                        "order": [[dateCol, "desc"]],
                         "scrollX": true
                     });
                 }
@@ -238,6 +236,20 @@ function callDeleteItem(urlAjax,reloadPage = false) {
             });
 
             return false;
+        }
+    });
+}
+
+function SignoutNotify(url) {
+    swal({
+        title: "Are you sure?",
+        text: "Signout",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((cf) => {
+        if (cf) {
+            location.href = url;
         }
     });
 }

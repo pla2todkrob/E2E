@@ -1,0 +1,25 @@
+﻿@model IEnumerable<E2E.Models.Tables.Services>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th class="fit"></th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <button class="btn btn-outline-info" onclick="callModalService('@Url.Action("Index_Form","Services",new { id = Html.ValueFor(m => item.Service_Id) })')">View</button>
+                </td>
+                <td>@Html.DisplayFor(i => item.Create)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -22,5 +22,11 @@
     "inputFiles": [
       "Asset/Master.js"
     ]
+  },
+  {
+    "outputFileName": "Asset/Service.min.js",
+    "inputFiles": [
+      "Asset/Service.js"
+    ]
   }
 ]
