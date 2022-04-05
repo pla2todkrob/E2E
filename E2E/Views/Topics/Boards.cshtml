@@ -5,7 +5,7 @@
 
 @section scripts{
 
-    <script src="~/Asset/Master.min.js"></script>
+    <script src="~/Asset/Topic.js"></script>
     <script>
         $(function () {
             reloadTable();
@@ -17,8 +17,9 @@
             return false;
         });
 
-        function reloadTable() {
-            callTable_NoSort('@Url.Action("Boards_Table", "Topics")', true,  0);
+        async function reloadTable() {
+            await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { val=true})', true, 0);
+            await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { val=false})', true, 0, '#datalist2');
         }
     </script>
 }
@@ -38,12 +39,29 @@
         <div class="d-flex">
             <div class="mr-auto"></div>
             <div class="ml-auto">
-                <button class="btn btn-secondary" onclick="callModal('@Url.Action("Boards_Create","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Add</button>
+                <button class="btn btn-secondary" onclick="callModalTopics('@Url.Action("Boards_Create","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Add</button>
             </div>
         </div>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist">
+        <div class="card mb-5">
+            <div class="card-header">
+                <h5 class="card-title">Announce</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="datalist">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Topic</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="datalist2">
+                </div>
+            </div>
         </div>
     </div>
 </div>
