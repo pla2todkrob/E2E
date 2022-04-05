@@ -1,18 +1,28 @@
 ﻿@{
     ViewBag.Title = "Services";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @section scripts{
+
     <script src="~/Asset/Service.min.js"></script>
+
     <script>
         $(function () {
             reloadTable();
+
+        });
+
+        $(document).on('submit','#SaveForm',  function () {
+            callSubmit('@Url.Action("Form", "Services")');
+            return false;
         });
 
         function reloadTable() {
-            callTable('@Url.Action("Index_Table", "Services",new { val=false })', true, true, 1, '#new_service');
-            callTable('@Url.Action("Index_Table", "Services",new { val=true })', true, true, 1, '#approve_service');
+            if (@ViewBag.AuthorizeIndex != 3) {
+                callTable('@Url.Action("Index_Table", "Services",new {val = false})', true, false, 1,'#waitingCommit');
+            }
+
+            callTable('@Url.Action("Index_Table", "Services",new {val = true})', true, false, 1,'#waitingAction');
         }
     </script>
 }
@@ -25,7 +35,8 @@
         </ol>
     </nav>
 }
-<div class="card">
+
+<div class="card shadow">
     <div class="card-header">
         <div class="d-flex">
             <div class="mr-auto"></div>
@@ -36,27 +47,24 @@
     </div>
     <div class="card-body">
         @{
-            if (ViewBag.AuthorizeIndex < 3)
+            if (ViewBag.AuthorizeIndex != 3)
             {
                 <div class="card shadow mb-5">
                     <div class="card-header">
-                        <h5 class="card-title">New Request</h5>
+                        <h5 class="card-title">Waiting Commit</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row" id="new_service">
-                        </div>
+                        <div class="row" id="waitingCommit"></div>
                     </div>
                 </div>
             }
         }
-
         <div class="card shadow">
             <div class="card-header">
-                <h5 class="card-title">Commit list</h5>
+                <h5 class="card-title">Waiting Action</h5>
             </div>
             <div class="card-body">
-                <div class="row" id="approve_service">
-                </div>
+                <div class="row" id="waitingAction"></div>
             </div>
         </div>
     </div>

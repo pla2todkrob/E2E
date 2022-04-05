@@ -61,14 +61,19 @@ namespace E2E.Models.Tables
 
         [Description("Employee code"), Display(Name = "Code"), Required]
         public string User_Code { get; set; }
+
         [Description("Employee email"), Display(Name = "Email")]
         public string User_Email { get; set; }
 
         [Key]
         public Guid User_Id { get; set; }
-        [Display(Name ="Point")]
+
+        [Display(Name = "Point")]
         public int User_Point { get; set; }
+
         [Display(Name = "Cost center")]
         public string User_CostCenter { get; set; }
+
+        public int YearSetPoint { get; set; }
     }
 }

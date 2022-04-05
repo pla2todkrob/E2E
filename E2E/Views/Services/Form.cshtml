@@ -4,24 +4,27 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", enctype = "multipart/form-data" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated",id="SaveForm", enctype = "multipart/form-data" }))
 {
-<div class="modal-header">
-    @{
-        if (!string.IsNullOrEmpty(Model.Service_Key))
-        {
-            <h5 class="modal-title">@string.Format("Form: {0}", Model.Service_Key);</h5>
+    @Html.AntiForgeryToken()
+    <div class="modal-header">
+        @{
+            if (!string.IsNullOrEmpty(Model.Service_Key))
+            {
+                <h5 class="modal-title">@string.Format("Form: {0}", Model.Service_Key);</h5>
+            }
+            else
+            {
+                <h5 class="modal-title">Form</h5>
+            }
         }
-        else
-        {
-            <h5 class="modal-title">Form</h5>
-        }
-    }
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <div class="modal-body">
+        @Html.HiddenFor(m => m.Service_Id)
+        @Html.HiddenFor(m => m.Service_Key)
         <div class="form-row">
             <div class="form-group col-12">
                 @Html.LabelFor(m => m.Service_Subject)
@@ -29,7 +32,7 @@
             </div>
             <div class="form-group col-lg-6">
                 @Html.LabelFor(m => m.Service_Description)
-                @Html.TextAreaFor(m => m.Service_Description, new { @class = "form-control", required = "required", rows = "4" })
+                @Html.TextAreaFor(m => m.Service_Description, new { @class = "form-control", required = "required", rows = "6" })
             </div>
             <div class="form-group col-lg-6">
                 <div class="form-row">
@@ -41,9 +44,11 @@
                         @Html.LabelFor(m => m.User_Id)
                         @Html.DropDownListFor(m => m.User_Id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
                     </div>
+                    <div class="col-md-6 col-lg-12 col-xl-6">
+                        @Html.LabelFor(m => m.Priority_Id)
+                        @Html.DropDownListFor(m => m.Priority_Id, new SelectList(ViewBag.PriorityList, "Value", "Text"), "Select Priority", new { @class = "form-control", required = "required" })
+                    </div>
                 </div>
-
-
             </div>
         </div>
     </div>

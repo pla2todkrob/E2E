@@ -173,7 +173,6 @@
     <Compile Include="Controllers\ConfigurationsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
-    <Compile Include="Controllers\SelectController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -227,6 +226,10 @@
     <Content Include="Asset\Master.js" />
     <Content Include="Asset\Master.min.js">
       <DependentUpon>Master.js</DependentUpon>
+    </Content>
+    <Content Include="Asset\Service.js" />
+    <Content Include="Asset\Service.min.js">
+      <DependentUpon>Service.js</DependentUpon>
     </Content>
     <Content Include="Asset\Topic.js" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -734,6 +737,8 @@
     <Content Include="Views\Masters\Grades_Detail.cshtml" />
     <Content Include="Views\Topics\Boards_Form.cshtml" />
     <Content Include="Views\Topics\Boards_Create.cshtml" />
+    <Content Include="Views\Services\Form.cshtml" />
+    <Content Include="Views\Services\Index_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

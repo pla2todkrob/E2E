@@ -22,10 +22,12 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         public ActionResult Departments_Table()
         {
             return View(data.Department_GetAllView());
         }
+
         public ActionResult Departments_Form(Guid? id)
         {
             ViewBag.PlantList = data.SelectListItems_Plant();
@@ -38,7 +40,6 @@ namespace E2E.Controllers
                 master_Departments = data.Department_Get(id.Value);
                 isNew = false;
                 ViewBag.DivisionsList = data.SelectListItems_Division(master_Departments.Master_Divisions.Plant_Id);
-
             }
 
             ViewBag.IsNew = isNew;
@@ -129,6 +130,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Departments_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -167,14 +169,17 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Divisions()
         {
             return View();
         }
+
         public ActionResult Divisions_Table()
         {
             return View(data.Division_GetAllView());
         }
+
         public ActionResult Divisions_Form(Guid? id)
         {
             ViewBag.PlantList = data.SelectListItems_Plant();
@@ -275,6 +280,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Divisions_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -313,10 +319,12 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Grades()
         {
             return View();
         }
+
         public ActionResult Grades_Form(Guid? id)
         {
             ViewBag.LineWorkList = data.SelectListItems_LineWork();
@@ -344,8 +352,6 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                       
-
                         if (data.Grade_Save(model))
                         {
                             scope.Complete();
@@ -419,10 +425,12 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Grades_Table()
         {
             return View(data.Grades_GetAllView());
         }
+
         public ActionResult Grades_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -430,7 +438,6 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-
                     clsSaveResult clsSaveResult = data.Grades_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -462,6 +469,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Index()
         {
             return RedirectToAction("LineWorks");
@@ -578,10 +586,12 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult LineWorks_Table()
         {
             return View(data.LineWorks_GetAll());
         }
+
         public ActionResult LineWorks_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -589,7 +599,6 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-
                     clsSaveResult clsSaveResult = data.Lineworks_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -621,6 +630,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Plants()
         {
             return View();
@@ -724,6 +734,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Plants_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -731,7 +742,6 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-
                     clsSaveResult clsSaveResult = data.Plants_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -763,14 +773,17 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Plants_Table()
         {
             return View(data.Plant_GetAll());
         }
+
         public ActionResult Processes()
         {
             return View();
         }
+
         public ActionResult Processes_Table()
         {
             return View(data.Process_GetAllView());
@@ -782,7 +795,6 @@ namespace E2E.Controllers
             ViewBag.DivisionsList = new List<SelectListItem>();
             ViewBag.DepartmentsList = new List<SelectListItem>();
             ViewBag.SectionsList = new List<SelectListItem>();
-
 
             bool isNew = true;
             Master_Processes master_Processes = new Master_Processes();
@@ -892,7 +904,6 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-
                     clsSaveResult clsSaveResult = data.Process_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -929,6 +940,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         public ActionResult Sections_Table()
         {
             return View(data.Section_GetAllView());
@@ -940,7 +952,6 @@ namespace E2E.Controllers
             ViewBag.DepartmentsList = new List<SelectListItem>();
             ViewBag.DivisionsList = new List<SelectListItem>();
 
-
             bool isNew = true;
             Master_Sections master_Sections = new Master_Sections();
             if (id.HasValue)
@@ -949,7 +960,6 @@ namespace E2E.Controllers
                 isNew = false;
                 ViewBag.DepartmentsList = data.SelectListItems_Department(master_Sections.Master_Departments.Division_Id);
                 ViewBag.DivisionsList = data.SelectListItems_Division(master_Sections.Master_Departments.Master_Divisions.Plant_Id);
-
             }
 
             ViewBag.IsNew = isNew;
@@ -1048,7 +1058,6 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-
                     clsSaveResult clsSaveResult = data.Section_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -1085,6 +1094,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         public ActionResult Users_Form(Guid? id)
         {
             ViewBag.RoleList = data.SelectListItems_Role();
@@ -1193,6 +1203,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Users_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -1200,7 +1211,6 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-
                     clsSaveResult clsSaveResult = data.User_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
@@ -1232,6 +1242,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Users_Table()
         {
             return View(data.User_GetAllView());
@@ -1245,7 +1256,6 @@ namespace E2E.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Users_UploadExcel()
         {
-
             var files = Request.Files;
             clsSwal swal = new clsSwal();
 
@@ -1289,6 +1299,7 @@ namespace E2E.Controllers
                                         userDetails.Users.Process_Id = data.Process_GetId(userDetails.Users.Section_Id.Value, sheet.Cells[row, 17].Text, true);
                                         userDetails.Users.Role_Id = data.Role_UserId();
                                         userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
+                                        userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
                                         if (data.User_Save(userDetails))
                                         {
                                             doComplete = true;
@@ -1355,6 +1366,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Users_GetSelectGrades(Guid? id)
         {
             return Json(data.SelectListItems_Grade(id), JsonRequestBehavior.AllowGet);
@@ -1369,10 +1381,12 @@ namespace E2E.Controllers
         {
             return Json(data.SelectListItems_Department(id), JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Users_GetSelectSections(Guid? id)
         {
             return Json(data.SelectListItems_Section(id), JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Users_GetSelectProcesses(Guid? id)
         {
             return Json(data.SelectListItems_Process(id), JsonRequestBehavior.AllowGet);
