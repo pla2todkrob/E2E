@@ -30,10 +30,15 @@ namespace E2E.Controllers
                 
             return View();
         }
-
-        public ActionResult Boards_Table(bool val)
+        bool val = new bool();
+        public ActionResult Boards_Table(int res)
         {
-            
+        
+            if (res==1)
+            {
+                val = true;
+            }
+    
             Guid id = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.Usercode = db.Users
                 .Where(w => w.User_Id == id)
@@ -41,7 +46,7 @@ namespace E2E.Controllers
                 .FirstOrDefault();
 
             Topics topics = new Topics();
-            var sql = db.Topics.Where(w => w.Topic_Pin == val).ToList();
+            var sql = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o=>o.Create).ToList();
             if (val)
             {
                 foreach (var item in sql.Where(w=>w.Topic_Pin_EndDate < DateTime.Today))
@@ -51,9 +56,12 @@ namespace E2E.Controllers
                     db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
                 }
-                sql = sql.Where(w => w.Topic_Pin_EndDate > DateTime.Today).ToList();
+                sql = sql.Where(w => w.Topic_Pin_EndDate >= DateTime.Today).OrderByDescending(o=>o.Create).ToList();
             }
-           
+            if (res == 3)
+            {
+                sql = db.Topics.OrderByDescending(o => o.Count_View).ToList();
+            }
 
             return View(sql);
         }
@@ -156,12 +164,52 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult Delete_Boards_Create(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.Board_Delete(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ลบข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public ActionResult Boards_Form(Guid? id)
         {
 
 
             bool isAdmin = true;
-            Topics topics = new Topics();
+            clsTopic clsTopic = new clsTopic();
 
             if (id.HasValue)
             {
@@ -173,14 +221,127 @@ namespace E2E.Controllers
                     }
                 }
 
-                topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
+                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
+                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id).OrderBy(o=>o.Create).ToList();
                 isAdmin = false;
             }
 
             ViewBag.IsAdmin = isAdmin;
 
-            return View(topics);
+            return View(clsTopic);
         }
 
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Form(clsTopic model)
+        {
+            string comment = Request.Form["TextArea1"];
+            string a = model.Topics.Topic_Id.ToString();
+
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Board_Reply_Save(model, comment))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Boards_Comment(Guid? id)
+        {
+            clsTopic clsTopic = new clsTopic();
+
+            if (id.HasValue)
+            {
+                clsTopic.topicComments_NoList = db.TopicComments.Where(w => w.TopicComment_Id == id).FirstOrDefault();
+
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    if (data.Board_Reply_Update(clsTopic))
+                    {
+                        scope.Complete();
+                    }
+                }
+            }
+
+            return View(clsTopic);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Comment(clsTopic model)
+        {
+            return View();
+        }
     }
 }

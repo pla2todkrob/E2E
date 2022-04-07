@@ -9,6 +9,7 @@ namespace E2E.Models.Views
     public class clsTopic
     {
         public Topics Topics { get; set; }
+        public TopicComments topicComments_NoList { get; set; }
         public List<TopicComments> TopicComments { get; set; }
         public List<TopicFiles> TopicFiles { get; set; }
         public List<TopicGalleries> TopicGalleries { get; set; }
