@@ -17,9 +17,15 @@
             return false;
         });
 
+        $(document).on('submit','#SaveReply',  function () {
+            callSubmit('@Url.Action("Boards_Form", "Topics")');
+            return false;
+        });
+
         async function reloadTable() {
-            await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { val=true})', true, 0);
-            await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { val=false})', true, 0, '#datalist2');
+            await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=1})', true, 0);//true
+            await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})', true, 0, '#datalist2');//false
+               await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=3})', true, 0, '#datalist3');//top
         }
     </script>
 }
@@ -34,34 +40,40 @@
     </nav>
 }
 
-<div class="card shadow">
+<div class="d-flex mb-3">
+    <div class="ml-auto">
+        <button class="btn btn-secondary" onclick="callModalTopics('@Url.Action("Boards_Create","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Add</button>
+    </div>
+</div>
+
+<div class="card mb-5">
     <div class="card-header">
-        <div class="d-flex">
-            <div class="mr-auto"></div>
-            <div class="ml-auto">
-                <button class="btn btn-secondary" onclick="callModalTopics('@Url.Action("Boards_Create","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Add</button>
-            </div>
-        </div>
+        <h5 class="card-title">Announce</h5>
     </div>
     <div class="card-body">
-        <div class="card mb-5">
-            <div class="card-header">
-                <h5 class="card-title">Announce</h5>
-            </div>
-            <div class="card-body">
-                <div class="row" id="datalist">
-                </div>
-            </div>
-        </div>
+        <div class="row" id="datalist"></div>
+    </div>
+</div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Topic</h5>
-            </div>
-            <div class="card-body">
-                <div class="row" id="datalist2">
-                </div>
-            </div>
+
+
+<div class="card mb-5">
+    <div class="card-header">
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Topic</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Top</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">  <div class="row" id="datalist2"> </div></div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab"> <div class="row" id="datalist3"> </div></div>
+          
         </div>
     </div>
 </div>

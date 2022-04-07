@@ -1,4 +1,5 @@
 ﻿using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +66,131 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public bool Board_Delete(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Topics topics = new Topics();
+                topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Board_Reply_Save(clsTopic model, string comment)
+        {
+            try
+            {
+                bool res = new bool();
+                Topics topics = new Topics();
+                topics = db.Topics.Where(w => w.Topic_Id == model.Topics.Topic_Id).FirstOrDefault();
+
+                if (topics != null)
+                {
+                   res = Board_Reply_Insert(model.Topics, comment);
+                   res = Board_CountComment_Update(model.Topics);
+                  
+                }
+                else
+                {
+              
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Board_Reply_Insert(Topics model,string comment)
+        {
+            try
+            {
+
+                bool res = new bool();
+                TopicComments topicComments = new TopicComments();
+                topicComments.Topic_Id = model.Topic_Id;
+                topicComments.Comment_Content = comment;
+                topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+
+                db.TopicComments.Add(topicComments);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool Board_Reply_Update(clsTopic model)
+        {
+            try
+            {
+
+                bool res = new bool();
+                TopicComments topicComments = new TopicComments();
+    
+        
+                topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+
+                db.TopicComments.Add(topicComments);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        protected bool Board_CountComment_Update(Topics model)
+        {
+            try
+            {
+                bool res = new bool();
+                Topics topics = new Topics();
+                topics = db.Topics
+                    .Where(w => w.Topic_Id == model.Topic_Id)
+                    .FirstOrDefault();
+
+                topics.Count_Comment += 1;
+                topics.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }
