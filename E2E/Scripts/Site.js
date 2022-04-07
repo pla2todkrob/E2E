@@ -17,6 +17,11 @@
             }
         }
     });
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
 });
 
 function AdjustMenu() {
@@ -27,7 +32,6 @@ function AdjustMenu() {
 }
 
 function callSpin(active) {
-
     var opts = {
         lines: 13, // The number of lines to draw
         length: 38, // The length of each line
@@ -66,40 +70,51 @@ $(document).ajaxStart(function () {
     callSpin(false);
 });
 
-function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blockId = '#datalist') {
+async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
             $(blockId).html(res);
             $(blockId).find('table').each(function () {
+                var table;
                 if (hasDate && hasButton) {
-                    $(this).DataTable({
+                    table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }, { "targets": 0, "orderable": false }],
-                        "scrollX": true
+                        "scrollX": true,
+                        "autoWidth": false,
+                        responsive: true
                     });
                 }
                 else if (hasDate) {
-                    $(this).DataTable({
+                    table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
-                        "scrollX": true
+                        "scrollX": true,
+                        "autoWidth": false,
+                        responsive: true
                     });
                 }
                 else if (hasButton) {
-                    $(this).DataTable({
+                    table = $(this).DataTable({
                         "columnDefs": [{ "targets": 0, "orderable": false }],
-                        "scrollX": true
+                        "scrollX": true,
+                        "autoWidth": false,
+                        responsive: true
                     });
                 }
                 else {
-                    $(this).DataTable({
-                        "scrollX": true
+                    table = $(this).DataTable({
+                        "scrollX": true,
+                        "autoWidth": false,
+                        responsive: true
                     });
                 }
+
+                table.columns.adjust();
             });
         }
     });
-    return false;
+    return true;
 }
 
 function callModal(urlAjax, bigSize = false) {
@@ -127,32 +142,37 @@ function callModal(urlAjax, bigSize = false) {
     return false;
 }
 
-function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
+async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
             $(blockId).html(res);
-            $(blockId).find('table').each(function () {
-
+            $(blockId).find('table').each(function (i, v) {
+                var table;
                 if (hasDate) {
-                    $(this).DataTable({
+                    table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
                         "ordering": false,
-                        "scrollX": true
+                        "scrollX": true,
+                        "autoWidth": false,
+                        responsive: true
                     });
                 }
-
-                else {
-                    $(this).DataTable({
+                else
+                {
+                    table = $(this).DataTable({
                         "ordering": false,
-                        "scrollX": true
+                        "scrollX": true,
+                        "autoWidth": false,
+                        responsive: true
                     });
                 }
+                table.columns.adjust().draw();
             });
         }
     });
-    return false;
+    return true;
 }
 
 function callSubmit(urlAjax, reloadPage = false) {
@@ -230,8 +250,7 @@ function callFileSubmit(urlAjax, fileId, reloadPage = false) {
     return false;
 }
 
-
-function callDeleteItem(urlAjax,reloadPage = false) {
+function callDeleteItem(urlAjax, reloadPage = false) {
     swal({
         title: "Are you sure?",
         text: "Once you delete this information, you cannot recover it.",

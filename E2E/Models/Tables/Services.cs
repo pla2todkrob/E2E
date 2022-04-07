@@ -10,6 +10,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Service_Id { get; set; }
+
         public string Service_Key { get; set; }
 
         public string Service_Subject { get; set; }
@@ -31,6 +32,8 @@ namespace E2E.Models.Tables
         public virtual System_Statuses System_Statuses { get; set; }
         public Guid Priority_Id { get; set; }
         public virtual System_Priorities System_Priorities { get; set; }
+        public DateTime Service_DueDate { get; set; }
+
         public Services()
         {
             Service_Id = Guid.NewGuid();
