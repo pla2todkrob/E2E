@@ -185,6 +185,7 @@
     <Compile Include="Models\clsManageMaster.cs" />
     <Compile Include="Models\clsManageService.cs" />
     <Compile Include="Models\clsManageTopic.cs" />
+    <Compile Include="Models\clsServiceFTP.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
     <Compile Include="Models\Tables\Master_LineWorks.cs" />

@@ -159,8 +159,7 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
                         responsive: true
                     });
                 }
-                else
-                {
+                else {
                     table = $(this).DataTable({
                         "ordering": false,
                         "scrollX": true,
