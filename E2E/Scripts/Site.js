@@ -22,6 +22,10 @@
         $($.fn.dataTable.tables(true)).DataTable()
             .columns.adjust();
     });
+    $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
 });
 
 function AdjustMenu() {
@@ -155,7 +159,6 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
                         "ordering": false,
                         "scrollX": true,
-                        "autoWidth": false,
                         responsive: true
                     });
                 }
@@ -163,7 +166,6 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
                     table = $(this).DataTable({
                         "ordering": false,
                         "scrollX": true,
-                        "autoWidth": false,
                         responsive: true
                     });
                 }
@@ -177,46 +179,6 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
 function callSubmit(urlAjax, reloadPage = false) {
     var form = $('form')[0];
     var fd = new FormData(form);
-
-    $.ajax({
-        url: urlAjax,
-        method: "POST",
-        async: true,
-        data: fd,
-        processData: false,
-        contentType: false,
-        traditional: true,
-        success: function (res) {
-            swal({
-                title: res.title,
-                text: res.text,
-                icon: res.icon,
-                button: res.button,
-                dangerMode: res.dangerMode
-            });
-            if (res.icon == 'success') {
-                $('#modalArea').modal('hide');
-                if (reloadPage) {
-                    location.reload();
-                }
-                else {
-                    reloadTable();
-                }
-            }
-        }
-    });
-
-    return false;
-}
-
-function callFileSubmit(urlAjax, fileId, reloadPage = false) {
-    var _files = document.getElementById(fileId);
-    var form = $('form')[0];
-    var fd = new FormData(form);
-
-    for (var i = 0; i < _files.files.length; i++) {
-        fd.append(_files.files[i].name, _files.files[i]);
-    }
 
     $.ajax({
         url: urlAjax,

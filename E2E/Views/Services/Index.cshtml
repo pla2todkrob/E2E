@@ -12,7 +12,8 @@
 
         });
 
-        $(document).on('submit','#SaveForm',  function () {
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
             callSubmit('@Url.Action("Form", "Services")');
             return false;
         });
@@ -35,37 +36,31 @@
         </ol>
     </nav>
 }
-
-<div class="card shadow">
-    <div class="card-header">
-        <div class="d-flex">
-            <div class="mr-auto"></div>
-            <div class="ml-auto">
-                <button class="btn btn-secondary" onclick="callModalAddService('@Url.Action("Form","Services")','modal-xl')"><i class="fa fa-plus"></i>&nbsp;Add</button>
-            </div>
-        </div>
+<div class="d-flex mb-3">
+    <div class="mr-auto"></div>
+    <div class="ml-auto">
+        <button class="btn btn-secondary" onclick="callModalAddService('@Url.Action("Form","Services")','modal-xl')"><i class="fa fa-plus"></i>&nbsp;Add</button>
     </div>
-    <div class="card-body">
-        @{
-            if (ViewBag.AuthorizeIndex != 3)
-            {
-                <div class="card shadow mb-5">
-                    <div class="card-header">
-                        <h5 class="card-title">Waiting Commit</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row" id="waitingCommit"></div>
-                    </div>
-                </div>
-            }
-        }
-        <div class="card shadow">
+</div>
+
+@{
+    if (ViewBag.AuthorizeIndex != 3)
+    {
+        <div class="card shadow mb-5">
             <div class="card-header">
-                <h5 class="card-title">Waiting Action</h5>
+                <h5 class="card-title">Waiting Commit</h5>
             </div>
             <div class="card-body">
-                <div class="row" id="waitingAction"></div>
+                <div class="row" id="waitingCommit"></div>
             </div>
         </div>
+    }
+}
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="card-title">Waiting Action</h5>
+    </div>
+    <div class="card-body">
+        <div class="row" id="waitingAction"></div>
     </div>
 </div>

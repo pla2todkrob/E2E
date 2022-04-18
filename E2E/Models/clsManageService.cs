@@ -11,6 +11,7 @@ namespace E2E.Models
     public class clsManageService
     {
         private clsContext db = new clsContext();
+        private clsServiceFTP ftp = new clsServiceFTP();
 
         public List<Services> Services_GetAll(bool val)
         {
@@ -56,7 +57,7 @@ namespace E2E.Models
                 .Where(w => statusIds.Contains(w.Status_Id));
         }
 
-        public bool Services_Save(Services model)
+        public bool Services_Save(Services model, HttpFileCollectionBase files)
         {
             try
             {
@@ -69,11 +70,11 @@ namespace E2E.Models
                     model.Status_Id = services.Status_Id;
                     model.Service_Key = services.Service_Key;
                     model.RequiredApprove = services.RequiredApprove;
-                    res = Services_Update(model);
+                    res = Services_Update(model, files);
                 }
                 else
                 {
-                    res = Services_Insert(model);
+                    res = Services_Insert(model, files);
                 }
 
                 return res;
@@ -84,7 +85,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Insert(Services model)
+        public bool Services_Insert(Services model, HttpFileCollectionBase files)
         {
             try
             {
@@ -105,6 +106,16 @@ namespace E2E.Models
                 db.Entry(model).State = System.Data.Entity.EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
+                    if (files.Count > 0)
+                    {
+                        for (int i = 0; i < files.Count; i++)
+                        {
+                            ServiceFiles serviceFiles = new ServiceFiles();
+                            serviceFiles.Service_Id = model.Service_Id;
+                            serviceFiles.ServiceFile_Name = files[i].FileName;
+                            serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString();
+                        }
+                    }
                     res = true;
                 }
 
@@ -116,7 +127,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Update(Services model)
+        public bool Services_Update(Services model, HttpFileCollectionBase files)
         {
             try
             {

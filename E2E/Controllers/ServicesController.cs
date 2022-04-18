@@ -66,7 +66,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.Services_Save(model))
+                        if (data.Services_Save(model, Request.Files))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
