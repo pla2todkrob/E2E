@@ -331,5 +331,101 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult Boards_Reply(Guid id, Guid? comment_id)
+        {
+            TopicComments topicComments = new TopicComments();
+            topicComments.Topic_Id = id;
+            if (comment_id.HasValue)
+            {
+                topicComments = db.TopicComments.Find(comment_id);
+            }
+
+            return View(topicComments);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Reply(TopicComments model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Board_Comment_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
     }
 }
