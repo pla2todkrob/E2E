@@ -10,10 +10,13 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid TopicGallery_Id { get; set; }
+
         public Guid Topic_Id { get; set; }
         public string TopicGallery_Original { get; set; }
         public string TopicGallery_Thumbnail { get; set; }
         public string TopicGallery_Name { get; set; }
+        public string TopicGallery_Extension { get; set; }
+
         public TopicGalleries()
         {
             TopicGallery_Id = Guid.NewGuid();

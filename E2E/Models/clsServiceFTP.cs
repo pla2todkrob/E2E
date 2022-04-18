@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -12,12 +13,46 @@ namespace E2E.Models
         private string url = ConfigurationManager.AppSettings["FTP_Url"];
         private string user = ConfigurationManager.AppSettings["FTP_User"];
         private string pass = ConfigurationManager.AppSettings["FTP_Password"];
+        private string dir = ConfigurationManager.AppSettings["FTP_Dir"];
+        private string urlDomain = ConfigurationManager.AppSettings["UrlDomain"];
 
         public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
             try
             {
-                return "";
+                string res = string.Empty;
+                string finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = filePost.FileName;
+                }
+
+                fileName = string.Concat(finalPath, fileName);
+
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
+                request.Method = WebRequestMethods.Ftp.UploadFile;
+                request.Credentials = new NetworkCredential(user, pass);
+
+                byte[] bytes = new byte[filePost.ContentLength];
+                using (Stream fileStream = filePost.InputStream)
+                {
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        fileStream.CopyTo(memory);
+                        bytes = memory.ToArray();
+                    }
+                }
+
+                using (Stream reqStream = request.GetRequestStream())
+                {
+                    reqStream.Write(bytes, 0, bytes.Length);
+                    if (reqStream.CanWrite)
+                    {
+                        res = fileName.Replace(url, urlDomain);
+                    }
+                }
+
+                return res;
             }
             catch (Exception)
             {
@@ -98,41 +133,46 @@ namespace E2E.Models
             }
         }
 
-        private bool CheckDirectory(string fullDir)
+        private string GetFinallyPath(string fullDir)
         {
-            bool res = new bool();
+            string res = string.Empty;
         StartMethod:
-            string dir = url;
-
+            string path = url;
             try
             {
                 string[] splitDir = fullDir.Trim().Split('/');
 
                 foreach (var item in splitDir)
                 {
-                    dir += string.Concat(item, "/");
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(dir));
-                    request.Method = WebRequestMethods.Ftp.ListDirectory;
-                    request.Credentials = new NetworkCredential(user, pass);
-
-                    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                    if (!string.IsNullOrEmpty(item))
                     {
-                        if (true)
+                        path += string.Concat(item, "/");
+                        FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
+                        request.Method = WebRequestMethods.Ftp.ListDirectory;
+                        request.Credentials = new NetworkCredential(user, pass);
+
+                        using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                         {
-                            res = true;
+                            if (response.StatusCode == FtpStatusCode.DataAlreadyOpen || response.StatusCode == FtpStatusCode.OpeningData)
+                            {
+                                res = path;
+                            }
                         }
                     }
                 }
+                return res;
             }
             catch (Exception)
             {
-                if (CreateDirectory(dir))
+                if (CreateDirectory(path))
                 {
                     goto StartMethod;
                 }
+                else
+                {
+                    throw;
+                }
             }
-
-            return res;
         }
 
         private bool CreateDirectory(string path)
@@ -140,7 +180,16 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
+                request.Method = WebRequestMethods.Ftp.MakeDirectory;
+                request.Credentials = new NetworkCredential(user, pass);
+                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                {
+                    if (response.StatusCode == FtpStatusCode.PathnameCreated)
+                    {
+                        res = true;
+                    }
+                }
                 return res;
             }
             catch (Exception)

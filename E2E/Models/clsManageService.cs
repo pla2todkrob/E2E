@@ -2,6 +2,7 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -89,7 +90,7 @@ namespace E2E.Models
         {
             try
             {
-                if (model.User_Id == Guid.Empty)
+                if (!model.User_Id.HasValue)
                 {
                     model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 }
@@ -104,18 +105,23 @@ namespace E2E.Models
                     .Select(s => s.Status_Id)
                     .FirstOrDefault();
                 db.Entry(model).State = System.Data.Entity.EntityState.Added;
+
+                if (files.Count > 0)
+                {
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        ServiceFiles serviceFiles = new ServiceFiles();
+                        serviceFiles.Service_Id = model.Service_Id;
+                        serviceFiles.ServiceFile_Name = files[i].FileName;
+                        string dir = string.Format("Service/{0}/", model.Service_Key);
+                        serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
+                        serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
+                        db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
+                    }
+                }
+
                 if (db.SaveChanges() > 0)
                 {
-                    if (files.Count > 0)
-                    {
-                        for (int i = 0; i < files.Count; i++)
-                        {
-                            ServiceFiles serviceFiles = new ServiceFiles();
-                            serviceFiles.Service_Id = model.Service_Id;
-                            serviceFiles.ServiceFile_Name = files[i].FileName;
-                            serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString("", files[i]);
-                        }
-                    }
                     res = true;
                 }
 
