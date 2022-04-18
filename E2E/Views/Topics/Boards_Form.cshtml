@@ -17,9 +17,11 @@
 }
 @section scripts{
     <script src="~/Asset/Topic.min.js"></script>
+
     <script>
-        $(document).on('submit','#SaveReply',  function () {
-            callSubmit_Reply('@Url.Action("Boards_Form", "Topics")');
+        $(document).on('submit', '#SaveComment', function (e) {
+            e.preventDefault();
+            callSubmit_Reply('@Url.Action("Boards_Comment", "Topics")');
             return false;
         });
     </script>
@@ -44,19 +46,12 @@
                 @Html.DisplayFor(m => m.Topics.Create)
             </div>
             <div class="ml-auto">
-                <button class="btn btn-primary" onclick="callModal('@Url.Action("Boards_Comment","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Comment</button>
+                <button class="btn btn-primary" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',true)"><i class="fa fa-plus"></i>&nbsp;Comment</button>
             </div>
         </div>
     </div>
 </div>
 
-
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveReply", @class = "was-validated" }))
-{
-    @Html.AntiForgeryToken()
-
-
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
     @Html.HiddenFor(m => m.Topics.Topic_Id)
 
     <div class="card">
@@ -82,7 +77,14 @@
                                     @Html.DisplayFor(i => item.Create)
                                 </div>
                                 <div class="ml-auto">
-                                    <button class="btn btn-primary" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-plus"></i>&nbsp;Reply</button>
+                                    <button class="btn btn-primary" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Reply</button>
+                                    @{
+                                        if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                        {
+                                            <button class="btn btn-primary" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-plus"></i>&nbsp;Edit</button>
+                                        }
+                                    }
+
                                 </div>
                             </div>
                         </div>
@@ -136,7 +138,7 @@
         </div>
     </div>
 
-}
+
 
 <div class="mr-auto mt-3">
     <button class="btn btn-secondary" onclick="location.href='@Url.Action("Boards", "Topics")'"><i class="fa fa-chevron-left"></i>&nbsp;</button>

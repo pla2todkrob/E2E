@@ -86,23 +86,20 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Reply_Save(clsTopic model, string comment)
+        public bool Board_Comment_Save(TopicComments model)
         {
             try
             {
                 bool res = new bool();
-                Topics topics = new Topics();
-                topics = db.Topics.Where(w => w.Topic_Id == model.Topics.Topic_Id).FirstOrDefault();
-
-                if (topics != null)
+                TopicComments topicComments = new TopicComments();
+                topicComments = db.TopicComments.Where(w => w.TopicComment_Id == model.TopicComment_Id).FirstOrDefault();
+                if (topicComments!= null)
                 {
-                   res = Board_Reply_Insert(model.Topics, comment);
-                   res = Board_CountComment_Update(model.Topics);
-                  
+                  res = Board_Comment_Update(model);
                 }
                 else
                 {
-              
+                    res = Board_Comment_Insert(model);
                 }
 
                 return res;
@@ -113,7 +110,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Reply_Insert(Topics model,string comment)
+        public bool Board_Comment_Insert(TopicComments model)
         {
             try
             {
@@ -121,7 +118,7 @@ namespace E2E.Models
                 bool res = new bool();
                 TopicComments topicComments = new TopicComments();
                 topicComments.Topic_Id = model.Topic_Id;
-                topicComments.Comment_Content = comment;
+                topicComments.Comment_Content = model.Comment_Content;
                 topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
 
@@ -140,19 +137,21 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Reply_Update(clsTopic model)
+        public bool Board_Comment_Update(TopicComments model)
         {
             try
             {
 
                 bool res = new bool();
                 TopicComments topicComments = new TopicComments();
-    
-        
-                topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                topicComments = db.TopicComments
+                    .Where(w => w.TopicComment_Id == model.TopicComment_Id)
+                    .FirstOrDefault();
 
+                topicComments.Comment_Content = model.Comment_Content;
+                topicComments.Update = DateTime.Now;
 
-                db.TopicComments.Add(topicComments);
+     
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -160,14 +159,14 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                 throw;
             }
         }
 
-        protected bool Board_CountComment_Update(Topics model)
+        protected bool Board_CountComment_Update(TopicComments model)
         {
             try
             {

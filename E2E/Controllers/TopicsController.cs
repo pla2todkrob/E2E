@@ -60,7 +60,7 @@ namespace E2E.Controllers
             }
             if (res == 3)
             {
-                sql = db.Topics.OrderByDescending(o => o.Count_View).ToList();
+                sql = db.Topics.OrderByDescending(o => o.Count_View).Take(10).ToList();
             }
 
             return View(sql);
@@ -207,6 +207,11 @@ namespace E2E.Controllers
         public ActionResult Boards_Form(Guid? id)
         {
 
+            Guid id_emp = Guid.Parse(HttpContext.User.Identity.Name);
+            ViewBag.Usercode = db.Users
+                .Where(w => w.User_Id == id_emp)
+                .Select(s => s.User_Code)
+                .FirstOrDefault();
 
             bool isAdmin = true;
             clsTopic clsTopic = new clsTopic();
@@ -231,20 +236,29 @@ namespace E2E.Controllers
             return View(clsTopic);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Form(clsTopic model)
+        public ActionResult Boards_Comment(Guid id, Guid? comment_id)
         {
-            string comment = Request.Form["TextArea1"];
-            string a = model.Topics.Topic_Id.ToString();
+            TopicComments topicComments = new TopicComments();
+            topicComments.Topic_Id = id;
+            if (comment_id.HasValue)
+            {
+                topicComments = db.TopicComments.Find(comment_id);
+            }
 
+            return View(topicComments);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Comment(TopicComments model)
+        {
             clsSwal swal = new clsSwal();
-            if (ModelState.IsValid)
+            if (ModelState.IsValid) 
             {
                 using (TransactionScope scope = new TransactionScope())
                 {
                     try
                     {
-                        if (data.Board_Reply_Save(model, comment))
+                        if (data.Board_Comment_Save(model))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -316,32 +330,6 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult Boards_Comment(Guid? id)
-        {
-            clsTopic clsTopic = new clsTopic();
-
-            if (id.HasValue)
-            {
-                clsTopic.topicComments_NoList = db.TopicComments.Where(w => w.TopicComment_Id == id).FirstOrDefault();
-
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    if (data.Board_Reply_Update(clsTopic))
-                    {
-                        scope.Complete();
-                    }
-                }
-            }
-
-            return View(clsTopic);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Comment(clsTopic model)
-        {
-            return View();
         }
     }
 }
