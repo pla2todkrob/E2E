@@ -113,7 +113,7 @@ namespace E2E.Models
                             ServiceFiles serviceFiles = new ServiceFiles();
                             serviceFiles.Service_Id = model.Service_Id;
                             serviceFiles.ServiceFile_Name = files[i].FileName;
-                            serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString();
+                            serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString("", files[i]);
                         }
                     }
                     res = true;
