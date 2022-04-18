@@ -17,7 +17,7 @@ namespace E2E.Models.Tables
         public string Service_Description { get; set; }
         public Guid? Department_Id { get; set; }
         public virtual Master_Departments Master_Departments { get; set; }
-        public Guid User_Id { get; set; }
+        public Guid? User_Id { get; set; }
         public virtual Users Users { get; set; }
         public Guid? Ref_Service_Id { get; set; }
         public DateTime Create { get; set; }
@@ -32,7 +32,7 @@ namespace E2E.Models.Tables
         public virtual System_Statuses System_Statuses { get; set; }
         public Guid Priority_Id { get; set; }
         public virtual System_Priorities System_Priorities { get; set; }
-        public DateTime Service_DueDate { get; set; }
+        public DateTime? Service_DueDate { get; set; }
 
         public Services()
         {
