@@ -17,11 +17,6 @@
             return false;
         });
 
-        $(document).on('submit','#SaveReply',  function () {
-            callSubmit('@Url.Action("Boards_Form", "Topics")');
-            return false;
-        });
-
         async function reloadTable() {
             await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=1})', true, 0);//true
             await callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})', true, 0, '#datalist2');//false

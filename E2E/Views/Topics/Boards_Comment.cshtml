@@ -1,10 +1,10 @@
-﻿@model E2E.Models.Views.clsTopic
+﻿@model E2E.Models.Tables.TopicComments
 
 @{
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveForm", @class = "was-validated" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveComment", @class = "was-validated" }))
 {
     @Html.AntiForgeryToken()
 
@@ -16,18 +16,19 @@
     </div>
     <div class="modal-body">
         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-        @Html.HiddenFor(m => m.topicComments_NoList.TopicComment_Id)
+        @Html.HiddenFor(m => m.TopicComment_Id)
+        @Html.HiddenFor(m => m.Topic_Id)
         <div class="form-row">
 
             <div class="form-group col-md-12">
-                @Html.LabelFor(m => m.topicComments_NoList.Comment_Content)
-                @Html.TextAreaFor(m => Model.topicComments_NoList.Comment_Content, new { @class = "form-control", required = "required" , rows=8})
+                @Html.LabelFor(m => m.Comment_Content)
+                @Html.TextAreaFor(m => m.Comment_Content, new { @class = "form-control", required = "required", rows = 8 })
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.Topics.Topic_Id)})')">Delete</button>
+        <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.TopicComment_Id)})')">Delete</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Submits</button>
     </div>
 }
