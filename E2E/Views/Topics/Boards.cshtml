@@ -30,14 +30,13 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
             <li class="breadcrumb-item active">Topics</li>
-            <li class="breadcrumb-item active" aria-current="page">Board</li>
         </ol>
     </nav>
 }
 
 <div class="d-flex mb-3">
     <div class="ml-auto">
-        <button class="btn btn-secondary" onclick="callModalTopics('@Url.Action("Boards_Create","Topics")',true)"><i class="fa fa-plus"></i>&nbsp;Add</button>
+        <a class="btn btn-secondary" href="@Url.Action("Boards_Create","Topics")"><i class="fa fa-plus"></i>&nbsp;Add</a>
     </div>
 </div>
 

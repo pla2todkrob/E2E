@@ -18,6 +18,7 @@
                 });
             });
 
+
             $('#Topic_Pin').on('change', function () {
                 if ($(this).is(':checked')) {
                     $('#Topic_Pin_EndDate').attr('required', 'required');
@@ -26,12 +27,22 @@
                 }
             });
 
-            
+
             $('#modalArea').modal('show');
         }
 
     });
     return false;
+}
+
+function previewMultiple(event) {
+    $('#galImage').empty();
+    var saida = document.getElementById("fileImage");
+    var quantos = saida.files.length;
+    for (i = 0; i < quantos; i++) {
+        var urls = URL.createObjectURL(event.target.files[i]);
+        document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid">';
+    }
 }
 
 function callSubmit_Reply(urlAjax, reloadPage = false) {
