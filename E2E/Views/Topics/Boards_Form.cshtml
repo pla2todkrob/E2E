@@ -15,19 +15,30 @@
         </ol>
     </nav>
 }
+@section css{
+
+    <link href="~/Content/justifiedGallery.min.css" rel="stylesheet" />
+
+}
 @section scripts{
     <script src="~/Asset/Topic.min.js"></script>
+    <script src="~/Scripts/jquery.justifiedGallery.min.js"></script>
 
     <script>
+        $(function () {
+            $("#mygallery").justifiedGallery({
+                rowHeight: 200,
+                lastRow:'justify'
+            });
+        });
+
         $(document).on('submit', '#SaveComment', function (e) {
             e.preventDefault();
             callSubmit_Reply('@Url.Action("Boards_Comment", "Topics")');
             return false;
         });
-    </script>
 
-    <script>
-        $(document).on('submit', '#SaveReply', function (e) {
+$(document).on('submit', '#SaveReply', function (e) {
             e.preventDefault();
             callSubmit_Reply('@Url.Action("Boards_Reply", "Topics")');
             return false;
@@ -44,9 +55,23 @@
     </div>
     <div class="card-body">
         @Html.DisplayFor(m => m.Topics.Topic_Content)
-    </div>
+
+        <div id="mygallery" class="justified-gallery col-md-8">
+            @foreach (var img in Model.TopicGalleries)
+            {
+
+
+                <a href="@img.TopicGallery_Original">
+                    <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original" />
+                </a>
+                <!-- other images... -->
+
+            }
+        </div>
+        </div>
+
     <div class="card-footer">
-        <div class="row">
+        <div class="d-flex">
             <div class="mr-auto">
                 <span class="font-weight-bold">
                     @Html.DisplayNameFor(m => m.Topics.Create):
@@ -54,7 +79,7 @@
                 @Html.DisplayFor(m => m.Topics.Create)
             </div>
             <div class="ml-auto">
-                <button class="btn btn-primary" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',true)"><i class="fa fa-plus"></i>&nbsp;Comment</button>
+                <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',true)"><i class="fa fa-commenting-o"></i></button>@*comment*@
             </div>
         </div>
     </div>
@@ -85,11 +110,11 @@
                                 @Html.DisplayFor(i => item.Create)
                             </div>
                             <div class="ml-auto">
-                                <button class="btn btn-primary" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-plus"></i>&nbsp;Reply</button>
+                                <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
                                 @{
                                     if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
                                     {
-                                        <button class="btn btn-primary" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-plus"></i>&nbsp;Edit</button>
+                                        <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
                                     }
                                 }
 
@@ -119,6 +144,12 @@
                                         <span class="font-weight-bold"> @Html.DisplayNameFor(i => item2.Create):</span>
                                         @Html.DisplayFor(i => item2.Create)
                                     </div>
+                                    @{
+                                        if (string.Equals(item2.Users.User_Code, ViewBag.Usercode))
+                                        {
+                                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
+                                        }
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -130,26 +161,7 @@
         }
 
 
-
-        <div class="form-row mt-3">
-
-            <div class="form-group col-md-12">
-
-                <asp:Label runat="server" Text="Reply"></asp:Label>
-                <textarea id="TextArea1" name="TextArea1" rows="8" class="col-md-12" runat="server"></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary mb-3">Submit</button>
-        </div>
-
-
     </div>
-</div>
-
-
-
-<div class="mr-auto mt-3">
-    <button class="btn btn-secondary" onclick="location.href='@Url.Action("Boards", "Topics")'"><i class="fa fa-chevron-left"></i>&nbsp;</button>
 </div>
 
 

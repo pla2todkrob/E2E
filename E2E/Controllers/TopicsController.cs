@@ -16,6 +16,7 @@ namespace E2E.Controllers
     {
         private clsManageTopic data = new clsManageTopic();
         private clsContext db = new clsContext();
+        private clsServiceFTP ftp = new clsServiceFTP();
         // GET: Topics
         public ActionResult Index()
         {
@@ -88,9 +89,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-
-
-                        if (data.Board_Save(model))
+                        if (data.Board_Save(model, Request.Files))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -227,6 +226,7 @@ namespace E2E.Controllers
                 }
 
                 clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
                 clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id).OrderBy(o=>o.Create).ToList();
                 isAdmin = false;
             }
@@ -332,21 +332,24 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Boards_Reply(Guid id, Guid? comment_id)
+        public ActionResult Boards_Reply(Guid comment_id, Guid? id)
         {
+            Session["Boards_Reply"] = "I";
             TopicComments topicComments = new TopicComments();
-            topicComments.Topic_Id = id;
-            if (comment_id.HasValue)
+            topicComments.TopicComment_Id = comment_id;
+            if (id.HasValue)
             {
                 topicComments = db.TopicComments.Find(comment_id);
+                Session["Boards_Reply"] = "U";
             }
-
+       
             return View(topicComments);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Boards_Reply(TopicComments model)
         {
+            string Boards_Reply = Session["Boards_Reply"].ToString();
             clsSwal swal = new clsSwal();
             if (ModelState.IsValid)
             {
@@ -354,7 +357,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.Board_Comment_Save(model))
+                        if (data.Board_Reply_Save(model, Boards_Reply))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -426,6 +429,46 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Delete_Reply(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.Delete_Reply(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ลบข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
         }
     }
 }
