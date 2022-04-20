@@ -46,14 +46,22 @@ namespace E2E.Controllers
             ViewBag.PriorityList = data.SelectListItems_Priority();
             ViewBag.RefServiceList = data.SelectListItems_RefService();
             ViewBag.UserList = data.SelectListItems_User();
-
+            bool isNew = true;
             Services services = new Services();
             if (id.HasValue)
             {
-                services = db.Services.Find(id);
+                services = data.Services_View(id.Value);
+                isNew = false;
             }
 
+            ViewBag.IsNew = isNew;
+
             return View(services);
+        }
+
+        public ActionResult _File(Guid id)
+        {
+            return PartialView("_File", data.ServiceFiles_View(id));
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -139,16 +147,61 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult GetOwner(Guid id)
+        public ActionResult DeleteFile(Guid id)
         {
-            try
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
             {
-                return Json(db.Services.Find(id).User_Id, JsonRequestBehavior.AllowGet);
+                try
+                {
+                    if (data.ServiceFiles_Delete(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบไฟล์สำเร็จ";
+                        swal.title = "Successful";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Commit(Guid id)
+        {
+            return View(data.ClsServices_ViewList(id));
         }
     }
 }

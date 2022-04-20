@@ -18,7 +18,11 @@
                 });
             });
 
-            $('#Ref_Service_Id').on('select2:select', function () {
+            $('#Ref_Service_Id').on('select2:select', function (e) {
+            });
+
+            $('#Priority_Id').on('select2:select', function (e) {
+                setDateRange(e.params.data.id);
             });
 
             $('#modalArea').modal('show');
@@ -27,13 +31,44 @@
     return false;
 }
 
-function getOwner(val) {
+function deleteFile(urlAjax, urlLoad) {
+    swal({
+        title: "Are you sure?",
+        text: "Once deleted, you will not be able to recover this file",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        });
+                        if (res.icon == 'success') {
+                            $('#fileTable').load(urlLoad);
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+}
+
+function setDateRange(id) {
     $.ajax({
-        url: '/Services/GetOwner/' + val,
+        url: '',
         async: true,
         success: function (res) {
-            $('#User_Id').val(res);
+            var now = new Date();
+            $('#Service_DueDate').attr('min', '');
         }
     });
-    return false;
 }

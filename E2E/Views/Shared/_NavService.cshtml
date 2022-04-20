@@ -1,0 +1,14 @@
+﻿@model int
+
+@{
+    Layout = null;
+}
+<div class="d-flex justify-content-between align-items-center">
+    <span>Board</span>
+    @{
+        if (Model > 0)
+        {
+            <span id="count" class="badge badge-pill badge-warning">@Model</span>
+        }
+    }
+</div>

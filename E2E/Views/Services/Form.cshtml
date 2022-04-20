@@ -11,7 +11,7 @@
         @{
             if (!string.IsNullOrEmpty(Model.Service_Key))
             {
-                <h5 class="modal-title">@string.Format("Form: {0}", Model.Service_Key);</h5>
+                <h5 class="modal-title">@string.Format("Form: {0}", Model.Service_Key)</h5>
             }
             else
             {
@@ -54,10 +54,21 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group col-12">
+            <div class="form-group col-md-6">
                 <label for="fileUpload">Attach file</label>
                 <input type="file" name="fileUpload" id="fileUpload" class="form-control-file" multiple />
             </div>
+            @{
+                if (!ViewBag.IsNew)
+                {
+                    if (Model.Service_FileCount > 0)
+                    {
+                        <div class="col-md-6" id="fileTable">
+                            @{ Html.RenderAction("_File", "Services"); }
+                        </div>
+                    }
+                }
+            }
         </div>
     </div>
     <div class="modal-footer">

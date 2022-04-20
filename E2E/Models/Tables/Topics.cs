@@ -10,6 +10,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Topic_Id { get; set; }
+
         public string Topic_Title { get; set; }
         public string Topic_Content { get; set; }
         public bool Topic_Pin { get; set; }
@@ -20,6 +21,9 @@ namespace E2E.Models.Tables
         public DateTime? Update { get; set; }
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
+        public int Topic_FileCount { get; set; }
+        public int Topic_GalleryCount { get; set; }
+
         public Topics()
         {
             Topic_Id = Guid.NewGuid();

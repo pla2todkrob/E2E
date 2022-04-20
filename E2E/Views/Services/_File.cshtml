@@ -1,0 +1,25 @@
+﻿@model IEnumerable<E2E.Models.Tables.ServiceFiles>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover mt-3">
+    <thead>
+        <tr>
+            <th class="fit"></th>
+            <th>@Html.DisplayNameFor(m => m.ServiceFile_Name)</th>
+            <th class="fit"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td><a href="#" class="text-danger" onclick="deleteFile('@Url.Action("DeleteFile","Services",new { id=Html.ValueFor(m => item.ServiceFile_Id) })','@Url.Action("_File","Services",new { id=item.Service_Id })')"><i class="fa fa-trash"></i></a></td>
+                <td>@Html.DisplayFor(m => item.ServiceFile_Name)</td>
+                <td><a href="@Html.ValueFor(m => item.ServiceFile_Path)"><i class="fa fa-download"></i></a></td>
+            </tr>
+        }
+    </tbody>
+</table>

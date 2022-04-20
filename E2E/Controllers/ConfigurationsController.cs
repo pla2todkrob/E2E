@@ -58,7 +58,35 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
 
+        public ActionResult _NavService()
+        {
+            try
+            {
+                int res = new int();
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+
+                int authorIndex = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
+                    .FirstOrDefault();
+
+                if (authorIndex != 3)
+                {
+                    res = new clsManageService().Count_GetAllPending(false);
+                }
+                else
+                {
+                    res = new clsManageService().Count_GetAllPending(true);
+                }
+
+                return PartialView("_NavService", res);
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

@@ -8,11 +8,10 @@
     var url = window.location.pathname,
         urlRegExp = new RegExp(url.replace(/\/$/, '') + "$");
 
-    $('.navbar-nav a').each(function () {
+    $('li.nav-item a').each(function () {
         if (classEmpty) {
             if (urlRegExp.test(this.href.replace(/\/$/, ''))) {
                 $(this).addClass('active');
-                $(this).parent('li').addClass('bg-light');
                 classEmpty = false;
             }
         }
@@ -33,6 +32,10 @@ function AdjustMenu() {
     var brandHeight = $('#brand').innerHeight();
     var menuHeight = sidebarHeight - brandHeight;
     $('#menu').innerHeight(menuHeight);
+}
+
+function reloadCount() {
+    $('#nav_service').load(link_navService);
 }
 
 function callSpin(active) {
@@ -80,42 +83,38 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
         async: true,
         success: function (res) {
             $(blockId).html(res);
+            var table;
             $(blockId).find('table').each(function () {
-                var table;
                 if (hasDate && hasButton) {
                     table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }, { "targets": 0, "orderable": false }],
                         "scrollX": true,
-                        "autoWidth": false,
-                        responsive: true
+                        "autoWidth": false
                     });
                 }
                 else if (hasDate) {
                     table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
                         "scrollX": true,
-                        "autoWidth": false,
-                        responsive: true
+                        "autoWidth": false
                     });
                 }
                 else if (hasButton) {
                     table = $(this).DataTable({
                         "columnDefs": [{ "targets": 0, "orderable": false }],
                         "scrollX": true,
-                        "autoWidth": false,
-                        responsive: true
+                        "autoWidth": false
                     });
                 }
                 else {
                     table = $(this).DataTable({
                         "scrollX": true,
-                        "autoWidth": false,
-                        responsive: true
+                        "autoWidth": false
                     });
                 }
-
-                table.columns.adjust();
             });
+            table.columns.adjust();
+            reloadCount();
         }
     });
     return true;
@@ -152,25 +151,26 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
         async: true,
         success: function (res) {
             $(blockId).html(res);
+            var table;
             $(blockId).find('table').each(function (i, v) {
-                var table;
                 if (hasDate) {
                     table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
                         "ordering": false,
                         "scrollX": true,
-                        responsive: true
+                        "autoWidth": false
                     });
                 }
                 else {
                     table = $(this).DataTable({
                         "ordering": false,
                         "scrollX": true,
-                        responsive: true
+                        "autoWidth": false
                     });
                 }
-                table.columns.adjust().draw();
             });
+            table.columns.adjust();
+            reloadCount();
         }
     });
     return true;
