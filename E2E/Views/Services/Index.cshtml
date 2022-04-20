@@ -5,7 +5,7 @@
 @section scripts{
 
     <script src="~/Asset/Service.min.js"></script>
-
+    
     <script>
         $(function () {
             reloadTable();
@@ -20,10 +20,10 @@
 
         function reloadTable() {
             if (@ViewBag.AuthorizeIndex != 3) {
-                callTable('@Url.Action("Index_Table", "Services",new {val = false})', true, false, 1,'#waitingCommit');
+                callTable_NoSort('@Url.Action("Index_Table", "Services",new {val = false})', true, 1,'#waitingCommit');
             }
 
-            callTable('@Url.Action("Index_Table", "Services",new {val = true})', true, false, 1,'#waitingAction');
+            callTable_NoSort('@Url.Action("Index_Table", "Services",new {val = true})', true, 1,'#waitingAction');
         }
     </script>
 }

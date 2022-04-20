@@ -33,6 +33,7 @@ namespace E2E.Models.Tables
         public Guid Priority_Id { get; set; }
         public virtual System_Priorities System_Priorities { get; set; }
         public DateTime? Service_DueDate { get; set; }
+        public int Service_FileCount { get; set; }
 
         public Services()
         {

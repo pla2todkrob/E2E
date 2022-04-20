@@ -4,24 +4,23 @@
     Layout = null;
 }
 <nav class="col-12 py-3 navbar navbar-light overflow-auto" id="menu">
-    <ul class="navbar-nav w-100">
+    <ul class="nav flex-column nav-pills flex-fill w-100">
         <li class="nav-item">
             <a href="@Url.Action("Index","Home")" class="nav-link pl-3">Home</a>
         </li>
         <li class="nav-item">
             <h6>Topic</h6>
-            <ul class="navbar-nav">
-                <li class="nav-item d-flex justify-content-between align-items-center">
+            <ul class="nav flex-column nav-pills flex-fill">
+                <li class="nav-item">
                     <a href="@Url.Action("Index","Topics")" class="nav-link pl-3">Board</a>
                 </li>
-
             </ul>
         </li>
         <li class="nav-item">
             <h6>Service</h6>
-            <ul class="navbar-nav">
-                <li class="nav-item d-flex justify-content-between align-items-center">
-                    <a href="@Url.Action("Index","Services")" class="nav-link pl-3">Board</a>
+            <ul class="nav flex-column nav-pills flex-fill">
+                <li class="nav-item">
+                    <a href="@Url.Action("Index","Services")" class="nav-link pl-3" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
                 </li>
             </ul>
         </li>
@@ -35,18 +34,21 @@
 
         <li class="nav-item">
             <h6>Department</h6>
-            <ul class="navbar-nav">
-                <li class="nav-item d-flex justify-content-between align-items-center">
+            <ul class="nav flex-column nav-pills flex-fill">
+                <li class="nav-item">
                     <a href="@Url.Action("AllTask","Departments")" class="nav-link pl-3">All task</a>
                 </li>
-                <li class="nav-item d-flex justify-content-between align-items-center">
+                <li class="nav-item">
                     <a href="@Url.Action("AllRequest","Departments")" class="nav-link pl-3">All request</a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Approve","Departments")" class="nav-link pl-3">Approve</a>
                 </li>
             </ul>
         </li>
         <li class="nav-item">
             <h6>@{ Html.RenderAction("_Profile", "Configurations"); }</h6>
-            <ul class="navbar-nav">
+            <ul class="nav flex-column nav-pills flex-fill">
                 <li class="nav-item">
                     <a href="@Url.Action("MyTask","Profile")" class="nav-link pl-3">My task</a>
                 </li>
@@ -60,4 +62,3 @@
         </li>
     </ul>
 </nav>
-

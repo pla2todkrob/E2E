@@ -7,6 +7,7 @@
     <title>@ViewBag.Title - E2E Service</title>
     @Styles.Render("~/bundles/css")
     @Scripts.Render("~/bundles/modernizr")
+    @RenderSection("css", required: false)
 </head>
 <body>
     <div id="objSpin"></div>
@@ -44,6 +45,9 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/js")
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        var link_navService = '@Url.Action("_NavService", "Configurations")';
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>
