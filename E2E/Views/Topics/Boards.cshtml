@@ -7,6 +7,7 @@
 
     <script src="~/Asset/Topic.js"></script>
     <script>
+
         $(function () {
             reloadTable();
 
@@ -36,7 +37,8 @@
 
 <div class="d-flex mb-3">
     <div class="ml-auto">
-        <a class="btn btn-secondary" href="@Url.Action("Boards_Create","Topics")"><i class="fa fa-plus"></i>&nbsp;Add</a>
+        @*<a class="btn btn-secondary" href="@Url.Action("Boards_Create","Topics")"><i class="fa fa-plus"></i>&nbsp;Add</a>*@
+        <a href="#" onclick="callModal('@Url.Action("Boards_Create","Topics")', true)" class="btn btn-primary"><i class="fa fa-plus"></i></a> 
     </div>
 </div>
 

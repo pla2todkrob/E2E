@@ -1,7 +1,6 @@
 ﻿@model E2E.Models.Views.clsTopic
 
 
-
 @{
     ViewBag.Title = "Boards_Form";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -27,7 +26,7 @@
     <script>
         $(function () {
             $("#mygallery").justifiedGallery({
-                rowHeight: 200,
+                rowHeight: 250,
                 lastRow:'justify'
             });
         });
@@ -56,19 +55,40 @@ $(document).on('submit', '#SaveReply', function (e) {
     <div class="card-body">
         @Html.DisplayFor(m => m.Topics.Topic_Content)
 
-        <div id="mygallery" class="justified-gallery col-md-8">
-            @foreach (var img in Model.TopicGalleries)
-            {
+        @if (Model.TopicGalleries.Count > 0)
+        {
+            <hr />
+            <h5>Galleries</h5>
+            <div id="mygallery" class="justified-gallery">
+                @foreach (var img in Model.TopicGalleries)
+                {
 
 
-                <a href="@img.TopicGallery_Original">
-                    <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original" />
-                </a>
-                <!-- other images... -->
+                    <a href="@img.TopicGallery_Original">
+                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original" />
+                    </a>
+                    <!-- other images... -->
 
-            }
-        </div>
-        </div>
+                }
+            </div>
+        }
+
+        @if (Model.TopicFiles.Count > 0)
+        {
+            <hr />
+            <h5>Files</h5>
+            <ul>
+                @foreach (var files in Model.TopicFiles)
+                {
+                    <li>
+                        <a href="@files.TopicFile_Path">@files.TopicFile_Name</a>
+                    </li>
+
+                }
+            </ul>
+        }
+
+    </div>
 
     <div class="card-footer">
         <div class="d-flex">
