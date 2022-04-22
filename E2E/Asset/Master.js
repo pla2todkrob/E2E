@@ -195,7 +195,6 @@ function getGrades(objSelect, selectVal) {
 
 function getDivisions(objSelect, selectVal) {
     objSelect.empty();
-    objSelect.append(new Option('Select Division', ''));
     if (selectVal != '') {
         $.ajax({
             url: '/Masters/Users_GetSelectDivisions',

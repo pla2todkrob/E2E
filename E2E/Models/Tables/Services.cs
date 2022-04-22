@@ -11,28 +11,52 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Service_Id { get; set; }
 
+        [Display(Name = "Key")]
         public string Service_Key { get; set; }
 
+        [Display(Name = "Subject")]
         public string Service_Subject { get; set; }
+
+        [Display(Name = "Description")]
         public string Service_Description { get; set; }
+
+        [Display(Name = "Department")]
         public Guid? Department_Id { get; set; }
+
         public virtual Master_Departments Master_Departments { get; set; }
+
+        [Display(Name = "User")]
         public Guid? User_Id { get; set; }
+
         public virtual Users Users { get; set; }
         public Guid? Ref_Service_Id { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
         public bool CommitService { get; set; }
         public Guid? Commit_User_Id { get; set; }
+
+        [Display(Name = "Commit dateTime")]
         public DateTime? Commit_DateTime { get; set; }
+
         public bool RequiredApprove { get; set; }
         public Guid? Approve_User_Id { get; set; }
+
+        [Display(Name = "Approval dateTime")]
         public DateTime? Approve_DateTime { get; set; }
+
+        [Display(Name = "Status")]
         public Guid Status_Id { get; set; }
+
         public virtual System_Statuses System_Statuses { get; set; }
+
+        [Display(Name = "Priority")]
         public Guid Priority_Id { get; set; }
+
         public virtual System_Priorities System_Priorities { get; set; }
+
+        [Display(Name = "Due date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? Service_DueDate { get; set; }
+
         public int Service_FileCount { get; set; }
 
         public Services()

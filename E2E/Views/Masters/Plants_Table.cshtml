@@ -19,7 +19,7 @@
         {
             <tr>
                 <td>
-                    <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("Plants_Form","Masters",new { id = Html.ValueFor(m => item.Plant_Id) })')">Edit</button>
+                    <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("Plants_Form","Masters",new { id = Html.ValueFor(m => item.Plant_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
                 </td>
                 <td>@Html.DisplayFor(i => item.Create)</td>
                 <td>@Html.DisplayFor(i => item.Plant_Name)</td>

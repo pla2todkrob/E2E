@@ -261,3 +261,20 @@ function SignoutNotify(url) {
         }
     });
 }
+
+function getSelectOp(urlAjax, val, desSelectId) {
+    var eSelect = $(desSelectId);
+    eSelect.empty();
+    $.ajax({
+        url: urlAjax,
+        data: {
+            id: val
+        },
+        async: true,
+        success: function (res) {
+            $.each(res, function (i, v) {
+                eSelect.append(new Option(v.Text, v.Value));
+            });
+        }
+    });
+}

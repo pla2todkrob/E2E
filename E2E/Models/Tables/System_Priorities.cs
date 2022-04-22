@@ -11,7 +11,9 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Priority_Id { get; set; }
 
+        [Display(Name = "Priority")]
         public string Priority_Name { get; set; }
+
         public int Priority_Index { get; set; }
         public string Priority_Class { get; set; }
         public int Priority_Point { get; set; }
