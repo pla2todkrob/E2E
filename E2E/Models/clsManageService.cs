@@ -148,8 +148,40 @@ namespace E2E.Models
                     .Select(s => new clsServices()
                     {
                         Services = s,
-                        ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
+                        ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList(),
+                        User_Name = db.UserDetails.Where(w => w.User_Id == s.User_Id)
+                        .Select(s2 => new { Name = s2.Detail_EN_FirstName + " " + s2.Detail_EN_LastName })
+                        .Select(s2 => s2.Name)
+                        .FirstOrDefault()
                     }).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<clsServices> ClsServices_ViewRefList(Guid id)
+        {
+            try
+            {
+                List<clsServices> res = new List<clsServices>();
+                Guid? refId = db.Services.Find(id).Ref_Service_Id;
+                while (refId.HasValue)
+                {
+                    clsServices clsServices = new clsServices();
+                    clsServices = db.Services
+                        .Where(w => w.Service_Id == refId.Value)
+                        .Select(s => new clsServices()
+                        {
+                            Services = s,
+                            ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
+                        }).FirstOrDefault();
+                    res.Add(clsServices);
+                    refId = clsServices.Services.Ref_Service_Id;
+                }
+
+                return res;
             }
             catch (Exception)
             {
@@ -159,30 +191,30 @@ namespace E2E.Models
 
         public List<clsServices> ClsServices_ViewList(Guid id)
         {
-            List<clsServices> res = new List<clsServices>();
-            bool hasData = true;
-            while (hasData)
+            try
             {
-                clsServices clsServices = new clsServices();
-                clsServices = db.Services
-                    .Where(w => w.Service_Id == id)
-                    .Select(s => new clsServices()
-                    {
-                        Services = s,
-                        ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
-                    }).FirstOrDefault();
-                res.Add(clsServices);
-                if (clsServices.Services.Ref_Service_Id.HasValue)
+                List<clsServices> res = new List<clsServices>();
+                Guid? refId = id;
+                while (refId.HasValue)
                 {
-                    id = clsServices.Services.Ref_Service_Id.Value;
+                    clsServices clsServices = new clsServices();
+                    clsServices = db.Services
+                        .Where(w => w.Service_Id == refId.Value)
+                        .Select(s => new clsServices()
+                        {
+                            Services = s,
+                            ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
+                        }).FirstOrDefault();
+                    res.Add(clsServices);
+                    refId = clsServices.Services.Ref_Service_Id;
                 }
-                else
-                {
-                    hasData = false;
-                }
-            }
 
-            return res;
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public bool Services_Save(Services model, HttpFileCollectionBase files)
@@ -235,6 +267,18 @@ namespace E2E.Models
                 {
                     model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 }
+
+                Users users = new Users();
+                users = db.Users.Find(model.User_Id);
+                int usePoint = db.System_Priorities.Find(model.Priority_Id).Priority_Point;
+                if (users.User_Point < usePoint)
+                {
+                    return false;
+                }
+
+                users.User_Point -= usePoint;
+                db.Entry(users).State = System.Data.Entity.EntityState.Modified;
+
                 bool res = new bool();
                 int todayCount = db.Services
                     .Where(w => w.Create >= DateTime.Today)

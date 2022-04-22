@@ -2025,12 +2025,16 @@ namespace E2E.Models
                     .Where(w => w.Plant_Id == plantId.Value);
             }
 
-            return query
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Division", Value = "" });
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Division_Id.ToString(),
                     Text = s.Division_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_Department(Guid? divisionId)

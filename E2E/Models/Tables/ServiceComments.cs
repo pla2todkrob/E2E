@@ -10,12 +10,17 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid ServiceComment_Id { get; set; }
+
         public Guid Service_Id { get; set; }
+
+        [Display(Name = "Comment")]
         public string Comment_Content { get; set; }
+
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
+
         public ServiceComments()
         {
             ServiceComment_Id = Guid.NewGuid();

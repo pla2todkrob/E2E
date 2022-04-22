@@ -10,9 +10,14 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Status_Id { get; set; }
+
         public int Status_Index { get; set; }
+
+        [Display(Name = "Status")]
         public string Status_Name { get; set; }
+
         public string Status_Class { get; set; }
+
         public System_Statuses()
         {
             Status_Id = Guid.NewGuid();

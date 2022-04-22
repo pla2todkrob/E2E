@@ -1,0 +1,107 @@
+﻿@model E2E.Models.Views.clsServices
+
+@{
+    ViewBag.Title = "Services";
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb " class="mt-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Services")">Service</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Commit</li>
+        </ol>
+    </nav>
+}
+
+@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CommitForm" }))
+{
+    <div class="modal-header">
+        <h5 class="modal-title"><b>Commit:&nbsp;</b>@Html.DisplayFor(m => m.Services.Service_Key)</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Create)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Services.Create)</dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Service_Subject)</dt>
+                    <dd class="col-9"><b>@Html.DisplayFor(m => m.Services.Service_Subject)</b></dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
+                    <dd class="col-9"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Services.Service_DueDate)</dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Services.Update)</dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Approve_User_Code)</dd>
+                    <dt class="col-3">@Html.DisplayNameFor(m => m.Services.Approve_DateTime)</dt>
+                    <dd class="col-9">@Html.DisplayFor(m => m.Services.Approve_DateTime)</dd>
+                    <dt class="col-3">Files</dt>
+                    <dd class="col-9">@Model.ServiceFiles.Count Attachments</dd>
+                </dl>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>File name</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+                        {
+                            <tr>
+                                <td>@item.ServiceFile_Name</td>
+                                <td class="fit">
+                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <label for="plantList">
+                            Plant
+                        </label>
+                        <select class="form-control" id="plantList" onchange="getSelectOp('@Url.Action("Users_GetSelectDivisions","Masters")',this.value,'#divisionList')" required>
+                            <option value="">Select Plant</option>
+                            @{
+                                foreach (var item in ViewBag.PlantList)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="divisionList">
+                            Division
+                        </label>
+                        <select class="form-control" id="divisionList" onchange="getSelectOp('@Url.Action("Users_GetSelectDepartments","Masters")',this.value,'#Services_Department_Id')" required>
+                            <option value="">Select Division</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-12">
+                        @Html.LabelFor(m => m.Services.Department_Id)
+                        @Html.DropDownListFor(m => m.Services.Department_Id, new SelectList(ViewBag.DepartmentList, "Value", "Text"), "Select Department", new { @class = "form-control", required = "required" })
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-warning">Require approval</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger mr-auto"><i class="fa fa-ban" aria-hidden="true"></i></button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+    </div>
+}
+<div id="serviceRefList"></div>

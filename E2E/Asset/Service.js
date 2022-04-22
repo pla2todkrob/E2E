@@ -4,10 +4,9 @@
         async: true,
         success: function (res) {
             if (modalSize != '') {
-                $('#modalContent').parent().addClass(modalSize);
-            }
-            else {
-                $('#modalContent').parent().removeClass(modalSize);
+                if (!$('#modalContent').parent().hasClass(modalSize)) {
+                    $('#modalContent').parent().addClass(modalSize);
+                }
             }
 
             $('#modalContent').html(res);
@@ -29,6 +28,30 @@
         }
     });
     return false;
+}
+
+function callModalCommit(urlAjax, urlLoad) {
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            if (!$('#modalContent').parent().hasClass('modal-lg')) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+
+            $('#modalContent').html(res);
+            $('#modalContent').find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
+
+            $('#serviceRefList').load(urlLoad);
+
+            $('#modalArea').modal('show');
+        }
+    });
 }
 
 function deleteFile(urlAjax, urlLoad) {
@@ -62,9 +85,12 @@ function deleteFile(urlAjax, urlLoad) {
         });
 }
 
-function setDateRange(id) {
+function setDateRange(urlAjax, val) {
     $.ajax({
-        url: '',
+        url: urlAjax,
+        data: {
+            id: val
+        },
         async: true,
         success: function (res) {
             var now = new Date();

@@ -5,127 +5,127 @@
 }
 @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveForm", @class = "was-validated" }))
 {
-    @Html.AntiForgeryToken()
+@Html.AntiForgeryToken()
 
-    <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Form</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+<div class="modal-header">
+    <h5 class="modal-title" id="modalTitle">Form</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+    @Html.HiddenFor(m => m.Users.User_Id)
+    @Html.HiddenFor(m => m.Detail_Id)
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            @Html.LabelFor(m => m.Users.Role_Id)
+            @Html.DropDownListFor(m => m.Users.Role_Id, new SelectList(ViewBag.RoleList, "Value", "Text"), "Select Role", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(m => m.Users.User_Code)
+            @Html.TextBoxFor(m => m.Users.User_Code, new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(m => m.Users.User_Email)
+            @Html.TextBoxFor(m => m.Users.User_Email, new { @class = "form-control" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(m => m.Users.LineWork_Id)
+            @Html.DropDownListFor(m => m.Users.LineWork_Id, new SelectList(ViewBag.LineWorkList, "Value", "Text"), "Select Line of work", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(m => m.Users.Grade_Id)
+            @Html.DropDownListFor(m => m.Users.Grade_Id, new SelectList(ViewBag.GradeList, "Value", "Text"), "Select Grade", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(m => m.Users.Plant_Id)
+            @Html.DropDownListFor(m => m.Users.Plant_Id, new SelectList(ViewBag.PlantList, "Value", "Text"), "Select Plant", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Users.Division_Id)
+            @Html.DropDownListFor(m => m.Users.Division_Id, new SelectList(ViewBag.DivisionList, "Value", "Text"), "Select Division", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Users.Department_Id)
+            @Html.DropDownListFor(m => m.Users.Department_Id, new SelectList(ViewBag.DepartmentList, "Value", "Text"), "Select Department", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Users.Section_Id)
+            @Html.DropDownListFor(m => m.Users.Section_Id, new SelectList(ViewBag.SectionList, "Value", "Text"), "Select Section", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Users.Process_Id)
+            @Html.DropDownListFor(m => m.Users.Process_Id, new SelectList(ViewBag.ProcessList, "Value", "Text"), "Select Process", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(m => m.Users.User_CostCenter)
+            @Html.TextBoxFor(m => m.Users.User_CostCenter, new { @class = "form-control" })
+        </div>
     </div>
-    <div class="modal-body">
-        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-        @Html.HiddenFor(m => m.Users.User_Id)
-        @Html.HiddenFor(m => m.Detail_Id)
-        <div class="form-row">
-            <div class="form-group col-md-4">
-                @Html.LabelFor(m => m.Users.Role_Id)
-                @Html.DropDownListFor(m => m.Users.Role_Id, new SelectList(ViewBag.RoleList, "Value", "Text"), "Select Role", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-3">
-                @Html.LabelFor(m => m.Users.User_Code)
-                @Html.TextBoxFor(m => m.Users.User_Code, new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-5">
-                @Html.LabelFor(m => m.Users.User_Email)
-                @Html.TextBoxFor(m => m.Users.User_Email, new { @class = "form-control" })
-            </div>
-            <div class="form-group col-md-4">
-                @Html.LabelFor(m => m.Users.LineWork_Id)
-                @Html.DropDownListFor(m => m.Users.LineWork_Id, new SelectList(ViewBag.LineWorkList, "Value", "Text"), "Select Line of work", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-4">
-                @Html.LabelFor(m => m.Users.Grade_Id)
-                @Html.DropDownListFor(m => m.Users.Grade_Id, new SelectList(ViewBag.GradeList, "Value", "Text"), "Select Grade", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-4">
-                @Html.LabelFor(m => m.Users.Plant_Id)
-                @Html.DropDownListFor(m => m.Users.Plant_Id, new SelectList(ViewBag.PlantList, "Value", "Text"), "Select Plant", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-6">
-                @Html.LabelFor(m => m.Users.Division_Id)
-                @Html.DropDownListFor(m => m.Users.Division_Id, new SelectList(ViewBag.DivisionList, "Value", "Text"), "Select Division", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-6">
-                @Html.LabelFor(m => m.Users.Department_Id)
-                @Html.DropDownListFor(m => m.Users.Department_Id, new SelectList(ViewBag.DepartmentList, "Value", "Text"), "Select Department", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-6">
-                @Html.LabelFor(m => m.Users.Section_Id)
-                @Html.DropDownListFor(m => m.Users.Section_Id, new SelectList(ViewBag.SectionList, "Value", "Text"), "Select Section", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-6">
-                @Html.LabelFor(m => m.Users.Process_Id)
-                @Html.DropDownListFor(m => m.Users.Process_Id, new SelectList(ViewBag.ProcessList, "Value", "Text"), "Select Process", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-5">
-                @Html.LabelFor(m => m.Users.User_CostCenter)
-                @Html.TextBoxFor(m => m.Users.User_CostCenter, new { @class = "form-control" })
-            </div>
+    <div class="form-group form-check">
+        @Html.CheckBoxFor(m => m.Users.Active, new { @class = "form-check-input" })
+        @Html.LabelFor(m => m.Users.Active, new { @class = "form-check-label" })
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(m => m.Prefix_TH_Id)
+            @Html.DropDownListFor(m => m.Prefix_TH_Id, new SelectList(ViewBag.PrefixTHList, "Value", "Text"), "Select Prefix TH", new { @class = "form-control", required = "required" })
         </div>
-        <div class="form-group form-check">
-            @Html.CheckBoxFor(m => m.Users.Active, new { @class = "form-check-input" })
-            @Html.LabelFor(m => m.Users.Active, new { @class = "form-check-label" })
+        <div class="form-group col-md-5">
+            @Html.LabelFor(m => m.Detail_TH_FirstName)
+            @Html.TextBoxFor(m => m.Detail_TH_FirstName, new { @class = "form-control", required = "required" })
         </div>
-        <div class="form-row">
-            <div class="form-group col-md-2">
-                @Html.LabelFor(m => m.Prefix_TH_Id)
-                @Html.DropDownListFor(m => m.Prefix_TH_Id, new SelectList(ViewBag.PrefixTHList, "Value", "Text"), "Select Prefix TH", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-5">
-                @Html.LabelFor(m => m.Detail_TH_FirstName)
-                @Html.TextBoxFor(m => m.Detail_TH_FirstName, new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-5">
-                @Html.LabelFor(m => m.Detail_TH_LastName)
-                @Html.TextBoxFor(m => m.Detail_TH_LastName, new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-2">
-                @Html.LabelFor(m => m.Prefix_EN_Id)
-                @Html.DropDownListFor(m => m.Prefix_EN_Id, new SelectList(ViewBag.PrefixENList, "Value", "Text"), "Select Prefix EN", new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-5">
-                @Html.LabelFor(m => m.Detail_EN_FirstName)
-                @Html.TextBoxFor(m => m.Detail_EN_FirstName, new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-5">
-                @Html.LabelFor(m => m.Detail_EN_LastName)
-                @Html.TextBoxFor(m => m.Detail_EN_LastName, new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-md-6">
-                @Html.LabelFor(m => m.Detail_Tel)
-                @Html.TextBoxFor(m => m.Detail_Tel, new { @class = "form-control" })
-            </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(m => m.Detail_TH_LastName)
+            @Html.TextBoxFor(m => m.Detail_TH_LastName, new { @class = "form-control", required = "required" })
         </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(m => m.Prefix_EN_Id)
+            @Html.DropDownListFor(m => m.Prefix_EN_Id, new SelectList(ViewBag.PrefixENList, "Value", "Text"), "Select Prefix EN", new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(m => m.Detail_EN_FirstName)
+            @Html.TextBoxFor(m => m.Detail_EN_FirstName, new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(m => m.Detail_EN_LastName)
+            @Html.TextBoxFor(m => m.Detail_EN_LastName, new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Detail_Tel)
+            @Html.TextBoxFor(m => m.Detail_Tel, new { @class = "form-control" })
+        </div>
+    </div>
 
-        @{
+    @{
             if (ViewBag.IsNew)
             {
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        @Html.LabelFor(m => m.Detail_Password)
-                        @Html.TextBoxFor(m => m.Detail_Password, new { @class = "form-control", required = "required", type = "password" })
-                    </div>
-                    <div class="form-group col-md-6">
-                        @Html.LabelFor(m => m.Detail_ConfirmPassword)
-                        @Html.TextBoxFor(m => m.Detail_ConfirmPassword, new { @class = "form-control", required = "required", type = "password" })
-                    </div>
-                </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                @Html.LabelFor(m => m.Detail_Password)
+                @Html.TextBoxFor(m => m.Detail_Password, new { @class = "form-control", required = "required", type = "password" })
+            </div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(m => m.Detail_ConfirmPassword)
+                @Html.TextBoxFor(m => m.Detail_ConfirmPassword, new { @class = "form-control", required = "required", type = "password" })
+            </div>
+        </div>
             }
-        }
-    </div>
-    <div class="modal-footer">
-        @{
+    }
+</div>
+<div class="modal-footer">
+    @{
             if (!ViewBag.IsNew)
             {
-                <div class="mr-auto">
-                    <button type="button" class="btn btn-outline-danger" onclick="callDeleteItem('@Url.Action("Users_Delete","Masters",new { id=Html.ValueFor(m => m.User_Id) })')">Delete</button>
-                    <button type="button" class="btn btn-outline-warning ">Reset Password</button>
-                </div>
+        <div class="mr-auto">
+            <button type="button" class="btn btn-outline-danger" onclick="callDeleteItem('@Url.Action("Users_Delete","Masters",new { id=Html.ValueFor(m => m.User_Id) })')"><i class="fa fa-trash" aria-hidden="true"></i></button>
+            <button type="button" class="btn btn-outline-warning ">Reset Password</button>
+        </div>
 
             }
-        }
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
+    }
+    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+    <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+</div>
 }

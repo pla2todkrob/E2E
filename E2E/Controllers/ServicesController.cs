@@ -201,7 +201,16 @@ namespace E2E.Controllers
 
         public ActionResult Commit(Guid id)
         {
-            return View(data.ClsServices_ViewList(id));
+            ViewBag.PlantList = new clsManageMaster().SelectListItems_Plant();
+            ViewBag.DivisionList = new List<SelectListItem>();
+            ViewBag.DepartmentList = new List<SelectListItem>();
+            var res = data.ClsServices_View(id);
+            return View(res);
+        }
+
+        public ActionResult _RefService(Guid id)
+        {
+            return PartialView("_RefService", data.ClsServices_ViewRefList(id));
         }
     }
 }

@@ -10,9 +10,15 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid ServiceCommentFile_Id { get; set; }
+
         public Guid ServiceComment_Id { get; set; }
+
+        [Display(Name = "File path")]
         public string ServiceCommentFile_Path { get; set; }
+
+        [Display(Name = "File name")]
         public string ServiceCommentFile_Name { get; set; }
+
         public ServiceCommentFiles()
         {
             ServiceCommentFile_Id = Guid.NewGuid();
