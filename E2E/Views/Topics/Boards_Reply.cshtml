@@ -27,8 +27,19 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Reply","Topics",new { id=Html.ValueFor(w=>w.TopicComment_Id)})',true)">Delete</button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Submits</button>
+            @{
+                if (ViewBag.isNew)
+                {
+
+                }
+                else
+                {
+                    <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Reply", "Topics", new { id = Html.ValueFor(w => w.TopicComment_Id) })',true)"><i class="fa fa-trash"></i></button>
+                }
+            }
+
+
+            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i></button>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i></button>
         </div>
     }

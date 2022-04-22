@@ -20,7 +20,7 @@ namespace E2E.Controllers
         // GET: Topics
         public ActionResult Index()
         {
-          return   RedirectToAction("Boards");
+            return RedirectToAction("Boards");
         }
 
         public ActionResult Boards()
@@ -28,18 +28,18 @@ namespace E2E.Controllers
             //clsTopic clsTopic = new clsTopic();
             //clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == ).FirstOrDefault();
             //clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id ==).ToList();
-                
+
             return View();
         }
         bool val = new bool();
         public ActionResult Boards_Table(int res)
         {
-        
-            if (res==1)
+
+            if (res == 1)
             {
                 val = true;
             }
-    
+
             Guid id = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.Usercode = db.Users
                 .Where(w => w.User_Id == id)
@@ -47,17 +47,17 @@ namespace E2E.Controllers
                 .FirstOrDefault();
 
             Topics topics = new Topics();
-            var sql = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o=>o.Create).ToList();
+            var sql = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o => o.Create).ToList();
             if (val)
             {
-                foreach (var item in sql.Where(w=>w.Topic_Pin_EndDate < DateTime.Today))
+                foreach (var item in sql.Where(w => w.Topic_Pin_EndDate < DateTime.Today))
                 {
                     item.Topic_Pin = false;
                     item.Topic_Pin_EndDate = null;
                     db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
                 }
-                sql = sql.Where(w => w.Topic_Pin_EndDate >= DateTime.Today).OrderByDescending(o=>o.Create).ToList();
+                sql = sql.Where(w => w.Topic_Pin_EndDate >= DateTime.Today).OrderByDescending(o => o.Create).ToList();
             }
             if (res == 3)
             {
@@ -71,27 +71,31 @@ namespace E2E.Controllers
         {
             if (id.HasValue)
             {
-                Topics topics = new Topics();
-                topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
-                return View(topics);
+                clsTopic clsTopic = new clsTopic();
+                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+                ViewBag.isNew = false;
+                return View(clsTopic);
             }
-
-            return View(new Topics());
+            ViewBag.isNew = true;
+            return View(new clsTopic());
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Create(Topics model)
+        public ActionResult Boards_Create(clsTopic model)
         {
             clsSwal swal = new clsSwal();
-            if (ModelState.IsValid)
+            if (model.Topics.Topic_Title != string.Empty && model.Topics.Topic_Content != string.Empty)
             {
                 using (TransactionScope scope = new TransactionScope())
                 {
                     try
                     {
-                        if (data.Board_Save(model, Request.Files))
+                        if (data.Board_Save(model.Topics, Request.Files))
                         {
                             scope.Complete();
+
                             swal.dangerMode = false;
                             swal.icon = "success";
                             swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
@@ -212,7 +216,6 @@ namespace E2E.Controllers
                 .Select(s => s.User_Code)
                 .FirstOrDefault();
 
-            bool isAdmin = true;
             clsTopic clsTopic = new clsTopic();
 
             if (id.HasValue)
@@ -227,11 +230,9 @@ namespace E2E.Controllers
 
                 clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
                 clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
-                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id).OrderBy(o=>o.Create).ToList();
-                isAdmin = false;
+                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id).OrderBy(o => o.Create).ToList();
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
             }
-
-            ViewBag.IsAdmin = isAdmin;
 
             return View(clsTopic);
         }
@@ -243,8 +244,10 @@ namespace E2E.Controllers
             if (comment_id.HasValue)
             {
                 topicComments = db.TopicComments.Find(comment_id);
+                ViewBag.isNew = false;
+                return View(topicComments);
             }
-
+            ViewBag.isNew = true;
             return View(topicComments);
         }
 
@@ -252,7 +255,7 @@ namespace E2E.Controllers
         public ActionResult Boards_Comment(TopicComments model)
         {
             clsSwal swal = new clsSwal();
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 using (TransactionScope scope = new TransactionScope())
                 {
@@ -334,6 +337,7 @@ namespace E2E.Controllers
 
         public ActionResult Boards_Reply(Guid comment_id, Guid? id)
         {
+            
             Session["Boards_Reply"] = "I";
             TopicComments topicComments = new TopicComments();
             topicComments.TopicComment_Id = comment_id;
@@ -341,8 +345,10 @@ namespace E2E.Controllers
             {
                 topicComments = db.TopicComments.Find(comment_id);
                 Session["Boards_Reply"] = "U";
+                ViewBag.isNew = false;
+                return View(topicComments);
             }
-       
+            ViewBag.isNew = true;
             return View(topicComments);
         }
 
@@ -469,6 +475,121 @@ namespace E2E.Controllers
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        public ActionResult DeleteGallery(Guid id)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.DeleteGallery(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบไฟล์สำเร็จ";
+                        swal.title = "Successful";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult DeleteFiles(Guid id)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.DeleteFile(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบไฟล์สำเร็จ";
+                        swal.title = "Successful";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult ReloadModel(Guid id)
+        {
+            clsTopic clsTopic = new clsTopic();
+
+            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+
+            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+
+            return View(clsTopic);
         }
     }
 }
