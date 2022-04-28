@@ -256,22 +256,40 @@ namespace E2E.Models
                         for (int i = 0; i < files.Count; i++)
                         {
                             HttpPostedFileBase file = files[i];
+
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
                             string dir = "Topic/" + model.Topic_Id;
-                            string filepath = ftp.Ftp_UploadFileToString(dir, file);
+
                             if (CK_IMG)
                             {
+                                string FileName = file.FileName;
 
+                                TopicGalleries topicGalleries = new TopicGalleries();
+                                topicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id && w.TopicGallery_Name == file.FileName).FirstOrDefault();
+                                if (topicGalleries != null)
+                                {
+                                    FileName = string.Concat("_", file.FileName);
+                                }
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    Galleries_Save(topics, filepath, file.FileName, status);
+                                    Galleries_Save(topics, filepath, FileName, status);
                                 }
                             }
                             else
                             {
+                                string FileName = file.FileName;
+
+                                TopicFiles topicFiles = new TopicFiles();
+                                topicFiles = db.TopicFiles.Where(w => w.Topic_Id == model.Topic_Id && w.TopicFile_Name == file.FileName).FirstOrDefault();
+                                if (topicFiles != null)
+                                {
+                                    FileName = string.Concat("_", file.FileName);
+                                }
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(topics, filepath, file.FileName, status);
+                                    File_Save(topics, filepath, FileName, status);
                                 }
                             }
                         }
@@ -313,22 +331,40 @@ namespace E2E.Models
                         for (int i = 0; i < files.Count; i++)
                         {
                             HttpPostedFileBase file = files[i];
+
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
                             string dir = "Topic/" + model.Topic_Id;
-                            string filepath = ftp.Ftp_UploadFileToString(dir, file);
+
                             if (CK_IMG)
                             {
+                                string FileName = file.FileName;
 
+                                TopicGalleries topicGalleries = new TopicGalleries();
+                                topicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id && w.TopicGallery_Name == file.FileName).FirstOrDefault();
+                                if (topicGalleries != null)
+                                {
+                                    FileName = string.Concat("_", file.FileName);
+                                }
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    Galleries_Save(topics, filepath, file.FileName, status);
+                                    Galleries_Save(topics, filepath, FileName, status);
                                 }
                             }
                             else
                             {
+                                string FileName = file.FileName;
+
+                                TopicFiles topicFiles = new TopicFiles();
+                                topicFiles = db.TopicFiles.Where(w => w.Topic_Id == model.Topic_Id && w.TopicFile_Name == file.FileName).FirstOrDefault();
+                                if (topicFiles != null)
+                                {
+                                    FileName = string.Concat("_", file.FileName);
+                                }
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(topics, filepath, file.FileName, status);
+                                    File_Save(topics, filepath, FileName, status);
                                 }
                             }
                         }
@@ -512,6 +548,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Topics topics = new Topics();
+
                 if (status == "U")
                 {
                     res = Galleries_Insert(model, filepath, file);

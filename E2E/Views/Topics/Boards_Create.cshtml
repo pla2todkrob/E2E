@@ -53,7 +53,7 @@
                                     <td>
                                         <button type="button" class="btn text-danger mr-auto" onclick="deleteFiles('@Url.Action("DeleteGallery","Topics",new { id=Html.ValueFor(m => img.TopicGallery_Id) })','@Url.Action("ReloadModel","Topics",new { id=img.Topic_Id})')"><i class="fa fa-trash-o"></i></button>
                                         <a href="@img.TopicGallery_Original" target="_blank">
-                                            <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original" height="100" width="200" />
+                                            <img alt="@img.TopicGallery_Name" class="img-fluid" src="@img.TopicGallery_Original" height="100" max-height/>
                                         </a>
                                         <!-- other images... -->
                                     </td>
