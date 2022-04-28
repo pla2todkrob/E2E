@@ -171,6 +171,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ConfigurationsController.cs" />
+    <Compile Include="Controllers\DepartmentsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
     <Compile Include="Controllers\ProfileController.cs" />
@@ -758,6 +759,9 @@
     <Content Include="Views\Profile\MyRequest.cshtml" />
     <Content Include="Views\Profile\MyTask.cshtml" />
     <Content Include="Views\Profile\MyRequest_Table.cshtml" />
+    <Content Include="Views\Departments\Approve.cshtml" />
+    <Content Include="Views\Departments\Approve_Form.cshtml" />
+    <Content Include="Views\Departments\Approve_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
