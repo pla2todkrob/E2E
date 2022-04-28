@@ -3,14 +3,26 @@
     var url = window.location.pathname,
         urlRegExp = new RegExp(url.replace(/\/$/, '') + "$");
 
-    $('li.nav-item a').each(function () {
+    $('.vertical_nav li a').each(function () {
         if (classEmpty) {
             if (urlRegExp.test(this.href.replace(/\/$/, ''))) {
-                $(this).addClass('active');
+                $(this).addClass('link__active');
+                $(this).parents('li.menu--item__has_sub_menu').addClass('menu--subitens__opened');
                 classEmpty = false;
             }
         }
     });
+
+    $('.wrapper').click(function () {
+
+
+        if ($('#vl_nav').prop('class').includes('vertical_nav__opened')) {
+
+            document.getElementById("toggleMenu").click();
+
+        }
+    });
+
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         $($.fn.dataTable.tables(true)).DataTable()
