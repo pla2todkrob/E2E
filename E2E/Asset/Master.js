@@ -214,7 +214,6 @@ function getDivisions(objSelect, selectVal) {
 
 function getDepartments(objSelect, selectVal) {
     objSelect.empty();
-    objSelect.append(new Option('Select Department', ''));
     if (selectVal != '') {
         $.ajax({
             url: '/Masters/Users_GetSelectDepartments',

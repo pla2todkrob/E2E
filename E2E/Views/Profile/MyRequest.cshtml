@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "My Request";
+}
+
+@section scripts{
+
+    <script src="~/Asset/Service.min.js"></script>
+
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
+            callSubmit('@Url.Action("Form", "Services")');
+            return false;
+        });
+
+        function reloadTable() {
+            callTable('@Url.Action("MyRequest_Table", "Profile")', true, true,1);
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb " class="mt-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Profile")">Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">My Request</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="card-title">My Request</h5>
+    </div>
+    <div class="card-body">
+        <div class="row" id="datalist"></div>
+    </div>
+</div>

@@ -41,7 +41,7 @@ namespace E2E.Models.Tables
         public bool RequiredApprove { get; set; }
         public Guid? Approve_User_Id { get; set; }
 
-        [Display(Name = "Approval dateTime")]
+        [Display(Name = "Approval datetime")]
         public DateTime? Approve_DateTime { get; set; }
 
         [Display(Name = "Status")]
@@ -58,6 +58,8 @@ namespace E2E.Models.Tables
         public DateTime? Service_DueDate { get; set; }
 
         public int Service_FileCount { get; set; }
+        public Guid? Action_User_Id { get; set; }
+        public DateTime? Acction_DateTime { get; set; }
 
         public Services()
         {

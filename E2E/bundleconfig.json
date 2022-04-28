@@ -3,36 +3,48 @@
     "outputFileName": "Content/css/select2-bootstrap4.min.css",
     "inputFiles": [
       "Content/css/select2-bootstrap4.css"
-    ]
+    ],
+    "sourceMap": false,
+    "sourceMapRootPath": null
   },
   {
     "outputFileName": "Content/Site.min.css",
     "inputFiles": [
       "Content/Site.css"
-    ]
+    ],
+    "sourceMap": false,
+    "sourceMapRootPath": null
   },
   {
     "outputFileName": "Scripts/Site.min.js",
     "inputFiles": [
       "Scripts/Site.js"
-    ]
+    ],
+    "sourceMap": false,
+    "sourceMapRootPath": null
   },
   {
     "outputFileName": "Asset/Master.min.js",
     "inputFiles": [
       "Asset/Master.js"
-    ]
+    ],
+    "sourceMap": false,
+    "sourceMapRootPath": null
   },
   {
     "outputFileName": "Asset/Service.min.js",
     "inputFiles": [
       "Asset/Service.js"
-    ]
+    ],
+    "sourceMap": false,
+    "sourceMapRootPath": null
   },
   {
     "outputFileName": "Asset/Topic.min.js",
     "inputFiles": [
       "Asset/Topic.js"
-    ]
+    ],
+    "sourceMap": false,
+    "sourceMapRootPath": null
   }
 ]

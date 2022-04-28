@@ -26,18 +26,20 @@
             .columns.adjust();
     });
 });
-
+$(document).ajaxStart(function () {
+    callSpin(true);
+}).ajaxStop(function () {
+    callSpin(false);
+});
 function AdjustMenu() {
     var sidebarHeight = $('#sidebar').innerHeight();
     var brandHeight = $('#brand').innerHeight();
     var menuHeight = sidebarHeight - brandHeight;
     $('#menu').innerHeight(menuHeight);
 }
-
 function reloadCount() {
     $('#nav_service').load(link_navService);
 }
-
 function callSpin(active) {
     var opts = {
         lines: 13, // The number of lines to draw
@@ -70,13 +72,6 @@ function callSpin(active) {
         $(target).empty();
     }
 }
-
-$(document).ajaxStart(function () {
-    callSpin(true);
-}).ajaxStop(function () {
-    callSpin(false);
-});
-
 async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
@@ -119,32 +114,6 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
     });
     return true;
 }
-
-function callModal(urlAjax, bigSize = false) {
-    $.ajax({
-        url: urlAjax,
-        async: true,
-        success: function (res) {
-            if (bigSize) {
-                $('#modalContent').parent().addClass('modal-lg');
-            }
-            else {
-                $('#modalContent').parent().removeClass('modal-lg');
-            }
-
-            $('#modalContent').html(res);
-            $('#modalContent').find('select').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
-                });
-            });
-            $('#modalArea').modal('show');
-        }
-    });
-    return false;
-}
-
 async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
@@ -175,7 +144,71 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
     });
     return true;
 }
+function setTable_File(tableId,bOrder = false,bSearch = false) {
+    var table = $(tableId).DataTable({
+        "ordering": bOrder,
+        "searching": bSearch
+    });
+}
+function setDropdown_Form() {
+    $('form').find('select').each(function () {
+        $(this).select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+    });
+}
+function callModal(urlAjax, bigSize = false) {
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            if (bigSize) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+            else {
+                $('#modalContent').parent().removeClass('modal-lg');
+            }
 
+            $('#modalContent').html(res);
+            $('#modalContent').find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
+            $('#modalArea').modal('show');
+        }
+    });
+    return false;
+}
+function callModalTable(urlAjax, bigSize = false) {
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            if (bigSize) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+            else {
+                $('#modalContent').parent().removeClass('modal-lg');
+            }
+
+            $('#modalContent').html(res);
+            $('#modalContent').find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
+            $('#modalContent').find('table').each(function () {
+                $(this).DataTable();
+            });
+            $('#modalArea').modal('show');
+        }
+    });
+    return false;
+}
 function callSubmit(urlAjax, reloadPage = false) {
     var form = $('form')[0];
     var fd = new FormData(form);
@@ -210,7 +243,6 @@ function callSubmit(urlAjax, reloadPage = false) {
 
     return false;
 }
-
 function callDeleteItem(urlAjax, reloadPage = false) {
     swal({
         title: "Are you sure?",
@@ -247,7 +279,6 @@ function callDeleteItem(urlAjax, reloadPage = false) {
         }
     });
 }
-
 function SignoutNotify(url) {
     swal({
         title: "Are you sure?",
@@ -261,7 +292,6 @@ function SignoutNotify(url) {
         }
     });
 }
-
 function getSelectOp(urlAjax, val, desSelectId) {
     var eSelect = $(desSelectId);
     eSelect.empty();

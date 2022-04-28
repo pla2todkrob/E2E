@@ -41,6 +41,21 @@ namespace E2E.Models
             }
         }
 
+        public List<Services> Services_GetMyRequest()
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                return db.Services
+                    .Where(w => w.User_Id == id)
+                    .ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<Services> Services_GetAllPending(bool val)
         {
             try
@@ -131,6 +146,7 @@ namespace E2E.Models
             {
                 return db.ServiceFiles
                     .Where(w => w.Service_Id == id)
+                    .OrderBy(o => o.ServiceFile_Name)
                     .ToList();
             }
             catch (Exception)
@@ -355,6 +371,28 @@ namespace E2E.Models
             }
         }
 
+        public bool Services_SetRequired(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.RequiredApprove = true;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public bool ServiceFiles_Delete(Guid id)
         {
             try
@@ -368,10 +406,12 @@ namespace E2E.Models
                 services.Service_FileCount -= 1;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Deleted;
-
-                if (db.SaveChanges() > 0)
+                if (ftp.Ftp_DeleteFile(serviceFiles.ServiceFile_Path))
                 {
-                    res = true;
+                    if (db.SaveChanges() > 0)
+                    {
+                        res = true;
+                    }
                 }
 
                 return res;
