@@ -2,40 +2,54 @@
 @{
     Layout = null;
 }
-<li class="nav-item">
-    <h6 class="navbar-text">Masters</h6>
-    <ul class="nav flex-column nav-pills flex-fill">
-        <li class="nav-item ">
-            <a href="@Url.Action("LineWorks","Masters")" class="nav-link pl-3">Line of works</a>
+<li class="menu--item  menu--item__has_sub_menu">
+    <label class="menu--link" title="Masters">
+        <span class="menu--label">Masters</span>
+    </label>
+
+    <ul class="sub_menu">
+        <li class="sub_menu--item">
+            <a href="@Url.Action("LineWorks","Masters")" class="sub_menu--link">Line of works</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Grades","Masters")" class="nav-link pl-3">Grades</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Grades","Masters")" class="sub_menu--link">Grades</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Plants","Masters")" class="nav-link pl-3">Plants</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Plants","Masters")" class="sub_menu--link">Plants</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Divisions","Masters")" class="nav-link pl-3">Divisions</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Divisions","Masters")" class="sub_menu--link">Divisions</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Departments","Masters")" class="nav-link pl-3">Departments</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Departments","Masters")" class="sub_menu--link">Departments</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Sections","Masters")" class="nav-link pl-3">Sections</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Sections","Masters")" class="sub_menu--link">Sections</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Processes","Masters")" class="nav-link pl-3">Processes</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Processes","Masters")" class="sub_menu--link">Processes</a>
         </li>
-        <li class="nav-item ">
-            <a href="@Url.Action("Users","Masters")" class="nav-link pl-3">Users</a>
+
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Users","Masters")" class="sub_menu--link">Users</a>
         </li>
     </ul>
 </li>
-<li class="nav-item">
-    <h6 class="navbar-text">System</h6>
-    <ul class="nav flex-column nav-pills flex-fill">
-        <li class="nav-item ">
-            <a href="@Url.Action("Index","Configurations")" class="nav-link pl-3">Configurations</a>
+
+<li class="menu--item  menu--item__has_sub_menu">
+    <label class="menu--link" title="System">
+        <span class="menu--label">System</span>
+    </label>
+
+    <ul class="sub_menu">
+        <li class="sub_menu--item">
+            <a href="@Url.Action("Index","Configurations")" class="sub_menu--link">Configurations</a>
         </li>
     </ul>
 </li>

@@ -1,59 +1,55 @@
 ﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - E2E Service</title>
-    @Styles.Render("~/bundles/css")
-    @Scripts.Render("~/bundles/modernizr")
-    @RenderSection("css", required: false)
-</head>
-<body>
-    <div id="objSpin"></div>
-    <div class="container-fluid">
-        <div class="row flex-nowrap">
-            @*<div class="col-4 col-md-3 col-lg-2 vh-100 sticky-top" id="sidebar">*@
-            <div class="col-auto col-md-3 col-lg-2 sticky-top">
-                <div class="row">
-                    <nav class=" col-12 navbar navbar-light justify-content-center navbar-expand-lg shadow" id="brand">
-                        @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
-                    </nav>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <link href="~/Content/vertical-responsive-menu.css" rel="stylesheet" />
 
-                    <nav class="navbar-expand-lg py-3 navbar navbar-light navbar-toggleable-md overflow-auto" id="menu">
+        <title>@ViewBag.Title - E2E Service</title>
+        @Styles.Render("~/bundles/css")
+        @Scripts.Render("~/bundles/modernizr")
+        @RenderSection("css", required: false)
+    </head>
+    <body>
 
-                        <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target=".navHeader">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
+        <header class="header clearfix">
+            <button type="button" id="toggleMenu" class="toggle_menu">
+                <i class="fa fa-bars"></i>
+            </button>
+                @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
+        </header>
 
-                        @{ Html.RenderAction("_Navbar", "Configurations"); }
-                    </nav>
-                </div>
-            </div>
-            <div class="col-8 col-md-9 col-lg-10 bg-light" id="content">
-                <div class="row min-vh-100">
-                    <div class="d-flex flex-column col-12">
-                        @RenderSection("breadcrumb", required: false)
-                        @RenderBody()
+        <div id="objSpin"></div>
+
+            @{ Html.RenderAction("_Navbar", "Configurations"); }
+  
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-12 bg-light" id="content">
+                    <div class="row min-vh-100">
+                        <div class="col-12">
+                            @RenderSection("breadcrumb", required: false)
+                            @RenderBody()
+                        </div>
+                        <footer class="bg-light col-12 mt-3">
+                            <small class="col-12">&copy; @DateTime.Now.Year - Thai Parkerizing</small>
+                        </footer>
                     </div>
-                    <footer class="bg-light col-12 mt-3">
-                        <small class="col-12">&copy; @DateTime.Now.Year - Thai Parkerizing</small>
-                    </footer>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
-            <div class="modal-content" id="modalContent">
+            <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
+                    <div class="modal-content" id="modalContent">
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/js")
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script>
+            @Scripts.Render("~/bundles/jquery")
+            @Scripts.Render("~/bundles/js")
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+            <script>
         var link_navService = '@Url.Action("_NavService", "Configurations")';
 
         function myFunction() {
@@ -64,7 +60,8 @@
                 x.className = "nav-bar";
             }
         }
-    </script>
-    @RenderSection("scripts", required: false)
-</body>
+            </script>
+            <script src="~/Asset/vertical-responsive-menu.js"></script>
+            @RenderSection("scripts", required: false)
+    </body>
 </html>

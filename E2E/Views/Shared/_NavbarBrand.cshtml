@@ -1,15 +1,15 @@
 ﻿@model string
 
 
-    <a href="@Url.Action("Index","Home")" class="d-block navbar-brand m-0">
+    <a href="@Url.Action("Index","Home")" class="d-block navbar-brand m-0 ml-3">
         @{
             if (string.IsNullOrEmpty(Model))
             {
-                <h1>E2E</h1>
+                <h2>E2E</h2>
             }
             else
             {
-                <img id="logo" src="@Model" class="img-thumbnail" alt="@Path.GetFileName(Model)" />
+                <img id="logo" src="@Model" class="img-thumbnail logo" alt="@Path.GetFileName(Model)" />
             }
         }
     </a>
