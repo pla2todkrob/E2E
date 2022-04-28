@@ -1,9 +1,4 @@
 ﻿$(function () {
-    AdjustMenu();
-    $(window).resize(function () {
-        AdjustMenu();
-    });
-
     var classEmpty = true;
     var url = window.location.pathname,
         urlRegExp = new RegExp(url.replace(/\/$/, '') + "$");
@@ -31,12 +26,7 @@ $(document).ajaxStart(function () {
 }).ajaxStop(function () {
     callSpin(false);
 });
-function AdjustMenu() {
-    var sidebarHeight = $('#sidebar').innerHeight();
-    var brandHeight = $('#brand').innerHeight();
-    var menuHeight = sidebarHeight - brandHeight;
-    $('#menu').innerHeight(menuHeight);
-}
+
 function reloadCount() {
     $('#nav_service').load(link_navService);
 }
@@ -78,37 +68,33 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
         async: true,
         success: function (res) {
             $(blockId).html(res);
-            var table;
             $(blockId).find('table').each(function () {
                 if (hasDate && hasButton) {
-                    table = $(this).DataTable({
-                        "columnDefs": [{ "targets": dateCol, "type": "date" }, { "targets": 0, "orderable": false }],
-                        "scrollX": true,
-                        "autoWidth": false
+                    $(this).DataTable({
+                        "columnDefs": [{ "targets": 0, "orderable": false }, { "targets": dateCol, "type": "date" }],
+                        'order': [[dateCol, 'desc']],
+                        "scrollX": true
                     });
                 }
                 else if (hasDate) {
-                    table = $(this).DataTable({
+                    $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
-                        "scrollX": true,
-                        "autoWidth": false
+                        'order': [[dateCol, 'desc']],
+                        "scrollX": true
                     });
                 }
                 else if (hasButton) {
-                    table = $(this).DataTable({
+                    $(this).DataTable({
                         "columnDefs": [{ "targets": 0, "orderable": false }],
-                        "scrollX": true,
-                        "autoWidth": false
+                        "scrollX": true
                     });
                 }
                 else {
-                    table = $(this).DataTable({
-                        "scrollX": true,
-                        "autoWidth": false
+                    $(this).DataTable({
+                        "scrollX": true
                     });
                 }
             });
-            table.columns.adjust();
             reloadCount();
         }
     });
@@ -144,7 +130,7 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
     });
     return true;
 }
-function setTable_File(tableId,bOrder = false,bSearch = false) {
+function setTable_File(tableId, bOrder = false, bSearch = false) {
     var table = $(tableId).DataTable({
         "ordering": bOrder,
         "searching": bSearch
@@ -209,35 +195,116 @@ function callModalTable(urlAjax, bigSize = false) {
     });
     return false;
 }
-function callSubmit(urlAjax, reloadPage = false) {
-    var form = $('form')[0];
-    var fd = new FormData(form);
+function callSubmitModal(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "This information is saved to the database.",
+        buttons: true,
+        icon: "warning"
+    }).then(function (cf) {
+        if (cf) {
+            var form = $('form')[0];
+            var fd = new FormData(form);
 
-    $.ajax({
-        url: urlAjax,
-        method: "POST",
-        async: true,
-        data: fd,
-        processData: false,
-        contentType: false,
-        traditional: true,
-        success: function (res) {
-            swal({
-                title: res.title,
-                text: res.text,
-                icon: res.icon,
-                button: res.button,
-                dangerMode: res.dangerMode
+            $.ajax({
+                url: urlAjax,
+                method: "POST",
+                async: true,
+                data: fd,
+                processData: false,
+                contentType: false,
+                traditional: true,
+                success: function (res) {
+                    swal({
+                        title: res.title,
+                        text: res.text,
+                        icon: res.icon,
+                        button: res.button,
+                        dangerMode: res.dangerMode
+                    }).then(function () {
+                        if (res.icon == 'success') {
+                            $('#modalArea').modal('hide');
+                            reloadTable();
+                        }
+                    });
+                }
             });
-            if (res.icon == 'success') {
-                $('#modalArea').modal('hide');
-                if (reloadPage) {
-                    location.reload();
+        }
+    });
+
+    return false;
+}
+function callSubmitPage(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "This information is saved to the database.",
+        buttons: true,
+        icon: "warning"
+    }).then(function (cf) {
+        if (cf) {
+            var form = $('form')[0];
+            var fd = new FormData(form);
+
+            $.ajax({
+                url: urlAjax,
+                method: "POST",
+                async: true,
+                data: fd,
+                processData: false,
+                contentType: false,
+                traditional: true,
+                success: function (res) {
+                    swal({
+                        title: res.title,
+                        text: res.text,
+                        icon: res.icon,
+                        button: res.button,
+                        dangerMode: res.dangerMode
+                    }).then(function () {
+                        if (res.icon == 'success') {
+                            window.location.reload();
+                        }
+                    });
                 }
-                else {
-                    reloadTable();
+            });
+        }
+    });
+
+    return false;
+}
+function callSubmitRedirect(urlAjax, urlRedirect) {
+    swal({
+        title: "Are you sure?",
+        text: "This information is saved to the database.",
+        buttons: true,
+        icon: "warning"
+    }).then((cf) => {
+        if (cf) {
+            var form = $('form')[0];
+            var fd = new FormData(form);
+
+            $.ajax({
+                url: urlAjax,
+                method: "POST",
+                async: true,
+                data: fd,
+                processData: false,
+                contentType: false,
+                traditional: true,
+                success: function (res) {
+                    swal({
+                        title: res.title,
+                        text: res.text,
+                        icon: res.icon,
+                        button: res.button,
+                        dangerMode: res.dangerMode
+                    }).then(function () {
+                        if (res.icon == 'success') {
+                            window.location.replace(urlRedirect + '/' + res.option);
+                        }
+                    });
                 }
-            }
+            });
         }
     });
 
@@ -279,7 +346,7 @@ function callDeleteItem(urlAjax, reloadPage = false) {
         }
     });
 }
-function SignoutNotify(url) {
+function notifySignout(url) {
     swal({
         title: "Are you sure?",
         text: "Signout",

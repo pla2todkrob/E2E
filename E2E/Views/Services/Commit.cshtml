@@ -6,10 +6,14 @@
 @section scripts{
     <script src="~/Asset/Service.min.js"></script>
     <script>
-
         $(function () {
             setTable_File('#reqFiles', true, false);
             setDropdown_Form();
+        });
+
+        $('form').submit(function () {
+            callSubmitRedirect('@Url.Action("Commit","Services")', '@Url.Action("Action","Services")');
+            return false;
         });
     </script>
 }
@@ -29,9 +33,12 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-lg-5">
+            <div class="col-12 col-lg-5 col-xl-3 order-1 order-lg-0">
                 @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CommitForm" }))
                 {
+                    @Html.ValidationSummary(true)
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Services.Service_Id)
                     <div class="form-group">
                         <label for="plantList">
                             Plant
@@ -55,73 +62,105 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        @Html.LabelFor(m => m.Services.Department_Id)
-                        @Html.DropDownListFor(m => m.Services.Department_Id, new SelectList(ViewBag.DepartmentList, "Value", "Text"), "Select Department", new { @class = "form-control", required = "required" })
+                        <label for="Services_Department_Id">Department</label>
+                        <select class="form-control" id="Services_Department_Id" onchange="getSelectOp('@Url.Action("Users_GetSelectSections","Masters")',this.value,'#sectionList')" required>
+                            <option value="">Select Department</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="sectionList">
                             Section
                         </label>
-                        <select class="form-control" id="sectionList" onchange="getSelectOp('@Url.Action("Users_GetSelectDepartments","Masters")',this.value,'#Services_Department_Id')">
+                        <select class="form-control" id="sectionList" onchange="getSelectOp('@Url.Action("Users_GetSelectProcesses","Masters")',this.value,'#processList')">
                             <option value="">Select Section</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        @{
-                            if (!Model.Services.RequiredApprove)
-                            {
-                                <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                                <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Require approval</button>
-                            }
-                        }
-
-                        <button type="submit" class="btn btn-primary float-right"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button>
+                        <label for="processList">
+                            Process
+                        </label>
+                        <select class="form-control" id="processList" onchange="getSelectOp('@Url.Action("Users_GetSelectUsers","Masters")',this.value,'#Services_Action_User_Id')">
+                            <option value="">Select Process</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="Services_Action_User_Id">
+                            User
+                        </label>
+                        <select class="form-control" id="Services_Action_User_Id">
+                            <option value="">Select User</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="float-right">
+                            <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to My department</button>
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                 }
             </div>
-            <div class="col-lg-7">
-                <dl class="row">
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Create)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Services.Create)</dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Service_Subject)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0"><b>@Html.DisplayFor(m => m.Services.Service_Subject)</b></dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Services.Service_DueDate)</dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Services.Update)</dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Approve_User_Code)</dd>
-                    <dt class="col-12 col-md-4">@Html.DisplayNameFor(m => m.Services.Approve_DateTime)</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Html.DisplayFor(m => m.Services.Approve_DateTime)</dd>
-                    <dt class="col-12 col-md-4">Files</dt>
-                    <dd class="offset-1 col-11 col-md-8 offset-md-0">@Model.ServiceFiles.Count Attachments</dd>
-                </dl>
-                <table class="table table-bordered table-hover" id="reqFiles">
-                    <thead>
-                        <tr>
-                            <th>File name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
-                        {
-                            <tr>
-                                <td>
-                                    <div class="d-flex justify-content-between">
-                                        @item.ServiceFile_Name
-                                        <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
+            <div class="col-12 col-lg-7 col-xl-9 order-0 order-lg-1">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-3">
+                        <dl class="row">
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Create)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Create)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Service_Subject)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Service_Subject)</b></dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Service_DueDate)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Approve_User_Code)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Approve_DateTime)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Approve_DateTime)</dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">Files</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Model.ServiceFiles.Count Attachments</dd>
+                        </dl>
+
+                        @{
+                            if (!Model.Services.RequiredApprove)
+                            {
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Require approval</button>
+                                </div>
+                            }
+
                         }
-                    </tbody>
-                </table>
+                    </div>
+                    <div class="col-12 col-xl-4 mb-3">
+                        <div class="row">
+                            <table class="table table-bordered table-hover" id="reqFiles">
+                                <thead>
+                                    <tr>
+                                        <th>@Html.DisplayNameFor(m => m.ServiceFiles.FirstOrDefault().ServiceFile_Name)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex justify-content-between">
+                                                    @item.ServiceFile_Name
+                                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

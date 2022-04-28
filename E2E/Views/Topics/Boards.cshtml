@@ -14,7 +14,7 @@
         });
 
         $(document).on('submit','#SaveForm',  function () {
-            callSubmit('@Url.Action("Boards_Create", "Topics")');
+            callSubmitModal('@Url.Action("Boards_Create", "Topics")');
             return false;
         });
 

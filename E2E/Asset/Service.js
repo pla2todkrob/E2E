@@ -101,27 +101,65 @@ function setDateRange(urlAjax, val) {
 }
 
 function setRequired(urlAjax) {
-    $.ajax({
-        url: urlAjax,
-        async: true,
-        success: function (res) {
-            swal({
-                title: res.title,
-                text: res.text,
-                icon: res.icon,
-                button: res.button,
-                dangerMode: res.dangerMode
-            });
-            if (res.icon == 'success') {
-                $('#modalArea').modal('hide');
-                if (reloadPage) {
-                    location.reload();
-                }
-                else {
-                    reloadTable();
-                }
+    swal({
+        title: "Are you sure?",
+        text: "This item will be sent to the requester's department manager.",
+        buttons: true,
+        icon: "warning"
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                location.reload();
+                            }
+                        })
+                    }
+                });
             }
-        }
-    });
+        });
+
+    return false;
+}
+
+function setCommitToDepartment(urlAjax, urlRedirect) {
+    swal({
+        title: "Are you sure?",
+        text: "This item request will be imported to your department.",
+        buttons: true,
+        icon: "warning"
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                window.location.replace(urlRedirect);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
     return false;
 }
