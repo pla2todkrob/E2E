@@ -64,8 +64,8 @@ $(document).on('submit', '#SaveReply', function (e) {
                 {
 
 
-                    <a href="@img.TopicGallery_Original">
-                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original" />
+                    <a href="@img.TopicGallery_Original" target="_blank">
+                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original"/>
                     </a>
                     <!-- other images... -->
 
@@ -81,7 +81,7 @@ $(document).on('submit', '#SaveReply', function (e) {
                 @foreach (var files in Model.TopicFiles)
                 {
                     <li>
-                        <a href="@files.TopicFile_Path">@files.TopicFile_Name</a>
+                        <a href="@files.TopicFile_Path" target="_blank">@files.TopicFile_Name</a>
                     </li>
 
                 }

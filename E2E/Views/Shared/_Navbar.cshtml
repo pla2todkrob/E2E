@@ -3,62 +3,63 @@
 @{
     Layout = null;
 }
-<nav class="col-12 py-3 navbar navbar-light overflow-auto" id="menu">
-    <ul class="nav flex-column nav-pills flex-fill w-100">
-        <li class="nav-item">
-            <a href="@Url.Action("Index","Home")" class="nav-link pl-3">Home</a>
-        </li>
-        <li class="nav-item">
-            <h6 class="navbar-text">Topic</h6>
-            <ul class="nav flex-column nav-pills flex-fill">
-                <li class="nav-item">
-                    <a href="@Url.Action("Boards","Topics")" class="nav-link pl-3">Board</a>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <h6 class="navbar-text">Service</h6>
-            <ul class="nav flex-column nav-pills flex-fill">
-                <li class="nav-item">
-                    <a href="@Url.Action("Index","Services")" class="nav-link pl-3" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
-                </li>
-            </ul>
-        </li>
 
-        @{
-            if (Model == 1)
-            {
-                Html.RenderPartial("_NavbarAdmin");
+<div class="collapse navbar-collapse navHeader ">
+        <ul class="nav flex-column nav-pills flex-fill w-100">
+            <li class="nav-item active mt-2">
+                <a href="@Url.Action("Index","Home")" class="nav-link pl-3">Home</a>
+            </li>
+            <li class="nav-item">
+                <h6 class="navbar-text">Topic</h6>
+                <ul class="nav flex-column nav-pills flex-fill">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Boards","Topics")" class="nav-link pl-3">Board</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <h6 class="navbar-text">Service</h6>
+                <ul class="nav flex-column nav-pills flex-fill">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","Services")" class="nav-link pl-3" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
+                    </li>
+                </ul>
+            </li>
+
+            @{
+                if (Model == 1)
+                {
+                    Html.RenderPartial("_NavbarAdmin");
+                }
             }
-        }
 
-        <li class="nav-item">
-            <h6 class="navbar-text">Department</h6>
-            <ul class="nav flex-column nav-pills flex-fill">
-                <li class="nav-item">
-                    <a href="@Url.Action("AllTask","Departments")" class="nav-link pl-3">All task</a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("AllRequest","Departments")" class="nav-link pl-3">All request</a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("Approve","Departments")" class="nav-link pl-3">Approve</a>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <h6 class="navbar-text">@{ Html.RenderAction("_Profile", "Configurations"); }</h6>
-            <ul class="nav flex-column nav-pills flex-fill">
-                <li class="nav-item">
-                    <a href="@Url.Action("MyTask","Profile")" class="nav-link pl-3">My task</a>
-                </li>
-                <li class="nav-item">
-                    <a href="@Url.Action("MyRequest","Profile")" class="nav-link pl-3">My request</a>
-                </li>
-                <li class="nav-item ">
-                    <a href="#" class="nav-link pl-3 text-danger" onclick="SignoutNotify('@Url.Action("Signout","Users")');">Signout</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
-</nav>
+            <li class="nav-item">
+                <h6 class="navbar-text">Department</h6>
+                <ul class="nav flex-column nav-pills flex-fill">
+                    <li class="nav-item">
+                        <a href="@Url.Action("AllTask","Departments")" class="nav-link pl-3">All task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("AllRequest","Departments")" class="nav-link pl-3">All request</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Approve","Departments")" class="nav-link pl-3">Approve</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <h6 class="navbar-text">@{ Html.RenderAction("_Profile", "Configurations"); }</h6>
+                <ul class="nav flex-column nav-pills flex-fill">
+                    <li class="nav-item">
+                        <a href="@Url.Action("MyTask","Profile")" class="nav-link pl-3">My task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("MyRequest","Profile")" class="nav-link pl-3">My request</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a href="#" class="nav-link pl-3 text-danger" onclick="SignoutNotify('@Url.Action("Signout","Users")');">Signout</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+</div>

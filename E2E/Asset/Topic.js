@@ -21,11 +21,11 @@ function callModalTopics(urlAjax, bigSize = false) {
             });
 
 
-            $('#Topic_Pin').on('change', function () {
+            $('#Topics_Topic_Pin').on('change', function () {
                 if ($(this).is(':checked')) {
-                    $('#Topic_Pin_EndDate').attr('required', 'required');
+                    $('#Topics_Topic_Pin_EndDate').attr('required', 'required');
                 } else {
-                    $('#Topic_Pin_EndDate').removeAttr('required');
+                    $('#Topics_Topic_Pin_EndDate').removeAttr('required');
                 }
             });
 
