@@ -87,6 +87,30 @@ namespace E2E.Models
             }
         }
 
+        public bool Ftp_DeleteFile(string path)
+        {
+            try
+            {
+                bool res = new bool();
+                path = path.Replace(urlDomain, url);
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
+                request.Method = WebRequestMethods.Ftp.DeleteFile;
+                request.Credentials = new NetworkCredential(user, pass);
+                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                {
+                    if (response.StatusCode == FtpStatusCode.FileActionOK)
+                    {
+                        res = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private string GetFileTypeBase64(string base64)
         {
             try

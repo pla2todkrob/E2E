@@ -2047,12 +2047,17 @@ namespace E2E.Models
                     .Where(w => w.Division_Id == divisionId.Value);
             }
 
-            return query
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Department", Value = "" });
+
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Department_Id.ToString(),
                     Text = s.Department_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_Section(Guid? departmentId)

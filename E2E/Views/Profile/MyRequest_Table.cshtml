@@ -8,8 +8,9 @@
     <thead>
         <tr>
             <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
-
+            <th class="fit">@Html.DisplayNameFor(m => m.System_Statuses.Status_Name)</th>
             <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
+
             <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
@@ -21,10 +22,11 @@
         {
             <tr>
                 <td>@Html.DisplayFor(i => item.Create)</td>
-
+                <td><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
-                    <a href="@Url.Action("Commit","Services",new { id=item.Service_Id })" >@Html.DisplayFor(i => item.Service_Subject)</a>
+                    @Html.DisplayFor(i => item.Service_Subject)
+                    &nbsp;<button type="button" class="btn" onclick="callModalForm('@Url.Action("Form","Services",new { id = item.Service_Id })',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
                 </td>
                 <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
                 <td>@Html.DisplayFor(i => item.Service_DueDate)</td>

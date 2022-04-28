@@ -36,7 +36,12 @@ namespace E2E.Controllers
         public ActionResult _Navbar()
         {
             int res = new int();
-            res = 1;
+            Guid id = Guid.Parse(HttpContext.User.Identity.Name);
+            res = db.Users
+                .Where(w => w.User_Id == id)
+                .Select(s => s.System_Roles.Role_Index)
+                .FirstOrDefault();
+
             return PartialView("_Navbar", res);
         }
 

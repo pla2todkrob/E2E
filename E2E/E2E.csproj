@@ -173,6 +173,7 @@
     <Compile Include="Controllers\ConfigurationsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
+    <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -752,6 +753,9 @@
     <Content Include="Views\Topics\ReloadModel.cshtml" />
     <Content Include="Views\Services\Commit.cshtml" />
     <Content Include="Views\Services\_RefService.cshtml" />
+    <Content Include="Views\Profile\MyRequest.cshtml" />
+    <Content Include="Views\Profile\MyTask.cshtml" />
+    <Content Include="Views\Profile\MyRequest_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

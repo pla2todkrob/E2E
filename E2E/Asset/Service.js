@@ -1,12 +1,13 @@
-﻿function callModalAddService(urlAjax, modalSize = '') {
+﻿function callModalForm(urlAjax, bigSize = false) {
     $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
-            if (modalSize != '') {
-                if (!$('#modalContent').parent().hasClass(modalSize)) {
-                    $('#modalContent').parent().addClass(modalSize);
-                }
+            if (bigSize) {
+                $('#modalContent').parent().addClass('modal-lg');
+            }
+            else {
+                $('#modalContent').parent().removeClass('modal-lg');
             }
 
             $('#modalContent').html(res);
@@ -97,4 +98,30 @@ function setDateRange(urlAjax, val) {
             $('#Service_DueDate').attr('min', '');
         }
     });
+}
+
+function setRequired(urlAjax) {
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            swal({
+                title: res.title,
+                text: res.text,
+                icon: res.icon,
+                button: res.button,
+                dangerMode: res.dangerMode
+            });
+            if (res.icon == 'success') {
+                $('#modalArea').modal('hide');
+                if (reloadPage) {
+                    location.reload();
+                }
+                else {
+                    reloadTable();
+                }
+            }
+        }
+    });
+    return false;
 }
