@@ -1990,7 +1990,7 @@ namespace E2E.Models
         {
             IQueryable<Master_Grades> query = db.Master_Grades
                 .Where(w => w.Active);
-            if (lineworkId != null)
+            if (lineworkId.HasValue)
             {
                 query = query
                     .Where(w => w.LineWork_Id == lineworkId.Value);
@@ -2019,7 +2019,7 @@ namespace E2E.Models
         {
             IQueryable<Master_Divisions> query = db.Master_Divisions
                 .Where(w => w.Active);
-            if (plantId != null)
+            if (plantId.HasValue)
             {
                 query = query
                     .Where(w => w.Plant_Id == plantId.Value);
@@ -2041,7 +2041,7 @@ namespace E2E.Models
         {
             IQueryable<Master_Departments> query = db.Master_Departments
                 .Where(w => w.Active);
-            if (divisionId != null)
+            if (divisionId.HasValue)
             {
                 query = query
                     .Where(w => w.Division_Id == divisionId.Value);
@@ -2064,36 +2064,71 @@ namespace E2E.Models
         {
             IQueryable<Master_Sections> query = db.Master_Sections
                 .Where(w => w.Active);
-            if (departmentId != null)
+            if (departmentId.HasValue)
             {
                 query = query
                     .Where(w => w.Department_Id == departmentId.Value);
             }
 
-            return query
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Section", Value = "" });
+
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Section_Id.ToString(),
                     Text = s.Section_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_Process(Guid? sectionId)
         {
             IQueryable<Master_Processes> query = db.Master_Processes
                 .Where(w => w.Active);
-            if (sectionId != null)
+            if (sectionId.HasValue)
             {
                 query = query
                     .Where(w => w.Section_Id == sectionId.Value);
             }
 
-            return query
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Process", Value = "" });
+
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Process_Id.ToString(),
                     Text = s.Process_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
+        }
+
+        public List<SelectListItem> SelectListItems_Users(Guid? processId)
+        {
+            IQueryable<Users> query = db.Users
+                .Where(w => w.Active)
+                .OrderBy(o => o.Master_Grades.Grade_Name)
+                .ThenBy(t => t.User_Code);
+            if (processId.HasValue)
+            {
+                query = query
+                    .Where(w => w.Process_Id == processId);
+            }
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select User", Value = "" });
+
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Text = s.User_Code + " [" + s.Master_Grades.Grade_Name + "][" + db.UserDetails.Where(w => w.User_Id == s.User_Id).Select(s2 => s2.Detail_EN_FirstName).FirstOrDefault() + "]",
+                    Value = s.User_Id.ToString()
+                }).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_PrefixTH()

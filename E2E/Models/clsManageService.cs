@@ -90,7 +90,7 @@ namespace E2E.Models
                 .FirstOrDefault();
 
                 return Services_IQ_GetAll(val)
-                    .Where(w => w.Status_Id == statusId);
+                    .Where(w => w.Status_Id == statusId && !w.RequiredApprove && !w.Approve_User_Id.HasValue);
             }
             catch (Exception)
             {
@@ -226,6 +226,27 @@ namespace E2E.Models
                 }
 
                 return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<Services> Services_GetAllRequiredApprove(bool val)
+        {
+            try
+            {
+                Guid statusId = db.System_Statuses
+                .Where(w => w.Status_Index == 1)
+                .Select(s => s.Status_Id)
+                .FirstOrDefault();
+
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid deptId = db.Users.Find(id).Master_Processes.Master_Sections.Department_Id.Value;
+                List<Guid> userIdList = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId).Select(s => s.User_Id).ToList();
+                return db.Services.Where(w => w.RequiredApprove && w.Approve_User_Id.HasValue == val && userIdList.Contains(w.User_Id.Value) && w.Status_Id == statusId).ToList();
             }
             catch (Exception)
             {
@@ -379,6 +400,34 @@ namespace E2E.Models
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.RequiredApprove = true;
+                services.Update = DateTime.Now;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Services_GetToDepartment(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.Department_Id = deptId;
+                services.CommitService = true;
+                services.Commit_User_Id = userId;
+                services.Commit_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {

@@ -1391,5 +1391,9 @@ namespace E2E.Controllers
         {
             return Json(data.SelectListItems_Process(id), JsonRequestBehavior.AllowGet);
         }
+        public ActionResult Users_GetSelectUsers(Guid? id)
+        {
+            return Json(data.SelectListItems_Users(id), JsonRequestBehavior.AllowGet);
+        }
     }
 }
