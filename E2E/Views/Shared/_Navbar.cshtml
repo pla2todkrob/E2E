@@ -4,43 +4,27 @@
     Layout = null;
 }
 
-    <nav class="vertical_nav" id="vl_nav">
+    <nav class="vertical_nav shadow-lg" id="vl_nav">
         <ul id="js-menu" class="menu">
 
             <li class="menu--item">
-                <a href="@Url.Action("Index","Home")" class="menu--link menu--label">Home</a>
+                <a href="@Url.Action("Index","Home")" class="menu--link menu--label text-align">Home</a>
             </li>
 
-            <li class="menu--item  menu--item__has_sub_menu">
-                <label class="menu--link" title="Topic">
-                    <span class="menu--label">Topic</span>
-                </label>
-
-                <ul class="sub_menu">
-                    <li class="sub_menu--item">
-                        <a href="@Url.Action("Boards","Topics")" class="sub_menu--link ">Board</a>
-                    </li>
-                </ul>
+            <li class="menu--item">
+                <a href="@Url.Action("Boards","Topics")" class="menu--link menu--label text-align">Topic</a>
             </li>
 
-            <li class="menu--item  menu--item__has_sub_menu">
-                <label class="menu--link" title="Service">
-                    <span class="menu--label">Service</span>
-                </label>
-
-                <ul class="sub_menu">
-                    <li class="sub_menu--item">
-                        <a href="@Url.Action("Index","Services")" class="sub_menu--link " id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
-                    </li>
-                </ul>
+            <li class="menu--item">
+                <a href="@Url.Action("Index","Services")" class="menu--link menu--label text-align" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
             </li>
 
             @{
-                    if (Model == 1)
-                    {
-                        Html.RenderPartial("_NavbarAdmin");
-                    }
+                if (Model == 1)
+                {
+                    Html.RenderPartial("_NavbarAdmin");
                 }
+            }
 
             <li class="menu--item  menu--item__has_sub_menu">
                 <label class="menu--link" title="Department">
@@ -49,14 +33,14 @@
 
                 <ul class="sub_menu">
                     <li class="sub_menu--item">
-                        <a href="@Url.Action("AllTask","Departments")" class="sub_menu--link ">All task</a>
+                        <a href="@Url.Action("AllTask","Services")" class="sub_menu--link ">All task</a>
                     </li>
 
                     <li class="sub_menu--item">
-                        <a href="@Url.Action("AllRequest","Departments")" class="sub_menu--link ">All request</a>
+                        <a href="@Url.Action("AllRequest","Services")" class="sub_menu--link ">All request</a>
                     </li>
                     <li class="sub_menu--item">
-                        <a href="@Url.Action("Approve","Departments")" class="sub_menu--link ">Approve</a>
+                        <a href="@Url.Action("Approve","Services")" class="sub_menu--link ">Approve</a>
                     </li>
                 </ul>
             </li>
@@ -68,10 +52,10 @@
 
                 <ul class="sub_menu">
                     <li class="sub_menu--item">
-                        <a href="@Url.Action("MyTask","Profile")" class="sub_menu--link ">My task</a>
+                        <a href="@Url.Action("MyTask","Services")" class="sub_menu--link ">My task</a>
                     </li>
                     <li class="sub_menu--item">
-                        <a href="@Url.Action("MyRequest","Profile")" class="sub_menu--link ">My request</a>
+                        <a href="@Url.Action("MyRequest","Services")" class="sub_menu--link ">My request</a>
                     </li>
                     <li class="sub_menu--item">
                         <a href="#" class="sub_menu--link " onclick="SignoutNotify('@Url.Action("Signout","Users")');">Signout</a>
