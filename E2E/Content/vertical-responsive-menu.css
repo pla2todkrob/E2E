@@ -8,7 +8,7 @@ Vertical Reponsive Menu
   -moz-transition: all 0.3s ease-out;
   -webkit-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
-  z-index:4;
+  z-index:999;
 }
 
 /* line 14, sass/vertical-responsive-menu.scss */
@@ -45,7 +45,7 @@ Vertical Reponsive Menu
     top: 50px;
     bottom: 0px;
     width: 200px;
-    background: #f6f6f6;
+    background: #fff;
 }
 
 /* line 63, sass/vertical-responsive-menu.scss */
@@ -94,14 +94,15 @@ Vertical Reponsive Menu
 
 /* line 113, sass/vertical-responsive-menu.scss */
 .menu--link {
-  display: block;
-  overflow: hidden;
-  font-size: 0.875rem;
-  text-decoration: none;
-  color: #666;
-  font-weight: 400;
-  white-space: nowrap;
-  cursor: pointer; }
+    display: block;
+    overflow: hidden;
+    font-size: 0.875rem;
+    text-decoration: none;
+    color: #666;
+    font-weight: 400;
+    white-space: nowrap;
+    cursor: pointer;
+}
   /* line 123, sass/vertical-responsive-menu.scss */
   .menu--link:hover, .menu--link:hover .menu--label {
     color: #000;
@@ -120,7 +121,7 @@ Vertical Reponsive Menu
 .menu--label {
   display: block;
   height: 40px;
-  line-height: 40px;
+  line-height: 20px;  /*ค่าเดิม 40*/
   padding:10px;
 }
 
