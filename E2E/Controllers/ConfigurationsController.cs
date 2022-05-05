@@ -81,11 +81,11 @@ namespace E2E.Controllers
 
                 if (authorIndex != 3)
                 {
-                    res = new clsManageService().Count_GetAllPending(false);
+                    res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                 }
                 else
                 {
-                    res = new clsManageService().Count_GetAllPending(true);
+                    res = new clsManageService().Services_GetWaitCommitCount();
                 }
 
                 return PartialView("_NavService", res);

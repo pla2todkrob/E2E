@@ -19,7 +19,7 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("MyRequest_Table", "Profile")', true, true,1);
+            callTable('@Url.Action("MyRequest_Table", "Services")', true, false,0);
         }
     </script>
 }
@@ -28,7 +28,7 @@
     <nav aria-label="breadcrumb " class="mt-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-            <li class="breadcrumb-item"><a href="@Url.Action("Index","Profile")">Profile</a></li>
+            <li class="breadcrumb-item active">Profile</li>
             <li class="breadcrumb-item active" aria-current="page">My Request</li>
         </ol>
     </nav>
