@@ -14,11 +14,11 @@ namespace E2E.Models
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
 
-        public List<Services> Services_GetAll(bool val)
+        public List<Services> Services_GetWaitCommitList()
         {
             try
             {
-                return Services_IQ_GetAll(val).ToList();
+                return Services_GetWaitCommit_IQ().ToList();
             }
             catch (Exception)
             {
@@ -26,19 +26,117 @@ namespace E2E.Models
             }
         }
 
-        public IQueryable<Services> Services_IQ_GetAll(bool val)
+        public int Services_GetWaitCommitCount()
         {
             try
             {
-                return db.Services
-                .Where(w => w.CommitService == val)
-                .OrderByDescending(o => o.System_Priorities.Priority_Index)
-                .ThenBy(o => new { o.Create, o.Service_DueDate });
+                return Services_GetWaitCommit_IQ().Count();
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        private IQueryable<Services> Services_GetWaitCommit_IQ()
+        {
+            try
+            {
+                Guid statusId = db.System_Statuses
+                .Where(w => w.Status_Index == 1)
+                .Select(s => s.Status_Id)
+                .FirstOrDefault();
+
+                return db.Services
+                    .Where(w => !w.CommitService && w.Status_Id == statusId && (!w.RequiredApprove || (w.Approve_User_Id.HasValue && w.RequiredApprove)))
+                    .OrderByDescending(o => o.System_Priorities.Priority_Index)
+                    .ThenBy(o => new { o.Create, o.Service_DueDate });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<Services> Services_GetWaitActionList(Guid? id = null)
+        {
+            try
+            {
+                return Services_GetWaitAction_IQ(id).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public int Services_GetWaitActionCount(Guid? id = null)
+        {
+            try
+            {
+                return Services_GetWaitAction_IQ(id).Count();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private IQueryable<Services> Services_GetWaitAction_IQ(Guid? id)
+        {
+            try
+            {
+                Guid statusId = db.System_Statuses
+                .Where(w => w.Status_Index == 1)
+                .Select(s => s.Status_Id)
+                .FirstOrDefault();
+
+                IQueryable<Services> query = db.Services
+                    .Where(w => w.CommitService && w.Status_Id == statusId)
+                    .OrderByDescending(o => o.System_Priorities.Priority_Index)
+                    .ThenBy(o => new { o.Create, o.Service_DueDate });
+
+                if (id.HasValue)
+                {
+                    Guid? deptId = db.Users
+                        .Where(w => w.User_Id == id.Value)
+                        .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                        .FirstOrDefault();
+                    if (deptId.HasValue)
+                    {
+                        query = query.Where(w => w.Department_Id == deptId.Value);
+                    }
+                }
+
+                return query;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<Services> Services_GetNoPendingList()
+        {
+            return Services_GetNoPending_IQ().ToList();
+        }
+
+        public int Services_GetNoPendingCount()
+        {
+            return Services_GetNoPending_IQ().Count();
+        }
+
+        private IQueryable<Services> Services_GetNoPending_IQ()
+        {
+            Guid statusId = db.System_Statuses
+                .Where(w => w.Status_Index == 1)
+                .Select(s => s.Status_Id)
+                .FirstOrDefault();
+
+            return db.Services
+                .Where(w => w.Status_Id != statusId)
+                .OrderByDescending(o => o.System_Priorities.Priority_Index)
+                .ThenBy(o => new { o.Create, o.Service_DueDate });
         }
 
         public List<Services> Services_GetMyRequest()
@@ -49,78 +147,6 @@ namespace E2E.Models
                 return db.Services
                     .Where(w => w.User_Id == id)
                     .ToList();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public List<Services> Services_GetAllPending(bool val)
-        {
-            try
-            {
-                return Services_IQ_GetAllPending(val).ToList();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public int Count_GetAllPending(bool val)
-        {
-            try
-            {
-                return Services_IQ_GetAllPending(val).Count();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public IQueryable<Services> Services_IQ_GetAllPending(bool val)
-        {
-            try
-            {
-                Guid statusId = db.System_Statuses
-                .Where(w => w.Status_Index == 1)
-                .Select(s => s.Status_Id)
-                .FirstOrDefault();
-
-                return Services_IQ_GetAll(val)
-                    .Where(w => w.Status_Id == statusId && !w.RequiredApprove && !w.Approve_User_Id.HasValue);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public List<Services> Services_GetAllNoPending(bool val)
-        {
-            try
-            {
-                return Services_IQ_GetAllNoPending(val).ToList();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public IQueryable<Services> Services_IQ_GetAllNoPending(bool val)
-        {
-            try
-            {
-                List<Guid> statusIds = db.System_Statuses
-                .Where(w => w.Status_Index != 1)
-                .Select(s => s.Status_Id)
-                .ToList();
-
-                return Services_IQ_GetAll(val)
-                    .Where(w => statusIds.Contains(w.Status_Id));
             }
             catch (Exception)
             {
@@ -161,14 +187,35 @@ namespace E2E.Models
             {
                 return db.Services
                     .Where(w => w.Service_Id == id)
-                    .Select(s => new clsServices()
+                    .GroupJoin(db.UserDetails, m => m.Approve_User_Id, j => j.User_Id, (m, gj) => new
                     {
-                        Services = s,
-                        ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList(),
-                        User_Name = db.UserDetails.Where(w => w.User_Id == s.User_Id)
-                        .Select(s2 => new { Name = s2.Detail_EN_FirstName + " " + s2.Detail_EN_LastName })
-                        .Select(s2 => s2.Name)
-                        .FirstOrDefault()
+                        Services = m,
+                        Approve = gj.FirstOrDefault()
+                    })
+                    .GroupJoin(db.UserDetails, m => m.Services.Action_User_Id, j => j.User_Id, (m, gj) => new
+                    {
+                        DataJoin = m,
+                        Action = gj.FirstOrDefault()
+                    })
+                    .GroupJoin(db.UserDetails, m => m.DataJoin.Services.Commit_User_Id, j => j.User_Id, (m, gj) => new
+                    {
+                        DataJoin = m,
+                        Commit = gj.FirstOrDefault()
+                    })
+                    .GroupJoin(db.ServiceFiles, m => m.DataJoin.DataJoin.Services.Service_Id, j => j.Service_Id, (m, gj) => new clsServices()
+                    {
+                        Action_User_Code = m.DataJoin.Action.Users.User_Code,
+                        Action_User_Email = m.DataJoin.Action.Users.User_Email,
+                        Action_User_Name = m.DataJoin.Action.Detail_EN_FirstName + " " + m.DataJoin.Action.Detail_EN_LastName,
+                        Approve_User_Code = m.DataJoin.DataJoin.Approve.Users.User_Code,
+                        Approve_User_Email = m.DataJoin.DataJoin.Approve.Users.User_Email,
+                        Approve_User_Name = m.DataJoin.DataJoin.Approve.Detail_EN_FirstName + " " + m.DataJoin.DataJoin.Approve.Detail_EN_LastName,
+                        Commit_User_Code = m.Commit.Users.User_Code,
+                        Commit_User_Email = m.Commit.Users.User_Email,
+                        Commit_User_Name = m.Commit.Detail_EN_FirstName + " " + m.Commit.Detail_EN_LastName,
+                        ServiceFiles = gj.ToList(),
+                        Services = m.DataJoin.DataJoin.Services,
+                        User_Name = db.UserDetails.Where(w => w.User_Id == m.DataJoin.DataJoin.Services.User_Id).Select(s => new { Name = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName }).Select(s => s.Name).FirstOrDefault()
                     }).FirstOrDefault();
             }
             catch (Exception)
@@ -233,7 +280,7 @@ namespace E2E.Models
             }
         }
 
-        public List<Services> Services_GetAllRequiredApprove(bool val)
+        public List<Services> Services_GetRequiredApprove(bool val)
         {
             try
             {
@@ -415,7 +462,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_GetToDepartment(Guid id)
+        public bool Services_SetToDepartment(Guid id)
         {
             try
             {
@@ -471,6 +518,52 @@ namespace E2E.Models
             }
         }
 
+        public bool Services_SetApprove(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.Approve_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                services.Approve_DateTime = DateTime.Now;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Services_SetAction(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.Action_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                services.Acction_DateTime = DateTime.Now;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<SelectListItem> SelectListItems_Priority()
         {
             try
@@ -493,7 +586,7 @@ namespace E2E.Models
         {
             try
             {
-                return Services_IQ_GetAllNoPending(true)
+                return Services_GetNoPending_IQ()
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Service_Id.ToString(),

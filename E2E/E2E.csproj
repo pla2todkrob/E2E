@@ -171,10 +171,8 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ConfigurationsController.cs" />
-    <Compile Include="Controllers\DepartmentsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
-    <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -748,7 +746,6 @@
     <Content Include="Views\Topics\Boards_Form.cshtml" />
     <Content Include="Views\Topics\Boards_Create.cshtml" />
     <Content Include="Views\Services\Form.cshtml" />
-    <Content Include="Views\Services\Index_Table.cshtml" />
     <Content Include="Views\Topics\Boards_Comment.cshtml" />
     <Content Include="Views\Topics\Boards_Reply.cshtml" />
     <Content Include="Views\Services\_File.cshtml" />
@@ -756,12 +753,14 @@
     <Content Include="Views\Topics\ReloadModel.cshtml" />
     <Content Include="Views\Services\Commit.cshtml" />
     <Content Include="Views\Services\_RefService.cshtml" />
-    <Content Include="Views\Profile\MyRequest.cshtml" />
-    <Content Include="Views\Profile\MyTask.cshtml" />
-    <Content Include="Views\Profile\MyRequest_Table.cshtml" />
-    <Content Include="Views\Departments\Approve.cshtml" />
-    <Content Include="Views\Departments\Approve_Form.cshtml" />
-    <Content Include="Views\Departments\Approve_Table.cshtml" />
+    <Content Include="Views\Services\Approve.cshtml" />
+    <Content Include="Views\Services\Approve_Table.cshtml" />
+    <Content Include="Views\Services\Approve_Form.cshtml" />
+    <Content Include="Views\Services\MyRequest.cshtml" />
+    <Content Include="Views\Services\MyTask.cshtml" />
+    <Content Include="Views\Services\MyRequest_Table.cshtml" />
+    <Content Include="Views\Services\Index_Table_WaitCommit.cshtml" />
+    <Content Include="Views\Services\Index_Table_WaitAction.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

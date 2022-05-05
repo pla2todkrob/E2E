@@ -109,12 +109,12 @@
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Service_Subject)</b></dd>
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
-                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
-                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
-                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Service_DueDate)</dd>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Update)</dt>
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
@@ -165,4 +165,4 @@
         </div>
     </div>
 </div>
-<div id="serviceRefList"></div>
+<div id="serviceRefList">@{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }</div>

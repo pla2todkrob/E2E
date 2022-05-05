@@ -31,30 +31,6 @@
     return false;
 }
 
-function callModalCommit(urlAjax, urlLoad) {
-    $.ajax({
-        url: urlAjax,
-        async: true,
-        success: function (res) {
-            if (!$('#modalContent').parent().hasClass('modal-lg')) {
-                $('#modalContent').parent().addClass('modal-lg');
-            }
-
-            $('#modalContent').html(res);
-            $('#modalContent').find('select').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
-                });
-            });
-
-            $('#serviceRefList').load(urlLoad);
-
-            $('#modalArea').modal('show');
-        }
-    });
-}
-
 function deleteFile(urlAjax, urlLoad) {
     swal({
         title: "Are you sure?",
@@ -162,4 +138,34 @@ function setCommitToDepartment(urlAjax, urlRedirect) {
         });
 
     return false;
+}
+
+function setApprove(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "If approval is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        });
+                        if (res.icon == 'success') {
+                            location.reload();
+                        }
+                    }
+                });
+                return false;
+            }
+        });
 }

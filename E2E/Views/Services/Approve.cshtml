@@ -10,8 +10,8 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("Approve_Table", "Departments",new {type = false})', true, true, 1, '#pending').then(function () {
-                callTable('@Url.Action("Approve_Table", "Departments", new { type = true})', true, true, 1, '#success');
+            callTable('@Url.Action("Approve_Table", "Services",new {type = false})', true, false, 0, '#pending').then(function () {
+                callTable('@Url.Action("Approve_Table", "Services", new { type = true})', true, false, 0, '#success');
             });
 
         }
