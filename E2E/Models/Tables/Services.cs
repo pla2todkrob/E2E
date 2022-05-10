@@ -32,17 +32,20 @@ namespace E2E.Models.Tables
         public Guid? Ref_Service_Id { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
-        public bool CommitService { get; set; }
         public Guid? Commit_User_Id { get; set; }
 
-        [Display(Name = "Commit dateTime")]
+        [Display(Name = "Commit datetime")]
         public DateTime? Commit_DateTime { get; set; }
 
-        public bool RequiredApprove { get; set; }
-        public Guid? Approve_User_Id { get; set; }
+        public Guid? Required_Approve_User_Id { get; set; }
 
-        [Display(Name = "Approval datetime")]
-        public DateTime? Approve_DateTime { get; set; }
+        [Display(Name = "Required approve datetime")]
+        public DateTime? Required_Approve_DateTime { get; set; }
+
+        public Guid? Approved_User_Id { get; set; }
+
+        [Display(Name = "Approved datetime")]
+        public DateTime? Approved_DateTime { get; set; }
 
         [Display(Name = "Status")]
         public Guid Status_Id { get; set; }

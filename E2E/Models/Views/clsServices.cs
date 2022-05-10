@@ -22,13 +22,13 @@ namespace E2E.Models.Views
         public string Commit_User_Email { get; set; }
 
         [Display(Name = "Approved by")]
-        public string Approve_User_Name { get; set; }
+        public string Approved_User_Name { get; set; }
 
         [Display(Name = "Approved by")]
-        public string Approve_User_Code { get; set; }
+        public string Approved_User_Code { get; set; }
 
         [Display(Name = "Approved by")]
-        public string Approve_User_Email { get; set; }
+        public string Approved_User_Email { get; set; }
 
         public string Action_User_Name { get; set; }
         public string Action_User_Code { get; set; }

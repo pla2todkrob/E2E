@@ -7,7 +7,7 @@
 <table class="table table-bordered table-hover nowrap w-100">
     <thead>
         <tr>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Commit_DateTime)</th>
 
             <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
@@ -20,7 +20,7 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td>@Html.DisplayFor(i => item.Commit_DateTime)</td>
 
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>

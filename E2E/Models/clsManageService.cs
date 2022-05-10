@@ -49,7 +49,7 @@ namespace E2E.Models
                 .FirstOrDefault();
 
                 return db.Services
-                    .Where(w => !w.CommitService && w.Status_Id == statusId && (!w.RequiredApprove || (w.Approve_User_Id.HasValue && w.RequiredApprove)))
+                    .Where(w => !w.Commit_User_Id.HasValue && w.Status_Id == statusId && (!w.Required_Approve_User_Id.HasValue || (w.Approved_User_Id.HasValue && w.Required_Approve_User_Id.HasValue)))
                     .OrderByDescending(o => o.System_Priorities.Priority_Index)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
             }
@@ -93,7 +93,7 @@ namespace E2E.Models
                 .FirstOrDefault();
 
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.CommitService && w.Status_Id == statusId)
+                    .Where(w => w.Commit_User_Id.HasValue && w.Status_Id == statusId)
                     .OrderByDescending(o => o.System_Priorities.Priority_Index)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
 
@@ -188,7 +188,7 @@ namespace E2E.Models
             {
                 return db.Services
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.UserDetails, m => m.Approve_User_Id, j => j.User_Id, (m, gj) => new
+                    .GroupJoin(db.UserDetails, m => m.Approved_User_Id, j => j.User_Id, (m, gj) => new
                     {
                         Services = m,
                         Approve = gj.FirstOrDefault()
@@ -208,9 +208,9 @@ namespace E2E.Models
                         Action_User_Code = m.DataJoin.Action.Users.User_Code,
                         Action_User_Email = m.DataJoin.Action.Users.User_Email,
                         Action_User_Name = m.DataJoin.Action.Detail_EN_FirstName + " " + m.DataJoin.Action.Detail_EN_LastName,
-                        Approve_User_Code = m.DataJoin.DataJoin.Approve.Users.User_Code,
-                        Approve_User_Email = m.DataJoin.DataJoin.Approve.Users.User_Email,
-                        Approve_User_Name = m.DataJoin.DataJoin.Approve.Detail_EN_FirstName + " " + m.DataJoin.DataJoin.Approve.Detail_EN_LastName,
+                        Approved_User_Code = m.DataJoin.DataJoin.Approve.Users.User_Code,
+                        Approved_User_Email = m.DataJoin.DataJoin.Approve.Users.User_Email,
+                        Approved_User_Name = m.DataJoin.DataJoin.Approve.Detail_EN_FirstName + " " + m.DataJoin.DataJoin.Approve.Detail_EN_LastName,
                         Commit_User_Code = m.Commit.Users.User_Code,
                         Commit_User_Email = m.Commit.Users.User_Email,
                         Commit_User_Name = m.Commit.Detail_EN_FirstName + " " + m.Commit.Detail_EN_LastName,
@@ -294,7 +294,7 @@ namespace E2E.Models
                 Guid deptId = db.Users.Find(id).Master_Processes.Master_Sections.Department_Id.Value;
                 List<Guid> userIdList = db.Users
                     .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId).Select(s => s.User_Id).ToList();
-                return db.Services.Where(w => w.RequiredApprove && w.Approve_User_Id.HasValue == val && userIdList.Contains(w.User_Id.Value) && w.Status_Id == statusId).ToList();
+                return db.Services.Where(w => w.Required_Approve_User_Id.HasValue && w.Approved_User_Id.HasValue == val && userIdList.Contains(w.User_Id.Value) && w.Status_Id == statusId).ToList();
             }
             catch (Exception)
             {
@@ -447,8 +447,8 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(id);
-                services.RequiredApprove = true;
-                services.Update = DateTime.Now;
+                services.Required_Approve_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                services.Required_Approve_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -473,7 +473,6 @@ namespace E2E.Models
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.Department_Id = deptId;
-                services.CommitService = true;
                 services.Commit_User_Id = userId;
                 services.Commit_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
@@ -526,8 +525,8 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(id);
-                services.Approve_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                services.Approve_DateTime = DateTime.Now;
+                services.Approved_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                services.Approved_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -580,7 +579,6 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(model.Service_Id);
-                services.CommitService = true;
                 services.Commit_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 services.Commit_DateTime = DateTime.Now;
                 services.Department_Id = model.Department_Id;

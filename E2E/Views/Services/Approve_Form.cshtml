@@ -42,23 +42,26 @@
                     <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
                     <dt class="col-12 col-sm-4 col-lg-5 col-xl-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
                     <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
-                    <dt class="col-12 col-sm-4 col-lg-5 col-xl-4">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
-                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0">@Html.DisplayFor(m => m.Approve_User_Code)</dd>
-                    <dt class="col-12 col-sm-4 col-lg-5 col-xl-4">@Html.DisplayNameFor(m => m.Services.Approve_DateTime)</dt>
-                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Approve_DateTime)</b></dd>
+                    <dt class="col-12 col-sm-4 col-lg-5 col-xl-4">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
+                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0">@Html.DisplayFor(m => m.Approved_User_Code)</dd>
+                    <dt class="col-12 col-sm-4 col-lg-5 col-xl-4">@Html.DisplayNameFor(m => m.Services.Approved_DateTime)</dt>
+                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
                     <dt class="col-12 col-sm-4 col-lg-5 col-xl-4">Files</dt>
                     <dd class="offset-1 col-11 col-sm-8 col-lg-7 col-xl-8 offset-sm-0">@Model.ServiceFiles.Count Attachments</dd>
                 </dl>
                 @{
-                    if (!Model.Services.Approve_User_Id.HasValue)
+                    if (!Model.Services.Approved_User_Id.HasValue)
                     {
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                            <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button>
-                        </div>
+                        if (ViewBag.AuthorizeIndex != 3)
+                        {
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button>
+                            </div>
+                        }
+
                     }
                 }
-
             </div>
             <div class="col-lg-5">
                 <div class="row">
