@@ -19,6 +19,8 @@ namespace E2E.Models.Tables
         [Display(Name = "File name")]
         public string ServiceCommentFile_Name { get; set; }
 
+        public int ServiceComment_Seq { get; set; }
+
         public ServiceCommentFiles()
         {
             ServiceCommentFile_Id = Guid.NewGuid();

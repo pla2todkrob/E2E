@@ -15,6 +15,7 @@ namespace E2E.Models.Tables
         public string TopicFile_Path { get; set; }
         public string TopicFile_Name { get; set; }
         public string TopicFile_Extension { get; set; }
+        public int TopicFile_Seq { get; set; }
 
         public TopicFiles()
         {

@@ -22,6 +22,8 @@ namespace E2E.Models.Tables
         [Display(Name = "File extension")]
         public string ServiceFile_Extension { get; set; }
 
+        public int ServiceFile_Seq { get; set; }
+
         public ServiceFiles()
         {
             ServiceFile_Id = Guid.NewGuid();
