@@ -1,4 +1,4 @@
-﻿function callModalForm(urlAjax, bigSize = false) {
+﻿function callModalForm(urlAjax, urlGetDate, bigSize = false) {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -22,7 +22,7 @@
             });
 
             $('#Priority_Id').on('select2:select', function (e) {
-                setDateRange(e.params.data.id);
+                setDateRange(urlGetDate, e.params.data.id);
             });
 
             $('#modalArea').modal('show');
@@ -71,7 +71,9 @@ function setDateRange(urlAjax, val) {
         async: true,
         success: function (res) {
             var now = new Date();
-            $('#Service_DueDate').attr('min', '');
+            now.setDate(now.getDate() + res);
+
+            $('#Service_DueDate').attr('min', moment(now).format('YYYY-MM-DD'));
         }
     });
 }

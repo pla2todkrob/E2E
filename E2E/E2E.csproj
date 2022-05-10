@@ -751,7 +751,6 @@
     <Content Include="Views\Services\Commit.cshtml" />
     <Content Include="Views\Services\_RefService.cshtml" />
     <Content Include="Views\Services\Approve.cshtml" />
-    <Content Include="Views\Services\Approve_Table.cshtml" />
     <Content Include="Views\Services\Approve_Form.cshtml" />
     <Content Include="Views\Services\MyRequest.cshtml" />
     <Content Include="Views\Services\MyTask.cshtml" />
@@ -760,6 +759,9 @@
     <Content Include="Views\Services\Index_Table_WaitAction.cshtml" />
     <Content Include="Views\Services\Action.cshtml" />
     <Content Include="Views\Topics\_FileCollection.cshtml" />
+    <Content Include="Views\Shared\_NavDepartment.cshtml" />
+    <Content Include="Views\Services\Approve_Table_Waiting.cshtml" />
+    <Content Include="Views\Services\Approve_Table_Approved.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

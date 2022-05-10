@@ -15,16 +15,8 @@
         <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
         </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown_department" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Department
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdown_department">
-                <a class="dropdown-item" href="@Url.Action("AllTask","Services")">All task</a>
-                <a class="dropdown-item" href="@Url.Action("AllRequest","Services")">All request</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="@Url.Action("Approve","Services")">Approve</a>
-            </div>
+        <li class="nav-item dropdown" id="nav_department">
+            @{ Html.RenderAction("_NavDepartment", "Configurations"); }
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">
@@ -34,7 +26,7 @@
                 Html.RenderPartial("_NavbarAdmin");
             }
         }
-        
+
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 @{ Html.RenderAction("_Profile", "Configurations"); }
