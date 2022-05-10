@@ -12,7 +12,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Process_Id { get; set; }
 
-        [Description("Process name"), Display(Name = "Process"), Required]
+        [Description("Process name"), Display(Name = "Process")]
         public string Process_Name { get; set; }
 
         [Description("Autorun number")]

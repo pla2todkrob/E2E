@@ -26,10 +26,10 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Grade_Id { get; set; }
 
-        [Description("Grade"), Display(Name = "Grade"), Required]
+        [Description("Grade"), Display(Name = "Grade")]
         public string Grade_Name { get; set; }
 
-        [Description("Position"), Display(Name = "Position"), Required]
+        [Description("Position"), Display(Name = "Position")]
         public string Grade_Position { get; set; }
 
         [Required,Display(Name ="Line work")]

@@ -76,7 +76,7 @@ namespace E2E.Controllers
 
                 int authorIndex = db.Users
                     .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
+                    .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
                     .FirstOrDefault();
 
                 if (authorIndex == 3)

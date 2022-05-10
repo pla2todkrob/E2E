@@ -558,7 +558,7 @@ namespace E2E.Models
                 bool res = new bool();
                 if (!model.Active)
                 {
-                    int SectionCount = db.Users.Where(w => w.Section_Id == model.Section_Id).Count();
+                    int SectionCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Section_Id == model.Section_Id).Count();
 
                     if (SectionCount > 0)
                     {
@@ -595,7 +595,7 @@ namespace E2E.Models
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections.Where(w => w.Section_Id == id).FirstOrDefault();
 
-                int userCount = db.Users.Where(w => w.Section_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Section_Id == id).Count();
                 int ProcessesCount = db.Master_Processes.Where(w => w.Section_Id == id).Count();
 
                 if (userCount > 0 || ProcessesCount > 0)
@@ -788,7 +788,7 @@ namespace E2E.Models
                 bool res = new bool();
                 if (!model.Active)
                 {
-                    int DepartmentCount = db.Users.Where(w => w.Department_Id == model.Department_Id).Count();
+                    int DepartmentCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Id == model.Department_Id).Count();
 
                     if (DepartmentCount > 0)
                     {
@@ -824,7 +824,7 @@ namespace E2E.Models
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments.Where(w => w.Department_Id == id).FirstOrDefault();
 
-                int userCount = db.Users.Where(w => w.Department_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Id == id).Count();
                 int deptCount = db.Master_Sections.Where(w => w.Department_Id == id).Count();
 
                 if (userCount > 0 || deptCount > 0)
@@ -1016,7 +1016,7 @@ namespace E2E.Models
                 bool res = new bool();
                 if (!model.Active)
                 {
-                    int DivisionCount = db.Users.Where(w => w.Division_Id == model.Division_Id).Count();
+                    int DivisionCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Division_Id == model.Division_Id).Count();
 
                     if (DivisionCount > 0)
                     {
@@ -1052,7 +1052,7 @@ namespace E2E.Models
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == id).FirstOrDefault();
 
-                int userCount = db.Users.Where(w => w.Division_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Id == id).Count();
                 int deptCount = db.Master_Departments.Where(w => w.Division_Id == id).Count();
 
                 if (userCount > 0 || deptCount > 0)
@@ -1417,7 +1417,7 @@ namespace E2E.Models
 
                 if (!model.Active)
                 {
-                    int LineWorksCount = db.Users.Where(w => w.LineWork_Id == model.LineWork_Id).Count();
+                    int LineWorksCount = db.Users.Where(w => w.Master_Grades.Master_LineWorks.LineWork_Id == model.LineWork_Id).Count();
 
                     if (LineWorksCount > 0)
                     {
@@ -1630,7 +1630,7 @@ namespace E2E.Models
                 bool res = new bool();
                 if (!model.Active)
                 {
-                    int PlantCount = db.Users.Where(w => w.Plant_Id == model.Plant_Id).Count();
+                    int PlantCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Id == model.Plant_Id).Count();
 
                     if (PlantCount > 0)
                     {
@@ -1667,7 +1667,7 @@ namespace E2E.Models
                 master_Plants = db.Master_Plants.Where(w => w.Plant_Id == id).FirstOrDefault();
 
                 int divisionCount = db.Master_Divisions.Where(w => w.Plant_Id == id).Count();
-                int userCount = db.Users.Where(w => w.Plant_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Id == id).Count();
 
                 if (userCount > 0 || divisionCount > 0)
                 {
@@ -1708,14 +1708,14 @@ namespace E2E.Models
                     User_Id = s.User_Id,
                     Active = s.Active,
                     Create = s.Create,
-                    Department_Name = s.Master_Departments.Department_Name,
-                    Division_Name = s.Master_Divisions.Division_Name,
+                    Department_Name = s.Master_Processes.Master_Sections.Master_Departments.Department_Name,
+                    Division_Name = s.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
                     Grade_Name = s.Master_Grades.Grade_Name,
                     Grade_Position = s.Master_Grades.Grade_Position,
-                    LineWork_Name = s.Master_LineWorks.LineWork_Name,
-                    Plant_Name = s.Master_Plants.Plant_Name,
+                    LineWork_Name = s.Master_Grades.Master_LineWorks.LineWork_Name,
+                    Plant_Name = s.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
                     Process_Name = s.Master_Processes.Process_Name,
-                    Section_Name = s.Master_Sections.Section_Name,
+                    Section_Name = s.Master_Processes.Master_Sections.Section_Name,
                     Update = s.Update,
                     User_Code = s.User_Code,
                     User_Email = s.User_Email,
@@ -1803,12 +1803,7 @@ namespace E2E.Models
 
                 Users users = new Users();
                 users.User_Code = model.Users.User_Code.Trim();
-                users.LineWork_Id = model.Users.LineWork_Id;
                 users.Grade_Id = model.Users.Grade_Id;
-                users.Plant_Id = model.Users.Plant_Id;
-                users.Division_Id = model.Users.Division_Id;
-                users.Department_Id = model.Users.Department_Id;
-                users.Section_Id = model.Users.Section_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.Role_Id = model.Users.Role_Id;
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
@@ -1892,13 +1887,10 @@ namespace E2E.Models
                 bool res = new bool();
 
                 Users users = db.Users.Where(w => w.User_Code == model.Users.User_Code).FirstOrDefault();
-                users.Department_Id = model.Users.Department_Id;
-                users.Division_Id = model.Users.Division_Id;
+
                 users.Grade_Id = model.Users.Grade_Id;
-                users.Plant_Id = model.Users.Plant_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.Role_Id = model.Users.Role_Id;
-                users.Section_Id = model.Users.Section_Id;
                 users.User_Code = model.Users.User_Code.Trim();
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
 

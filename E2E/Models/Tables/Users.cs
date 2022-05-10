@@ -21,39 +21,18 @@ namespace E2E.Models.Tables
 
         public DateTime Create { get; set; }
 
-        public Guid? Department_Id { get; set; }
-
-        public Guid? Division_Id { get; set; }
-
         [Required]
         public Guid Grade_Id { get; set; }
 
-        [Required]
-        public Guid LineWork_Id { get; set; }
-
-        public virtual Master_Departments Master_Departments { get; set; }
-
-        public virtual Master_Divisions Master_Divisions { get; set; }
-
         public virtual Master_Grades Master_Grades { get; set; }
-
-        public virtual Master_LineWorks Master_LineWorks { get; set; }
-
-        public virtual Master_Plants Master_Plants { get; set; }
 
         public virtual Master_Processes Master_Processes { get; set; }
 
-        public virtual Master_Sections Master_Sections { get; set; }
-
         [Required]
-        public Guid Plant_Id { get; set; }
-
-        public Guid? Process_Id { get; set; }
+        public Guid Process_Id { get; set; }
 
         [Required]
         public Guid Role_Id { get; set; }
-
-        public Guid? Section_Id { get; set; }
 
         public virtual System_Roles System_Roles { get; set; }
 
