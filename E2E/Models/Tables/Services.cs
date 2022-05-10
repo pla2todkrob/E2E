@@ -59,7 +59,7 @@ namespace E2E.Models.Tables
 
         public int Service_FileCount { get; set; }
         public Guid? Action_User_Id { get; set; }
-        public DateTime? Acction_DateTime { get; set; }
+        public DateTime? Action_DateTime { get; set; }
 
         public Services()
         {

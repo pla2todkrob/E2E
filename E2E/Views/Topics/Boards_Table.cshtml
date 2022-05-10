@@ -1,55 +1,59 @@
 ﻿@model IEnumerable<E2E.Models.Tables.Topics>
 
-
-
 @{
     Layout = null;
 }
 
-<table class="table table-bordered table-hover table-striped nowrap w-100">
+<table class="table table-bordered table-hover w-100">
     <thead>
         <tr>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
-            <th>@Html.DisplayNameFor(m => m.Topic_Title)</th>
-
-            <th class="fit"><i class="fa fa-eye"></i></th>
-            <th class="fit"><i class="fa fa-commenting-o" aria-hidden="true"></i></th>
-            <th class="fit"><i class="fa fa-picture-o"></i></th>
-            <th class="fit"><i class="fa fa-file-text-o"></i></th>
-
-
-            <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+            <th><i class="fa fa-bullhorn" aria-hidden="true"></i></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td>
-                @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
+            <tr>
+                <td>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
 
-                @{
-                    if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
-                    {
-                        <a href="#" onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })',true)" class="text-dark"><i class="fa fa-pencil"></i></a> @*edit*@
-                    }
-
-                }
-
-            </td>
-
-            <td>@Html.DisplayFor(i => item.Count_View)</td>
-            <td>@Html.DisplayFor(i => item.Count_Comment)</td>
-            <td>@Html.DisplayFor(i => item.Topic_GalleryCount)</td>
-            <td>@Html.DisplayFor(i => item.Topic_FileCount)</td>
-
-
-            <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
-            <td>@Html.DisplayFor(i => item.Update)</td>
-        </tr>
+                            @{
+                                if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                {
+                                    <button onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                }
+                            }
+                        </div>
+                        <div class="col-md-9 col-6">
+                            <div class="d-flex justify-content-between flex-wrap">
+                                <b>@Html.DisplayFor(i => item.Users.User_Code)</b>
+                                <small>
+                                    @{
+                                        if (item.Update.HasValue)
+                                        {
+                                            @Html.DisplayFor(i => item.Update)
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(i => item.Create)
+                                        }
+                                    }
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="d-flex justify-content-around">
+                                <small><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_View)</small>
+                                <small><i class="fa fa-commenting-o" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_Comment)</small>
+                                <small><i class="fa fa-picture-o" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Topic_GalleryCount)</small>
+                                <small><i class="fa fa-paperclip" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Topic_FileCount)</small>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
-

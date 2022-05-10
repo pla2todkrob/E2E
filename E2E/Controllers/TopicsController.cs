@@ -17,6 +17,7 @@ namespace E2E.Controllers
         private clsManageTopic data = new clsManageTopic();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+
         // GET: Topics
         public ActionResult Index()
         {
@@ -31,68 +32,80 @@ namespace E2E.Controllers
 
             return View();
         }
-        bool val = new bool();
+
         public ActionResult Boards_Table(int res)
         {
-
-            if (res == 1)
+            try
             {
-                val = true;
-            }
+                bool val = new bool();
 
-            Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.Usercode = db.Users
-                .Where(w => w.User_Id == id)
-                .Select(s => s.User_Code)
-                .FirstOrDefault();
-
-            Topics topics = new Topics();
-            var sql = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o => o.Create).ToList();
-            if (val)
-            {
-                foreach (var item in sql.Where(w => w.Topic_Pin_EndDate < DateTime.Today))
+                if (res == 1)
                 {
-                    item.Topic_Pin = false;
-                    item.Topic_Pin_EndDate = null;
-                    db.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                    db.SaveChanges();
+                    val = true;
                 }
-                sql = sql.Where(w => w.Topic_Pin_EndDate >= DateTime.Today).OrderByDescending(o => o.Create).ToList();
-            }
-            if (res == 3)
-            {
-                sql = db.Topics.OrderByDescending(o => o.Count_View).Take(10).ToList();
-            }
 
-            return View(sql);
+                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.Usercode = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.User_Code)
+                    .FirstOrDefault();
+
+                var query = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o => new { o.Update, o.Create }).ToList();
+                if (val)
+                {
+                    foreach (var item in query.Where(w => w.Topic_Pin_EndDate < DateTime.Today))
+                    {
+                        item.Topic_Pin = false;
+                        item.Topic_Pin_EndDate = null;
+                        db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                    query = query.Where(w => w.Topic_Pin_EndDate >= DateTime.Today).ToList();
+                }
+                if (res == 3)
+                {
+                    query = db.Topics.OrderByDescending(o => o.Count_View).Take(10).ToList();
+                }
+                return View(query);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Boards_Create(Guid? id)
         {
-            if (id.HasValue)
+            try
             {
-                clsTopic clsTopic = new clsTopic();
-                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
-                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
-                ViewBag.isNew = false;
-                return View(clsTopic);
+                Topics topics = new Topics();
+                bool isNew = true;
+                if (id.HasValue)
+                {
+                    topics = db.Topics.Find(id);
+                    isNew = false;
+                }
+                ViewBag.isNew = isNew;
+
+                return View(topics);
             }
-            ViewBag.isNew = true;
-            return View(new clsTopic());
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Create(clsTopic model)
+        public ActionResult Boards_Create(Topics model)
         {
             clsSwal swal = new clsSwal();
-            if (model.Topics.Topic_Title != string.Empty && model.Topics.Topic_Content != string.Empty)
+            if (model.Topic_Title != string.Empty && model.Topic_Content != string.Empty)
             {
                 using (TransactionScope scope = new TransactionScope())
                 {
                     try
                     {
-                        if (data.Board_Save(model.Topics, Request.Files))
+                        if (data.Board_Save(model, Request.Files))
                         {
                             scope.Complete();
 
@@ -209,7 +222,6 @@ namespace E2E.Controllers
 
         public ActionResult Boards_Form(Guid? id)
         {
-
             Guid id_emp = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.Usercode = db.Users
                 .Where(w => w.User_Id == id_emp)
@@ -337,7 +349,6 @@ namespace E2E.Controllers
 
         public ActionResult Boards_Reply(Guid comment_id, Guid? id)
         {
-            
             Session["Boards_Reply"] = "I";
             TopicComments topicComments = new TopicComments();
             topicComments.TopicComment_Id = comment_id;
@@ -579,6 +590,17 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult _FileCollection(Guid id)
+        {
+            clsTopic clsTopic = new clsTopic();
+
+            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+
+            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+
+            return View(clsTopic);
         }
 
         public ActionResult ReloadModel(Guid id)

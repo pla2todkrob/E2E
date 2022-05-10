@@ -1,6 +1,4 @@
-﻿
-
-function callModalTopics(urlAjax, bigSize = false) {
+﻿function callModalTopics(urlAjax, urlLoad = '', bigSize = false) {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -20,21 +18,26 @@ function callModalTopics(urlAjax, bigSize = false) {
                 });
             });
 
-
-            $('#Topics_Topic_Pin').on('change', function () {
+            $('#Topic_Pin').on('change', function () {
                 if ($(this).is(':checked')) {
-                    $('#Topics_Topic_Pin_EndDate').attr('required', 'required');
+                    $('#Topic_Pin_EndDate').attr('required', 'required');
                 } else {
-                    $('#Topics_Topic_Pin_EndDate').removeAttr('required');
+                    $('#Topic_Pin_EndDate').removeAttr('required');
                 }
             });
 
+            if (urlLoad != '') {
+                callFileCollection(urlLoad);
+            }
 
             $('#modalArea').modal('show');
         }
-
     });
     return false;
+}
+
+function callFileCollection(urlLoad) {
+    $('#fileCollection').load(urlLoad);
 }
 
 function deleteFiles(urlAjax, urlLoad) {
@@ -60,9 +63,7 @@ function deleteFiles(urlAjax, urlLoad) {
                         });
                         if (res.icon == 'success') {
                             reloadTable();
-
-                            $('#fileTables').empty();
-                            $('#reloads').load(urlLoad);
+                            callFileCollection(urlLoad);
                         }
                     }
                 });
@@ -72,27 +73,20 @@ function deleteFiles(urlAjax, urlLoad) {
 }
 
 function previewMultiple(event) {
-   /*     $('#galImage').empty();*/
-
-    $("#fileImage").on("click", function () {
-        $('#galImage').empty();
-    });
+    $('#galImage').empty();
 
     var saida = document.getElementById("fileImage");
     var quantos = saida.files.length;
     for (i = 0; i < quantos; i++) {
         var urls = URL.createObjectURL(event.target.files[i]);
-        
+
         var filetype = event.target.files[i].type.split('/')[0];
-        console.log(filetype);
-        console.log(event.target.files[i]);
         if (filetype == 'image') {
             document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1">';
         }
         else {
             document.getElementById("galImage").innerHTML += '<i class="fa fa-file-text-o fa-5x"></i>';
         }
-       
     }
 }
 

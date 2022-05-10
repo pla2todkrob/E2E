@@ -28,6 +28,7 @@
         <h5 class="modal-title">LOGIN</h5>
     </div>
     <div class="modal-body">
+        @Html.ValidationSummary("",new { @class="text-danger" })
         <div class="form-group">
             @Html.LabelFor(m => m.Username)
             @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
