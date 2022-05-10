@@ -18,12 +18,10 @@
                 });
             });
 
+            checkPin($('#Topic_Pin'));
+
             $('#Topic_Pin').on('change', function () {
-                if ($(this).is(':checked')) {
-                    $('#Topic_Pin_EndDate').attr('required', 'required');
-                } else {
-                    $('#Topic_Pin_EndDate').removeAttr('required');
-                }
+                checkPin(this);
             });
 
             if (urlLoad != '') {
@@ -34,6 +32,16 @@
         }
     });
     return false;
+}
+
+function checkPin(ele) {
+    if ($(ele).is(':checked')) {
+        $('#Topic_Pin_EndDate').attr('required', 'required');
+        $('#Pins').slideDown();
+    } else {
+        $('#Topic_Pin_EndDate').removeAttr('required');
+        $('#Pins').slideUp();
+    }
 }
 
 function callFileCollection(urlLoad) {
