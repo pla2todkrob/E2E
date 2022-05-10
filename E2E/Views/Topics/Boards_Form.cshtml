@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @section breadcrumb{
-    <nav aria-label="breadcrumb " class="mt-3">
+    <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
             <li class="breadcrumb-item"><a href="@Url.Action("Boards","Topics")">Topic</a></li>
@@ -65,7 +65,7 @@ $(document).on('submit', '#SaveReply', function (e) {
 
 
                     <a href="@img.TopicGallery_Original" target="_blank">
-                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original"/>
+                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Original" />
                     </a>
                     <!-- other images... -->
 
@@ -106,82 +106,87 @@ $(document).on('submit', '#SaveReply', function (e) {
 </div>
 
 @Html.HiddenFor(m => m.Topics.Topic_Id)
-
-<div class="card">
-    <div class="card-body">
-        @foreach (var item in Model.TopicComments)
-        {
-            if (!item.Ref_TopicComment_Id.HasValue)
-            {
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="card-title">
-                            @Html.DisplayFor(i => item.Users.User_Code)
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        @Html.DisplayFor(i => item.Comment_Content)
-
-                    </div>
-                    <div class="card-footer">
-                        <div class="d-flex">
-                            <div class="mr-auto">
-                                <span class="font-weight-bold"> @Html.DisplayNameFor(i => item.Create):</span>
-                                @Html.DisplayFor(i => item.Create)
-                            </div>
-                            <div class="ml-auto">
-                                <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
-                                @{
-                                    if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
-                                    {
-                                        <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
-                                    }
-                                }
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                var ReplyComment = Model.TopicComments.Where(w => w.Ref_TopicComment_Id == item.TopicComment_Id).ToList();
-
-                if (ReplyComment.Count > 0)
+@{
+    if (Model.TopicComments.Count > 0)
+    {
+        <div class="card">
+            <div class="card-body">
+                @foreach (var item in Model.TopicComments)
                 {
-                    foreach (var item2 in ReplyComment)
+                    if (!item.Ref_TopicComment_Id.HasValue)
                     {
-                        <div class="card offset-1 mb-3">
+                        <div class="card mb-3">
                             <div class="card-header">
                                 <h6 class="card-title">
-                                    @Html.DisplayFor(i => item2.Users.User_Code)
+                                    @Html.DisplayFor(i => item.Users.User_Code)
                                 </h6>
                             </div>
                             <div class="card-body">
-                                @Html.DisplayFor(i => item2.Comment_Content)
+                                @Html.DisplayFor(i => item.Comment_Content)
 
                             </div>
                             <div class="card-footer">
                                 <div class="d-flex">
                                     <div class="mr-auto">
-                                        <span class="font-weight-bold"> @Html.DisplayNameFor(i => item2.Create):</span>
-                                        @Html.DisplayFor(i => item2.Create)
+                                        <span class="font-weight-bold"> @Html.DisplayNameFor(i => item.Create):</span>
+                                        @Html.DisplayFor(i => item.Create)
                                     </div>
-                                    @{
-                                        if (string.Equals(item2.Users.User_Code, ViewBag.Usercode))
-                                        {
-                                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
+                                    <div class="ml-auto">
+                                        <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
+                                        @{
+                                            if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                            {
+                                                <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
+                                            }
                                         }
-                                    }
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        var ReplyComment = Model.TopicComments.Where(w => w.Ref_TopicComment_Id == item.TopicComment_Id).ToList();
+
+                        if (ReplyComment.Count > 0)
+                        {
+                            foreach (var item2 in ReplyComment)
+                            {
+                                <div class="card offset-1 mb-3">
+                                    <div class="card-header">
+                                        <h6 class="card-title">
+                                            @Html.DisplayFor(i => item2.Users.User_Code)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        @Html.DisplayFor(i => item2.Comment_Content)
+
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex">
+                                            <div class="mr-auto">
+                                                <span class="font-weight-bold"> @Html.DisplayNameFor(i => item2.Create):</span>
+                                                @Html.DisplayFor(i => item2.Create)
+                                            </div>
+                                            @{
+                                                if (string.Equals(item2.Users.User_Code, ViewBag.Usercode))
+                                                {
+                                                    <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
                     }
+
+
                 }
-            }
 
 
-        }
+            </div>
+        </div>
+    }
+}
 
-
-    </div>
-</div>
 
 

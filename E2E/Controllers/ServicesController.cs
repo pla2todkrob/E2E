@@ -71,11 +71,6 @@ namespace E2E.Controllers
             return View(services);
         }
 
-        public ActionResult _File(Guid id)
-        {
-            return PartialView("_File", data.ServiceFiles_View(id));
-        }
-
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Form(Services model)
         {
@@ -159,6 +154,11 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult _File(Guid id)
+        {
+            return PartialView("_File", data.ServiceFiles_View(id));
+        }
+
         public ActionResult DeleteFile(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -227,11 +227,20 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        //swal.dangerMode = false;
-                        //swal.icon = "success";
-                        //swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                        //swal.title = "Successful";
-                        //swal.option = model.Services.Service_Id;
+                        if (data.Services_SetCommit(model.Services))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
                     }
                     catch (DbEntityValidationException ex)
                     {

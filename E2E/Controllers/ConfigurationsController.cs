@@ -79,13 +79,14 @@ namespace E2E.Controllers
                     .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
                     .FirstOrDefault();
 
-                if (authorIndex != 3)
+                if (authorIndex == 3)
                 {
                     res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                 }
                 else
                 {
                     res = new clsManageService().Services_GetWaitCommitCount();
+                    res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                 }
 
                 return PartialView("_NavService", res);

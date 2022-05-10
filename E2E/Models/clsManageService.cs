@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 
@@ -20,9 +21,9 @@ namespace E2E.Models
             {
                 return Services_GetWaitCommit_IQ().ToList();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -104,7 +105,7 @@ namespace E2E.Models
                         .FirstOrDefault();
                     if (deptId.HasValue)
                     {
-                        query = query.Where(w => w.Department_Id == deptId.Value);
+                        query = query.Where(w => (w.Department_Id == deptId.Value && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
                     }
                 }
 
@@ -548,8 +549,45 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(id);
-                services.Action_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                services.Acction_DateTime = DateTime.Now;
+                if (!services.Action_User_Id.HasValue)
+                {
+                    services.Action_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                }
+
+                services.Action_DateTime = DateTime.Now;
+                services.Status_Id = db.System_Statuses
+                    .Where(w => w.Status_Index == 2)
+                    .Select(s => s.Status_Id)
+                    .FirstOrDefault();
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Services_SetCommit(Services model)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
+                services.CommitService = true;
+                services.Commit_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                services.Commit_DateTime = DateTime.Now;
+                services.Department_Id = model.Department_Id;
+                if (model.Action_User_Id.HasValue)
+                {
+                    services.Action_User_Id = model.Action_User_Id;
+                }
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {

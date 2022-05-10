@@ -1,69 +1,48 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-br">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <link href="~/Content/vertical-responsive-menu.css" rel="stylesheet" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        <title>@ViewBag.Title - E2E Service</title>
-        @Styles.Render("~/bundles/css")
-        @Scripts.Render("~/bundles/modernizr")
-        @RenderSection("css", required: false)
-    </head>
-    <body>
-
-
-            <header class="header clearfix shadow">
-                <button type="button" id="toggleMenu" class="toggle_menu">
-                    <i class="fa fa-bars"></i>
-                </button>
-                @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
-            </header>
-
-
-        <div id="objSpin"></div>
-
+    <title>@ViewBag.Title - E2E Service</title>
+    @Styles.Render("~/bundles/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @RenderSection("css", required: false)
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-light bg-light sticky-top">
+        <div class="container">
+            @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_top" aria-controls="navbar_top" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             @{ Html.RenderAction("_Navbar", "Configurations"); }
-  
-        <div class="wrapper">
-            <div class="row">
-                <div class="col-12 bg-light" id="content">
-                    <div class="row min-vh-100">
-                        <div class="col-12">
-                            @RenderSection("breadcrumb", required: false)
-                            @RenderBody()
-                        </div>
-                        <footer class="bg-light col-12 mt-3">
-                            <small class="col-12">&copy; @DateTime.Now.Year - Thai Parkerizing</small>
-                        </footer>
-                    </div>
-                </div>
+        </div>
+    </nav>
+    <div id="objSpin"></div>
+
+    <div class="container bg-white py-3">
+        @RenderSection("breadcrumb", required: false)
+        @RenderBody()
+    </div>
+
+    <footer class="mt-3">
+        <small>&copy; @DateTime.Now.Year - Thai Parkerizing</small>
+    </footer>
+
+    <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
+            <div class="modal-content" id="modalContent">
             </div>
         </div>
+    </div>
 
-            <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
-                    <div class="modal-content" id="modalContent">
-                    </div>
-                </div>
-            </div>
-
-            @Scripts.Render("~/bundles/jquery")
-            @Scripts.Render("~/bundles/js")
-            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-            <script>
+    @Scripts.Render("~/bundles/jquery")
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    @Scripts.Render("~/bundles/js")
+    <script>
         var link_navService = '@Url.Action("_NavService", "Configurations")';
-
-        function myFunction() {
-            var x = document.getElementById("nav-menu");
-            if (x.className === "nav-bar") {
-                x.className += " responsive";
-            } else {
-                x.className = "nav-bar";
-            }
-        }
-            </script>
-            <script src="~/Asset/vertical-responsive-menu.js"></script>
-            @RenderSection("scripts", required: false)
-    </body>
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
 </html>

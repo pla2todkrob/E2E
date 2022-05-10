@@ -1,9 +1,8 @@
-﻿@model E2E.Models.Views.clsTopic
+﻿@model E2E.Models.Tables.Topics
 
 @{
     Layout = null;
 }
-
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveForm", @class = "was-validated", enctype = "multipath/form-data" }))
 {
@@ -17,114 +16,48 @@
     </div>
     <div class="modal-body">
         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-        @Html.HiddenFor(m => m.Topics.Topic_Id)
+        @Html.HiddenFor(m => m.Topic_Id)
         <div class="form-row">
 
             <div class="form-group col-md-12">
-                @Html.LabelFor(m => m.Topics.Topic_Title)
-                @Html.TextBoxFor(m => m.Topics.Topic_Title, new { @class = "form-control", required = "required" })
+                @Html.LabelFor(m => m.Topic_Title)
+                @Html.TextBoxFor(m => m.Topic_Title, new { @class = "form-control", required = "required" })
             </div>
 
-            <div class="form-group col-md-12">
+            <div class="form-group col-auto">
                 <label for="fileImage">
-                    Brows File
+                    Upload files
                 </label>
                 <input name="fileImage" id="fileImage" type="file" multiple class="form-control-file" onchange="previewMultiple(event)" />
             </div>
 
             <div class="col-md-12 d-flex overflow-auto mb-3" style="height:100px" id="galImage"></div>
 
-            <div id="fileTables" class="col-md-12">
-
-                @if (Model.TopicGalleries.Count > 0)
-                {
-                    <table class="table table-bordered table-hover table-striped nowrap">
-                        <thead>
-                            <tr>
-                                <th>
-                                    @Html.DisplayName("Galleries")
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var img in Model.TopicGalleries)
-                            {
-                                <tr>
-                                    <td>
-                                        <button type="button" class="btn text-danger mr-auto" onclick="deleteFiles('@Url.Action("DeleteGallery","Topics",new { id=Html.ValueFor(m => img.TopicGallery_Id) })','@Url.Action("ReloadModel","Topics",new { id=img.Topic_Id})')"><i class="fa fa-trash-o"></i></button>
-                                        <a href="@img.TopicGallery_Original" target="_blank">
-                                            <img alt="@img.TopicGallery_Name" class="img-fluid" src="@img.TopicGallery_Original" height="100" max-height/>
-                                        </a>
-                                        <!-- other images... -->
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-
-                @if (Model.TopicFiles.Count > 0)
-                {
-                    <table class="table table-bordered table-hover table-striped nowrap">
-                        <thead>
-                            <tr>
-                                <th>
-                                    @Html.DisplayName("Files")
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var files in Model.TopicFiles)
-                            {
-                                <tr>
-                                    <td>
-                                        <button type="button" class="btn text-danger mr-auto" onclick="deleteFiles('@Url.Action("DeleteFiles","Topics",new { id=Html.ValueFor(m => files.TopicFile_Id) })','@Url.Action("ReloadModel","Topics",new { id=files.Topic_Id})')"><i class="fa fa-trash-o"></i></button>
-                                        <a href="@files.TopicFile_Path" target="_blank">@files.TopicFile_Name</a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-            </div>
-
-            <div id="reloads" class="col-12"></div>
+            <div id="fileCollection" class="col-12"></div>
 
             <div class="form-group col-md-12">
-                @Html.LabelFor(m => m.Topics.Topic_Content)
-                @Html.TextAreaFor(m => m.Topics.Topic_Content, new { @class = "form-control", required = "required", rows = 8 })
+                @Html.LabelFor(m => m.Topic_Content)
+                @Html.TextAreaFor(m => m.Topic_Content, new { @class = "form-control", required = "required", rows = 8 })
             </div>
 
             <div class="col-md-6">
                 <div class="form-group form-check">
 
-                    @Html.CheckBoxFor(m => m.Topics.Topic_Pin, new { @class = "form-check-input" })
-                    @Html.LabelFor(m => m.Topics.Topic_Pin, new { @class = "form-check-label" })
-
+                    @Html.CheckBoxFor(m => m.Topic_Pin, new { @class = "form-check-input" })
+                    @Html.LabelFor(m => m.Topic_Pin, new { @class = "form-check-label" })
                 </div>
                 <div class="form-group">
-                    @Html.LabelFor(m => m.Topics.Topic_Pin_EndDate)
-                    @Html.TextBoxFor(m => m.Topics.Topic_Pin_EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    @Html.LabelFor(m => m.Topic_Pin_EndDate)
+                    @Html.TextBoxFor(m => m.Topic_Pin_EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
                 </div>
             </div>
-            <div class="col-md-6">
-
-            </div>
         </div>
-
-
-
-
     </div>
     <div class="modal-footer">
         @{
-            if (ViewBag.isNew)
+            if (ViewBag.isNew == false)
             {
-
-            }
-            else
-            {
-                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.Topics.Topic_Id)})')"><i class="fa fa-trash"></i></button>
+                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.Topic_Id)})')"><i class="fa fa-trash"></i></button>
             }
         }
         <button id="modalClose" type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i></button>
