@@ -31,6 +31,7 @@ $(document).ajaxStart(function () {
 
 function reloadCount() {
     $('#nav_service').load(link_navService);
+    $('#nav_department').load(link_navDepartment);
 }
 function callSpin(active) {
     var opts = {

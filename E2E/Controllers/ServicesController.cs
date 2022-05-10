@@ -23,7 +23,7 @@ namespace E2E.Controllers
 
             ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
+                .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
                 .FirstOrDefault();
 
             return View();
@@ -493,9 +493,14 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Approve_Table(bool type)
+        public ActionResult Approve_Table_Waiting()
         {
-            return View(data.Services_GetRequiredApprove(type));
+            return View(data.Services_GetRequiredApprove(false));
+        }
+
+        public ActionResult Approve_Table_Approved()
+        {
+            return View(data.Services_GetRequiredApprove(true));
         }
 
         public ActionResult Approve_Form(Guid id)
@@ -503,7 +508,7 @@ namespace E2E.Controllers
             Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
+                .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
                 .FirstOrDefault();
             return View(data.ClsServices_View(id));
         }
@@ -584,6 +589,22 @@ namespace E2E.Controllers
         public ActionResult _RefService(Guid id)
         {
             return PartialView("_RefService", data.ClsServices_ViewRefList(id));
+        }
+
+        public ActionResult GetPriorityDateRange(Guid id)
+        {
+            try
+            {
+                int res = new int();
+                res = db.System_Priorities
+                    .Find(id).Priority_DateRange;
+
+                return Json(res, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

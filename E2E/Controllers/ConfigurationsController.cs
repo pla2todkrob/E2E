@@ -96,5 +96,34 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
+        public ActionResult _NavDepartment()
+        {
+            try
+            {
+                int res = new int();
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+
+                int authorIndex = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
+                    .FirstOrDefault();
+
+                if (authorIndex != 3)
+                {
+                    res = db.Services
+                        .Where(w => w.Required_Approve_User_Id.HasValue &&
+                        !w.Approved_User_Id.HasValue &&
+                        w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
+                }
+
+                return PartialView("_NavDepartment", res);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

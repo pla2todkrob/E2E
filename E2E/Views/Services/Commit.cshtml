@@ -124,7 +124,7 @@
                         </dl>
                         <div class="d-flex justify-content-between">
                             @{
-                                if (Model.Services.Required_Approve_User_Id.HasValue)
+                                if (!Model.Services.Required_Approve_User_Id.HasValue)
                                 {
                                     <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
 
