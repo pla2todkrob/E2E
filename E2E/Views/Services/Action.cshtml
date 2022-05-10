@@ -28,7 +28,7 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-12 col-md-6">
+            <div class="col-12">
                 <div class="row">
                     <div class="col-12 col-md-8 mb-3">
                         <div class="row">
@@ -48,24 +48,15 @@
                                     <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
                                     <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Update)</dt>
                                     <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
-                                    <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
-                                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Approve_User_Code)</span></dd>
-                                    <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Approve_DateTime)</dt>
-                                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Services.Approve_DateTime)</span></dd>
+                                    <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
+                                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Approved_User_Code)</span></dd>
+                                    <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Approved_DateTime)</dt>
+                                    <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Services.Approved_DateTime)</span></dd>
                                     <dt class="col-12 col-sm-4 col-lg-5">Files</dt>
                                     <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Model.ServiceFiles.Count Attachments</dd>
                                 </dl>
 
-                                @{
-                                    if (!Model.Services.RequiredApprove)
-                                    {
-                                        <div class="d-flex justify-content-between">
-                                            <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                                            <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Require approval</button>
-                                        </div>
-                                    }
-
-                                }
+                                <button class="btn btn-primary ml-auto" onclick="callModal()">Start job</button>
                             </div>
                         </div>
                     </div>
@@ -95,7 +86,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 bg-secondary">@{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }</div>
+            <div class="col-12">@{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }</div>
         </div>
     </div>
 </div>

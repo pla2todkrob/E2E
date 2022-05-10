@@ -76,7 +76,7 @@ function setDateRange(urlAjax, val) {
     });
 }
 
-function setRequired(urlAjax) {
+function setRequired(urlAjax, urlRedirect) {
     swal({
         title: "Are you sure?",
         text: "This item will be sent to the requester's department manager.",
@@ -97,7 +97,7 @@ function setRequired(urlAjax) {
                             dangerMode: res.dangerMode
                         }).then(function () {
                             if (res.icon == 'success') {
-                                location.reload();
+                                window.location.replace(urlRedirect);
                             }
                         })
                     }

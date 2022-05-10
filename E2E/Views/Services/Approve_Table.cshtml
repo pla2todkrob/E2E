@@ -9,7 +9,7 @@
         <tr>
             <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
             <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Approve_DateTime)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Approved_DateTime)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
@@ -24,7 +24,7 @@
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]&nbsp;</b><a href="@Url.Action("Approve_Form","Services",new { id=item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
                 </td>
-                <td>@Html.DisplayFor(i => item.Approve_DateTime)</td>
+                <td>@Html.DisplayFor(i => item.Approved_DateTime)</td>
                 <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
                 <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
                 <td>@Html.DisplayFor(i => item.Users.User_Code)</td>

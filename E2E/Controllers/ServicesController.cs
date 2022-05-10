@@ -500,6 +500,11 @@ namespace E2E.Controllers
 
         public ActionResult Approve_Form(Guid id)
         {
+            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+            ViewBag.AuthorizeIndex = db.Users
+                .Where(w => w.User_Id == userId)
+                .Select(s => s.Master_LineWorks.System_Authorize.Authorize_Index)
+                .FirstOrDefault();
             return View(data.ClsServices_View(id));
         }
 

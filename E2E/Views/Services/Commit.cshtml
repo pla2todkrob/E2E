@@ -91,7 +91,7 @@
                     </div>
                     <div class="form-group">
                         <div class="d-flex">
-                            <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to My department</button>
+                            <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">To department</button>
                             <button type="submit" class="btn btn-primary ml-auto"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
             </div>
             <div class="col-12 col-lg-7 col-xl-9 order-0 order-lg-1">
                 <div class="row">
-                    <div class="col-12 col-xl-8 mb-3">
+                    <div class="col-12 col-xl-7 mb-3">
                         <dl class="row">
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Create)</dt>
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Create)</dd>
@@ -115,26 +115,26 @@
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
                             <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Update)</dt>
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
-                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Approve_User_Code)</dt>
-                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Approve_User_Code)</span></dd>
-                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Approve_DateTime)</dt>
-                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Services.Approve_DateTime)</span></dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Approved_User_Code)</span></dd>
+                            <dt class="col-12 col-sm-4 col-lg-5">@Html.DisplayNameFor(m => m.Services.Approved_DateTime)</dt>
+                            <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0"><span class="text-success">@Html.DisplayFor(m => m.Services.Approved_DateTime)</span></dd>
                             <dt class="col-12 col-sm-4 col-lg-5">Files</dt>
                             <dd class="offset-1 col-11 col-sm-8 col-lg-7 offset-sm-0">@Model.ServiceFiles.Count Attachments</dd>
                         </dl>
-
-                        @{
-                            if (!Model.Services.RequiredApprove)
-                            {
-                                <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between">
+                            @{
+                                if (Model.Services.Required_Approve_User_Id.HasValue)
+                                {
                                     <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                                    <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Require approval</button>
-                                </div>
-                            }
 
-                        }
+                                    <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Require approval</button>
+                                }
+
+                            }
+                        </div>
                     </div>
-                    <div class="col-12 col-xl-4 mb-3">
+                    <div class="col-12 col-xl-5 mb-3">
                         <div class="row">
                             <table class="table table-bordered table-hover" id="reqFiles">
                                 <thead>
