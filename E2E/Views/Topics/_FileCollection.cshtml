@@ -5,11 +5,15 @@
 }
 
 <script>
-    $("#gallery").justifiedGallery({ maxRowsCount: 5 });
+    $("#gallery").justifiedGallery({
+        maxRowHeight: 200,
+        rowHeight:150
+    });
 </script>
 
 @if (Model.TopicGalleries.Count > 0)
 {
+    <h5>Galleries</h5>
     <div id="gallery">
         @foreach (var item in Model.TopicGalleries)
         {
@@ -25,11 +29,11 @@
 
 @if (Model.TopicFiles.Count > 0)
 {
-    <table class="table table-bordered table-hover table-striped nowrap">
+    <table class="table-borderless mt-3">
         <thead>
             <tr>
                 <th>
-                    @Html.DisplayName("Files")
+                    <h5>Files</h5>
                 </th>
             </tr>
         </thead>
