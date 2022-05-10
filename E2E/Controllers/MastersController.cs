@@ -1115,11 +1115,11 @@ namespace E2E.Controllers
             if (id.HasValue)
             {
                 userDetails = data.UserDetail_Get(id.Value);
-                ViewBag.GradeList = data.SelectListItems_Grade(userDetails.Users.LineWork_Id);
-                ViewBag.DivisionList = data.SelectListItems_Division(userDetails.Users.Plant_Id);
-                ViewBag.DepartmentList = data.SelectListItems_Department(userDetails.Users.Division_Id);
-                ViewBag.SectionList = data.SelectListItems_Section(userDetails.Users.Department_Id);
-                ViewBag.ProcessList = data.SelectListItems_Process(userDetails.Users.Section_Id);
+                ViewBag.GradeList = data.SelectListItems_Grade(userDetails.Users.Master_Grades.LineWork_Id);
+                ViewBag.DivisionList = data.SelectListItems_Division(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Plant_Id);
+                ViewBag.DepartmentList = data.SelectListItems_Department(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Id);
+                ViewBag.SectionList = data.SelectListItems_Section(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Id);
+                ViewBag.ProcessList = data.SelectListItems_Process(userDetails.Users.Master_Processes.Master_Sections.Section_Id);
                 ViewBag.IsNew = false;
             }
 
@@ -1290,13 +1290,14 @@ namespace E2E.Controllers
                                         userDetails.Detail_TH_LastName = sheet.Cells[row, 8].Text;
                                         userDetails.Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value;
                                         userDetails.Users = new Users();
-                                        userDetails.Users.LineWork_Id = data.LineWork_GetId(sheet.Cells[row, 10].Text, true).Value;
-                                        userDetails.Users.Grade_Id = data.Grade_GetId(userDetails.Users.LineWork_Id, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                        userDetails.Users.Plant_Id = data.Plant_GetId(sheet.Cells[row, 13].Text, true).Value;
-                                        userDetails.Users.Division_Id = data.Division_GetId(userDetails.Users.Plant_Id, sheet.Cells[row, 14].Text, true);
-                                        userDetails.Users.Department_Id = data.Department_GetId(userDetails.Users.Division_Id.Value, sheet.Cells[row, 15].Text, true);
-                                        userDetails.Users.Section_Id = data.Section_GetId(userDetails.Users.Department_Id.Value, sheet.Cells[row, 16].Text, true);
-                                        userDetails.Users.Process_Id = data.Process_GetId(userDetails.Users.Section_Id.Value, sheet.Cells[row, 17].Text, true);
+                                        Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
+                                        userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
+                                        Guid? plantId = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
+                                        Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
+                                        Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
+                                        Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
+
+                                        userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
                                         userDetails.Users.Role_Id = data.Role_UserId();
                                         userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
                                         userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;

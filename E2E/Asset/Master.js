@@ -139,30 +139,30 @@ function callModalUser(urlAjax, bigSize = false) {
             });
             $('#modalArea').modal('show');
 
-            $('#Users_LineWork_Id').on('select2:select', function () {
+            $('#Users_Master_Grades_LineWork_Id').on('select2:select', function () {
                 var objSelect = $('#Users_Grade_Id');
                 getGrades(objSelect, $(this).val());
             });
 
-            $('#Users_Plant_Id').on('select2:select', function () {
-                var objSelect = $('#Users_Division_Id');
+            $('#Users_Master_Processes_Master_Sections_Master_Departments_Master_Divisions_Plant_Id').on('select2:select', function () {
+                var objSelect = $('#Users_Master_Processes_Master_Sections_Master_Departments_Division_Id');
                 getDivisions(objSelect, $(this).val());
                 objSelect.trigger('select2:select');
             });
 
-            $('#Users_Division_Id').on('select2:select', function () {
-                var objSelect = $('#Users_Department_Id');
+            $('#Users_Master_Processes_Master_Sections_Master_Departments_Division_Id').on('select2:select', function () {
+                var objSelect = $('#Users_Master_Processes_Master_Sections_Department_Id');
                 getDepartments(objSelect, $(this).val());
                 objSelect.trigger('select2:select');
             });
 
-            $('#Users_Department_Id').on('select2:select', function () {
-                var objSelect = $('#Users_Section_Id');
+            $('#Users_Master_Processes_Master_Sections_Department_Id').on('select2:select', function () {
+                var objSelect = $('#Users_Master_Processes_Section_Id');
                 getSections(objSelect, $(this).val());
                 objSelect.trigger('select2:select');
             });
 
-            $('#Users_Section_Id').on('select2:select', function () {
+            $('#Users_Master_Processes_Section_Id').on('select2:select', function () {
                 var objSelect = $('#Users_Process_Id');
                 getProcesses(objSelect, $(this).val());
                 objSelect.trigger('select2:select');
@@ -233,7 +233,6 @@ function getDepartments(objSelect, selectVal) {
 
 function getSections(objSelect, selectVal) {
     objSelect.empty();
-    objSelect.append(new Option('Select Section', ''));
     if (selectVal != '') {
         $.ajax({
             url: '/Masters/Users_GetSelectSections',
@@ -254,7 +253,6 @@ function getSections(objSelect, selectVal) {
 
 function getProcesses(objSelect, selectVal) {
     objSelect.empty();
-    objSelect.append(new Option('Select Process', ''));
     if (selectVal != '') {
         $.ajax({
             url: '/Masters/Users_GetSelectProcesses',
