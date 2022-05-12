@@ -155,6 +155,21 @@ namespace E2E.Models
             }
         }
 
+        public List<Services> Services_GetMyTask()
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                return db.Services
+                    .Where(w => w.Action_User_Id == id)
+                    .ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Services Services_View(Guid id)
         {
             try
@@ -195,28 +210,36 @@ namespace E2E.Models
                     })
                     .GroupJoin(db.UserDetails, m => m.Services.Action_User_Id, j => j.User_Id, (m, gj) => new
                     {
-                        DataJoin = m,
+                        ServiceJoin = m,
                         Action = gj.FirstOrDefault()
                     })
-                    .GroupJoin(db.UserDetails, m => m.DataJoin.Services.Commit_User_Id, j => j.User_Id, (m, gj) => new
+                    .GroupJoin(db.UserDetails, m => m.ServiceJoin.Services.Commit_User_Id, j => j.User_Id, (m, gj) => new
                     {
-                        DataJoin = m,
+                        ServiceJoin = m,
                         Commit = gj.FirstOrDefault()
                     })
-                    .GroupJoin(db.ServiceFiles, m => m.DataJoin.DataJoin.Services.Service_Id, j => j.Service_Id, (m, gj) => new clsServices()
+                    .GroupJoin(db.UserDetails, m => m.ServiceJoin.ServiceJoin.Services.Required_Approve_User_Id, j => j.User_Id, (m, gj) => new
                     {
-                        Action_User_Code = m.DataJoin.Action.Users.User_Code,
-                        Action_User_Email = m.DataJoin.Action.Users.User_Email,
-                        Action_User_Name = m.DataJoin.Action.Detail_EN_FirstName + " " + m.DataJoin.Action.Detail_EN_LastName,
-                        Approved_User_Code = m.DataJoin.DataJoin.Approve.Users.User_Code,
-                        Approved_User_Email = m.DataJoin.DataJoin.Approve.Users.User_Email,
-                        Approved_User_Name = m.DataJoin.DataJoin.Approve.Detail_EN_FirstName + " " + m.DataJoin.DataJoin.Approve.Detail_EN_LastName,
-                        Commit_User_Code = m.Commit.Users.User_Code,
-                        Commit_User_Email = m.Commit.Users.User_Email,
-                        Commit_User_Name = m.Commit.Detail_EN_FirstName + " " + m.Commit.Detail_EN_LastName,
+                        ServiceJoin = m,
+                        Required = gj.FirstOrDefault()
+                    })
+                    .GroupJoin(db.ServiceFiles, m => m.ServiceJoin.ServiceJoin.ServiceJoin.Services.Service_Id, j => j.Service_Id, (m, gj) => new clsServices()
+                    {
+                        Action_User_Code = m.ServiceJoin.ServiceJoin.Action.Users.User_Code,
+                        Action_User_Email = m.ServiceJoin.ServiceJoin.Action.Users.User_Email,
+                        Action_User_Name = m.ServiceJoin.ServiceJoin.Action.Detail_EN_FirstName + " " + m.ServiceJoin.ServiceJoin.Action.Detail_EN_LastName,
+                        Approved_User_Code = m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Users.User_Code,
+                        Approved_User_Email = m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Users.User_Email,
+                        Approved_User_Name = m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Detail_EN_FirstName + " " + m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Detail_EN_LastName,
+                        Commit_User_Code = m.ServiceJoin.Commit.Users.User_Code,
+                        Commit_User_Email = m.ServiceJoin.Commit.Users.User_Email,
+                        Commit_User_Name = m.ServiceJoin.Commit.Detail_EN_FirstName + " " + m.ServiceJoin.Commit.Detail_EN_LastName,
+                        Required_User_Code = m.Required.Users.User_Code,
+                        Required_User_Email = m.Required.Users.User_Email,
+                        Required_User_Name = m.Required.Detail_EN_FirstName + " " + m.Required.Detail_EN_LastName,
                         ServiceFiles = gj.ToList(),
-                        Services = m.DataJoin.DataJoin.Services,
-                        User_Name = db.UserDetails.Where(w => w.User_Id == m.DataJoin.DataJoin.Services.User_Id).Select(s => new { Name = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName }).Select(s => s.Name).FirstOrDefault()
+                        Services = m.ServiceJoin.ServiceJoin.ServiceJoin.Services,
+                        User_Name = db.UserDetails.Where(w => w.User_Id == m.ServiceJoin.ServiceJoin.ServiceJoin.Services.User_Id).Select(s => new { Name = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName }).Select(s => s.Name).FirstOrDefault()
                     }).FirstOrDefault();
             }
             catch (Exception)
@@ -541,18 +564,18 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetAction(Guid id)
+        public bool Services_SetAction(Services model)
         {
             try
             {
                 bool res = new bool();
                 Services services = new Services();
-                services = db.Services.Find(id);
+                services = db.Services.Find(model.Service_Id);
                 if (!services.Action_User_Id.HasValue)
                 {
                     services.Action_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 }
-
+                services.Service_EstimateTime = model.Service_EstimateTime;
                 services.Action_DateTime = DateTime.Now;
                 services.Status_Id = db.System_Statuses
                     .Where(w => w.Status_Index == 2)

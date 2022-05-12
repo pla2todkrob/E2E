@@ -14,6 +14,10 @@ namespace E2E.Models
         {
         }
 
+        public DbSet<EForm_Files> EForm_Files { get; set; }
+        public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
+        public DbSet<EForms> EForms { get; set; }
+
         public DbSet<Master_Departments> Master_Departments { get; set; }
         public DbSet<Master_Divisions> Master_Divisions { get; set; }
         public DbSet<Master_Grades> Master_Grades { get; set; }
