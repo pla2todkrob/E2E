@@ -12,6 +12,15 @@ namespace E2E.Models.Views
         [Display(Name = "Name")]
         public string User_Name { get; set; }
 
+        [Display(Name = "Required by")]
+        public string Required_User_Name { get; set; }
+
+        [Display(Name = "Required by")]
+        public string Required_User_Code { get; set; }
+
+        [Display(Name = "Required by")]
+        public string Required_User_Email { get; set; }
+
         [Display(Name = "Commit by")]
         public string Commit_User_Name { get; set; }
 

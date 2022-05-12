@@ -186,6 +186,9 @@
     <Compile Include="Models\clsManageService.cs" />
     <Compile Include="Models\clsManageTopic.cs" />
     <Compile Include="Models\clsServiceFTP.cs" />
+    <Compile Include="Models\Tables\EForms.cs" />
+    <Compile Include="Models\Tables\EForm_Files.cs" />
+    <Compile Include="Models\Tables\EForm_Galleries.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
     <Compile Include="Models\Tables\Master_LineWorks.cs" />
@@ -762,6 +765,9 @@
     <Content Include="Views\Shared\_NavDepartment.cshtml" />
     <Content Include="Views\Services\Approve_Table_Waiting.cshtml" />
     <Content Include="Views\Services\Approve_Table_Approved.cshtml" />
+    <Content Include="Views\Services\Action_Set.cshtml" />
+    <Content Include="Views\Services\MyTask_Table.cshtml" />
+    <Content Include="Views\Services\ServiceInfomation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

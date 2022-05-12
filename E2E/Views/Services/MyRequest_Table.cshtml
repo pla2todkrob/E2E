@@ -22,7 +22,7 @@
         {
             <tr>
                 <td>@Html.DisplayFor(i => item.Create)</td>
-                <td><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
+                <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
                     @Html.DisplayFor(i => item.Service_Subject)

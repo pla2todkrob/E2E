@@ -34,17 +34,17 @@ namespace E2E.Models.Tables
         public DateTime? Update { get; set; }
         public Guid? Commit_User_Id { get; set; }
 
-        [Display(Name = "Commit datetime")]
+        [Display(Name = "Commit")]
         public DateTime? Commit_DateTime { get; set; }
 
         public Guid? Required_Approve_User_Id { get; set; }
 
-        [Display(Name = "Required approve datetime")]
+        [Display(Name = "Required")]
         public DateTime? Required_Approve_DateTime { get; set; }
 
         public Guid? Approved_User_Id { get; set; }
 
-        [Display(Name = "Approved datetime")]
+        [Display(Name = "Approved")]
         public DateTime? Approved_DateTime { get; set; }
 
         [Display(Name = "Status")]
@@ -62,7 +62,12 @@ namespace E2E.Models.Tables
 
         public int Service_FileCount { get; set; }
         public Guid? Action_User_Id { get; set; }
+
+        [Display(Name = "Action")]
         public DateTime? Action_DateTime { get; set; }
+
+        [Display(Name = "Estimate time (days)")]
+        public int Service_EstimateTime { get; set; }
 
         public Services()
         {

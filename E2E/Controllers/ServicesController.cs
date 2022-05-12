@@ -21,10 +21,17 @@ namespace E2E.Controllers
         {
             Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
 
-            ViewBag.AuthorizeIndex = db.Users
+            try
+            {
+                ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
                 .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             return View();
         }
@@ -55,20 +62,26 @@ namespace E2E.Controllers
 
         public ActionResult Form(Guid? id)
         {
-            ViewBag.PriorityList = data.SelectListItems_Priority();
-            ViewBag.RefServiceList = data.SelectListItems_RefService();
-            ViewBag.UserList = data.SelectListItems_User();
-            bool isNew = true;
-            Services services = new Services();
-            if (id.HasValue)
+            try
             {
-                services = data.Services_View(id.Value);
-                isNew = false;
+                ViewBag.PriorityList = data.SelectListItems_Priority();
+                ViewBag.RefServiceList = data.SelectListItems_RefService();
+                ViewBag.UserList = data.SelectListItems_User();
+                bool isNew = true;
+                Services services = new Services();
+                if (id.HasValue)
+                {
+                    services = data.Services_View(id.Value);
+                    isNew = false;
+                }
+
+                ViewBag.IsNew = isNew;
+                return View(services);
             }
-
-            ViewBag.IsNew = isNew;
-
-            return View(services);
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -156,7 +169,14 @@ namespace E2E.Controllers
 
         public ActionResult _File(Guid id)
         {
-            return PartialView("_File", data.ServiceFiles_View(id));
+            try
+            {
+                return PartialView("_File", data.ServiceFiles_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult DeleteFile(Guid id)
@@ -213,8 +233,15 @@ namespace E2E.Controllers
 
         public ActionResult Commit(Guid id)
         {
-            ViewBag.PlantList = new clsManageMaster().SelectListItems_Plant();
-            return View(data.ClsServices_View(id));
+            try
+            {
+                ViewBag.PlantList = new clsManageMaster().SelectListItems_Plant();
+                return View(data.ClsServices_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -417,59 +444,105 @@ namespace E2E.Controllers
 
         public ActionResult Action(Guid id)
         {
-            return View(data.ClsServices_View(id));
+            try
+            {
+                return View(data.ClsServices_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Action_Set(Guid id)
         {
-            clsSwal swal = new clsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            try
             {
-                try
+                return View(data.Services_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Action_Set(Services model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
                 {
-                    if (data.Services_SetAction(id))
+                    try
                     {
-                        scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                        swal.title = "Successful";
-                    }
-                    else
-                    {
-                        swal.icon = "warning";
-                        swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                        swal.title = "Warning";
-                    }
-                }
-                catch (DbEntityValidationException ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    foreach (var item in ex.EntityValidationErrors)
-                    {
-                        foreach (var item2 in item.ValidationErrors)
+                        if (data.Services_SetAction(model))
                         {
-                            if (string.IsNullOrEmpty(swal.text))
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                            swal.option = model.Service_Id;
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
                             {
-                                swal.text = item2.ErrorMessage;
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
                             }
-                            else
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
                             {
-                                swal.text += "\n" + item2.ErrorMessage;
+                                swal.text = ex.InnerException.InnerException.Message;
                             }
                         }
                     }
                 }
-                catch (Exception ex)
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
                 {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
-                    if (ex.InnerException != null)
+                    foreach (var item2 in item)
                     {
-                        swal.text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
+                        if (string.IsNullOrEmpty(swal.text))
                         {
-                            swal.text = ex.InnerException.InnerException.Message;
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
                         }
                     }
                 }
@@ -495,22 +568,43 @@ namespace E2E.Controllers
 
         public ActionResult Approve_Table_Waiting()
         {
-            return View(data.Services_GetRequiredApprove(false));
+            try
+            {
+                return View(data.Services_GetRequiredApprove(false));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Approve_Table_Approved()
         {
-            return View(data.Services_GetRequiredApprove(true));
+            try
+            {
+                return View(data.Services_GetRequiredApprove(true));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Approve_Form(Guid id)
         {
-            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.AuthorizeIndex = db.Users
+            try
+            {
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
                 .FirstOrDefault();
-            return View(data.ClsServices_View(id));
+                return View(data.ClsServices_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Approve_Set(Guid id)
@@ -578,7 +672,14 @@ namespace E2E.Controllers
 
         public ActionResult MyRequest_Table()
         {
-            return View(data.Services_GetMyRequest());
+            try
+            {
+                return View(data.Services_GetMyRequest());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult MyTask()
@@ -586,9 +687,40 @@ namespace E2E.Controllers
             return View();
         }
 
+        public ActionResult MyTask_Table()
+        {
+            try
+            {
+                return View(data.Services_GetMyTask());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult ServiceInfomation(Guid id)
+        {
+            try
+            {
+                return View(data.ClsServices_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult _RefService(Guid id)
         {
-            return PartialView("_RefService", data.ClsServices_ViewRefList(id));
+            try
+            {
+                return PartialView("_RefService", data.ClsServices_ViewRefList(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult GetPriorityDateRange(Guid id)
