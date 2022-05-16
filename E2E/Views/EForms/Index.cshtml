@@ -14,9 +14,9 @@
             reloadTable();
         });
 
-        $(document).on('submit', '#SaveForm', function (e) {
+        $(document).on('submit', '#SaveEForm', function (e) {
             e.preventDefault();
-            callSubmitModal('@Url.Action("Boards_Create", "Topics")');
+            callSubmitModal('@Url.Action("EForms_Create", "EForms")');
             return false;
         });
 

@@ -1,8 +1,11 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
 using System.Linq;
+using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -10,7 +13,7 @@ namespace E2E.Controllers
 {
     public class EFormsController : Controller
     {
-        private clsManageTopic data = new clsManageTopic();
+        private clsManageEForm data = new clsManageEForm();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         // GET: EForms
@@ -29,25 +32,25 @@ namespace E2E.Controllers
                     .Select(s => s.User_Code)
                     .FirstOrDefault();
 
+                ViewBag.MyForm = false;
 
-                var query = db.EForms.Where(w => w.EForm_Start == DateTime.Today).OrderByDescending(o => new { o.Update, o.Create }).ToList();
-            
+                IQueryable<EForms> query = db.EForms.OrderByDescending(o => new { o.Update, o.Create });
+
                 if (res == 1)
                 {
-                    query = query.Where(w => w.EForm_End >= DateTime.Today).ToList();
-                    return View(query);
+                    query = query.Where(w => (w.EForm_Start <= DateTime.Today && w.EForm_End >= DateTime.Today)||(w.EForm_Start <= DateTime.Today && !w.EForm_End.HasValue));
                 }
                 if (res == 2)
                 {
-                    query = db.EForms.Where(w => w.User_Id == id).OrderByDescending(o => new { o.Update, o.Create }).ToList();
-                    return View(query);
+                    query = db.EForms.Where(w => w.User_Id == id);
+                    ViewBag.MyForm = true;
                 }
                 if (res == 3)
                 {
-                    query = db.EForms.Where(w => w.EForm_End < DateTime.Today).OrderByDescending(o => new { o.Update, o.Create }).ToList();
-                    return View(query);
+                    query = db.EForms.Where(w => w.EForm_End < DateTime.Today);
                 }
-                return View();
+
+                return View(query.ToList());
             }
             catch (Exception)
             {
@@ -76,6 +79,91 @@ namespace E2E.Controllers
             {
                 throw;
             }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult EForms_Create(EForms model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.EForm_Save(model, Request.Files))
+                        {
+                            scope.Complete();
+
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
     }
 }
