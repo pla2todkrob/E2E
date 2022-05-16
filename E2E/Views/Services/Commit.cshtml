@@ -145,7 +145,7 @@
                         {
                             <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
 
-                            <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Require approval</button>
+                            <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Must be approved</button>
                         }
 
                     }
@@ -154,4 +154,4 @@
         </div>
     </div>
 </div>
-<div id="serviceRefList">@{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }</div>
+@{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }

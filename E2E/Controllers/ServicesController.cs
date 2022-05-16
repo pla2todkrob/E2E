@@ -738,5 +738,18 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
+        public ActionResult GetOwnerUser(Guid id)
+        {
+            try
+            {
+                Guid? res = db.Services.Find(id).User_Id;
+                return Json(res, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
