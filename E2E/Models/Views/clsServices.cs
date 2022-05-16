@@ -12,13 +12,13 @@ namespace E2E.Models.Views
         [Display(Name = "Name")]
         public string User_Name { get; set; }
 
-        [Display(Name = "Required by")]
+        [Display(Name = "Notify required approved by")]
         public string Required_User_Name { get; set; }
 
-        [Display(Name = "Required by")]
+        [Display(Name = "Notify required approved by")]
         public string Required_User_Code { get; set; }
 
-        [Display(Name = "Required by")]
+        [Display(Name = "Notify required approved by")]
         public string Required_User_Email { get; set; }
 
         [Display(Name = "Commit by")]
@@ -39,9 +39,15 @@ namespace E2E.Models.Views
         [Display(Name = "Approved by")]
         public string Approved_User_Email { get; set; }
 
+        [Display(Name = "Action by")]
         public string Action_User_Name { get; set; }
+
+        [Display(Name = "Action by")]
         public string Action_User_Code { get; set; }
+
+        [Display(Name = "Action by")]
         public string Action_User_Email { get; set; }
+
         public Services Services { get; set; }
         public List<ServiceFiles> ServiceFiles { get; set; }
 

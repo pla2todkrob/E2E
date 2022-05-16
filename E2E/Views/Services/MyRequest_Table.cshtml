@@ -25,8 +25,12 @@
                 <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
-                    @Html.DisplayFor(i => item.Service_Subject)
-                    &nbsp;<button type="button" class="btn" onclick="callModalForm('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                    <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+                    @if (item.System_Statuses.Status_Index == 1)
+                    {
+                        <button type="button" class="btn" onclick="callModalForm('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")','@Url.Action("GetOwnerUser","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                    }
+
                 </td>
                 <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
                 <td>@Html.DisplayFor(i => item.Service_DueDate)</td>

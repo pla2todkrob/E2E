@@ -1,1 +1,81 @@
-﻿
+﻿@model E2E.Models.Views.clsServices
+
+@{
+    ViewBag.Title = "Service Information";
+}
+
+@section scripts{
+
+    <script src="~/Asset/Service.min.js"></script>
+    <script>
+        $(function () {
+            $('#refService').load('@Url.Action("_RefService","Services",new { id = Model.Services.Service_Id })');
+        });
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Service Information</li>
+        </ol>
+    </nav>
+}
+
+<blockquote class="blockquote text-right">
+    <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
+    <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
+</blockquote>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.System_Statuses.Status_Name)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0"><span class="@Model.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => m.Services.System_Statuses.Status_Name)</span></dd>
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
+            @if (Model.Services.Update.HasValue)
+            {
+                <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
+            }
+
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">Files</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">
+                @Model.ServiceFiles.Count Attachments
+                <ul class="list-unstyled">
+                    @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+                    {
+                        <li>
+                            <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                        </li>
+
+                    }
+                </ul>
+            </dd>
+            @if (Model.Services.Required_Approve_User_Id.HasValue)
+            {
+                <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
+                <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
+            }
+            @if (Model.Services.Approved_User_Id.HasValue)
+            {
+                <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
+                <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
+            }
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Commit_User_Code)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Commit_User_Code) - <b>@Html.DisplayFor(m => m.Services.Commit_DateTime)</b></dd>
+            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Action_User_Code)</dt>
+            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Action_User_Code) - <b>@Html.DisplayFor(m => m.Services.Action_DateTime)</b></dd>
+        </dl>
+    </div>
+</div>
+
+<div id="refService"></div>

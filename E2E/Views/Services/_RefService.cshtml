@@ -5,25 +5,28 @@
 
 @if (Model.Count() > 0)
 {
-    <div class="card-header">
-        <h5 class="modal-title">Service Reference</h5>
-    </div>
-    <div class="card-body">
-        @foreach (var item in Model)
-        {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h6 class="card-title">@item.Services.Service_Key</h6>
-                </div>
-                <div class="card-body">
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between">
-                        <div><b>@Html.DisplayNameFor(m => m.Services.Create):&nbsp;</b>@Html.DisplayFor(m => item.Services.Create)</div>
-                        <div><b>@Html.DisplayNameFor(m => m.Services.Update):&nbsp;</b>@Html.DisplayFor(m => item.Services.Update)</div>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Service Reference</h5>
+        </div>
+        <div class="card-body">
+            @foreach (var item in Model)
+            {
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="card-title">@item.Services.Service_Key</h6>
+                    </div>
+                    <div class="card-body">
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <div><b>@Html.DisplayNameFor(m => m.Services.Create):&nbsp;</b>@Html.DisplayFor(m => item.Services.Create)</div>
+                            <div><b>@Html.DisplayNameFor(m => m.Services.Update):&nbsp;</b>@Html.DisplayFor(m => item.Services.Update)</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
+
 }

@@ -25,7 +25,7 @@
                 <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
-                    <a href="#" onclick="">@Html.DisplayFor(i => item.Service_Subject)</a>
+                    <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
                 </td>
                 <td>@Html.DisplayFor(i => item.Service_EstimateTime)</td>
                 <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>

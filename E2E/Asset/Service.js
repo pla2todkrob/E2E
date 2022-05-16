@@ -1,4 +1,4 @@
-﻿function callModalForm(urlAjax, urlGetDate, bigSize = false) {
+﻿function callModalForm(urlAjax, urlGetDate, urlGetRef, bigSize = false) {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -19,6 +19,7 @@
             });
 
             $('#Ref_Service_Id').on('select2:select', function (e) {
+                setUserRef(urlGetRef, e.params.data.id);
             });
 
             $('#Priority_Id').on('select2:select', function (e) {
@@ -170,4 +171,24 @@ function setApprove(urlAjax) {
                 return false;
             }
         });
+}
+
+function setUserRef(urlAjax, val) {
+    $('#User_Id').val('').trigger('change');
+    if (val != '') {
+        $.ajax({
+            url: urlAjax,
+            data: {
+                id: val
+            },
+            async: true,
+            success: function (res) {
+                $('#User_Id').val(res).trigger('change');
+                $('#User_Id').prop('disabled', true);
+            }
+        });
+    }
+    else {
+        $('#User_Id').prop('disabled', false);
+    }
 }
