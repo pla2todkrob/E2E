@@ -21,7 +21,7 @@ namespace E2E.Models.Tables
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
         public DateTime EForm_Start { get; set; }
-        public DateTime EForm_End { get; set; }
+        public DateTime? EForm_End { get; set; }
         public bool Active { get; set; }
 
         public EForms()

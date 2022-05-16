@@ -171,6 +171,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ConfigurationsController.cs" />
+    <Compile Include="Controllers\EFormsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
@@ -182,6 +183,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\clsContext.cs" />
     <Compile Include="Models\clsDefaultSystem.cs" />
+    <Compile Include="Models\clsManageEForm.cs" />
     <Compile Include="Models\clsManageMaster.cs" />
     <Compile Include="Models\clsManageService.cs" />
     <Compile Include="Models\clsManageTopic.cs" />
@@ -768,6 +770,9 @@
     <Content Include="Views\Services\Action_Set.cshtml" />
     <Content Include="Views\Services\MyTask_Table.cshtml" />
     <Content Include="Views\Services\ServiceInfomation.cshtml" />
+    <Content Include="Views\EForms\Index.cshtml" />
+    <Content Include="Views\EForms\EForms_Table.cshtml" />
+    <Content Include="Views\EForms\EForms_Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,52 @@
+﻿@model IEnumerable<E2E.Models.Tables.EForms>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover w-100">
+    <thead>
+        <tr>
+            <th><i class="fa fa-bullhorn" aria-hidden="true"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            @Html.ActionLink(item.EForm_Title, "EForms", new { id = item.EForm_Id }) &nbsp;
+
+                            @{
+                                if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                {
+                                    <button onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.EForm_Id) })','@Url.Action("_FileCollection","Topics",new { id=item.EForm_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                }
+                            }
+                        </div>
+                        <div class="col-md-9 col-6">
+                            <div class="d-flex justify-content-between flex-wrap">
+                                <b>@Html.DisplayFor(i => item.Users.User_Code)</b>
+                                <small>
+                                    @{
+                                        if (item.Update.HasValue)
+                                        {
+                                            @Html.DisplayFor(i => item.Update)
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(i => item.Create)
+                                        }
+                                    }
+                                </small>
+                            </div>
+                        </div>
+                  
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
