@@ -22,7 +22,10 @@
                             @{
                                 if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
                                 {
-                                    <button onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.EForm_Id) })','@Url.Action("_FileCollection","Topics",new { id=item.EForm_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                    if (ViewBag.MyForm == true)
+                                    {
+                                        <button onclick="callModal('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })','@Url.Action("_FileCollection", "Topics", new { id = item.EForm_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                    }
                                 }
                             }
                         </div>
@@ -43,7 +46,7 @@
                                 </small>
                             </div>
                         </div>
-                  
+
                     </div>
                 </td>
             </tr>
