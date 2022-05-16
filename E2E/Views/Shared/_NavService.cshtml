@@ -1,10 +1,11 @@
-﻿@model int
+﻿@model int?
 
 @{
     Layout = null;
 }
 <span>Service</span>
-@{
+@if (Model.HasValue)
+{
     if (Model > 0)
     {
         <span id="count" class="badge badge-pill badge-warning">@Model</span>

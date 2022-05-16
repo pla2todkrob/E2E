@@ -248,6 +248,28 @@ namespace E2E.Models
             }
         }
 
+        public clsServices ClsServices_ViewComment(Guid id)
+        {
+            try
+            {
+                clsServices clsServices = new clsServices();
+                clsServices.Services = db.Services.Find(id);
+                clsServices.ClsServiceComments = db.ServiceComments
+                    .Where(w => w.Service_Id == id)
+                    .GroupJoin(db.ServiceCommentFiles, m => m.ServiceComment_Id, j => j.ServiceComment_Id, (m, gj) => new clsServiceComments()
+                    {
+                        ServiceComments = m,
+                        ServiceCommentFiles = gj.ToList()
+                    }).ToList();
+
+                return clsServices;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<clsServices> ClsServices_ViewRefList(Guid id)
         {
             try
@@ -405,7 +427,7 @@ namespace E2E.Models
                         ServiceFiles serviceFiles = new ServiceFiles();
                         serviceFiles.Service_Id = model.Service_Id;
                         serviceFiles.ServiceFile_Name = files[i].FileName;
-                        string dir = string.Format("Service/{0}/", model.Service_Key);
+                        string dir = string.Format("Service/{0}/", model.Service_Id);
                         serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
@@ -442,7 +464,7 @@ namespace E2E.Models
                         ServiceFiles serviceFiles = new ServiceFiles();
                         serviceFiles.Service_Id = model.Service_Id;
                         serviceFiles.ServiceFile_Name = files[i].FileName;
-                        string dir = string.Format("Service/{0}/", model.Service_Key);
+                        string dir = string.Format("Service/{0}/", model.Service_Id);
                         serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
@@ -610,6 +632,41 @@ namespace E2E.Models
                     services.Action_User_Id = model.Action_User_Id;
                 }
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
+        {
+            try
+            {
+                bool res = new bool();
+                model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                if (files[0].ContentLength > 0)
+                {
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        ServiceCommentFiles serviceCommentFiles = new ServiceCommentFiles();
+                        serviceCommentFiles.ServiceCommentFile_Name = files[i].FileName;
+                        string dir = string.Format("Service/{0}/Comment/{1}/", model.Service_Id, DateTime.Today.ToString("yyMMdd"));
+                        serviceCommentFiles.ServiceCommentFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
+                        serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
+                        serviceCommentFiles.ServiceComment_Seq = i;
+                        serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
+                        db.Entry(serviceCommentFiles).State = System.Data.Entity.EntityState.Added;
+                    }
+                }
+
                 if (db.SaveChanges() > 0)
                 {
                     res = true;

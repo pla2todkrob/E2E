@@ -1,4 +1,4 @@
-﻿@model int
+﻿@model int?
 
 @{
     Layout = null;
@@ -23,23 +23,30 @@
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">
-        @{
+        @if (Model.HasValue)
+        {
             if (Model == 1)
             {
                 Html.RenderPartial("_NavbarAdmin");
             }
-        }
 
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                @{ Html.RenderAction("_Profile", "Configurations"); }
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdown_profile">
-                <a class="dropdown-item" href="@Url.Action("MyTask","Services")">My task</a>
-                <a class="dropdown-item" href="@Url.Action("MyRequest","Services")">My request</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" onclick="SignoutNotify('@Url.Action("Signout","Users")');">Signout</a>
-            </div>
-        </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    @{ Html.RenderAction("_Profile", "Configurations"); }
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdown_profile">
+                    <a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
+                    <a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
+                </div>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("Login","Users")">Login</a>
+            </li>
+        }
     </ul>
 </div>

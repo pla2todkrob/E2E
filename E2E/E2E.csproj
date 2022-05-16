@@ -222,6 +222,7 @@
     <Compile Include="Models\Views\clsProcesses.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
+    <Compile Include="Models\Views\clsServiceComments.cs" />
     <Compile Include="Models\Views\clsServices.cs" />
     <Compile Include="Models\Views\clsSwal.cs" />
     <Compile Include="Models\Views\clsTopic.cs" />
@@ -773,6 +774,8 @@
     <Content Include="Views\EForms\Index.cshtml" />
     <Content Include="Views\EForms\EForms_Table.cshtml" />
     <Content Include="Views\EForms\EForms_Create.cshtml" />
+    <Content Include="Views\Services\_CommentHistory.cshtml" />
+    <Content Include="Views\Services\_Comment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

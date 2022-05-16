@@ -19,7 +19,6 @@ namespace E2E.Models.Tables
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
         public DateTime Create { get; set; }
-        public DateTime? Update { get; set; }
 
         public ServiceComments()
         {

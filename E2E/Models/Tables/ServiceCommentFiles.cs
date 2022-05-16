@@ -18,6 +18,8 @@ namespace E2E.Models.Tables
 
         [Display(Name = "File name")]
         public string ServiceCommentFile_Name { get; set; }
+        [Display(Name = "File extension")]
+        public string ServiceCommentFile_Extension { get; set; }
 
         public int ServiceComment_Seq { get; set; }
 

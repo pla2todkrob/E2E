@@ -9,11 +9,12 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     public class ConfigurationsController : Controller
     {
         private clsContext db = new clsContext();
 
+        [Authorize]
         public ActionResult Index()
         {
             return View();
@@ -35,12 +36,15 @@ namespace E2E.Controllers
 
         public ActionResult _Navbar()
         {
-            int res = new int();
-            Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-            res = db.Users
-                .Where(w => w.User_Id == id)
-                .Select(s => s.System_Roles.Role_Index)
-                .FirstOrDefault();
+            int? res = null;
+            if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+            {
+                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
+                res = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.System_Roles.Role_Index)
+                    .FirstOrDefault();
+            }
 
             return PartialView("_Navbar", res);
         }
@@ -71,22 +75,25 @@ namespace E2E.Controllers
         {
             try
             {
-                int res = new int();
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-
-                int authorIndex = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
-                    .FirstOrDefault();
-
-                if (authorIndex == 3)
+                int? res = null;
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
-                    res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
-                }
-                else
-                {
-                    res = new clsManageService().Services_GetWaitCommitCount();
-                    res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+
+                    int authorIndex = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
+                        .FirstOrDefault();
+
+                    if (authorIndex == 3)
+                    {
+                        res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                    }
+                    else
+                    {
+                        res = new clsManageService().Services_GetWaitCommitCount();
+                        res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                    }
                 }
 
                 return PartialView("_NavService", res);
@@ -101,21 +108,24 @@ namespace E2E.Controllers
         {
             try
             {
-                int res = new int();
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
-
-                int authorIndex = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
-                    .FirstOrDefault();
-
-                if (authorIndex != 3)
+                int? res = null;
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
-                    res = db.Services
-                        .Where(w => w.Required_Approve_User_Id.HasValue &&
-                        !w.Approved_User_Id.HasValue &&
-                        w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+
+                    int authorIndex = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
+                        .FirstOrDefault();
+
+                    if (authorIndex != 3)
+                    {
+                        res = db.Services
+                            .Where(w => w.Required_Approve_User_Id.HasValue &&
+                            !w.Approved_User_Id.HasValue &&
+                            w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
+                    }
                 }
 
                 return PartialView("_NavDepartment", res);
