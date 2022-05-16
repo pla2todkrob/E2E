@@ -723,6 +723,88 @@ namespace E2E.Controllers
             }
         }
 
+        public ActionResult _CommentHistory(Guid id)
+        {
+            try
+            {
+                return PartialView("_CommentHistory", data.ClsServices_ViewComment(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult _Comment(Guid id)
+        {
+            try
+            {
+                ServiceComments serviceComments = new ServiceComments();
+                serviceComments.Service_Id = id;
+                return PartialView("_Comment", serviceComments);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult _Comment(ServiceComments model)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.Services_Comment(model, Request.Files))
+                    {
+                        scope.Complete();
+                        swal.icon = "success";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult GetPriorityDateRange(Guid id)
         {
             try

@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private clsContext db = new clsContext();

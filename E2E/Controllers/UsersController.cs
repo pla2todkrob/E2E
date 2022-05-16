@@ -145,7 +145,7 @@ namespace E2E.Controllers
         public ActionResult Signout()
         {
             FormsAuthentication.SignOut();
-            return Redirect(FormsAuthentication.LoginUrl);
+            return Redirect(FormsAuthentication.DefaultUrl);
         }
     }
 }

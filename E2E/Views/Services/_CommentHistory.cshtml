@@ -1,0 +1,42 @@
+﻿@model E2E.Models.Views.clsServices
+
+@{
+    Layout = null;
+}
+@{ 
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+}
+@foreach (var item in Model.ClsServiceComments)
+{
+    if (item.ServiceComments.User_Id != userId)
+    {
+        <div class="row">
+            <div class="col-9">
+                <div class="row">
+                    <div class="col-auto rounded bg-secondary">
+                        @item.ServiceComments.Comment_Content
+                        @foreach (var item2 in item.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
+                        {
+                        <a href="@item2.ServiceCommentFile_Path" title="@item2.ServiceCommentFile_Name" target="_blank">@item2.ServiceCommentFile_Name</a>
+                        }
+                        <small class="text-right">
+                            @item.ServiceComments.Users.User_Code&nbsp;<cite>@item.ServiceComments.Create</cite>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-9 offset-3">
+                <div class="row">
+                    <div class="col-auto rounded bg-primary">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
