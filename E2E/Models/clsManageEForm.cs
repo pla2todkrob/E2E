@@ -1,4 +1,5 @@
 ﻿using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,13 +23,11 @@ namespace E2E.Models
 
                 if (eForms != null)
                 {
-                    status = "U";
-                    res = Board_Update(model, files, status);
+                    res = EForm_Update(model, files);
                 }
                 else
                 {
-                    status = "I";
-                    res = Board_Insert(model, files, status);
+                    res = EForm_Insert(model, files);
                 }
 
                 return res;
@@ -39,7 +38,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Insert(EForms model, HttpFileCollectionBase files, string status)
+        protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
         {
             try
             {
@@ -80,24 +79,24 @@ namespace E2E.Models
                                 string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    Galleries_Save(eForms, filepath, FileName, status);
+                                    Galleries_Save(eForms, filepath, FileName);
                                 }
                             }
                             else
                             {
-                                //string FileName = file.FileName;
+                                string FileName = file.FileName;
 
-                                //TopicFiles topicFiles = new TopicFiles();
-                                //topicFiles = db.TopicFiles.Where(w => w.Topic_Id == model.Topic_Id && w.TopicFile_Name == file.FileName).FirstOrDefault();
-                                //if (topicFiles != null)
-                                //{
-                                //    FileName = string.Concat("_", file.FileName);
-                                //}
-                                //string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-                                //if (filepath != "")
-                                //{
-                                //    File_Save(topics, filepath, FileName, status);
-                                //}
+                                EForm_Files eForm_Files = new EForm_Files();
+                                eForm_Files = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_File_Name == file.FileName).FirstOrDefault();
+                                if (eForm_Files != null)
+                                {
+                                    FileName = string.Concat("_", file.FileName);
+                                }
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                                if (filepath != "")
+                                {
+                                    File_Save(eForms, filepath, FileName);
+                                }
                             }
                         }
                     }
@@ -113,7 +112,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Update(EForms model, HttpFileCollectionBase files, string status)
+        protected bool EForm_Update(EForms model, HttpFileCollectionBase files)
         {
             try
             {
@@ -126,6 +125,8 @@ namespace E2E.Models
                 EForms.EForm_Title = model.EForm_Title.Trim();
                 EForms.EForm_Description = model.EForm_Description.Trim();
                 EForms.EForm_Link = model.EForm_Link;
+                EForms.EForm_Start = model.EForm_Start;
+                EForms.EForm_End = model.EForm_End;
                 EForms.Active = model.Active;
                 EForms.Update = DateTime.Now;
 
@@ -155,24 +156,24 @@ namespace E2E.Models
                                 string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    Galleries_Save(EForms, filepath, FileName, status);
+                                    Galleries_Save(EForms, filepath, FileName);
                                 }
                             }
                             else
                             {
-                                //string FileName = file.FileName;
+                                string FileName = file.FileName;
 
-                                //TopicFiles topicFiles = new TopicFiles();
-                                //topicFiles = db.TopicFiles.Where(w => w.Topic_Id == model.Topic_Id && w.TopicFile_Name == file.FileName).FirstOrDefault();
-                                //if (topicFiles != null)
-                                //{
-                                //    FileName = string.Concat("_", file.FileName);
-                                //}
-                                //string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-                                //if (filepath != "")
-                                //{
-                                //    File_Save(topics, filepath, FileName, status);
-                                //}
+                                EForm_Files eForm_Files = new EForm_Files();
+                                eForm_Files = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_File_Name == file.FileName).FirstOrDefault();
+                                if (eForm_Files != null)
+                                {
+                                    FileName = string.Concat("_", file.FileName);
+                                }
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                                if (filepath != "")
+                                {
+                                    File_Save(EForms, filepath, FileName);
+                                }
                             }
                         }
                     }
@@ -211,7 +212,7 @@ namespace E2E.Models
             return false;
         }
 
-        public void Galleries_Save(EForms model, string filepath, string file, string status)
+        public void Galleries_Save(EForms model, string filepath, string file)
         {
             try
             {
@@ -238,6 +239,7 @@ namespace E2E.Models
                 eForm_Galleries.EForm_Gallery_Original = filepath;
                 eForm_Galleries.EForm_Gallery_Name = file;
                 eForm_Galleries.EForm_Gallery_Extension = Path.GetExtension(file);
+                
                 if (Count == null)
                 {
                     eForm_Galleries.EForm_Gallery_Seq = 1;
@@ -264,7 +266,156 @@ namespace E2E.Models
             }
         }
 
+        public void File_Save(EForms model, string filepath, string file)
+        {
+            try
+            {
+                bool res = new bool();
+                res = File_Insert(model, filepath, file);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool File_Insert(EForms model, string filepath, string file)
+        {
+            try
+            {
+
+                bool res = new bool();
+                EForm_Files eForm_Files = new EForm_Files();
+                var Count = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_File_Seq).FirstOrDefault();
+
+                eForm_Files.EForm_Id = model.EForm_Id;
+                eForm_Files.EForm_File_Path = filepath;
+                eForm_Files.EForm_File_Name = file;
+                eForm_Files.EForm_File_Extension = Path.GetExtension(file);
+
+                if (Count == null)
+                {
+                    eForm_Files.EForm_File_Seq = 1;
+                }
+                else
+                {
+                    eForm_Files.EForm_File_Seq = Count.EForm_File_Seq++;
+                }
+
+                db.EForm_Files.Add(eForm_Files);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public bool EForm_Delete(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                EForms eForms = new EForms();
+                eForms = db.EForms.Where(w => w.EForm_Id == id).FirstOrDefault();
+                
+                db.EForms.Remove(eForms);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public bool Delete_Attached(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                clsEForm clsEForm = new clsEForm();
 
 
+                clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+                clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+                if (clsEForm != null)
+                {
+                    db.EForm_Files.RemoveRange(clsEForm.EForm_Files);
+                    db.EForm_Galleries.RemoveRange(clsEForm.EForm_Galleries);
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        res = EForm_Delete(id);
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool DeleteGallery(Guid id)
+        {
+            try
+            {
+
+                bool res = new bool();
+
+                var Galleries = db.EForm_Galleries.Where(w => w.EForm_Gallery_Id == id).FirstOrDefault();
+
+                db.EForm_Galleries.Remove(Galleries);
+
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool DeleteFile(Guid id)
+        {
+            try
+            {
+
+                bool res = new bool();
+
+                var Files = db.EForm_Files.Where(w => w.EForm_File_Id == id).FirstOrDefault();
+
+                db.EForm_Files.Remove(Files);
+
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

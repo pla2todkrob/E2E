@@ -18,7 +18,7 @@
         @foreach (var item in Model.TopicGalleries)
         {
             <div class="d-inline-block">
-                <button type="button" class="btn btn-secondary mr-auto position-absolute" style="z-index:1; right:0;" onclick="deleteFiles('@Url.Action("DeleteGallery","Topics",new { id=Html.ValueFor(m => item.TopicGallery_Id)})','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id})')"><i class="fa fa-times"></i></button>
+                <button type="button" class="btn btn-secondary mr-auto position-absolute" style="z-index:1; right:0;" onclick="deleteFiles('@Url.Action("DeleteGallery","Topics",new { id=Html.ValueFor(m => item.TopicGallery_Id)})','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id})','@Url.Action("ReloadModel","Topics",new { id=item.Topic_Id})')"><i class="fa fa-times"></i></button>
                 <a href="@item.TopicGallery_Original" target="_blank">
                     <img alt="@item.TopicGallery_Name" src="@item.TopicGallery_Original" />
                 </a>
@@ -42,7 +42,7 @@
             {
                 <tr>
                     <td>
-                        <button type="button" class="btn text-danger mr-auto" onclick="deleteFiles('@Url.Action("DeleteFiles","Topics",new { id=Html.ValueFor(m => files.TopicFile_Id) })','@Url.Action("ReloadModel","Topics",new { id=files.Topic_Id})')"><i class="fa fa-trash-o"></i></button>
+                        <button type="button" class="btn text-danger mr-auto" onclick="deleteFiles('@Url.Action("DeleteFiles","Topics",new { id=Html.ValueFor(m => files.TopicFile_Id) })','@Url.Action("_FileCollection","Topics",new { id=files.Topic_Id})','@Url.Action("ReloadModel","Topics",new { id=files.Topic_Id})')"><i class="fa fa-trash-o"></i></button>
                         <a href="@files.TopicFile_Path" target="_blank">@files.TopicFile_Name</a>
                     </td>
                 </tr>

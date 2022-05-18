@@ -36,7 +36,7 @@
                 <input name="fileImage" id="fileImage" type="file" multiple class="form-control-file" onchange="previewMultiple(event)" />
             </div>
 
-            <div id="fileCollection" class="col-12"></div>
+            <div id="fileCollections" class="col-12"></div>
 
             <div class="form-group col-md-12">
                 @Html.LabelFor(m => m.EForm_Description)
@@ -56,7 +56,7 @@
             </div>
             <div class="col-md-6 form-group">
                 @Html.LabelFor(m => m.EForm_End)
-                @Html.TextBoxFor(m => m.EForm_End, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.TextBoxFor(m => m.EForm_End, "{0:yyyy-MM-dd}", new { @class = "form-control input-large", type = "date"})
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
         @{
             if (ViewBag.isNew == false)
             {
-                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.EForm_Id)})')"><i class="fa fa-trash"></i></button>
+                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_EForm","EForms",new { id=Html.ValueFor(w=>w.EForm_Id)})')"><i class="fa fa-trash"></i></button>
             }
         }
         <button id="modalClose" type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i></button>
