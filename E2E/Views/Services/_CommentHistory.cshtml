@@ -2,41 +2,68 @@
 
 @{
     Layout = null;
-}
-@{ 
-    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-}
-@foreach (var item in Model.ClsServiceComments)
-{
-    if (item.ServiceComments.User_Id != userId)
-    {
-        <div class="row">
-            <div class="col-9">
-                <div class="row">
-                    <div class="col-auto rounded bg-secondary">
-                        @item.ServiceComments.Comment_Content
-                        @foreach (var item2 in item.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
-                        {
-                        <a href="@item2.ServiceCommentFile_Path" title="@item2.ServiceCommentFile_Name" target="_blank">@item2.ServiceCommentFile_Name</a>
-                        }
-                        <small class="text-right">
-                            @item.ServiceComments.Users.User_Code&nbsp;<cite>@item.ServiceComments.Create</cite>
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            <div class="col-9 offset-3">
-                <div class="row">
-                    <div class="col-auto rounded bg-primary">
 
-                    </div>
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+    List<DateTime> dates = Model.ClsServiceComments
+        .Select(s => s.ServiceComments.Create.Date)
+        .OrderBy(o => o)
+        .Distinct()
+        .ToList();
+}
+@foreach (var item in dates)
+{
+    <center class="font-weight-bold my-3 text-secondary small">@item.ToString("d")</center>
+    foreach (var item2 in Model.ClsServiceComments.Where(w => w.ServiceComments.Create.Date == item).ToList())
+    {
+        <div class="row mb-1">
+            @if (item2.ServiceComments.User_Id != userId)
+            {
+            <div class="col-11">
+                <div class="d-flex flex-row flex-nowrap align-items-end">
+                    <ul class="bg-secondary text-light rounded mb-0 p-2">
+                        <li>
+                            <span>@item2.ServiceComments.Comment_Content</span>
+                            @if (item2.ServiceCommentFiles.Count > 0)
+                            {
+                                <ul>
+                                    @foreach (var item3 in item2.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
+                                    {
+                                        <li>
+                                            <a href="@item3.ServiceCommentFile_Path" title="@item3.ServiceCommentFile_Name" class="text-light" target="_blank">@item3.ServiceCommentFile_Name</a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    </ul>
+                    <small class="text-dark text-nowrap px-1">@item2.ServiceComments.Create.ToString("t")</small>
                 </div>
             </div>
+            }
+            else
+            {
+                <div class="col-11 offset-1">
+                    <div class="d-flex flex-row flex-nowrap justify-content-end align-items-end">
+                        <small class="text-dark text-nowrap px-1">@item2.ServiceComments.Create.ToString("t")</small>
+                        <ul class="bg-info text-light rounded mb-0 p-2">
+                            <li>
+                                <span>@item2.ServiceComments.Comment_Content</span>
+                                @if (item2.ServiceCommentFiles.Count > 0)
+                                {
+                                    <ul>
+                                        @foreach (var item3 in item2.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
+                                        {
+                                            <li>
+                                                <a href="@item3.ServiceCommentFile_Path" title="@item3.ServiceCommentFile_Name" class="text-light" target="_blank">@item3.ServiceCommentFile_Name</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            }
         </div>
     }
 }

@@ -482,13 +482,7 @@ namespace E2E.Controllers
 
         public ActionResult LineWorks_Form(Guid? id)
         {
-            ViewBag.AuthorizeList = db.System_Authorizes
-                .OrderBy(o => o.Authorize_Index)
-                .Select(s => new SelectListItem()
-                {
-                    Value = s.Authorize_Id.ToString(),
-                    Text = s.Authorize_Name
-                }).ToList();
+            ViewBag.AuthorizeList = data.SelectListItems_Authorize();
 
             bool isNew = true;
             Master_LineWorks master_LineWorks = new Master_LineWorks();
@@ -1392,6 +1386,7 @@ namespace E2E.Controllers
         {
             return Json(data.SelectListItems_Process(id), JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Users_GetSelectUsers(Guid? id)
         {
             return Json(data.SelectListItems_Users(id), JsonRequestBehavior.AllowGet);

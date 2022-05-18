@@ -260,7 +260,9 @@ namespace E2E.Models
                     {
                         ServiceComments = m,
                         ServiceCommentFiles = gj.ToList()
-                    }).ToList();
+                    })
+                    .OrderBy(o => o.ServiceComments.Create)
+                    .ToList();
 
                 return clsServices;
             }

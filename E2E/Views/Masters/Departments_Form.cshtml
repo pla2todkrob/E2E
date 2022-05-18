@@ -21,11 +21,11 @@
 
             <div class="form-group col-md-6">
                 @Html.LabelFor(m => m.Master_Divisions.Plant_Id)
-                @Html.DropDownListFor(m => m.Master_Divisions.Plant_Id, new SelectList(ViewBag.PlantList, "Value", "Text"), "Select Plant", new { @class = "form-control", required = "required" })
+                @Html.DropDownListFor(m => m.Master_Divisions.Plant_Id, new SelectList(ViewBag.PlantList, "Value", "Text"), new { @class = "form-control", required = "required" })
             </div>
             <div class="form-group col-md-6">
                 @Html.LabelFor(m => m.Division_Id)
-                @Html.DropDownListFor(m => m.Division_Id, new SelectList(ViewBag.DivisionsList, "Value", "Text"), "Select Division", new { @class = "form-control", required = "required" })
+                @Html.DropDownListFor(m => m.Division_Id, new SelectList(ViewBag.DivisionsList, "Value", "Text"), new { @class = "form-control", required = "required" })
             </div>
             <div class="form-group col-md-12">
                 @Html.LabelFor(m => m.Department_Name)
