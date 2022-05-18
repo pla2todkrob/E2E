@@ -6,3 +6,7 @@
 .img-table {
     max-height: 192px;
 }
+
+#serviceInfo {
+    min-height: 640px;
+}

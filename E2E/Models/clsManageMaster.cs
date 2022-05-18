@@ -1959,141 +1959,166 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_Role()
         {
-            return db.System_Roles
+            IQueryable<System_Roles> query = db.System_Roles;
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Role", Value = "" });
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Role_Id.ToString(),
                     Text = s.Role_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
+        }
+
+        public List<SelectListItem> SelectListItems_Authorize()
+        {
+            IQueryable<System_Authorize> query = db.System_Authorizes;
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Authorize", Value = "" });
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Authorize_Id.ToString(),
+                    Text = s.Authorize_Name
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_LineWork()
         {
-            return db.Master_LineWorks
-                .Where(w => w.Active)
+            IQueryable<Master_LineWorks> query = db.Master_LineWorks
+                .Where(w => w.Active);
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Line of work", Value = "" });
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.LineWork_Id.ToString(),
                     Text = s.LineWork_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_Grade(Guid? lineworkId)
         {
-            IQueryable<Master_Grades> query = db.Master_Grades
-                .Where(w => w.Active);
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Grade", Value = "" });
+
             if (lineworkId.HasValue)
             {
-                query = query
-                    .Where(w => w.LineWork_Id == lineworkId.Value);
-            }
-
-            return query
+                item.AddRange(db.Master_Grades
+                .Where(w => w.Active &&
+                w.LineWork_Id == lineworkId.Value)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Grade_Id.ToString(),
                     Text = s.Grade_Name + " (" + s.Grade_Position + ")"
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+            }
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_Plant()
         {
-            return db.Master_Plants
-                .Where(w => w.Active)
+            IQueryable<Master_Plants> query = db.Master_Plants
+                .Where(w => w.Active);
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Plant", Value = "" });
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Plant_Id.ToString(),
                     Text = s.Plant_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_Division(Guid? plantId)
         {
-            IQueryable<Master_Divisions> query = db.Master_Divisions
-                .Where(w => w.Active);
-            if (plantId.HasValue)
-            {
-                query = query
-                    .Where(w => w.Plant_Id == plantId.Value);
-            }
-
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select Division", Value = "" });
-            item.AddRange(query
+
+            if (plantId.HasValue)
+            {
+                item.AddRange(db.Master_Divisions
+                .Where(w => w.Active &&
+                w.Plant_Id == plantId.Value)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Division_Id.ToString(),
                     Text = s.Division_Name
                 }).OrderBy(o => o.Text).ToList());
+            }
 
             return item;
         }
 
         public List<SelectListItem> SelectListItems_Department(Guid? divisionId)
         {
-            IQueryable<Master_Departments> query = db.Master_Departments
-                .Where(w => w.Active);
-            if (divisionId.HasValue)
-            {
-                query = query
-                    .Where(w => w.Division_Id == divisionId.Value);
-            }
-
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select Department", Value = "" });
 
-            item.AddRange(query
+            if (divisionId.HasValue)
+            {
+                item.AddRange(db.Master_Departments
+                .Where(w => w.Active &&
+                w.Division_Id == divisionId.Value)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Department_Id.ToString(),
                     Text = s.Department_Name
                 }).OrderBy(o => o.Text).ToList());
+            }
 
             return item;
         }
 
         public List<SelectListItem> SelectListItems_Section(Guid? departmentId)
         {
-            IQueryable<Master_Sections> query = db.Master_Sections
-                .Where(w => w.Active);
-            if (departmentId.HasValue)
-            {
-                query = query
-                    .Where(w => w.Department_Id == departmentId.Value);
-            }
-
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select Section", Value = "" });
 
-            item.AddRange(query
+            if (departmentId.HasValue)
+            {
+                item.AddRange(db.Master_Sections
+                .Where(w => w.Active &&
+                w.Department_Id == departmentId.Value)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Section_Id.ToString(),
                     Text = s.Section_Name
                 }).OrderBy(o => o.Text).ToList());
+            }
 
             return item;
         }
 
         public List<SelectListItem> SelectListItems_Process(Guid? sectionId)
         {
-            IQueryable<Master_Processes> query = db.Master_Processes
-                .Where(w => w.Active);
-            if (sectionId.HasValue)
-            {
-                query = query
-                    .Where(w => w.Section_Id == sectionId.Value);
-            }
-
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select Process", Value = "" });
 
-            item.AddRange(query
-                .Select(s => new SelectListItem()
-                {
-                    Value = s.Process_Id.ToString(),
-                    Text = s.Process_Name
-                }).OrderBy(o => o.Text).ToList());
+            if (sectionId.HasValue)
+            {
+                item.AddRange(db.Master_Processes
+                 .Where(w => w.Active &&
+                 w.Section_Id == sectionId.Value)
+                 .Select(s => new SelectListItem()
+                 {
+                     Value = s.Process_Id.ToString(),
+                     Text = s.Process_Name
+                 }).OrderBy(o => o.Text).ToList());
+            }
 
             return item;
         }
@@ -2125,22 +2150,34 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_PrefixTH()
         {
-            return db.System_Prefix_THs
+            IQueryable<System_Prefix_TH> query = db.System_Prefix_THs;
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Prefix", Value = "" });
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Prefix_TH_Id.ToString(),
                     Text = s.Prefix_TH_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
         public List<SelectListItem> SelectListItems_PrefixEN()
         {
-            return db.System_Prefix_ENs
+            IQueryable<System_Prefix_EN> query = db.System_Prefix_ENs;
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Prefix", Value = "" });
+            item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Prefix_EN_Id.ToString(),
                     Text = s.Prefix_EN_Name
-                }).OrderBy(o => o.Text).ToList();
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
     }
 }
