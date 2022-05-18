@@ -17,32 +17,40 @@
                 <td>
                     <div class="row">
                         <div class="col-12 mb-3">
-                            @Html.ActionLink(item.EForm_Title, "EForms", new { id = item.EForm_Id }) &nbsp;
+                            @Html.ActionLink(item.EForm_Title, "EForms_Content", new { id = item.EForm_Id }) &nbsp;
 
                             @{
                                 if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
                                 {
                                     if (ViewBag.MyForm == true)
                                     {
-                                        <button onclick="callModal('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })','@Url.Action("_FileCollection", "Topics", new { id = item.EForm_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                        <button onclick="callModalEForms('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })', '@Url.Action("_FileCollections", "EForms", new { id = item.EForm_Id })', true)" class="btn"><i class="fa fa-pencil"></i></button>
                                     }
                                 }
                             }
                         </div>
-                        <div class="col-md-9 col-6">
+                        <div class="col-md-12 col-6">
                             <div class="d-flex justify-content-between flex-wrap">
-                                <b>@Html.DisplayFor(i => item.Users.User_Code)</b>
+                                <div>
+                                    <small>
+                                        <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)
+                                    </small>
+                                </div>
+                                 
                                 <small>
                                     @{
                                         if (item.Update.HasValue)
                                         {
-                                            @Html.DisplayFor(i => item.Update)
+                                            <b>Update :</b> @Html.DisplayFor(i => item.Update)
                                         }
                                         else
                                         {
-                                            @Html.DisplayFor(i => item.Create)
+                                            <b>Create :</b> @Html.DisplayFor(i => item.Create)
                                         }
                                     }
+                                    <br/>
+                                    <b>EForm_Start:</b> @Html.DisplayFor(i => item.EForm_Start)<br/>
+                                    <b>EForm_End:</b> @Html.DisplayFor(i => item.EForm_End)<br/>
                                 </small>
                             </div>
                         </div>

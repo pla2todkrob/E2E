@@ -3,11 +3,16 @@
     ViewBag.Title = "Index";
 }
 
+@section css{
+
+    <link href="~/Content/justifiedGallery.min.css" rel="stylesheet" />
+}
+
 <h2>Index</h2>
 
 @section scripts{
     <script src="~/Scripts/jquery.justifiedGallery.min.js"></script>
-    <script src="~/Asset/Topic.min.js"></script>
+    <script src="~/Asset/EForm.js"></script>
     <script>
 
         $(function () {
@@ -42,7 +47,7 @@
 
 <div class="d-flex mb-3">
     <div class="ml-auto">
-        <button type="button" onclick="callModal('@Url.Action("EForms_Create","EForms")','', true)" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+        <button type="button" onclick="callModalEForms('@Url.Action("EForms_Create","EForms")', '', true)" class="btn btn-primary"><i class="fa fa-plus"></i></button>
     </div>
 </div>
 

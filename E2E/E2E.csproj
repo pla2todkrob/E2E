@@ -217,6 +217,7 @@
     <Compile Include="Models\Tables\System_Roles.cs" />
     <Compile Include="Models\Views\clsDepartments.cs" />
     <Compile Include="Models\Views\clsDivisions.cs" />
+    <Compile Include="Models\Views\clsEForm.cs" />
     <Compile Include="Models\Views\clsGrades.cs" />
     <Compile Include="Models\Views\clsLogin.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
@@ -230,6 +231,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Asset\EForm.js" />
+    <Content Include="Asset\EForm.min.js">
+      <DependentUpon>EForm.js</DependentUpon>
+    </Content>
     <Content Include="Asset\Master.js" />
     <Content Include="Asset\Master.min.js">
       <DependentUpon>Master.js</DependentUpon>
@@ -776,6 +781,8 @@
     <Content Include="Views\EForms\EForms_Create.cshtml" />
     <Content Include="Views\Services\_CommentHistory.cshtml" />
     <Content Include="Views\Services\_Comment.cshtml" />
+    <Content Include="Views\EForms\_FileCollections.cshtml" />
+    <Content Include="Views\EForms\EForms_Content.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

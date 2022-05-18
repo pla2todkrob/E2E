@@ -34,7 +34,7 @@ namespace E2E.Controllers
 
                 ViewBag.MyForm = false;
 
-                IQueryable<EForms> query = db.EForms.OrderByDescending(o => new { o.Update, o.Create });
+                IQueryable<EForms> query = db.EForms.OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t=>t.EForm_Start) ;
 
                 if (res == 1)
                 {
@@ -164,6 +164,192 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult _FileCollections(Guid id)
+        {
+            clsEForm clsEForm = new clsEForm();
+
+            clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+
+            clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+
+            return View(clsEForm);
+        }
+
+        public ActionResult ReloadModel(Guid id)
+        {
+            clsEForm clsEForm = new clsEForm();
+
+            clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+
+            clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+
+            return View(clsEForm);
+        }
+
+        public ActionResult Delete_EForm(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.Delete_Attached(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ลบข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult DeleteGallery(Guid id)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.DeleteGallery(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบไฟล์สำเร็จ";
+                        swal.title = "Successful";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult DeleteFiles(Guid id)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.DeleteFile(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบไฟล์สำเร็จ";
+                        swal.title = "Successful";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult EForms_Content(Guid? id)
+        {
+            Guid id_emp = Guid.Parse(HttpContext.User.Identity.Name);
+            ViewBag.Usercode = db.Users
+                .Where(w => w.User_Id == id_emp)
+                .Select(s => s.User_Code)
+                .FirstOrDefault();
+
+            clsEForm clsEForm = new clsEForm();
+
+            if (id.HasValue)
+            {
+                clsEForm.EForms = db.EForms.Where(w => w.EForm_Id == id).FirstOrDefault();
+                clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+                clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+            }
+
+            return View(clsEForm);
         }
     }
 }

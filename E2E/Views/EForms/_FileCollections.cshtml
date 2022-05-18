@@ -1,0 +1,52 @@
+﻿@model E2E.Models.Views.clsEForm
+
+@{
+    Layout = null;
+}
+
+<script>
+    $("#gallerys").justifiedGallery({
+        maxRowHeight: 200,
+        rowHeight:150
+    });
+</script>
+
+@if (Model.EForm_Galleries.Count > 0)
+{
+    <h5>Galleries</h5>
+    <div id="gallerys">
+        @foreach (var item in Model.EForm_Galleries)
+        {
+            <div class="d-inline-block">
+                <button type="button" class="btn btn-secondary position-absolute" style="z-index:1; right:0;" onclick="deleteFileEF('@Url.Action("DeleteGallery","EForms",new { id=Html.ValueFor(m => item.EForm_Gallery_Id)})','@Url.Action("_FileCollections","EForms",new { id=item.EForm_Id})','@Url.Action("ReloadModel","EForms",new { id=item.EForm_Id})')"><i class="fa fa-times"></i></button>
+                <a href="@item.EForm_Gallery_Original" target="_blank">
+                    <img alt="@item.EForm_Gallery_Name" src="@item.EForm_Gallery_Original" />
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.EForm_Files.Count > 0)
+{
+    <table class="table-borderless mt-3">
+        <thead>
+            <tr>
+                <th>
+                    <h5>Files</h5>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var files in Model.EForm_Files)
+            {
+                <tr>
+                    <td>
+                        <button type="button" class="btn text-danger mr-auto" onclick="deleteFileEF('@Url.Action("DeleteFiles","EForms",new { id=Html.ValueFor(m => files.EForm_File_Id) })','@Url.Action("_FileCollections","EForms",new { id=files.EForm_Id})','@Url.Action("ReloadModel","EForms",new { id=files.EForm_Id})')"><i class="fa fa-trash-o"></i></button>
+                        <a href="@files.EForm_File_Path" target="_blank">@files.EForm_File_Name</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,95 @@
+﻿@model E2E.Models.Views.clsEForm
+
+@{
+    ViewBag.Title = "Boards_Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Boards","Topics")">E-Forms</a></li>
+            <li class="breadcrumb-item active" aria-current="page">EFormsContent</li>
+        </ol>
+    </nav>
+}
+@section css{
+
+    <link href="~/Content/justifiedGallery.min.css" rel="stylesheet" />
+
+}
+@section scripts{
+    <script src="~/Asset/Topic.min.js"></script>
+    <script src="~/Scripts/jquery.justifiedGallery.min.js"></script>
+
+    <script>
+        $(function () {
+            $("#mygallery").justifiedGallery({
+                rowHeight: 200,
+            });
+        });
+
+    </script>
+}
+
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">
+            [@Html.DisplayFor(m => m.EForms.Users.User_Code)]
+            @Html.DisplayFor(m => m.EForms.EForm_Title)
+        </h5>
+    </div>
+    <div class="card-body">
+        <a href="@Html.DisplayFor(m => m.EForms.EForm_Link)">@Html.DisplayFor(m => m.EForms.EForm_Link)</a>
+        @Html.DisplayFor(m => m.EForms.EForm_Description)
+
+        @if (Model.EForm_Galleries.Count > 0)
+        {
+            <hr />
+            <h5>Galleries</h5>
+            <div id="mygallery" class="justified-gallery">
+                @foreach (var img in Model.EForm_Galleries)
+                {
+
+
+                    <a href="@img.EForm_Gallery_Original" target="_blank">
+                        <img alt="@img.EForm_Gallery_Name" src="@img.EForm_Gallery_Original" />
+                    </a>
+                    <!-- other images... -->
+
+                }
+            </div>
+        }
+
+        @if (Model.EForm_Files.Count > 0)
+        {
+            <hr />
+            <h5>Files</h5>
+            <ul>
+                @foreach (var files in Model.EForm_Files)
+                {
+                    <li>
+                        <a href="@files.EForm_File_Path" target="_blank">@files.EForm_File_Name</a>
+                    </li>
+
+                }
+            </ul>
+        }
+
+    </div>
+
+    <div class="card-footer">
+        <div class="d-flex">
+            <div class="mr-auto">
+                <span class="font-weight-bold">
+                    @Html.DisplayNameFor(m => m.EForms.Create):
+                </span>
+                @Html.DisplayFor(m => m.EForms.Create)
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
