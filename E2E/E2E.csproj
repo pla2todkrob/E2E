@@ -224,6 +224,7 @@
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsEForm.cs" />
     <Compile Include="Models\Views\clsGrades.cs" />
+    <Compile Include="Models\Views\clsImage.cs" />
     <Compile Include="Models\Views\clsLogin.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
