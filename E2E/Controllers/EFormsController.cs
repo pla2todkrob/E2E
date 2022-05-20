@@ -82,7 +82,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult EForms_Create(EForms model)
+        public ActionResult EForms_Create(clsEForm model)
         {
             clsSwal swal = new clsSwal();
             if (ModelState.IsValid)
@@ -91,7 +91,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.EForm_Save(model, Request.Files))
+                        if (data.EForm_Save(model.EForms, Request.Files))
                         {
                             scope.Complete();
 
