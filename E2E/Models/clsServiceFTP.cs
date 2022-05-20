@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,6 +27,10 @@ namespace E2E.Models
                 {
                     fileName = filePost.FileName;
                 }
+                else
+                {
+                    fileName += Path.GetExtension(filePost.FileName);
+                }
 
                 fileName = string.Concat(finalPath, fileName);
 
@@ -33,7 +38,7 @@ namespace E2E.Models
                 request.Method = WebRequestMethods.Ftp.UploadFile;
                 request.Credentials = new NetworkCredential(user, pass);
 
-                byte[] bytes = new byte[filePost.ContentLength];
+                byte[] bytes = null;
                 using (Stream fileStream = filePost.InputStream)
                 {
                     using (MemoryStream memory = new MemoryStream())
@@ -87,6 +92,112 @@ namespace E2E.Models
             }
         }
 
+        public string Ftp_UploadImgThumbnail(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        {
+            try
+            {
+                string res = string.Empty;
+                string finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = filePost.FileName;
+                }
+                else
+                {
+                    fileName += Path.GetExtension(filePost.FileName);
+                }
+
+                fileName = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
+
+                fileName = string.Concat(finalPath, fileName);
+
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
+                request.Method = WebRequestMethods.Ftp.UploadFile;
+                request.Credentials = new NetworkCredential(user, pass);
+
+                byte[] bytes = null;
+
+                Image source = Image.FromStream(filePost.InputStream);
+                double widthRatio = 192 / source.Width;
+                double heightRatio = 108 / source.Height;
+                double ratio = (widthRatio < heightRatio) ? widthRatio : heightRatio;
+                Image thumbnail = source.GetThumbnailImage((int)(source.Width * ratio), (int)(source.Height * ratio), null, IntPtr.Zero);
+
+                using (var memory = new MemoryStream())
+                {
+                    thumbnail.Save(memory, source.RawFormat);
+                    bytes = memory.ToArray();
+                }
+
+                using (Stream reqStream = request.GetRequestStream())
+                {
+                    reqStream.Write(bytes, 0, bytes.Length);
+                    if (reqStream.CanWrite)
+                    {
+                        res = fileName.Replace(url, urlDomain);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public string Ftp_UploadImgThumbnailFix(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        {
+            try
+            {
+                string res = string.Empty;
+                string finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = filePost.FileName;
+                }
+                else
+                {
+                    fileName += Path.GetExtension(filePost.FileName);
+                }
+
+                fileName = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
+
+                fileName = string.Concat(finalPath, fileName);
+
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
+                request.Method = WebRequestMethods.Ftp.UploadFile;
+                request.Credentials = new NetworkCredential(user, pass);
+
+                byte[] bytes = null;
+
+                Image source = Image.FromStream(filePost.InputStream);
+                Image thumbnail = source.GetThumbnailImage(192,108, null, IntPtr.Zero);
+
+                using (var memory = new MemoryStream())
+                {
+                    thumbnail.Save(memory, source.RawFormat);
+                    bytes = memory.ToArray();
+                }
+
+                using (Stream reqStream = request.GetRequestStream())
+                {
+                    reqStream.Write(bytes, 0, bytes.Length);
+                    if (reqStream.CanWrite)
+                    {
+                        res = fileName.Replace(url, urlDomain);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Ftp_DeleteFile(string path)
         {
             try
@@ -110,7 +221,6 @@ namespace E2E.Models
                 throw;
             }
         }
-
         private string GetFileTypeBase64(string base64)
         {
             try
