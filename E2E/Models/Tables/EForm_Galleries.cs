@@ -17,6 +17,8 @@ namespace E2E.Models.Tables
         public string EForm_Gallery_Thumbnail { get; set; }
         public string EForm_Gallery_Name { get; set; }
         public string EForm_Gallery_Extension { get; set; }
+
+        [Display(Name ="No.")]
         public int EForm_Gallery_Seq { get; set; }
 
         public EForm_Galleries()

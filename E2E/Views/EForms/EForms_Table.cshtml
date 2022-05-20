@@ -33,22 +33,21 @@
                             <div class="d-flex justify-content-between flex-wrap">
                                 <div>
                                     <small>
-                                        <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)
+                                        <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)   <br />
+                                        @{
+                                            if (item.Update.HasValue)
+                                            {
+                                                <b>Update :</b> @Html.DisplayFor(i => item.Update)
+                                            }
+                                            else
+                                            {
+                                                <b>Create :</b> @Html.DisplayFor(i => item.Create)
+                                            }
+                                        }
                                     </small>
                                 </div>
                                  
                                 <small>
-                                    @{
-                                        if (item.Update.HasValue)
-                                        {
-                                            <b>Update :</b> @Html.DisplayFor(i => item.Update)
-                                        }
-                                        else
-                                        {
-                                            <b>Create :</b> @Html.DisplayFor(i => item.Create)
-                                        }
-                                    }
-                                    <br/>
                                     <b>EForm_Start:</b> @Html.DisplayFor(i => item.EForm_Start)<br/>
                                     <b>EForm_End:</b> @Html.DisplayFor(i => item.EForm_End)<br/>
                                 </small>
