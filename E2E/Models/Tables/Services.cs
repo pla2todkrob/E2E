@@ -26,7 +26,7 @@ namespace E2E.Models.Tables
         public virtual Master_Departments Master_Departments { get; set; }
 
         [Display(Name = "User")]
-        public Guid? User_Id { get; set; }
+        public Guid User_Id { get; set; }
 
         public virtual Users Users { get; set; }
         public Guid? Ref_Service_Id { get; set; }

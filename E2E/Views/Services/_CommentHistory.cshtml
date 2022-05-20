@@ -16,51 +16,62 @@
     foreach (var item2 in Model.ClsServiceComments.Where(w => w.ServiceComments.Create.Date == item).ToList())
     {
         <div class="row mb-1">
-            @if (item2.ServiceComments.User_Id != userId)
+            @if (item2.ServiceComments.User_Id == userId)
             {
-            <div class="col-11">
-                <div class="d-flex flex-row flex-nowrap align-items-end">
-                    <ul class="bg-secondary text-light rounded mb-0 p-2">
-                        <li>
-                            <span>@item2.ServiceComments.Comment_Content</span>
-                            @if (item2.ServiceCommentFiles.Count > 0)
-                            {
-                                <ul>
-                                    @foreach (var item3 in item2.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
+                <div class="col-11 offset-1">
+                    <div class="row">
+                        <div class="col-auto ml-auto text-right">
+                            <small class="text-dark text-nowrap px-1">@item2.ServiceComments.Create.ToString("t")</small>
+                            <ul class="bg-info text-light text-left rounded mb-0 p-2">
+                                <li>
+                                    <span>@item2.ServiceComments.Comment_Content</span>
+                                    @if (item2.ServiceCommentFiles.Count > 0)
                                     {
-                                        <li>
-                                            <a href="@item3.ServiceCommentFile_Path" title="@item3.ServiceCommentFile_Name" class="text-light" target="_blank">@item3.ServiceCommentFile_Name</a>
-                                        </li>
+                                        <ul>
+                                            @foreach (var item3 in item2.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
+                                            {
+                                                <li>
+                                                    <a href="@item3.ServiceCommentFile_Path" title="@item3.ServiceCommentFile_Name" class="text-light" target="_blank">@item3.ServiceCommentFile_Name</a>
+                                                </li>
+                                            }
+                                        </ul>
                                     }
-                                </ul>
-                            }
-                        </li>
-                    </ul>
-                    <small class="text-dark text-nowrap px-1">@item2.ServiceComments.Create.ToString("t")</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+
+
             }
             else
             {
-                <div class="col-11 offset-1">
-                    <div class="d-flex flex-row flex-nowrap justify-content-end align-items-end">
-                        <small class="text-dark text-nowrap px-1">@item2.ServiceComments.Create.ToString("t")</small>
-                        <ul class="bg-info text-light rounded mb-0 p-2">
-                            <li>
-                                <span>@item2.ServiceComments.Comment_Content</span>
-                                @if (item2.ServiceCommentFiles.Count > 0)
-                                {
-                                    <ul>
-                                        @foreach (var item3 in item2.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
-                                        {
-                                            <li>
-                                                <a href="@item3.ServiceCommentFile_Path" title="@item3.ServiceCommentFile_Name" class="text-light" target="_blank">@item3.ServiceCommentFile_Name</a>
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-                            </li>
-                        </ul>
+                
+                <div class="col-11">
+                    <small class="font-weight-bold">@item2.ServiceComments.Users.User_Code</small>
+                    <small class="px-1">@item2.ServiceComments.Create.ToString("t")</small>
+                    <div class="row">
+                        <div class="col-auto">
+                            <ul class="bg-secondary text-light rounded mb-0 p-2">
+                                <li>
+
+                                    <span>@item2.ServiceComments.Comment_Content</span>
+                                    @if (item2.ServiceCommentFiles.Count > 0)
+                                    {
+                                        <ul>
+                                            @foreach (var item3 in item2.ServiceCommentFiles.OrderBy(o => o.ServiceComment_Seq))
+                                            {
+                                                <li>
+                                                    <a href="@item3.ServiceCommentFile_Path" title="@item3.ServiceCommentFile_Name" class="text-light" target="_blank">@item3.ServiceCommentFile_Name</a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </li>
+                            </ul>
+
+                        </div>
                     </div>
                 </div>
             }

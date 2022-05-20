@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "My request";
+    ViewBag.Title = "All task";
 }
 
 @section scripts{
@@ -19,7 +19,7 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("MyRequest_Table", "Services")', true, false,0);
+            callTable('@Url.Action("AllTask_Table", "Services")', true, false,0);
         }
     </script>
 }
@@ -28,8 +28,8 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-            <li class="breadcrumb-item active">Profile</li>
-            <li class="breadcrumb-item active" aria-current="page">My request</li>
+            <li class="breadcrumb-item active">Department</li>
+            <li class="breadcrumb-item active" aria-current="page">All task</li>
         </ol>
     </nav>
 }

@@ -789,6 +789,10 @@
     <Content Include="Views\Services\_Comment.cshtml" />
     <Content Include="Views\EForms\_FileCollections.cshtml" />
     <Content Include="Views\EForms\EForms_Content.cshtml" />
+    <Content Include="Views\Services\AllTask.cshtml" />
+    <Content Include="Views\Services\AllRequest.cshtml" />
+    <Content Include="Views\Services\AllTask_Table.cshtml" />
+    <Content Include="Views\Services\AllRequest_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

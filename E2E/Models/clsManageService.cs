@@ -145,7 +145,7 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                return db.Services
+                return Services_GetAllRequest_IQ()
                     .Where(w => w.User_Id == id)
                     .ToList();
             }
@@ -155,12 +155,49 @@ namespace E2E.Models
             }
         }
 
+        public List<Services> Services_GetDepartmentRequest()
+        {
+            try
+            {
+                return Services_GetAllRequest_IQ().ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private IQueryable<Services> Services_GetAllRequest_IQ()
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid departmentId = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Master_Processes.Master_Sections.Department_Id.Value)
+                    .FirstOrDefault();
+                List<Guid> userIds = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId)
+                    .Select(s => s.User_Id)
+                    .ToList();
+                IQueryable<Services> query = db.Services
+                    .Where(w => userIds.Contains(w.User_Id));
+
+                return query;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public List<Services> Services_GetMyTask()
         {
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                return db.Services
+                return Services_GetAllTask_IQ()
                     .Where(w => w.Action_User_Id == id)
                     .ToList();
             }
@@ -170,6 +207,40 @@ namespace E2E.Models
             }
         }
 
+        public List<Services> Services_GetDepartmentTask()
+        {
+            try
+            {
+                return Services_GetAllTask_IQ().ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private IQueryable<Services> Services_GetAllTask_IQ()
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid departmentId = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Master_Processes.Master_Sections.Department_Id.Value)
+                    .FirstOrDefault();
+
+                IQueryable<Services> query = db.Services
+                    .Where(w => w.Department_Id == departmentId);
+
+                return query;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public Services Services_View(Guid id)
         {
             try
@@ -341,7 +412,7 @@ namespace E2E.Models
                 Guid deptId = db.Users.Find(id).Master_Processes.Master_Sections.Department_Id.Value;
                 List<Guid> userIdList = db.Users
                     .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId).Select(s => s.User_Id).ToList();
-                return db.Services.Where(w => w.Required_Approve_User_Id.HasValue && w.Approved_User_Id.HasValue == val && userIdList.Contains(w.User_Id.Value) && w.Status_Id == statusId).ToList();
+                return db.Services.Where(w => w.Required_Approve_User_Id.HasValue && w.Approved_User_Id.HasValue == val && userIdList.Contains(w.User_Id) && w.Status_Id == statusId).ToList();
             }
             catch (Exception)
             {
@@ -365,14 +436,7 @@ namespace E2E.Models
                         services.Ref_Service_Id = model.Ref_Service_Id;
                     }
 
-                    if (model.User_Id.HasValue)
-                    {
-                        services.User_Id = model.User_Id;
-                    }
-                    else
-                    {
-                        services.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                    }
+                    services.User_Id = model.User_Id;
 
                     services.Priority_Id = model.Priority_Id;
                     services.Service_DueDate = model.Service_DueDate;
@@ -395,11 +459,6 @@ namespace E2E.Models
         {
             try
             {
-                if (!model.User_Id.HasValue)
-                {
-                    model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                }
-
                 Users users = new Users();
                 users = db.Users.Find(model.User_Id);
                 int usePoint = db.System_Priorities.Find(model.Priority_Id).Priority_Point;

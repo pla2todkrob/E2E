@@ -69,6 +69,7 @@ namespace E2E.Controllers
                 ViewBag.UserList = data.SelectListItems_User();
                 bool isNew = true;
                 Services services = new Services();
+                services.User_Id = Guid.Parse(HttpContext.User.Identity.Name);
                 if (id.HasValue)
                 {
                     services = data.Services_View(id.Value);
@@ -555,12 +556,34 @@ namespace E2E.Controllers
         {
             return View();
         }
+        public ActionResult AllTask_Table()
+        {
+            try
+            {
+                return View(data.Services_GetDepartmentTask());
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+        }
         public ActionResult AllRequest()
         {
             return View();
         }
+        public ActionResult AllRequest_Table()
+        {
+            try
+            {
+                return View(data.Services_GetDepartmentRequest());
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+        }
         public ActionResult Approve()
         {
             return View();
