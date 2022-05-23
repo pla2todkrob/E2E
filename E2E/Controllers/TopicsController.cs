@@ -11,7 +11,6 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    [Authorize]
     public class TopicsController : Controller
     {
         private clsManageTopic data = new clsManageTopic();
@@ -50,7 +49,7 @@ namespace E2E.Controllers
                     .Select(s => s.User_Code)
                     .FirstOrDefault();
 
-                var query = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o => new { o.Update, o.Create }).ToList();
+                var query = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o => o.Update).ThenByDescending(t => t.Create).ToList();
                 if (val)
                 {
                     foreach (var item in query.Where(w => w.Topic_Pin_EndDate < DateTime.Today))

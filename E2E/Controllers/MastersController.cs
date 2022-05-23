@@ -12,7 +12,6 @@ using System.Data.Entity.Validation;
 
 namespace E2E.Controllers
 {
-    [Authorize]
     public class MastersController : Controller
     {
         private clsManageMaster data = new clsManageMaster();

@@ -11,7 +11,6 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    [Authorize]
     public class ServicesController : Controller
     {
         private clsManageService data = new clsManageService();
