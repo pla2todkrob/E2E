@@ -12,7 +12,6 @@ using System.Web.Security;
 
 namespace E2E.Controllers
 {
-    [Authorize]
     public class UsersController : Controller
     {
         private clsContext db = new clsContext();
