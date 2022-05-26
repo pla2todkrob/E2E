@@ -7,24 +7,53 @@
 <script>
     $("#gallery").justifiedGallery({
         maxRowHeight: 200,
-        rowHeight:150
+        rowHeight: 150
     });
 </script>
 
 @if (Model.TopicGalleries.Count > 0)
 {
     <h5>Galleries</h5>
-    <div id="gallery">
-        @foreach (var item in Model.TopicGalleries)
-        {
-            <div class="d-inline-block">
-                <button type="button" class="btn btn-secondary mr-auto position-absolute" style="z-index:1; right:0;" onclick="deleteFiles('@Url.Action("DeleteGallery","Topics",new { id=Html.ValueFor(m => item.TopicGallery_Id)})','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id})','@Url.Action("ReloadModel","Topics",new { id=item.Topic_Id})')"><i class="fa fa-times"></i></button>
-                <a href="@item.TopicGallery_Original" target="_blank">
-                    <img alt="@item.TopicGallery_Name" src="@item.TopicGallery_Original" />
-                </a>
-            </div>
-        }
-    </div>
+    <table class="table table-hover table-borderless" id="tableGal">
+
+        <tbody>
+            @foreach (var item in Model.TopicGalleries)
+            {
+                <tr>
+                    <td>
+                        <button type="button" class="btn btn-outline-info" onclick="window.open('@item.TopicGallery_Original', '_blank')"><i class="fa fa-eye">  </i></button>
+                    </td>
+
+                    <td>
+                        <img alt="@item.TopicGallery_Name" src="@item.TopicGallery_Thumbnail" />
+                    </td>
+
+                    <td class="align-middle" id="rowVal">
+                        <div class="d-flex align-items-center">
+                            @Html.HiddenFor(m => item.TopicGallery_Id)
+                            @Html.LabelFor(m => item.TopicGallery_Seq, new { @class = "pr-2 mb-0" })
+                            @Html.TextBoxFor(m => item.TopicGallery_Seq, new { @class = "form-control", required = "required" })
+                        </div>
+                    </td>
+
+                    <td class="align-middle text-center">
+                        <button type="button" class="btn btn-outline-danger" onclick="deleteFiles('@Url.Action("DeleteGallery","Topics",new { id=Html.ValueFor(m => item.TopicGallery_Id)})','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id})','@Url.Action("ReloadModel","Topics",new { id=item.Topic_Id})')"><i class="fa fa-trash"></i></button>
+                    </td>
+
+                </tr>
+
+
+            }
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <th class="text-center" colspan="4">
+                    @*<button type="button" class="btn btn-outline-primary" onclick="savegallery('@Url.Action("SaveSeq","EForms")','@Url.Action("_FileCollections", "EForms", new { id = Model.EForm_Galleries.FirstOrDefault().EForm_Id})','@Url.Action("ReloadModel", "EForms", new { id = Model.EForm_Galleries.FirstOrDefault().EForm_Id})')">SAVE GALLERY</button>*@
+                </th>
+            </tr>
+        </tfoot>
+    </table>
 }
 
 @if (Model.TopicFiles.Count > 0)

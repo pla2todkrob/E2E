@@ -4,71 +4,67 @@
     Layout = null;
 }
 
-<script>
-    $("#gallerys").justifiedGallery({
-        maxRowHeight: 200,
-        rowHeight: 150
-    });
-</script>
+    @if (Model.EForm_Galleries.Count > 0)
+    {
+        <h5>Galleries</h5>
+        <table class="table table-hover table-borderless" id="tableGal">
 
-@if (Model.EForm_Galleries.Count > 0)
-{
-    <h5>Galleries</h5>
-    <table class="table table-hover table-borderless">
+            <tbody>
+                @foreach (var item in Model.EForm_Galleries.OrderBy(o => o.EForm_Gallery_Seq))
+                {
+                    <tr>
+                        <td class="align-middle text-center">
+                            <button type="button" class="btn btn-outline-info" onclick="window.open('@item.EForm_Gallery_Original', '_blank')"><i class="fa fa-eye">  </i></button>
+                        </td>
+                        <td class="fit">
+                            <img alt="@item.EForm_Gallery_Name" src="@item.EForm_Gallery_Thumbnail" />
+                        </td>
+                        <td class="align-middle" id="rowVal">
+                            <div class="d-flex align-items-center">
+                                @Html.HiddenFor(m=>item.EForm_Gallery_Id)
+                                @Html.LabelFor(m => item.EForm_Gallery_Seq, new { @class = "pr-2 mb-0" })
+                                @Html.TextBoxFor(m => item.EForm_Gallery_Seq, new { @class = "form-control", required = "required" })
+                            </div>
+                        </td>
+                        <td class="align-middle text-center">
+                            <button type="button" class="btn btn-outline-danger" onclick="deleteFileEF('@Url.Action("DeleteGallery", "EForms", new { id = Html.ValueFor(m => item.EForm_Gallery_Id) })','@Url.Action("_FileCollections", "EForms", new { id = item.EForm_Id })','@Url.Action("ReloadModel", "EForms", new { id = item.EForm_Id })')"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
 
-        <tbody>
-            @foreach (var item in Model.EForm_Galleries.OrderBy(o => o.EForm_Gallery_Seq))
-            {
+            <tfoot>
                 <tr>
-                    <td class="align-middle text-center">
-                        <button type="button" class="btn btn-outline-info" onclick="window.open('@item.EForm_Gallery_Original', '_blank')"><i class="fa fa-eye">  </i></button>
-                    </td>
-                    <td class="fit">
-                        <img alt="@item.EForm_Gallery_Name" src="@item.EForm_Gallery_Original" id="img-table" />
-                    </td>
-                    <td class="align-middle">
-                        <div class="d-flex align-items-center">
-                            @Html.LabelFor(m => item.EForm_Gallery_Seq,new {@class= "pr-2 mb-0" })
-                            @Html.TextBoxFor(m => item.EForm_Gallery_Seq, new { @class = "form-control", required = "required" })
-                        </div>
-                    </td>
-                    <td class="align-middle text-center">
-                        <button type="button" class="btn btn-outline-danger" onclick="deleteFileEF('@Url.Action("DeleteGallery","EForms",new { id=Html.ValueFor(m => item.EForm_Gallery_Id)})','@Url.Action("_FileCollections","EForms",new { id=item.EForm_Id})','@Url.Action("ReloadModel","EForms",new { id=item.EForm_Id})')"><i class="fa fa-trash"></i></button>
-                    </td>
+                    <th class="text-center" colspan="4">
+                        <button type="button" class="btn btn-outline-primary" onclick="savegallery('@Url.Action("SaveSeq","EForms")','@Url.Action("_FileCollections", "EForms", new { id = Model.EForm_Galleries.FirstOrDefault().EForm_Id})','@Url.Action("ReloadModel", "EForms", new { id = Model.EForm_Galleries.FirstOrDefault().EForm_Id})')">SAVE GALLERY</button>
+                    </th>
                 </tr>
-            }
-        </tbody>
+            </tfoot>
+        </table>
+    }
 
-        <tfoot>
-            <tr>
-                <th class="text-center" colspan="4">
-                    <button type="button" class="btn btn-outline-primary">SAVE GALLERY</button>
-                </th>
-            </tr>
-        </tfoot>
-    </table>
-}
-<br/>
-@if (Model.EForm_Files.Count > 0)
-{
-    <table class="table-borderless mt-3">
-        <thead>
-            <tr>
-                <th>
-                    <h5>Files</h5>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var files in Model.EForm_Files)
-            {
+
+    <br />
+    @if (Model.EForm_Files.Count > 0)
+    {
+        <table class="table-borderless mt-3">
+            <thead>
                 <tr>
-                    <td>
-                        <button type="button" class="btn text-danger mr-auto" onclick="deleteFileEF('@Url.Action("DeleteFiles","EForms",new { id=Html.ValueFor(m => files.EForm_File_Id) })','@Url.Action("_FileCollections","EForms",new { id=files.EForm_Id})','@Url.Action("ReloadModel","EForms",new { id=files.EForm_Id})')"><i class="fa fa-trash-o"></i></button>
-                        <a href="@files.EForm_File_Path" target="_blank">@files.EForm_File_Name</a>
-                    </td>
+                    <th>
+                        <h5>Files</h5>
+                    </th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var files in Model.EForm_Files)
+                {
+                    <tr>
+                        <td>
+                            <button type="button" class="btn text-danger mr-auto" onclick="deleteFileEF('@Url.Action("DeleteFiles","EForms",new { id=Html.ValueFor(m => files.EForm_File_Id) })','@Url.Action("_FileCollections","EForms",new { id=files.EForm_Id})','@Url.Action("ReloadModel","EForms",new { id=files.EForm_Id})')"><i class="fa fa-trash-o"></i></button>
+                            <a href="@files.EForm_File_Path" target="_blank">@files.EForm_File_Name</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }

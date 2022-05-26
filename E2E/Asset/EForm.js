@@ -2,6 +2,44 @@
     $('#fileCollections').load(urlLoad);
 }
 
+function savegallery(urlAjax,urlLoad) {
+    var arr = [];
+    $('table#tableGal').find('tbody').each(function () {
+        console.log($(this));
+        $(this).find('tr').each(function () {
+            console.log($(this));
+            $(this).find('td#rowVal').each(function () {
+                console.log($(this));
+                var obj = {};
+                obj.EForm_Gallery_Id = $(this).find('#item_EForm_Gallery_Id').val();
+                obj.EForm_Gallery_Seq = $(this).find('#item_EForm_Gallery_Seq').val();
+                arr.push(obj);
+            });
+        });
+    });
+    console.log(arr);
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        data: {
+            model: JSON.stringify(arr)
+        },
+        success: function (res) {
+            swal({
+                title: res.title,
+                text: res.text,
+                icon: res.icon,
+                button: res.button,
+                dangerMode: res.dangerMode
+            });
+            if (res.icon == 'success') {
+                reloadTable();
+                callFileCollections(urlLoad);
+            }
+        }
+    });
+}
+
 function deleteFileEF(urlAjax, urlLoad) {
     swal({
         title: "Are you sure?",

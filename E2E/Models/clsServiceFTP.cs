@@ -29,6 +29,7 @@ namespace E2E.Models
                     fileName = filePost.FileName;
                 }
 
+                fileName = replaceName(fileName);
                 fileName = string.Concat(finalPath, fileName);
 
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
@@ -44,6 +45,7 @@ namespace E2E.Models
                         bytes = memory.ToArray();
                     }
                 }
+                request.ContentLength = bytes.Length;
 
                 using (Stream reqStream = request.GetRequestStream())
                 {
@@ -62,6 +64,14 @@ namespace E2E.Models
             }
         }
 
+        private string replaceName (string name)
+        {
+            return name.Replace("!", "_").Replace("@", "_").Replace("#", "_").Replace("$", "_").Replace("%", "_")
+                .Replace("^", "_").Replace("&", "_").Replace("'", "_");
+
+
+        }
+
         public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
             try
@@ -73,6 +83,8 @@ namespace E2E.Models
                 {
                     fileName = filePost.FileName;
                 }
+
+                fileName = replaceName(fileName);
 
                 fileName = string.Concat(finalPath, fileName);
 
@@ -139,7 +151,7 @@ namespace E2E.Models
                 {
                     fileName = filePost.FileName;
                 }
-
+                fileName = replaceName(fileName);
                 fileName = string.Concat(finalPath, fileName);
 
                 List<clsImage> clsImages = new List<clsImage>();
@@ -150,6 +162,7 @@ namespace E2E.Models
                 clsImages.Add(clsImage);
 
                 Image thumbnailFile = originalFile.GetThumbnailImage(192, 108, null, IntPtr.Zero);
+                clsImage = new clsImage();
                 clsImage.Image = thumbnailFile;
                 clsImage.FtpPath = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
                 clsImages.Add(clsImage);
