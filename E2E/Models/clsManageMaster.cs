@@ -1690,51 +1690,160 @@ namespace E2E.Models
             }
         }
 
-        public Users User_Get(Guid id)
+        public Users Users_Get(Guid id)
         {
-            return db.Users.Find(id);
+            try
+            {
+                return db.Users.Find(id);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public Users Users_Get(string val)
+        {
+            try
+            {
+                return db.Users.Where(w => w.User_Code == val).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public List<Users> Users_GetAll()
+        {
+            try
+            {
+                return db.Users.ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
-        public List<Users> User_GetAll()
+        public List<clsUsers> clsUsers_GetAllView()
         {
-            return db.Users.ToList();
-        }
+            try
+            {
 
-        public List<clsUsers> User_GetAllView()
-        {
-            return db.Users
+                return db.UserDetails
                 .Select(s => new clsUsers()
                 {
-                    User_Id = s.User_Id,
-                    Active = s.Active,
-                    Create = s.Create,
-                    Department_Name = s.Master_Processes.Master_Sections.Master_Departments.Department_Name,
-                    Division_Name = s.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
-                    Grade_Name = s.Master_Grades.Grade_Name,
-                    Grade_Position = s.Master_Grades.Grade_Position,
-                    LineWork_Name = s.Master_Grades.Master_LineWorks.LineWork_Name,
-                    Plant_Name = s.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
-                    Process_Name = s.Master_Processes.Process_Name,
-                    Section_Name = s.Master_Processes.Master_Sections.Section_Name,
-                    Update = s.Update,
-                    User_Code = s.User_Code,
-                    User_Email = s.User_Email,
-                    User_CostCenter = s.User_CostCenter
+                    User_Id = s.Users.User_Id,
+                    Active = s.Users.Active,
+                    Create = s.Users.Create,
+                    Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
+                    Division_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
+                    Grade_Name = s.Users.Master_Grades.Grade_Name,
+                    Grade_Position = s.Users.Master_Grades.Grade_Position,
+                    LineWork_Name = s.Users.Master_Grades.Master_LineWorks.LineWork_Name,
+                    Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Process_Name = s.Users.Master_Processes.Process_Name,
+                    Section_Name = s.Users.Master_Processes.Master_Sections.Section_Name,
+                    Update = s.Users.Update,
+                    User_Code = s.Users.User_Code,
+                    User_Email = s.Users.User_Email,
+                    User_CostCenter = s.Users.User_CostCenter,
+                    User_Point = s.Users.User_Point,
+                    User_Name_EN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
+                    User_Name_TH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName,
                 }).ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
-        public bool User_Save(UserDetails model)
+        public clsUsers clsUsers_GetView(Guid id)
+        {
+            try
+            {
+                return db.UserDetails
+                    .Where(w => w.User_Id == id)
+                .Select(s => new clsUsers()
+                {
+                    User_Id = s.Users.User_Id,
+                    Active = s.Users.Active,
+                    Create = s.Users.Create,
+                    Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
+                    Division_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
+                    Grade_Name = s.Users.Master_Grades.Grade_Name,
+                    Grade_Position = s.Users.Master_Grades.Grade_Position,
+                    LineWork_Name = s.Users.Master_Grades.Master_LineWorks.LineWork_Name,
+                    Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Process_Name = s.Users.Master_Processes.Process_Name,
+                    Section_Name = s.Users.Master_Processes.Master_Sections.Section_Name,
+                    Update = s.Users.Update,
+                    User_Code = s.Users.User_Code,
+                    User_Email = s.Users.User_Email,
+                    User_CostCenter = s.Users.User_CostCenter,
+                    User_Point = s.Users.User_Point,
+                    User_Name_EN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
+                    User_Name_TH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName,
+                }).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsUsers clsUsers_GetView(string val)
+        {
+            try
+            {
+                return db.UserDetails
+                    .Where(w => w.Users.User_Code == val)
+                .Select(s => new clsUsers()
+                {
+                    User_Id = s.Users.User_Id,
+                    Active = s.Users.Active,
+                    Create = s.Users.Create,
+                    Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
+                    Division_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
+                    Grade_Name = s.Users.Master_Grades.Grade_Name,
+                    Grade_Position = s.Users.Master_Grades.Grade_Position,
+                    LineWork_Name = s.Users.Master_Grades.Master_LineWorks.LineWork_Name,
+                    Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Process_Name = s.Users.Master_Processes.Process_Name,
+                    Section_Name = s.Users.Master_Processes.Master_Sections.Section_Name,
+                    Update = s.Users.Update,
+                    User_Code = s.Users.User_Code,
+                    User_Email = s.Users.User_Email,
+                    User_CostCenter = s.Users.User_CostCenter,
+                    User_Point = s.Users.User_Point,
+                    User_Name_EN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
+                    User_Name_TH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName,
+                }).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool Users_Save(UserDetails model)
         {
             try
             {
                 bool res = new bool();
                 if (db.Users.Where(w => w.User_Code == model.Users.User_Code.Trim()).FirstOrDefault() == null)
                 {
-                    res = User_Insert(model);
+                    res = Users_Insert(model);
                 }
                 else
                 {
-                    res = User_Update(model);
+                    res = Users_Update(model);
                 }
 
                 return res;
@@ -1745,12 +1854,32 @@ namespace E2E.Models
             }
         }
 
-        public UserDetails UserDetail_Get(Guid id)
+        public UserDetails UserDetails_Get(Guid id)
         {
-            return db.UserDetails.Where(w => w.User_Id == id).FirstOrDefault();
-        }
+            try
+            {
+                return db.UserDetails.Where(w => w.User_Id == id).FirstOrDefault();
+            }
+            catch (Exception)
+            {
 
-        public clsSaveResult User_Delete(Guid id)
+                throw;
+            }
+        }
+        public UserDetails UserDetails_Get(string val)
+        {
+            try
+            {
+                return db.UserDetails
+                    .Where(w => w.Users.User_Code == val).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public clsSaveResult Users_Delete(Guid id)
         {
             clsSaveResult res = new clsSaveResult();
             try
@@ -1795,7 +1924,7 @@ namespace E2E.Models
             return res;
         }
 
-        protected bool User_Insert(UserDetails model)
+        protected bool Users_Insert(UserDetails model)
         {
             try
             {
@@ -1826,7 +1955,7 @@ namespace E2E.Models
 
                 if (!string.IsNullOrEmpty(model.Detail_Password))
                 {
-                    userDetails.Detail_Password = User_Password(model.Detail_Password.Trim());
+                    userDetails.Detail_Password = Users_Password(model.Detail_Password.Trim());
                     userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 }
 
@@ -1854,7 +1983,7 @@ namespace E2E.Models
             }
         }
 
-        public string User_Password(string val)
+        public string Users_Password(string val)
         {
             try
             {
@@ -1880,7 +2009,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool User_Update(UserDetails model)
+        protected bool Users_Update(UserDetails model)
         {
             try
             {

@@ -26,50 +26,63 @@
 </blockquote>
 <div class="card mb-3">
     <div class="card-body">
-        <dl class="row">
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0"><b class="text-info">@Html.DisplayFor(m => m.Services.Users.User_Code)</b></dd>
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Services.Update)</dd>
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">Files</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">
-                @Model.ServiceFiles.Count Attachments
-                <ul class="list-unstyled">
-                    @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-7 col-xl-8">
+                <dl class="row">
+                    <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+                    <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
+                    <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
+                    <dd class="col-8 col-lg-9"><b class="text-info">@Html.DisplayFor(m => m.Services.Users.User_Code)</b></dd>
+                    <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                    <dd class="col-8 col-lg-9">@Html.DisplayFor(m => m.Services.Update)</dd>
+                    <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
+                    <dd class="col-8 col-lg-9"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
+                    <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
+                    <dd class="col-8 col-lg-9"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
+                    <dt class="col-4 col-lg-3">Files</dt>
+                    <dd class="col-8 col-lg-9">
+                        @Model.ServiceFiles.Count Attachments
+                        <ul class="list-unstyled">
+                            @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+                            {
+                                <li>
+                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                                </li>
+                            }
+                        </ul>
+                    </dd>
+                    <dt class="col-4 col-md-12 col-lg-3">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
+                    <dd class="col-8 col-md-12 col-lg-9">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
+                    @if (Model.Services.Approved_DateTime.HasValue)
                     {
-                        <li>
-                            <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                        </li>
+                        <dt class="col-4 col-md-12 col-lg-3">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
+                        <dd class="col-8 col-md-12 col-lg-9">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
                     }
-                </ul>
-            </dd>
-            <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
-            <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
-            @if (Model.Services.Approved_DateTime.HasValue)
-            {
-                <dt class="col-12 col-sm-4 col-md-3 col-lg-2">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
-                <dd class="offset-1 col-11 col-sm-8 col-md-9 col-lg-10 offset-sm-0">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
-            }
-        </dl>
-        @{
-            if (!Model.Services.Approved_User_Id.HasValue)
-            {
-                if (ViewBag.AuthorizeIndex != 3)
-                {
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                        <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button>
-                    </div>
-                }
+                </dl>
+                @{
+                    if (!Model.Services.Approved_User_Id.HasValue)
+                    {
+                        if (ViewBag.AuthorizeIndex != 3)
+                        {
+                            <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
+                        }
 
-            }
-        }
+                    }
+                }
+            </div>
+            <div class="col-12 col-md-6 col-lg-5 col-xl-4 d-flex align-items-stretch">
+                <div class="card w-100">
+                    <div class="card-header">
+                        <h5 class="card-title">Comments</h5>
+                    </div>
+                    <div class="card-body">
+                        @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </div>
 @{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }

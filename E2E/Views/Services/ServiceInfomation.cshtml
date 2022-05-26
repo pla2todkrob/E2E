@@ -82,9 +82,16 @@
                                 if (Model.Services.System_Statuses.Status_Index == 2)
                                 {
                                     <button type="button" class="btn btn-outline-secondary">Forward</button>
-                                    <button type="button" class="btn btn-success">Close</button>
+                                    <button type="button" class="btn btn-success">Complete</button>
                                 }
 
+                            }
+                            if (Model.Services.User_Id == userId)
+                            {
+                                if (Model.Services.System_Statuses.Status_Index == 3)
+                                {
+                                    <button type="button" class="btn btn-success">Close</button>
+                                }
                             }
                         }
                     </div>
@@ -124,17 +131,24 @@
                     @if (Model.Services.Required_Approve_User_Id.HasValue)
                     {
                         <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
-                        <dd class="offset-1 col-11 col-md-9 offset-md-0">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
+                        <dd class="offset-1 col-11 col-md-9 offset-md-0"><span>@Html.DisplayFor(m => m.Required_User_Code)</span> - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
                     }
                     @if (Model.Services.Approved_User_Id.HasValue)
                     {
                         <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
-                        <dd class="offset-1 col-11 col-md-9 offset-md-0">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
+                        <dd class="offset-1 col-11 col-md-9 offset-md-0"><span>@Html.DisplayFor(m => m.Approved_User_Code)</span> - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
                     }
-                    <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Commit_User_Code)</dt>
-                    <dd class="offset-1 col-11 col-md-9 offset-md-0">@Html.DisplayFor(m => m.Commit_User_Code) - <b>@Html.DisplayFor(m => m.Services.Commit_DateTime)</b></dd>
-                    <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_User_Code)</dt>
-                    <dd class="offset-1 col-11 col-md-9 offset-md-0">@Html.DisplayFor(m => m.Action_User_Code) - <b>@Html.DisplayFor(m => m.Services.Action_DateTime)</b></dd>
+                    @if (Model.Services.Commit_User_Id.HasValue)
+                    {
+                        <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Commit_User_Code)</dt>
+                        <dd class="offset-1 col-11 col-md-9 offset-md-0"><span>@Html.DisplayFor(m => m.Commit_User_Code)</span> - <b>@Html.DisplayFor(m => m.Services.Commit_DateTime)</b></dd>
+                    }
+                    @if (Model.Services.Action_User_Id.HasValue)
+                    {
+                        <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_User_Code)</dt>
+                        <dd class="offset-1 col-11 col-md-9 offset-md-0"><span>@Html.DisplayFor(m => m.Action_User_Code)</span> - <b>@Html.DisplayFor(m => m.Services.Action_DateTime)</b></dd>
+                    }
+
                 </dl>
             </div>
         </div>

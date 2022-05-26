@@ -48,5 +48,9 @@ namespace E2E.Models.Views
         public string User_CostCenter { get; set; }
         [Display(Name = "Point")]
         public int User_Point { get; set; }
+        [Display(Name = "Name EN")]
+        public string User_Name_EN { get; set; }
+        [Display(Name = "Name TH")]
+        public string User_Name_TH { get; set; }
     }
 }

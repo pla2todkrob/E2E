@@ -1108,7 +1108,7 @@ namespace E2E.Controllers
             userDetails.Users = new Users();
             if (id.HasValue)
             {
-                userDetails = data.UserDetail_Get(id.Value);
+                userDetails = data.UserDetails_Get(id.Value);
                 ViewBag.GradeList = data.SelectListItems_Grade(userDetails.Users.Master_Grades.LineWork_Id);
                 ViewBag.DivisionList = data.SelectListItems_Division(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Plant_Id);
                 ViewBag.DepartmentList = data.SelectListItems_Department(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Id);
@@ -1130,7 +1130,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.User_Save(model))
+                        if (data.Users_Save(model))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -1205,7 +1205,7 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-                    clsSaveResult clsSaveResult = data.User_Delete(id);
+                    clsSaveResult clsSaveResult = data.Users_Delete(id);
                     if (clsSaveResult.CanSave)
                     {
                         scope.Complete();
@@ -1239,7 +1239,7 @@ namespace E2E.Controllers
 
         public ActionResult Users_Table()
         {
-            return View(data.User_GetAllView());
+            return View(data.clsUsers_GetAllView());
         }
 
         public ActionResult Users_Upload()
@@ -1295,7 +1295,7 @@ namespace E2E.Controllers
                                         userDetails.Users.Role_Id = data.Role_UserId();
                                         userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
                                         userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
-                                        if (data.User_Save(userDetails))
+                                        if (data.Users_Save(userDetails))
                                         {
                                             doComplete = true;
                                         }

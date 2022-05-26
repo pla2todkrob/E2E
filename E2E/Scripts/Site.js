@@ -383,3 +383,20 @@ function getSelectOp(urlAjax, val, desSelectId) {
         }
     });
 }
+function appendInfo(ele) {
+    var value = $(ele).html();
+    $.ajax({
+        url: link_userInfo,
+        data: {
+            val: value
+        },
+        success: function (res) {
+            var div = $('<div class="position-absolute bg-white shadow rounded p-2 mt-1"></div>');
+
+        }
+    });
+}
+
+function detroyInfo(ele) {
+    $(ele).children('div').remove();
+}
