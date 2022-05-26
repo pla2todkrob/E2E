@@ -59,13 +59,13 @@ namespace E2E.Models
 
                 if (topics != null)
                 {
-                    status = "U";
-                    res = Board_Update(model, files, status);
+
+                    res = Board_Update(model, files);
                 }
                 else
                 {
-                    status = "I";
-                    res = Board_Insert(model, files, status);
+
+                    res = Board_Insert(model, files);
                 }
 
                 return res;
@@ -76,19 +76,25 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Delete(Guid id)
+        public bool Board_Delete(Guid id, List<string> File_ = null)
         {
             try
             {
                 bool res = new bool();
                 Topics topics = new Topics();
                 topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
-
+                Board_Delete_CommentTopics(id);
                 db.Topics.Remove(topics);
                 if (db.SaveChanges() > 0)
                 {
+                    if (File_.Count > 0)
+                    {
+                        foreach (var item in File_)
+                        {
+                            ftp.Ftp_DeleteFile(item);
+                        }
+                    }
                     res = true;
-                    Board_Delete_CommentTopics(id);
                 }
 
                 return res;
@@ -107,16 +113,24 @@ namespace E2E.Models
                 clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id || w.Ref_TopicComment_Id == id).ToList();
                 clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
                 clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
-                if (clsTopic != null)
+
+                if (clsTopic.TopicComments.Count > 0)
                 {
                     db.TopicComments.RemoveRange(clsTopic.TopicComments);
+                }
+                if (clsTopic.TopicFiles.Count > 0)
+                {
                     db.TopicFiles.RemoveRange(clsTopic.TopicFiles);
+                }
+                if (clsTopic.TopicGalleries.Count > 0)
+                {
                     db.TopicGalleries.RemoveRange(clsTopic.TopicGalleries);
+                }
 
-                    if (db.SaveChanges() > 0)
-                    {
 
-                    }
+                if (db.SaveChanges() > 0)
+                {
+
                 }
             }
             catch (Exception)
@@ -234,7 +248,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Insert(Topics model, HttpFileCollectionBase files, string status)
+        protected bool Board_Insert(Topics model, HttpFileCollectionBase files)
         {
             try
             {
@@ -259,7 +273,7 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "Topic/" + model.Topic_Id;
+                            string dir = "Topic/" + topics.Topic_Id;
 
                             if (CK_IMG)
                             {
@@ -290,7 +304,7 @@ namespace E2E.Models
                                 string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(topics, filepath, FileName, status);
+                                    File_Save(topics, filepath, FileName);
                                 }
                             }
                         }
@@ -307,7 +321,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Update(Topics model, HttpFileCollectionBase files, string status)
+        protected bool Board_Update(Topics model, HttpFileCollectionBase files)
         {
             try
             {
@@ -365,7 +379,7 @@ namespace E2E.Models
                                 string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(topics, filepath, FileName, status);
+                                    File_Save(topics, filepath, FileName);
                                 }
                             }
                         }
@@ -597,19 +611,11 @@ namespace E2E.Models
             }
         }
 
-        public void File_Save(Topics model, string filepath, string file, string status)
+        public void File_Save(Topics model, string filepath, string file)
         {
             try
             {
-                bool res = new bool();
-                if (status == "U")
-                {
-                    res = File_Insert(model, filepath, file);
-                }
-                else
-                {
-                    res = File_Insert(model, filepath, file);
-                }
+                File_Insert(model, filepath, file);
             }
             catch (Exception)
             {
@@ -703,7 +709,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteGallery(Guid id)
+        public bool DeleteGallery(Guid id, bool status = true)
         {
             try
             {
@@ -712,14 +718,20 @@ namespace E2E.Models
 
                 var TopicGalleries = db.TopicGalleries.Where(w => w.TopicGallery_Id == id).FirstOrDefault();
 
+                Guid topic_id = TopicGalleries.Topic_Id.Value;
+
                 db.TopicGalleries.Remove(TopicGalleries);
 
 
                 if (db.SaveChanges() > 0)
                 {
-                    ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Original);
-                    ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
-                    res = DeleteGallery_Count(TopicGalleries.Topic_Id.Value);
+                    if (status)
+                    {
+                        ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Original);
+                        ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
+                    }
+
+                    res = DeleteGallery_Count(topic_id);
 
                 }
 
@@ -759,7 +771,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteFile(Guid id)
+        public bool DeleteFile(Guid id, bool status = true)
         {
             try
             {
@@ -768,14 +780,18 @@ namespace E2E.Models
 
                 var TopicFiles = db.TopicFiles.Where(w => w.TopicFile_Id == id).FirstOrDefault();
 
-                db.TopicFiles.Remove(TopicFiles);
+                Guid topic_id = TopicFiles.Topic_Id.Value;
 
+                db.TopicFiles.Remove(TopicFiles);
 
                 if (db.SaveChanges() > 0)
                 {
-                    ftp.Ftp_DeleteFile(TopicFiles.TopicFile_Path);
-                    res = DeleteFile_Count(TopicFiles.Topic_Id.Value);
+                    if (status)
+                    {
+                        ftp.Ftp_DeleteFile(TopicFiles.TopicFile_Path);
+                    }
 
+                    res = DeleteFile_Count(topic_id);
                 }
 
                 return res;
@@ -871,31 +887,35 @@ namespace E2E.Models
                 bool res = new bool();
                 clsTopic clsTopic = new clsTopic();
 
+                List<string> FilePath = new List<string>();
 
                 clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
-                if (clsTopic != null)
+                FilePath.AddRange(clsTopic.TopicFiles.Select(s => s.TopicFile_Path).ToList());
+                if (clsTopic.TopicFiles.Count > 0)
                 {
-                    db.TopicFiles.RemoveRange(clsTopic.TopicFiles);
-                    db.TopicGalleries.RemoveRange(clsTopic.TopicGalleries);
-
-
-
-                    if (db.SaveChanges() > 0)
+                    foreach (var item in clsTopic.TopicFiles)
                     {
-                        foreach (var item in clsTopic.TopicFiles)
-                        {
-                            ftp.Ftp_DeleteFile(item.TopicFile_Path);
-                        }
-
-                        foreach (var item in clsTopic.TopicGalleries)
-                        {
-                            ftp.Ftp_DeleteFile(item.TopicGallery_Original);
-                            ftp.Ftp_DeleteFile(item.TopicGallery_Thumbnail);
-                        }
-                        res = Board_Delete(id);
+                        DeleteFile(item.TopicFile_Id, false);
                     }
+
                 }
+
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+                FilePath.AddRange(clsTopic.TopicGalleries.Select(s => s.TopicGallery_Original).ToList());
+                FilePath.AddRange(clsTopic.TopicGalleries.Select(s => s.TopicGallery_Thumbnail).ToList());
+                if (clsTopic.TopicGalleries.Count > 0)
+                {
+                    foreach (var item in clsTopic.TopicGalleries)
+                    {
+                        DeleteGallery(item.TopicGallery_Id, false);
+                    }
+
+                }
+
+
+                res = Board_Delete(id, FilePath);
+
+
                 return res;
             }
             catch (Exception)

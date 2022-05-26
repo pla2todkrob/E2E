@@ -65,7 +65,7 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "EForm/" + model.EForm_Id;
+                            string dir = "EForm/" + eForms.EForm_Id;
 
                             if (CK_IMG)
                             {
@@ -142,7 +142,7 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "EForm/" + model.EForm_Id;
+                            string dir = "EForm/" + EForms.EForm_Id;
 
                             if (CK_IMG)
                             {
@@ -272,8 +272,7 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-                res = File_Insert(model, filepath, file);
+               File_Insert(model, filepath, file);
             }
             catch (Exception)
             {
@@ -319,7 +318,7 @@ namespace E2E.Models
             }
         }
 
-        public bool EForm_Delete(Guid id)
+        public bool EForm_Delete(Guid id, List<string> File_ = null)
         {
             try
             {
@@ -330,6 +329,13 @@ namespace E2E.Models
                 db.EForms.Remove(eForms);
                 if (db.SaveChanges() > 0)
                 {
+                    if (File_.Count > 0)
+                    {
+                        foreach (var item in File_)
+                        {
+                            ftp.Ftp_DeleteFile(item);
+                        }
+                    }
                     res = true;
                 }
 
@@ -348,31 +354,34 @@ namespace E2E.Models
                 bool res = new bool();
                 clsEForm clsEForm = new clsEForm();
 
+                List<string> FilePath = new List<string>();
 
                 clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
                 clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
-                if (clsEForm != null)
+                if (clsEForm.EForm_Files.Count > 0)
                 {
-                    db.EForm_Files.RemoveRange(clsEForm.EForm_Files);
-                    db.EForm_Galleries.RemoveRange(clsEForm.EForm_Galleries);
-
-
-
-                    if (db.SaveChanges() > 0)
+                    foreach (var item in clsEForm.EForm_Files)
                     {
-                        foreach (var item in clsEForm.EForm_Files)
-                        {
-                            ftp.Ftp_DeleteFile(item.EForm_File_Path);
-                        }
-
-                        foreach (var item in clsEForm.EForm_Galleries)
-                        {
-                            ftp.Ftp_DeleteFile(item.EForm_Gallery_Original);
-                            ftp.Ftp_DeleteFile(item.EForm_Gallery_Thumbnail);
-                        }
-                        res = EForm_Delete(id);
+                        DeleteFile(item.EForm_File_Id, false);
                     }
+
                 }
+
+
+                clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+                FilePath.AddRange(clsEForm.EForm_Galleries.Select(s => s.EForm_Gallery_Original).ToList());
+                FilePath.AddRange(clsEForm.EForm_Galleries.Select(s => s.EForm_Gallery_Thumbnail).ToList());
+                if (clsEForm.EForm_Galleries.Count > 0)
+                {
+                    foreach (var item in clsEForm.EForm_Galleries)
+                    {
+                        DeleteGallery(item.EForm_Gallery_Id, false);
+                    }
+
+                }
+
+                res = EForm_Delete(id, FilePath);
+
                 return res;
             }
             catch (Exception)
@@ -381,7 +390,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteGallery(Guid id)
+        public bool DeleteGallery(Guid id, bool status = true)
         {
             try
             {
@@ -395,8 +404,11 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Original);
-                    ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
+                    if (status)
+                    {
+                        ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Original);
+                        ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
+                    }
                     res = true;
                 }
 
@@ -408,7 +420,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteFile(Guid id)
+        public bool DeleteFile(Guid id, bool status = true)
         {
             try
             {
@@ -422,7 +434,11 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    ftp.Ftp_DeleteFile(Files.EForm_File_Path);
+                    if (status)
+                    {
+                        ftp.Ftp_DeleteFile(Files.EForm_File_Path);
+                    }
+            
                     res = true;
 
                 }
