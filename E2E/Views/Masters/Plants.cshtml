@@ -15,8 +15,9 @@
             callTable('@Url.Action("Plants_Table", "Masters")', true, true, 1);
         }
 
-        $(document).on('submit','#SaveForm',  function () {
-            callSubmitModal('@Url.Action("Plants_Form", "Masters")');
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("Plants_Form", "Masters")', this);
             return false;
         });
     </script>

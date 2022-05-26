@@ -2086,6 +2086,22 @@ namespace E2E.Models
             }
         }
 
+        public string Users_GetInfomation(Guid id)
+        {
+            try
+            {
+                return db.UserDetails
+                    .Where(w => w.User_Id == id)
+                    .Select(s => new { Data = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "]" })
+                    .Select(s => s.Data)
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public List<SelectListItem> SelectListItems_Role()
         {
             IQueryable<System_Roles> query = db.System_Roles;

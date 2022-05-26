@@ -27,7 +27,7 @@
 <div class="card mb-3">
     <div class="card-body">
         <div class="row">
-            <div class="col-12 col-md-6 col-lg-7 col-xl-8">
+            <div class="col-12 col-md-6 col-lg-7 col-xl-8 mb-3">
                 <dl class="row">
                     <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                     <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
@@ -51,12 +51,12 @@
                             }
                         </ul>
                     </dd>
-                    <dt class="col-4 col-md-12 col-lg-3">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
-                    <dd class="col-8 col-md-12 col-lg-9">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
+                    <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
+                    <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
                     @if (Model.Services.Approved_DateTime.HasValue)
                     {
-                        <dt class="col-4 col-md-12 col-lg-3">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
-                        <dd class="col-8 col-md-12 col-lg-9">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
+                        <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
+                        <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
                     }
                 </dl>
                 @{
@@ -64,8 +64,11 @@
                     {
                         if (ViewBag.AuthorizeIndex != 3)
                         {
-                            <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                            <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
+                                </div>
+                            
                         }
 
                     }

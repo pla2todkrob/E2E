@@ -13,8 +13,9 @@
 
         });
 
-        $(document).on('submit','#SaveForm',  function () {
-            callSubmitModal('@Url.Action("Departments_Form", "Masters")');
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("Departments_Form", "Masters")', this);
             return false;
         });
 

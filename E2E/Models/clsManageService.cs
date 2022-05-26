@@ -14,7 +14,7 @@ namespace E2E.Models
     {
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
-
+        private clsManageMaster master = new clsManageMaster();
         public List<Services> Services_GetWaitCommitList()
         {
             try
@@ -335,6 +335,8 @@ namespace E2E.Models
                     .OrderBy(o => o.ServiceComments.Create)
                     .ToList();
 
+                clsServices.ClsServiceComments.ForEach(f => f.UserInfomation = master.Users_GetInfomation(f.ServiceComments.User_Id));
+
                 return clsServices;
             }
             catch (Exception)
@@ -556,15 +558,12 @@ namespace E2E.Models
                 services.Required_Approve_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 services.Required_Approve_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-
-                ServiceComments serviceComments = new ServiceComments();
-                serviceComments.Service_Id = id;
-                serviceComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                serviceComments.Comment_Content = "Approval required";
-                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = id;
+                    serviceComments.Comment_Content = "Approval required";
+                    res = Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -594,16 +593,12 @@ namespace E2E.Models
                 services.Commit_User_Id = userId;
                 services.Commit_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-
-                ServiceComments serviceComments = new ServiceComments();
-                serviceComments.Service_Id = services.Service_Id;
-                serviceComments.Comment_Content = string.Format("Commit a job to the {0} department", deptName);
-                serviceComments.User_Id = userId;
-                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
-
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Commit Task, Assign task to the {0} department", deptName);
+                    res = Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -622,12 +617,6 @@ namespace E2E.Models
                 Guid userActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 string deptName = db.Master_Departments.Find(deptId).Department_Name;
-                string userData = db.UserDetails
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => new
-                    {
-                        Data = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "]"
-                    }).Select(s => s.Data).FirstOrDefault();
 
                 Services services = new Services();
                 services = db.Services.Find(id);
@@ -636,23 +625,16 @@ namespace E2E.Models
                 services.Commit_User_Id = userActionId;
                 services.Commit_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-
-                ServiceComments serviceComments = new ServiceComments();
-                serviceComments.Service_Id = services.Service_Id;
-                serviceComments.Comment_Content = string.Format("Commit a job to the {0} department", deptName);
-                serviceComments.User_Id = userId;
-                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
-
-                serviceComments = new ServiceComments();
-                serviceComments.Service_Id = services.Service_Id;
-                serviceComments.Comment_Content = string.Format("Assign task to {0}", userData);
-                serviceComments.User_Id = userId;
-                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
-
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Commit Task, Assign task to the {0} department, Assign task to {1}", deptName, master.Users_GetInfomation(userId));
+                    res = Services_Comment(serviceComments);
                 }
+                
+
+                
 
                 return res;
             }
@@ -702,15 +684,12 @@ namespace E2E.Models
                 services.Approved_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 services.Approved_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-
-                ServiceComments serviceComments = new ServiceComments();
-                serviceComments.Service_Id = id;
-                serviceComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                serviceComments.Comment_Content = "Approved";
-                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = id;
+                    serviceComments.Comment_Content = "Approved";
+                    res = Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -728,21 +707,33 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(model.Service_Id);
+
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
                 if (!services.Action_User_Id.HasValue)
                 {
-                    services.Action_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                    services.Action_User_Id = userId;
                 }
-                services.Service_EstimateTime = model.Service_EstimateTime;
-                services.Action_DateTime = DateTime.Now;
-                services.Status_Id = db.System_Statuses
+
+                System_Statuses system_Statuses = new System_Statuses();
+                system_Statuses = db.System_Statuses
                     .Where(w => w.Status_Index == 2)
-                    .Select(s => s.Status_Id)
                     .FirstOrDefault();
+                DateTime dateTime = DateTime.Now;
+
+                services.Service_EstimateTime = model.Service_EstimateTime;
+                services.Action_DateTime = dateTime;
+                services.Status_Id = system_Statuses.Status_Id;
+                services.Update = dateTime;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Start task, Status update to {0}", system_Statuses.Status_Name);
+                    res = Services_Comment(serviceComments);
                 }
+                
 
                 return res;
             }
@@ -773,18 +764,64 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Services_SetComplete(ServiceComments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
 
+                System_Statuses system_Statuses = new System_Statuses();
+                system_Statuses = db.System_Statuses
+                    .Where(w => w.Status_Index == 3)
+                    .FirstOrDefault();
+
+                services.Update = DateTime.Now;
+                services.Status_Id = system_Statuses.Status_Id;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    if (!string.IsNullOrEmpty(model.Comment_Content))
+                    {
+                        serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = services.Service_Id;
+                        serviceComments.Comment_Content = model.Comment_Content;
+                        Services_Comment(serviceComments);
+                    }
+
+                    serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
+                    res = Services_Comment(serviceComments);
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
         {
             try
             {
                 bool res = new bool();
                 model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                model.Create = DateTime.Now;
                 db.Entry(model).State = System.Data.Entity.EntityState.Added;
-                if (files[0].ContentLength > 0)
+                if (files != null)
                 {
                     for (int i = 0; i < files.Count; i++)
                     {
+                        if (files[i].ContentLength == 0)
+                        {
+                            break;
+                        }
                         ServiceCommentFiles serviceCommentFiles = new ServiceCommentFiles();
                         serviceCommentFiles.ServiceCommentFile_Name = files[i].FileName;
                         string dir = string.Format("Service/{0}/Comment/{1}/", model.Service_Id, DateTime.Today.ToString("yyMMdd"));
@@ -795,6 +832,7 @@ namespace E2E.Models
                         db.Entry(serviceCommentFiles).State = System.Data.Entity.EntityState.Added;
                     }
                 }
+                
 
                 if (db.SaveChanges() > 0)
                 {
