@@ -17,10 +17,10 @@
     <table class="table table-hover table-borderless" id="tableGal">
 
         <tbody>
-            @foreach (var item in Model.TopicGalleries)
+            @foreach (var item in Model.TopicGalleries.OrderBy(o => o.TopicGallery_Seq))
             {
                 <tr>
-                    <td>
+                    <td class="align-middle">
                         <button type="button" class="btn btn-outline-info" onclick="window.open('@item.TopicGallery_Original', '_blank')"><i class="fa fa-eye">  </i></button>
                     </td>
 
@@ -49,7 +49,7 @@
         <tfoot>
             <tr>
                 <th class="text-center" colspan="4">
-                    @*<button type="button" class="btn btn-outline-primary" onclick="savegallery('@Url.Action("SaveSeq","EForms")','@Url.Action("_FileCollections", "EForms", new { id = Model.EForm_Galleries.FirstOrDefault().EForm_Id})','@Url.Action("ReloadModel", "EForms", new { id = Model.EForm_Galleries.FirstOrDefault().EForm_Id})')">SAVE GALLERY</button>*@
+                    <button type="button" class="btn btn-outline-primary" onclick="savegallery_T('@Url.Action("SaveSeq","Topics")','@Url.Action("_FileCollection", "Topics", new { id = Model.TopicGalleries.FirstOrDefault().Topic_Id})','@Url.Action("ReloadModel", "Topics", new { id = Model.TopicGalleries.FirstOrDefault().Topic_Id})')">SAVE GALLERY</button>
                 </th>
             </tr>
         </tfoot>
