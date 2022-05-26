@@ -91,7 +91,7 @@ namespace E2E.Controllers
                     }
                     else
                     {
-                        if (string.Equals(password, data.User_Password(model.Password.Trim())))
+                        if (string.Equals(password, data.Users_Password(model.Password.Trim())))
                         {
                             goto SetAuthen;
                         }
@@ -145,6 +145,19 @@ namespace E2E.Controllers
         {
             FormsAuthentication.SignOut();
             return Redirect(FormsAuthentication.DefaultUrl);
+        }
+
+        public ActionResult _UserInfomation(string val)
+        {
+            try
+            {
+                return Json(data.clsUsers_GetView(val),JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

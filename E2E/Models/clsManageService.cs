@@ -556,6 +556,12 @@ namespace E2E.Models
                 services.Required_Approve_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 services.Required_Approve_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+
+                ServiceComments serviceComments = new ServiceComments();
+                serviceComments.Service_Id = id;
+                serviceComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                serviceComments.Comment_Content = "Approval required";
+                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -569,19 +575,32 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetToDepartment(Guid id)
+        public bool Services_SetToDepartment(Guid id, Guid? deptId = null)
         {
             try
             {
                 bool res = new bool();
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+                if (!deptId.HasValue)
+                {
+                    deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+                }
+
+                string deptName = db.Master_Departments.Find(deptId).Department_Name;
+                
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.Department_Id = deptId;
                 services.Commit_User_Id = userId;
                 services.Commit_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+
+                ServiceComments serviceComments = new ServiceComments();
+                serviceComments.Service_Id = services.Service_Id;
+                serviceComments.Comment_Content = string.Format("Commit a job to the {0} department", deptName);
+                serviceComments.User_Id = userId;
+                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
+
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -591,6 +610,55 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public bool Services_SetToUser(Guid id, Guid deptId, Guid userId)
+        {
+            try
+            {
+                bool res = new bool();
+                Guid userActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                string deptName = db.Master_Departments.Find(deptId).Department_Name;
+                string userData = db.UserDetails
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => new
+                    {
+                        Data = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "]"
+                    }).Select(s => s.Data).FirstOrDefault();
+
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.Department_Id = deptId;
+                services.Action_User_Id = userId;
+                services.Commit_User_Id = userActionId;
+                services.Commit_DateTime = DateTime.Now;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+
+                ServiceComments serviceComments = new ServiceComments();
+                serviceComments.Service_Id = services.Service_Id;
+                serviceComments.Comment_Content = string.Format("Commit a job to the {0} department", deptName);
+                serviceComments.User_Id = userId;
+                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
+
+                serviceComments = new ServiceComments();
+                serviceComments.Service_Id = services.Service_Id;
+                serviceComments.Comment_Content = string.Format("Assign task to {0}", userData);
+                serviceComments.User_Id = userId;
+                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }
@@ -634,6 +702,12 @@ namespace E2E.Models
                 services.Approved_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 services.Approved_DateTime = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+
+                ServiceComments serviceComments = new ServiceComments();
+                serviceComments.Service_Id = id;
+                serviceComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                serviceComments.Comment_Content = "Approved";
+                db.Entry(serviceComments).State = System.Data.Entity.EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -683,19 +757,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
-                services.Commit_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                services.Commit_DateTime = DateTime.Now;
-                services.Department_Id = model.Department_Id;
                 if (model.Action_User_Id.HasValue)
                 {
-                    services.Action_User_Id = model.Action_User_Id;
+                    res = Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value);
                 }
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-                if (db.SaveChanges() > 0)
+                else
                 {
-                    res = true;
+                    res = Services_SetToDepartment(model.Service_Id, model.Department_Id);
                 }
 
                 return res;
