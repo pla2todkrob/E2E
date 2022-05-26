@@ -12,6 +12,7 @@ namespace E2E.Models
     {
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+        private clsImage clsImag = new clsImage();
         public bool EForm_Save(EForms model, HttpFileCollectionBase files)
         {
             try
@@ -76,10 +77,10 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-                                if (filepath != "")
+                                clsImag = ftp.Ftp_UploadImageFixSizeToString(dir, file, FileName);
+                                if (clsImag != null)
                                 {
-                                    Galleries_Save(eForms, filepath, FileName);
+                                    Galleries_Save(eForms, clsImag, FileName);
                                 }
                             }
                             else
@@ -153,10 +154,11 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-                                if (filepath != "")
+
+                                clsImag = ftp.Ftp_UploadImageFixSizeToString(dir, file, FileName);
+                                if (clsImag != null)
                                 {
-                                    Galleries_Save(EForms, filepath, FileName);
+                                    Galleries_Save(EForms, clsImag, FileName);
                                 }
                             }
                             else
@@ -212,13 +214,12 @@ namespace E2E.Models
             return false;
         }
 
-        public void Galleries_Save(EForms model, string filepath, string file)
+        public void Galleries_Save(EForms model, clsImage clsImage, string file)
         {
             try
             {
                 bool res = new bool();
-                EForms eForms = new EForms();
-                res = Galleries_Insert(model, filepath, file);
+                res = Galleries_Insert(model, clsImage, file);
             }
             catch (Exception)
             {
@@ -226,7 +227,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Galleries_Insert(EForms model, string filepath, string file)
+        public bool Galleries_Insert(EForms model, clsImage clsImage, string file)
         {
             try
             {
@@ -236,7 +237,8 @@ namespace E2E.Models
                 var Count = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_Gallery_Seq).FirstOrDefault();
 
                 eForm_Galleries.EForm_Id = model.EForm_Id;
-                eForm_Galleries.EForm_Gallery_Original = filepath;
+                eForm_Galleries.EForm_Gallery_Original = clsImage.OriginalPath;
+                eForm_Galleries.EForm_Gallery_Thumbnail = clsImage.ThumbnailPath;
                 eForm_Galleries.EForm_Gallery_Name = file;
                 eForm_Galleries.EForm_Gallery_Extension = Path.GetExtension(file);
                 
@@ -354,8 +356,20 @@ namespace E2E.Models
                     db.EForm_Files.RemoveRange(clsEForm.EForm_Files);
                     db.EForm_Galleries.RemoveRange(clsEForm.EForm_Galleries);
 
+
+
                     if (db.SaveChanges() > 0)
                     {
+                        foreach (var item in clsEForm.EForm_Files)
+                        {
+                            ftp.Ftp_DeleteFile(item.EForm_File_Path);
+                        }
+
+                        foreach (var item in clsEForm.EForm_Galleries)
+                        {
+                            ftp.Ftp_DeleteFile(item.EForm_Gallery_Original);
+                            ftp.Ftp_DeleteFile(item.EForm_Gallery_Thumbnail);
+                        }
                         res = EForm_Delete(id);
                     }
                 }
@@ -381,6 +395,8 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
+                    ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Original);
+                    ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
                     res = true;
                 }
 
@@ -406,6 +422,7 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
+                    ftp.Ftp_DeleteFile(Files.EForm_File_Path);
                     res = true;
 
                 }
@@ -414,6 +431,57 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public bool Galleries_SaveSeq(List<EForm_Galleries> model)
+        {
+            try
+            {
+                bool res = new bool();
+                string status = string.Empty;
+
+                foreach (var item in model)
+                {
+                    EForm_Galleries eForm_Galleries = new EForm_Galleries();
+                    eForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Gallery_Id == item.EForm_Gallery_Id).FirstOrDefault();
+                    if (eForm_Galleries != null)
+                    {
+                        res = Galleries_SaveSeq_Update(item);
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Galleries_SaveSeq_Update(EForm_Galleries model)
+        {
+            try
+            {
+                bool res = new bool();
+                EForm_Galleries eForm_Galleries = new EForm_Galleries();
+                eForm_Galleries = db.EForm_Galleries
+                    .Where(w => w.EForm_Gallery_Id == model.EForm_Gallery_Id)
+                    .FirstOrDefault();
+
+                eForm_Galleries.EForm_Gallery_Seq = model.EForm_Gallery_Seq;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }

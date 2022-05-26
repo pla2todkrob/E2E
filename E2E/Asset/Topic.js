@@ -34,6 +34,44 @@
     return false;
 }
 
+function savegallery_T(urlAjax, urlLoad) {
+    var arr = [];
+    $('table#tableGal').find('tbody').each(function () {
+        console.log($(this));
+        $(this).find('tr').each(function () {
+            console.log($(this));
+            $(this).find('td#rowVal').each(function () {
+                console.log($(this));
+                var obj = {};
+                obj.TopicGallery_Id = $(this).find('#item_TopicGallery_Id').val();
+                obj.TopicGallery_Seq = $(this).find('#item_TopicGallery_Seq').val();
+                arr.push(obj);
+            });
+        });
+    });
+    console.log(arr);
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        data: {
+            model: JSON.stringify(arr)
+        },
+        success: function (res) {
+            swal({
+                title: res.title,
+                text: res.text,
+                icon: res.icon,
+                button: res.button,
+                dangerMode: res.dangerMode
+            });
+            if (res.icon == 'success') {
+                reloadTable();
+                callFileCollection(urlLoad);
+            }
+        }
+    });
+}
+
 function checkPin(ele) {
     if ($(ele).is(':checked')) {
         $('#Topic_Pin_EndDate').attr('required', 'required');

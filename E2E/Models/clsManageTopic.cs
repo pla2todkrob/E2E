@@ -13,6 +13,7 @@ namespace E2E.Models
     {
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+        private clsImage clsImag = new clsImage();
 
         public bool UpdateView(Guid? id)
         {
@@ -270,10 +271,10 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-                                if (filepath != "")
+                                clsImag = ftp.Ftp_UploadImageFixSizeToString(dir, file, FileName);
+                                if (clsImag != null)
                                 {
-                                    Galleries_Save(topics, filepath, FileName, status);
+                                    Galleries_Save(topics, clsImag, FileName);
                                 }
                             }
                             else
@@ -345,10 +346,10 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-                                if (filepath != "")
+                                clsImag = ftp.Ftp_UploadImageFixSizeToString(dir, file, FileName);
+                                if (clsImag != null)
                                 {
-                                    Galleries_Save(topics, filepath, FileName, status);
+                                    Galleries_Save(topics, clsImag, FileName);
                                 }
                             }
                             else
@@ -480,7 +481,7 @@ namespace E2E.Models
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
-                    Board_CountComment_Delete(topicComments[0].Topic_Id, topicComments.Count);
+                    Board_CountComment_Delete(topicComments[0].Topic_Id.Value, topicComments.Count);
                 }
 
                 return res;
@@ -542,21 +543,13 @@ namespace E2E.Models
             return false;
         }
 
-        public void Galleries_Save(Topics model, string filepath, string file, string status)
+        public void Galleries_Save(Topics model, clsImage clsImage, string file)
         {
             try
             {
                 bool res = new bool();
-                Topics topics = new Topics();
+                res = Galleries_Insert(model, clsImage, file);
 
-                if (status == "U")
-                {
-                    res = Galleries_Insert(model, filepath, file);
-                }
-                else
-                {
-                    res = Galleries_Insert(model, filepath, file);
-                }
             }
             catch (Exception)
             {
@@ -564,19 +557,29 @@ namespace E2E.Models
             }
         }
 
-        public bool Galleries_Insert(Topics model, string filepath, string file)
+        public bool Galleries_Insert(Topics model, clsImage clsImage, string file)
         {
             try
             {
 
                 bool res = new bool();
                 TopicGalleries topicGalleries = new TopicGalleries();
+                var Count = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id).OrderByDescending(o => o.TopicGallery_Seq).FirstOrDefault();
 
                 topicGalleries.Topic_Id = model.Topic_Id;
-                topicGalleries.TopicGallery_Original = filepath;
+                topicGalleries.TopicGallery_Original = clsImage.OriginalPath;
+                topicGalleries.TopicGallery_Thumbnail = clsImage.ThumbnailPath;
                 topicGalleries.TopicGallery_Name = file;
                 topicGalleries.TopicGallery_Extension = Path.GetExtension(file);
 
+                if (Count == null)
+                {
+                    topicGalleries.TopicGallery_Seq = 1;
+                }
+                else
+                {
+                    topicGalleries.TopicGallery_Seq = Count.TopicGallery_Seq++;
+                }
 
                 db.TopicGalleries.Add(topicGalleries);
                 if (db.SaveChanges() > 0)
@@ -714,7 +717,9 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    res = DeleteGallery_Count(TopicGalleries.Topic_Id);
+                    ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Original);
+                    ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
+                    res = DeleteGallery_Count(TopicGalleries.Topic_Id.Value);
 
                 }
 
@@ -768,7 +773,8 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    res = DeleteFile_Count(TopicFiles.Topic_Id);
+                    ftp.Ftp_DeleteFile(TopicFiles.TopicFile_Path);
+                    res = DeleteFile_Count(TopicFiles.Topic_Id.Value);
 
                 }
 
@@ -804,6 +810,96 @@ namespace E2E.Models
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public bool Galleries_SaveSeq(List<TopicGalleries> model)
+        {
+            try
+            {
+                bool res = new bool();
+
+                foreach (var item in model)
+                {
+                    TopicGalleries topicGalleries = new TopicGalleries();
+                    topicGalleries = db.TopicGalleries.Where(w => w.TopicGallery_Id == item.TopicGallery_Id).FirstOrDefault();
+                    if (topicGalleries != null)
+                    {
+                        res = Galleries_SaveSeq_Update(item);
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected bool Galleries_SaveSeq_Update(TopicGalleries model)
+        {
+            try
+            {
+                bool res = new bool();
+                TopicGalleries topicGalleries = new TopicGalleries();
+                topicGalleries = db.TopicGalleries
+                    .Where(w => w.TopicGallery_Id == model.TopicGallery_Id)
+                    .FirstOrDefault();
+
+                topicGalleries.TopicGallery_Seq = model.TopicGallery_Seq;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool Delete_Attached(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                clsTopic clsTopic = new clsTopic();
+
+
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+                if (clsTopic != null)
+                {
+                    db.TopicFiles.RemoveRange(clsTopic.TopicFiles);
+                    db.TopicGalleries.RemoveRange(clsTopic.TopicGalleries);
+
+
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        foreach (var item in clsTopic.TopicFiles)
+                        {
+                            ftp.Ftp_DeleteFile(item.TopicFile_Path);
+                        }
+
+                        foreach (var item in clsTopic.TopicGalleries)
+                        {
+                            ftp.Ftp_DeleteFile(item.TopicGallery_Original);
+                            ftp.Ftp_DeleteFile(item.TopicGallery_Thumbnail);
+                        }
+                        res = Board_Delete(id);
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

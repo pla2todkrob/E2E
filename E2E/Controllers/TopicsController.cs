@@ -1,6 +1,7 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
@@ -186,7 +187,7 @@ namespace E2E.Controllers
                 clsSwal swal = new clsSwal();
                 try
                 {
-                    if (data.Board_Delete(id))
+                    if (data.Delete_Attached(id))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -611,6 +612,93 @@ namespace E2E.Controllers
             clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
 
             return View(clsTopic);
+        }
+
+        public ActionResult SaveSeq(string model)
+        {
+            List<TopicGalleries> topicGalleries = new List<TopicGalleries>();
+            topicGalleries = JsonConvert.DeserializeObject<List<TopicGalleries>>(model);
+
+            clsSwal swal = new clsSwal();
+            if (topicGalleries != null)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Galleries_SaveSeq(topicGalleries))
+                        {
+                            scope.Complete();
+
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
     }
 }

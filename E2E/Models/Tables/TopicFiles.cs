@@ -11,7 +11,8 @@ namespace E2E.Models.Tables
         [Key]
         public Guid TopicFile_Id { get; set; }
 
-        public Guid Topic_Id { get; set; }
+        public Guid? Topic_Id { get; set; }
+        public virtual Topics Topics { get; set; }
         public string TopicFile_Path { get; set; }
         public string TopicFile_Name { get; set; }
         public string TopicFile_Extension { get; set; }

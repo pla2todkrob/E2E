@@ -1,6 +1,7 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
@@ -82,7 +83,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult EForms_Create(clsEForm model)
+        public ActionResult EForms_Create(EForms model)
         {
             clsSwal swal = new clsSwal();
             if (ModelState.IsValid)
@@ -91,7 +92,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.EForm_Save(model.EForms, Request.Files))
+                        if (data.EForm_Save(model, Request.Files))
                         {
                             scope.Complete();
 
@@ -175,6 +176,94 @@ namespace E2E.Controllers
             clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
 
             return View(clsEForm);
+        }
+
+    
+        public ActionResult SaveSeq(string model)
+        {
+            List<EForm_Galleries> eForm_Galleries = new List<EForm_Galleries>();
+            eForm_Galleries = JsonConvert.DeserializeObject<List<EForm_Galleries>>(model);
+
+            clsSwal swal = new clsSwal();
+            if (eForm_Galleries != null)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Galleries_SaveSeq(eForm_Galleries))
+                        {
+                            scope.Complete();
+
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult ReloadModel(Guid id)
