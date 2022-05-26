@@ -198,7 +198,7 @@ function callModalTable(urlAjax, bigSize = false) {
     });
     return false;
 }
-function callSubmitModal(urlAjax) {
+function callSubmitModal(urlAjax,form) {
     swal({
         title: "Are you sure?",
         text: "This information is saved to the database.",
@@ -206,7 +206,6 @@ function callSubmitModal(urlAjax) {
         icon: "warning"
     }).then(function (cf) {
         if (cf) {
-            var form = $('form')[0];
             var fd = new FormData(form);
 
             $.ajax({
@@ -224,7 +223,8 @@ function callSubmitModal(urlAjax) {
                         icon: res.icon,
                         button: res.button,
                         dangerMode: res.dangerMode
-                    }).then(function () {
+                    }).then(function (e) {
+                        console.log(e);
                         if (res.icon == 'success') {
                             $('#modalArea').modal('hide');
                             reloadTable();
@@ -237,7 +237,7 @@ function callSubmitModal(urlAjax) {
 
     return false;
 }
-function callSubmitPage(urlAjax) {
+function callSubmitPage(urlAjax,form) {
     swal({
         title: "Are you sure?",
         text: "This information is saved to the database.",
@@ -245,7 +245,6 @@ function callSubmitPage(urlAjax) {
         icon: "warning"
     }).then(function (cf) {
         if (cf) {
-            var form = $('form')[0];
             var fd = new FormData(form);
 
             $.ajax({
@@ -263,7 +262,7 @@ function callSubmitPage(urlAjax) {
                         icon: res.icon,
                         button: res.button,
                         dangerMode: res.dangerMode
-                    }).then(function () {
+                    }).then(function (e) {
                         if (res.icon == 'success') {
                             window.location.reload();
                         }
@@ -275,7 +274,7 @@ function callSubmitPage(urlAjax) {
 
     return false;
 }
-function callSubmitRedirect(urlAjax, urlRedirect) {
+function callSubmitRedirect(urlAjax,form, urlRedirect) {
     swal({
         title: "Are you sure?",
         text: "This information is saved to the database.",
@@ -283,7 +282,6 @@ function callSubmitRedirect(urlAjax, urlRedirect) {
         icon: "warning"
     }).then((cf) => {
         if (cf) {
-            var form = $('form')[0];
             var fd = new FormData(form);
 
             $.ajax({
@@ -301,7 +299,7 @@ function callSubmitRedirect(urlAjax, urlRedirect) {
                         icon: res.icon,
                         button: res.button,
                         dangerMode: res.dangerMode
-                    }).then(function () {
+                    }).then(function (e) {
                         if (res.icon == 'success') {
                             console.log(res.option);
                             if (res.option != null) {
@@ -337,16 +335,18 @@ function callDeleteItem(urlAjax, reloadPage = false) {
                         icon: res.icon,
                         button: res.button,
                         dangerMode: res.dangerMode
+                    }).then(function () {
+                        if (res.icon == 'success') {
+                            $('#modalArea').modal('hide');
+                            if (reloadPage) {
+                                location.reload();
+                            }
+                            else {
+                                reloadTable();
+                            }
+                        }
                     });
-                    if (res.icon == 'success') {
-                        $('#modalArea').modal('hide');
-                        if (reloadPage) {
-                            location.reload();
-                        }
-                        else {
-                            reloadTable();
-                        }
-                    }
+                    
                 }
             });
 
@@ -382,21 +382,4 @@ function getSelectOp(urlAjax, val, desSelectId) {
             });
         }
     });
-}
-function appendInfo(ele) {
-    var value = $(ele).html();
-    $.ajax({
-        url: link_userInfo,
-        data: {
-            val: value
-        },
-        success: function (res) {
-            var div = $('<div class="position-absolute bg-white shadow rounded p-2 mt-1"></div>');
-
-        }
-    });
-}
-
-function detroyInfo(ele) {
-    $(ele).children('div').remove();
 }

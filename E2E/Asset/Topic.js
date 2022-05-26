@@ -63,11 +63,14 @@ function savegallery_T(urlAjax, urlLoad) {
                 icon: res.icon,
                 button: res.button,
                 dangerMode: res.dangerMode
+            }).then(function (e) {
+                console.log(e);
+                if (res.icon == 'success') {
+                    reloadTable();
+                    callFileCollection(urlLoad);
+                }
             });
-            if (res.icon == 'success') {
-                reloadTable();
-                callFileCollection(urlLoad);
-            }
+            
         }
     });
 }
@@ -106,11 +109,14 @@ function deleteFiles(urlAjax, urlLoad) {
                             icon: res.icon,
                             button: res.button,
                             dangerMode: res.dangerMode
+                        }).then(function (e) {
+                            console.log(e);
+                            if (res.icon == 'success') {
+                                reloadTable();
+                                callFileCollection(urlLoad);
+                            }
                         });
-                        if (res.icon == 'success') {
-                            reloadTable();
-                            callFileCollection(urlLoad);
-                        }
+                        
                     }
                 });
                 return false;
@@ -136,8 +142,8 @@ function previewMultiple(event) {
     }
 }
 
-function callSubmit_Reply(urlAjax, reloadPage = false) {
-    var form = $('form')[0];
+function callSubmit_Reply(urlAjax, form) {
+
     var fd = new FormData(form);
 
     $.ajax({

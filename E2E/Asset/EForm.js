@@ -31,11 +31,13 @@ function savegallery(urlAjax,urlLoad) {
                 icon: res.icon,
                 button: res.button,
                 dangerMode: res.dangerMode
+            }).then(function () {
+                if (res.icon == 'success') {
+                    reloadTable();
+                    callFileCollections(urlLoad);
+                }
             });
-            if (res.icon == 'success') {
-                reloadTable();
-                callFileCollections(urlLoad);
-            }
+            
         }
     });
 }
@@ -60,11 +62,13 @@ function deleteFileEF(urlAjax, urlLoad) {
                             icon: res.icon,
                             button: res.button,
                             dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                reloadTable();
+                                callFileCollections(urlLoad);
+                            }
                         });
-                        if (res.icon == 'success') {
-                            reloadTable();
-                            callFileCollections(urlLoad);
-                        }
+                        
                     }
                 });
                 return false;

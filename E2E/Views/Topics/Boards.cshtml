@@ -19,7 +19,7 @@
 
         $(document).on('submit', '#SaveForm', function (e) {
             e.preventDefault();
-            callSubmitModal('@Url.Action("Boards_Create", "Topics")');
+            callSubmitModal('@Url.Action("Boards_Create", "Topics")',this);
             return false;
         });
 

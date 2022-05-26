@@ -12,7 +12,7 @@
         });
 
         $('form').submit(function () {
-            callSubmitRedirect('@Url.Action("Commit","Services")', '@Url.Action("Index","Services")');
+            callSubmitRedirect('@Url.Action("Commit","Services")', this, '@Url.Action("Index","Services")');
             return false;
         });
     </script>

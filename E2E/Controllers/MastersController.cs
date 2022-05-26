@@ -1263,49 +1263,53 @@ namespace E2E.Controllers
                     foreach (var item in files)
                     {
                         HttpPostedFileBase file = Request.Files[item.ToString()];
-                        using (ExcelPackage package = new ExcelPackage(file.InputStream))
+                        if (file.ContentLength > 0)
                         {
-                            foreach (var sheet in package.Workbook.Worksheets)
+                            using (ExcelPackage package = new ExcelPackage(file.InputStream))
                             {
-                                for (int row = 1; row <= sheet.Dimension.End.Row; row++)
+                                foreach (var sheet in package.Workbook.Worksheets)
                                 {
-                                    if (row > 3)
+                                    for (int row = 1; row <= sheet.Dimension.End.Row; row++)
                                     {
-                                        if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
+                                        if (row > 3)
                                         {
-                                            goto EndProcess;
-                                        }
-                                        UserDetails userDetails = new UserDetails();
-                                        userDetails.Detail_EN_FirstName = sheet.Cells[row, 4].Text;
-                                        userDetails.Detail_EN_LastName = sheet.Cells[row, 5].Text;
-                                        userDetails.Prefix_EN_Id = data.Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value;
-                                        userDetails.Detail_TH_FirstName = sheet.Cells[row, 7].Text;
-                                        userDetails.Detail_TH_LastName = sheet.Cells[row, 8].Text;
-                                        userDetails.Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value;
-                                        userDetails.Users = new Users();
-                                        Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
-                                        userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                        Guid? plantId = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
-                                        Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
-                                        Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
-                                        Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
+                                            if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
+                                            {
+                                                goto EndProcess;
+                                            }
+                                            UserDetails userDetails = new UserDetails();
+                                            userDetails.Detail_EN_FirstName = sheet.Cells[row, 4].Text;
+                                            userDetails.Detail_EN_LastName = sheet.Cells[row, 5].Text;
+                                            userDetails.Prefix_EN_Id = data.Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value;
+                                            userDetails.Detail_TH_FirstName = sheet.Cells[row, 7].Text;
+                                            userDetails.Detail_TH_LastName = sheet.Cells[row, 8].Text;
+                                            userDetails.Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value;
+                                            userDetails.Users = new Users();
+                                            Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
+                                            userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
+                                            Guid? plantId = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
+                                            Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
+                                            Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
+                                            Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
 
-                                        userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
-                                        userDetails.Users.Role_Id = data.Role_UserId();
-                                        userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
-                                        userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
-                                        if (data.Users_Save(userDetails))
-                                        {
-                                            doComplete = true;
-                                        }
-                                        else
-                                        {
-                                            goto EndProcess;
+                                            userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
+                                            userDetails.Users.Role_Id = data.Role_UserId();
+                                            userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
+                                            userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
+                                            if (data.Users_Save(userDetails))
+                                            {
+                                                doComplete = true;
+                                            }
+                                            else
+                                            {
+                                                goto EndProcess;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                        
                     }
 
                 EndProcess:

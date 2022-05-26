@@ -793,6 +793,7 @@
     <Content Include="Views\Services\AllRequest.cshtml" />
     <Content Include="Views\Services\AllTask_Table.cshtml" />
     <Content Include="Views\Services\AllRequest_Table.cshtml" />
+    <Content Include="Views\Services\SetComplete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

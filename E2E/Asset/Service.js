@@ -52,10 +52,11 @@ function deleteFile(urlAjax, urlLoad) {
                             icon: res.icon,
                             button: res.button,
                             dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                $('#fileTable').load(urlLoad);
+                            }
                         });
-                        if (res.icon == 'success') {
-                            $('#fileTable').load(urlLoad);
-                        }
                     }
                 });
                 return false;
@@ -102,7 +103,7 @@ function setRequired(urlAjax, urlRedirect) {
                             if (res.icon == 'success') {
                                 window.location.replace(urlRedirect);
                             }
-                        })
+                        });
                     }
                 });
             }
@@ -162,10 +163,12 @@ function setApprove(urlAjax) {
                             icon: res.icon,
                             button: res.button,
                             dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                location.reload();
+                            }
                         });
-                        if (res.icon == 'success') {
-                            location.reload();
-                        }
+                        
                     }
                 });
                 return false;

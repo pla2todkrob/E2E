@@ -33,13 +33,13 @@
 
         $(document).on('submit', '#SaveComment', function (e) {
             e.preventDefault();
-            callSubmit_Reply('@Url.Action("Boards_Comment", "Topics")');
+            callSubmit_Reply('@Url.Action("Boards_Comment", "Topics")',this);
             return false;
         });
 
 $(document).on('submit', '#SaveReply', function (e) {
             e.preventDefault();
-            callSubmit_Reply('@Url.Action("Boards_Reply", "Topics")');
+            callSubmit_Reply('@Url.Action("Boards_Reply", "Topics")',this);
             return false;
         });
     </script>

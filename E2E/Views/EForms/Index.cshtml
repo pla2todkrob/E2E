@@ -20,7 +20,7 @@
 
         $(document).on('submit', '#SaveEForm', function (e) {
             e.preventDefault();
-            callSubmitModal('@Url.Action("EForms_Create", "EForms")');
+            callSubmitModal('@Url.Action("EForms_Create", "EForms")',this);
             return false;
         });
 
