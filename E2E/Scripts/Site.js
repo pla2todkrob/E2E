@@ -207,7 +207,12 @@ function callSubmitModal(urlAjax,form) {
     }).then(function (cf) {
         if (cf) {
             var fd = new FormData(form);
-
+            $(form).find('input[type=file]').each(function () {
+                var files = $(this).get(0).files;
+                for (var i = 0; i < files.length; i++) {
+                    fd.append(files[i].name, files[i]);
+                }
+            });
             $.ajax({
                 url: urlAjax,
                 method: "POST",
@@ -237,6 +242,7 @@ function callSubmitModal(urlAjax,form) {
 
     return false;
 }
+
 function callSubmitPage(urlAjax,form) {
     swal({
         title: "Are you sure?",

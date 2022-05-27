@@ -11,7 +11,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid TopicGallery_Id { get; set; }
 
-        public Guid? Topic_Id { get; set; }
+        public Guid Topic_Id { get; set; }
         public virtual Topics Topics { get; set; }
         public string TopicGallery_Original { get; set; }
         public string TopicGallery_Thumbnail { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace E2E.Migrations
+namespace E2E.Migrations
 {
     using E2E.Models;
     using System;
@@ -12,6 +12,7 @@
         {
             AutomaticMigrationsEnabled = true;
             AutomaticMigrationDataLossAllowed = true;
+
         }
 
         protected override void Seed(E2E.Models.clsContext context)

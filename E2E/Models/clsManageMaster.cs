@@ -1325,6 +1325,27 @@ namespace E2E.Models
                         {
                             master_LineWorks = new Master_LineWorks();
                             master_LineWorks.LineWork_Name = val;
+                            if (val.StartsWith("J"))
+                            {
+                                master_LineWorks.Authorize_Id = db.System_Authorizes
+                                    .Where(w => w.Authorize_Index == 1)
+                                    .Select(s => s.Authorize_Id)
+                                    .FirstOrDefault();
+                            }
+                            else if (val.StartsWith("M"))
+                            {
+                                master_LineWorks.Authorize_Id = db.System_Authorizes
+                                    .Where(w => w.Authorize_Index == 2)
+                                    .Select(s => s.Authorize_Id)
+                                    .FirstOrDefault();
+                            }
+                            else
+                            {
+                                master_LineWorks.Authorize_Id = db.System_Authorizes
+                                    .Where(w => w.Authorize_Index == 3)
+                                    .Select(s => s.Authorize_Id)
+                                    .FirstOrDefault();
+                            }
                             if (LineWork_Save(master_LineWorks))
                             {
                                 goto FindModel;
@@ -1936,7 +1957,17 @@ namespace E2E.Models
                 users.Process_Id = model.Users.Process_Id;
                 users.Role_Id = model.Users.Role_Id;
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
+                users.User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]);
+                users.YearSetPoint = DateTime.Now.Year;
 
+                System_Configurations system_ = new System_Configurations();
+                system_ = db.System_Configurations
+                    .OrderByDescending(o => o.CreateDateTime)
+                    .FirstOrDefault();
+                if (system_ != null)
+                {
+                    users.User_Point = system_.Configuration_Point;
+                }
                 if (!string.IsNullOrEmpty(model.Users.User_Email))
                 {
                     users.User_Email = model.Users.User_Email.Trim();

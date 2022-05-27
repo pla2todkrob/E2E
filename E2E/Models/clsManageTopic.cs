@@ -495,7 +495,7 @@ namespace E2E.Models
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
-                    Board_CountComment_Delete(topicComments[0].Topic_Id.Value, topicComments.Count);
+                    Board_CountComment_Delete(topicComments[0].Topic_Id, topicComments.Count);
                 }
 
                 return res;
@@ -718,7 +718,7 @@ namespace E2E.Models
 
                 var TopicGalleries = db.TopicGalleries.Where(w => w.TopicGallery_Id == id).FirstOrDefault();
 
-                Guid topic_id = TopicGalleries.Topic_Id.Value;
+                Guid topic_id = TopicGalleries.Topic_Id;
 
                 db.TopicGalleries.Remove(TopicGalleries);
 
@@ -780,7 +780,7 @@ namespace E2E.Models
 
                 var TopicFiles = db.TopicFiles.Where(w => w.TopicFile_Id == id).FirstOrDefault();
 
-                Guid topic_id = TopicFiles.Topic_Id.Value;
+                Guid topic_id = TopicFiles.Topic_Id;
 
                 db.TopicFiles.Remove(TopicFiles);
 

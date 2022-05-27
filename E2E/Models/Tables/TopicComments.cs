@@ -10,11 +10,11 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid TopicComment_Id { get; set; }
-        public Guid? Topic_Id { get; set; }
+        public Guid Topic_Id { get; set; }
         public virtual Topics Topics { get; set; }
         [Display(Name ="Content")]
         public string Comment_Content { get; set; }
-        public Guid User_Id { get; set; }
+        public Guid? User_Id { get; set; }
         public virtual Users Users { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
