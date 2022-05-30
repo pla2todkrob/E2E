@@ -19,10 +19,11 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44316</IISExpressSSLPort>
+    <IISExpressSSLPort>44325</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>
+    </IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -237,6 +238,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="android-chrome-192x192.png" />
+    <Content Include="android-chrome-512x512.png" />
+    <Content Include="apple-touch-icon.png" />
     <Content Include="Asset\EForm.js" />
     <Content Include="Asset\EForm.min.js">
       <DependentUpon>EForm.js</DependentUpon>
@@ -428,6 +432,8 @@
     <Content Include="Content\Site.min.css">
       <DependentUpon>Site.css</DependentUpon>
     </Content>
+    <Content Include="favicon-16x16.png" />
+    <Content Include="favicon-32x32.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="Global.asax" />
@@ -793,6 +799,7 @@
     <Content Include="Views\Services\AllTask_Table.cshtml" />
     <Content Include="Views\Services\AllRequest_Table.cshtml" />
     <Content Include="Views\Services\SetComplete.cshtml" />
+    <Content Include="site.webmanifest" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
