@@ -757,7 +757,6 @@
     <Content Include="Views\Shared\_Profile.cshtml" />
     <Content Include="Views\Topics\Boards.cshtml" />
     <Content Include="Views\Topics\Boards_Table.cshtml" />
-    <Content Include="Views\Masters\Grades_Detail.cshtml" />
     <Content Include="Views\Topics\Boards_Form.cshtml" />
     <Content Include="Views\Topics\Boards_Create.cshtml" />
     <Content Include="Views\Services\Form.cshtml" />
