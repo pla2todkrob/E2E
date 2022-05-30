@@ -92,6 +92,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
+                        var file = Request.Files["fileImage"];
                         if (data.EForm_Save(model, Request.Files))
                         {
                             scope.Complete();
