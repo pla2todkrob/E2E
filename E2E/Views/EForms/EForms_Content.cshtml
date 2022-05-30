@@ -41,8 +41,10 @@
         </h5>
     </div>
     <div class="card-body">
-        <a href="@Html.DisplayFor(m => m.EForms.EForm_Link)">@Html.DisplayFor(m => m.EForms.EForm_Link)</a>
-        @Html.DisplayFor(m => m.EForms.EForm_Description)
+
+        <p><b>@Html.DisplayNameFor(m=>m.EForms.EForm_Link):</b> <a href="@Html.ValueFor(m => m.EForms.EForm_Link)" target="_blank" class="db">@Html.ValueFor(m => m.EForms.EForm_Title)</a></p>
+
+        <span class="PreLine">  @Html.DisplayFor(m=>m.EForms.EForm_Description)</span>
 
         @if (Model.EForm_Galleries.Count > 0)
         {

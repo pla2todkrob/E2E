@@ -124,7 +124,7 @@ namespace E2E.Models
                     .FirstOrDefault();
 
                 EForms.EForm_Title = model.EForm_Title.Trim();
-                EForms.EForm_Description = model.EForm_Description.Trim();
+                EForms.EForm_Description = model.EForm_Description;
                 EForms.EForm_Link = model.EForm_Link;
                 EForms.EForm_Start = model.EForm_Start;
                 EForms.EForm_End = model.EForm_End;

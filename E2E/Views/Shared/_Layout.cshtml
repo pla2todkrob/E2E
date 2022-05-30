@@ -40,11 +40,6 @@
     @Scripts.Render("~/bundles/jquery")
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     @Scripts.Render("~/bundles/js")
-    <script>
-        var link_navService = '@Url.Action("_NavService", "Configurations")';
-        var link_navDepartment = '@Url.Action("_NavDepartment", "Configurations")';
-        var link_userInfo = '@Url.Action("_UserInfomation", "Users")';
-    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

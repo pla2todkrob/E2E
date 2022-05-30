@@ -1,4 +1,6 @@
-﻿$(function () {
+﻿var baseUrl = window.location.origin;
+
+$(function () {
     var classEmpty = true;
     var url = window.location.pathname,
         urlRegExp = new RegExp(url.replace(/\/$/, '') + "$");
@@ -30,8 +32,8 @@ $(document).ajaxStart(function () {
 });
 
 function reloadCount() {
-    $('#nav_service').load(link_navService);
-    $('#nav_department').load(link_navDepartment);
+    $('#nav_service').load(baseUrl + '/Configurations/_NavService');
+    $('#nav_department').load(baseUrl +'/Configurations/_NavDepartment');
 }
 function callSpin(active) {
     var opts = {

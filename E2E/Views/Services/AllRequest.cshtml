@@ -1,8 +1,41 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "All request";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>AllRequest</h2>
+@section scripts{
 
+    <script src="~/Asset/Service.min.js"></script>
+
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("Form", "Services")', this);
+            return false;
+        });
+
+        function reloadTable() {
+            callTable('@Url.Action("AllRequest_Table", "Services")', true, false,0);
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Department</li>
+            <li class="breadcrumb-item active" aria-current="page">All request</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="row" id="datalist"></div>
+    </div>
+</div>
