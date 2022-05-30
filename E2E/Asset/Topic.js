@@ -134,10 +134,10 @@ function previewMultiple(event) {
 
         var filetype = event.target.files[i].type.split('/')[0];
         if (filetype == 'image') {
-            document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1">';
+            document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1" title="' + event.target.files[i].name +'">';
         }
         else {
-            document.getElementById("galImage").innerHTML += '<i class="fa fa-file-text-o fa-5x"></i>';
+            document.getElementById("galImage").innerHTML += '<i class="fa fa-file-text-o fa-5x" title="' + event.target.files[i].name +'"></i>';
         }
     }
 }

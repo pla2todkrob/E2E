@@ -33,7 +33,7 @@
                 <label for="fileImage">
                     Upload files
                 </label>
-                <input name="fileImage" id="fileImage" type="file" multiple class="form-control-file" onchange="previewMultiple(event)" />
+                <input name="fileImage" id="fileImage" type="file" multiple class="form-control-file" onchange="previewMultiple(event)" @*accept="image/*"*@ />
             </div>
 
             <div id="fileCollections" class="col-12"></div>
@@ -52,11 +52,11 @@
 
             <div class="col-md-6 form-group">
                 @Html.LabelFor(m => m.EForm_Start)
-                @Html.TextBoxFor(m => m.EForm_Start, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date"})
+                @Html.TextBoxFor(m => m.EForm_Start, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
             </div>
             <div class="col-md-6 form-group">
                 @Html.LabelFor(m => m.EForm_End)
-                @Html.TextBoxFor(m => m.EForm_End, "{0:yyyy-MM-dd}", new { @class = "form-control input-large", type = "date"})
+                @Html.TextBoxFor(m => m.EForm_End, "{0:yyyy-MM-dd}", new { @class = "form-control input-large", type = "date" })
             </div>
         </div>
     </div>
