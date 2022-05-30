@@ -15,3 +15,7 @@ img#img-table{
 #serviceInfo {
     min-height: 640px;
 }
+
+.PreLine {
+    white-space:pre-line;
+}

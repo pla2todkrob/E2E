@@ -15,6 +15,8 @@ namespace E2E.Models.Tables
 
         public string EForm_Title { get; set; }
         public string EForm_Link { get; set; }
+
+        [DataType(DataType.MultilineText)]
         public string EForm_Description { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
