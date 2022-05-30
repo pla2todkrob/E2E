@@ -105,3 +105,21 @@ function callModalEForms(urlAjax, urlLoad = '', bigSize = false) {
     });
     return false;
 }
+
+function previewMultiple(event) {
+    $('#galImage').empty();
+
+    var saida = document.getElementById("fileImage");
+    var quantos = saida.files.length;
+    for (i = 0; i < quantos; i++) {
+        var urls = URL.createObjectURL(event.target.files[i]);
+
+        var filetype = event.target.files[i].type.split('/')[0];
+        if (filetype == 'image') {
+            document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1" title="' + event.target.files[i].name + '">';
+        }
+        else {
+            document.getElementById("galImage").innerHTML += '<i class="fa fa-file-text-o fa-5x" title="' + event.target.files[i].name + '"></i>';
+        }
+    }
+}
