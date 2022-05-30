@@ -1,4 +1,8 @@
-﻿.fit {
+﻿body {
+    font-family: 'Roboto';
+}
+
+.fit {
     width: 1%;
     white-space: nowrap;
 }
