@@ -29,6 +29,7 @@ namespace E2E.Models.Tables
         public Guid User_Id { get; set; }
 
         public virtual Users Users { get; set; }
+        [Display(Name = "Service Reference")]
         public Guid? Ref_Service_Id { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }

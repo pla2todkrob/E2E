@@ -1,4 +1,8 @@
-﻿var baseUrl = '.';
+﻿//For publish
+//var baseUrl = '/E2E';
+
+//For develop
+var baseUrl = '';
 
 $(function () {
     var classEmpty = true;
@@ -209,12 +213,6 @@ function callSubmitModal(urlAjax,form) {
     }).then(function (cf) {
         if (cf) {
             var fd = new FormData(form);
-            //$(form).find('input[type=file]').each(function () {
-            //    var files = $(this).get(0).files;
-            //    for (var i = 0; i < files.length; i++) {
-            //        fd.append(files[i].name, files[i]);
-            //    }
-            //});
             $.ajax({
                 url: urlAjax,
                 method: "POST",
