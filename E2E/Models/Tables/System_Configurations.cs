@@ -14,6 +14,8 @@ namespace E2E.Models.Tables
         public string Configuration_Brand { get; set; }
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
+        public string Copyright { get; set; }
+        public string SystemName { get; set; }
         public DateTime CreateDateTime { get; set; }
         public int Configuration_Point { get; set; }
 

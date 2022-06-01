@@ -17,6 +17,7 @@ namespace E2E.Models.Tables
         public string TopicGallery_Thumbnail { get; set; }
         public string TopicGallery_Name { get; set; }
         public string TopicGallery_Extension { get; set; }
+        [Display(Name ="No.")]
         public int TopicGallery_Seq { get; set; }
 
         public TopicGalleries()
