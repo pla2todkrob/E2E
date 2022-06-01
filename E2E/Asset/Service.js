@@ -187,7 +187,6 @@ function setUserRef(urlAjax, val) {
             async: true,
             success: function (res) {
                 $('#User_Id').val(res).trigger('change');
-                $('#User_Id').prop('disabled', true);
             }
         });
     }

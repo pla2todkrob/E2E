@@ -121,15 +121,13 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
                     table = $(this).DataTable({
                         "columnDefs": [{ "targets": dateCol, "type": "date" }],
                         "ordering": false,
-                        "scrollX": true,
-                        "autoWidth": false
+                        "scrollX": true
                     });
                 }
                 else {
                     table = $(this).DataTable({
                         "ordering": false,
-                        "scrollX": true,
-                        "autoWidth": false
+                        "scrollX": true
                     });
                 }
             });

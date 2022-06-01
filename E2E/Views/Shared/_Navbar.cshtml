@@ -9,20 +9,22 @@
         <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","Home")">Home</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Boards","Topics")">Topics</a>
-        </li>
+        
         <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>
-        </li>
+        
         <li class="nav-item dropdown" id="nav_department">
             @{ Html.RenderAction("_NavDepartment", "Configurations"); }
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Boards","Topics")">Topics</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>
+        </li>
         @if (Model.HasValue)
         {
             if (Model == 1)
