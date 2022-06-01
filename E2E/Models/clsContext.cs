@@ -25,12 +25,14 @@ namespace E2E.Models
         public DbSet<Master_Plants> Master_Plants { get; set; }
         public DbSet<Master_Processes> Master_Processes { get; set; }
         public DbSet<Master_Sections> Master_Sections { get; set; }
+        public DbSet<ServiceChangeDueDate> ServiceChangeDueDates { get; set; }
         public DbSet<ServiceCommentFiles> ServiceCommentFiles { get; set; }
         public DbSet<ServiceComments> ServiceComments { get; set; }
         public DbSet<ServiceFiles> ServiceFiles { get; set; }
         public DbSet<Services> Services { get; set; }
         public DbSet<System_Authorize> System_Authorizes { get; set; }
         public DbSet<System_Configurations> System_Configurations { get; set; }
+        public DbSet<System_DueDateStatuses> System_DueDateStatuses { get; set; }
         public DbSet<System_Prefix_EN> System_Prefix_ENs { get; set; }
         public DbSet<System_Prefix_TH> System_Prefix_THs { get; set; }
         public DbSet<System_Priorities> System_Priorities { get; set; }

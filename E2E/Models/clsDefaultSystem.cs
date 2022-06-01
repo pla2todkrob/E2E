@@ -21,9 +21,15 @@ namespace E2E.Models
             {
                 Role_Save();
             }
+
             if (db.System_Statuses.Count() != System_Statuses.DefaultList().Count())
             {
                 Status_Save();
+            }
+
+            if (db.System_DueDateStatuses.Count() != System_DueDateStatuses.DefaultList().Count())
+            {
+                DueDateStatus_Save();
             }
 
             if (db.System_Priorities.Count() != System_Priorities.DefaultList().Count())
@@ -85,6 +91,18 @@ namespace E2E.Models
                 if (db.System_Statuses.Where(w => w.Status_Name == item.Status_Name).Count() == 0)
                 {
                     db.System_Statuses.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void DueDateStatus_Save()
+        {
+            foreach (var item in System_DueDateStatuses.DefaultList())
+            {
+                if (db.System_DueDateStatuses.Where(w => w.DueDateStatus_Name == item.DueDateStatus_Name).Count() == 0)
+                {
+                    db.System_DueDateStatuses.Add(item);
                     db.SaveChanges();
                 }
             }

@@ -32,23 +32,23 @@
             </div>
             <div class="form-group col-lg-6">
                 @Html.LabelFor(m => m.Service_Description)
-                @Html.TextAreaFor(m => m.Service_Description, new { @class = "form-control", required = "required", rows = "4" })
+                @Html.TextAreaFor(m => m.Service_Description, new { @class = "form-control", required = "required", rows = "8" })
             </div>
             <div class="col-lg-6">
                 <div class="form-row">
-                    <div class="form-group col-md-6 col-lg-12 col-xl-6">
+                    <div class="form-group col-12">
                         @Html.LabelFor(m => m.Ref_Service_Id)
                         @Html.DropDownListFor(m => m.Ref_Service_Id, new SelectList(ViewBag.RefServiceList, "Value", "Text"), "Select Reference", new { @class = "form-control" })
                     </div>
-                    <div class="form-group col-md-6 col-lg-12 col-xl-6">
+                    <div class="form-group col-12">
                         @Html.LabelFor(m => m.User_Id)
                         @Html.DropDownListFor(m => m.User_Id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
                     </div>
-                    <div class="form-group col-md-6 col-lg-12 col-xl-6">
+                    <div class="form-group col-md-6">
                         @Html.LabelFor(m => m.Priority_Id)
                         @Html.DropDownListFor(m => m.Priority_Id, new SelectList(ViewBag.PriorityList, "Value", "Text"), "Select Priority", new { @class = "form-control", required = "required" })
                     </div>
-                    <div class="form-group col-md-6 col-lg-12 col-xl-6">
+                    <div class="form-group col-md-6">
                         @Html.LabelFor(m => m.Service_DueDate)
                         @Html.TextBoxFor(m => m.Service_DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", required = "required", type = "date" })
                     </div>

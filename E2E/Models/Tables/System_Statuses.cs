@@ -30,7 +30,7 @@ namespace E2E.Models.Tables
             list.Add(new System_Statuses() { Status_Index = 2, Status_Name = "In progress", Status_Class = "badge badge-warning" });
             list.Add(new System_Statuses() { Status_Index = 3, Status_Name = "Complete", Status_Class = "badge badge-success" });
             list.Add(new System_Statuses() { Status_Index = 4, Status_Name = "Close", Status_Class = "badge badge-light" });
-            list.Add(new System_Statuses() { Status_Index = 5, Status_Name = "Cancel", Status_Class = "badge badge-danger" });
+            list.Add(new System_Statuses() { Status_Index = 5, Status_Name = "Reject", Status_Class = "badge badge-danger" });
 
             return list;
         }

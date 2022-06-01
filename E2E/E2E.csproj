@@ -204,12 +204,14 @@
     <Compile Include="Models\Tables\Master_Departments.cs" />
     <Compile Include="Models\Tables\Master_Sections.cs" />
     <Compile Include="Models\Tables\Master_Processes.cs" />
+    <Compile Include="Models\Tables\ServiceChangeDueDate.cs" />
     <Compile Include="Models\Tables\ServiceCommentFiles.cs" />
     <Compile Include="Models\Tables\ServiceComments.cs" />
     <Compile Include="Models\Tables\ServiceFiles.cs" />
     <Compile Include="Models\Tables\Services.cs" />
     <Compile Include="Models\Tables\System_Authorize.cs" />
     <Compile Include="Models\Tables\System_Configurations.cs" />
+    <Compile Include="Models\Tables\System_DueDateStatuses.cs" />
     <Compile Include="Models\Tables\System_Prefix_EN.cs" />
     <Compile Include="Models\Tables\System_Prefix_TH.cs" />
     <Compile Include="Models\Tables\System_Priorities.cs" />
