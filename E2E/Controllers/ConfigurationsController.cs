@@ -122,8 +122,8 @@ namespace E2E.Controllers
                     if (authorIndex != 3)
                     {
                         res = db.Services
-                            .Where(w => w.Required_Approve_User_Id.HasValue &&
-                            !w.Approved_User_Id.HasValue &&
+                            .Where(w => w.Is_MustBeApproved &&
+                            !w.Is_Approval &&
                             w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
                     }
                 }

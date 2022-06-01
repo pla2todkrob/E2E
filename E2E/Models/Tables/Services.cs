@@ -33,20 +33,11 @@ namespace E2E.Models.Tables
         public Guid? Ref_Service_Id { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
-        public Guid? Commit_User_Id { get; set; }
-
-        [Display(Name = "Commit")]
-        public DateTime? Commit_DateTime { get; set; }
-
-        public Guid? Required_Approve_User_Id { get; set; }
-
-        [Display(Name = "Required")]
-        public DateTime? Required_Approve_DateTime { get; set; }
-
-        public Guid? Approved_User_Id { get; set; }
-
-        [Display(Name = "Approved")]
-        public DateTime? Approved_DateTime { get; set; }
+        public bool Is_Commit { get; set; }
+        public bool Is_MustBeApproved { get; set; }
+        public bool Is_Approval { get; set; }
+        public bool Is_Action { get; set; }
+        public Guid? Action_User_Id { get; set; }
 
         [Display(Name = "Status")]
         public Guid Status_Id { get; set; }
@@ -62,10 +53,6 @@ namespace E2E.Models.Tables
         public DateTime? Service_DueDate { get; set; }
 
         public int Service_FileCount { get; set; }
-        public Guid? Action_User_Id { get; set; }
-
-        [Display(Name = "Action")]
-        public DateTime? Action_DateTime { get; set; }
 
         [Display(Name = "Estimate time (days)")]
         public int Service_EstimateTime { get; set; }
