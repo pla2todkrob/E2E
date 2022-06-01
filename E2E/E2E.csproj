@@ -800,6 +800,7 @@
     <Content Include="Views\Services\AllRequest_Table.cshtml" />
     <Content Include="Views\Services\SetComplete.cshtml" />
     <Content Include="site.webmanifest" />
+    <Content Include="Views\Services\SetReject.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

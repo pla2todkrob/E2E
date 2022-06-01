@@ -15,6 +15,11 @@
             callSubmitRedirect('@Url.Action("Commit","Services")', this, '@Url.Action("Index","Services")');
             return false;
         });
+
+        $(document).on('submit', "#RejectForm", function () {
+            callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
+            return false;
+        });
     </script>
 }
 @section breadcrumb{
@@ -36,6 +41,7 @@
             <div class="col-12 col-lg-8">
                 <div class="row">
                     <div class="col-12 col-md-5">
+
                         @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CommitForm" }))
                         {
                             @Html.ValidationSummary(true)
@@ -90,18 +96,27 @@
                                     <option value="">Select User</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <div class="d-flex">
-                                    <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to department</button>
-                                    <button type="submit" class="btn btn-primary ml-auto">Commit</button>
-                                </div>
+                            <div class="d-flex">
+                                <button type="submit" class="btn btn-primary ml-auto">Commit</button>
                             </div>
                         }
                     </div>
                     <div class="col-12 col-md-7">
+                        @if (!Model.Services.Is_MustBeApproved)
+                        {
+                            <div class="form-group">
+                                <div class="d-flex">
+                                    <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Reject</button>
+                                    <button type="button" class="btn btn-warning ml-auto" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Must be approved</button>
+                                </div>
+                            </div>
+
+
+                        }
+
                         <dl class="row">
                             <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
-                            <dd class="col-12 col-xl-8">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
+                            <dd class="col-12 col-xl-8"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
                             <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
                             <dd class="col-8">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
                             @if (Model.Services.Update.HasValue)
@@ -128,26 +143,12 @@
                                     </ul>
                                 }
                             </dd>
-                            @if (Model.Services.Required_Approve_User_Id.HasValue)
-                            {
-                                <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
-                                <dd class="col-12 col-xl-8">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
-                            }
-                            @if (Model.Services.Approved_User_Id.HasValue)
-                            {
-                                <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
-                                <dd class="col-12 col-xl-8">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
-                            }
                         </dl>
-                        @{
-                            if (!Model.Services.Required_Approve_User_Id.HasValue)
-                            {
-                                <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-
-                                <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Must be approved</button>
-                            }
-
-                        }
+                        <div class="form-group">
+                            <div class="d-flex">
+                                <button type="button" class="btn btn-secondary ml-auto" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to department</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,7 +161,7 @@
                         @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>

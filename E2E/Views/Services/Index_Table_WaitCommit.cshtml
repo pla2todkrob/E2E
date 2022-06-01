@@ -21,7 +21,7 @@
             <tr>
                 <td>@Html.DisplayFor(i => item.Create)</td>
 
-                <td>
+                <td class="text-wrap">
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
                     <a href="@Url.Action("Commit","Services",new { id=item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
                 </td>

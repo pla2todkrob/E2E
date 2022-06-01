@@ -49,7 +49,7 @@ namespace E2E.Models
                 .FirstOrDefault();
 
                 return db.Services
-                    .Where(w => !w.Commit_User_Id.HasValue && w.Status_Id == statusId && (!w.Required_Approve_User_Id.HasValue || (w.Approved_User_Id.HasValue && w.Required_Approve_User_Id.HasValue)))
+                    .Where(w => !w.Is_Commit && w.Status_Id == statusId && (!w.Is_MustBeApproved || (w.Is_Approval && w.Is_MustBeApproved)))
                     .OrderByDescending(o => o.System_Priorities.Priority_Index)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
             }
@@ -93,7 +93,7 @@ namespace E2E.Models
                 .FirstOrDefault();
 
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Commit_User_Id.HasValue && w.Status_Id == statusId)
+                    .Where(w => w.Is_Commit && w.Status_Id == statusId)
                     .OrderByDescending(o => o.System_Priorities.Priority_Index)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
 
@@ -105,7 +105,7 @@ namespace E2E.Models
                         .FirstOrDefault();
                     if (deptId.HasValue)
                     {
-                        query = query.Where(w => (w.Department_Id == deptId.Value && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
+                        query = query.Where(w => (w.Department_Id == deptId.Value && !w.Is_Action) || w.Action_User_Id == id);
                     }
                 }
 
@@ -272,46 +272,25 @@ namespace E2E.Models
         {
             try
             {
-                return db.Services
+                clsServices clsServices = new clsServices();
+                clsServices =  db.Services
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.UserDetails, m => m.Approved_User_Id, j => j.User_Id, (m, gj) => new
-                    {
-                        Services = m,
-                        Approve = gj.FirstOrDefault()
-                    })
-                    .GroupJoin(db.UserDetails, m => m.Services.Action_User_Id, j => j.User_Id, (m, gj) => new
-                    {
-                        ServiceJoin = m,
-                        Action = gj.FirstOrDefault()
-                    })
-                    .GroupJoin(db.UserDetails, m => m.ServiceJoin.Services.Commit_User_Id, j => j.User_Id, (m, gj) => new
-                    {
-                        ServiceJoin = m,
-                        Commit = gj.FirstOrDefault()
-                    })
-                    .GroupJoin(db.UserDetails, m => m.ServiceJoin.ServiceJoin.Services.Required_Approve_User_Id, j => j.User_Id, (m, gj) => new
-                    {
-                        ServiceJoin = m,
-                        Required = gj.FirstOrDefault()
-                    })
-                    .GroupJoin(db.ServiceFiles, m => m.ServiceJoin.ServiceJoin.ServiceJoin.Services.Service_Id, j => j.Service_Id, (m, gj) => new clsServices()
-                    {
-                        Action_User_Code = m.ServiceJoin.ServiceJoin.Action.Users.User_Code,
-                        Action_User_Email = m.ServiceJoin.ServiceJoin.Action.Users.User_Email,
-                        Action_User_Name = m.ServiceJoin.ServiceJoin.Action.Detail_EN_FirstName + " " + m.ServiceJoin.ServiceJoin.Action.Detail_EN_LastName,
-                        Approved_User_Code = m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Users.User_Code,
-                        Approved_User_Email = m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Users.User_Email,
-                        Approved_User_Name = m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Detail_EN_FirstName + " " + m.ServiceJoin.ServiceJoin.ServiceJoin.Approve.Detail_EN_LastName,
-                        Commit_User_Code = m.ServiceJoin.Commit.Users.User_Code,
-                        Commit_User_Email = m.ServiceJoin.Commit.Users.User_Email,
-                        Commit_User_Name = m.ServiceJoin.Commit.Detail_EN_FirstName + " " + m.ServiceJoin.Commit.Detail_EN_LastName,
-                        Required_User_Code = m.Required.Users.User_Code,
-                        Required_User_Email = m.Required.Users.User_Email,
-                        Required_User_Name = m.Required.Detail_EN_FirstName + " " + m.Required.Detail_EN_LastName,
+                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new clsServices() {
                         ServiceFiles = gj.ToList(),
-                        Services = m.ServiceJoin.ServiceJoin.ServiceJoin.Services,
-                        User_Name = db.UserDetails.Where(w => w.User_Id == m.ServiceJoin.ServiceJoin.ServiceJoin.Services.User_Id).Select(s => new { Name = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName }).Select(s => s.Name).FirstOrDefault()
+                        Services = m
                     }).FirstOrDefault();
+                clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
+                if (clsServices.Services.Action_User_Id.HasValue)
+                {
+                    UserDetails userDetails = new UserDetails();
+                    userDetails = db.UserDetails
+                        .Where(w => w.User_Id == clsServices.Services.Action_User_Id)
+                        .FirstOrDefault();
+                    clsServices.Action_Email = userDetails.Users.User_Email;
+                    clsServices.Action_Name = master.Users_GetInfomation(userDetails.User_Id);
+                }
+
+                return clsServices;
             }
             catch (Exception)
             {
@@ -335,7 +314,7 @@ namespace E2E.Models
                     .OrderBy(o => o.ServiceComments.Create)
                     .ToList();
 
-                clsServices.ClsServiceComments.ForEach(f => f.UserInfomation = master.Users_GetInfomation(f.ServiceComments.User_Id));
+                clsServices.ClsServiceComments.ForEach(f => f.UserInfomation = master.Users_GetInfomation(f.ServiceComments.User_Id.Value));
 
                 return clsServices;
             }
@@ -361,6 +340,8 @@ namespace E2E.Models
                             Services = s,
                             ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
                         }).FirstOrDefault();
+                    clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
+
                     res.Add(clsServices);
                     refId = clsServices.Services.Ref_Service_Id;
                 }
@@ -389,6 +370,8 @@ namespace E2E.Models
                             Services = s,
                             ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
                         }).FirstOrDefault();
+                    clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
+
                     res.Add(clsServices);
                     refId = clsServices.Services.Ref_Service_Id;
                 }
@@ -414,7 +397,7 @@ namespace E2E.Models
                 Guid deptId = db.Users.Find(id).Master_Processes.Master_Sections.Department_Id.Value;
                 List<Guid> userIdList = db.Users
                     .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId).Select(s => s.User_Id).ToList();
-                return db.Services.Where(w => w.Required_Approve_User_Id.HasValue && w.Approved_User_Id.HasValue == val && userIdList.Contains(w.User_Id) && w.Status_Id == statusId).ToList();
+                return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == statusId).ToList();
             }
             catch (Exception)
             {
@@ -555,8 +538,8 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(id);
-                services.Required_Approve_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                services.Required_Approve_DateTime = DateTime.Now;
+                services.Is_MustBeApproved = true;
+                services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -590,8 +573,8 @@ namespace E2E.Models
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.Department_Id = deptId;
-                services.Commit_User_Id = userId;
-                services.Commit_DateTime = DateTime.Now;
+                services.Is_Commit = true;
+                services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -622,8 +605,8 @@ namespace E2E.Models
                 services = db.Services.Find(id);
                 services.Department_Id = deptId;
                 services.Action_User_Id = userId;
-                services.Commit_User_Id = userActionId;
-                services.Commit_DateTime = DateTime.Now;
+                services.Is_Commit = true;
+                services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -656,6 +639,7 @@ namespace E2E.Models
                 Services services = new Services();
                 services = db.Services.Find(serviceFiles.Service_Id);
                 services.Service_FileCount -= 1;
+                services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Deleted;
                 if (ftp.Ftp_DeleteFile(serviceFiles.ServiceFile_Path))
@@ -681,8 +665,8 @@ namespace E2E.Models
                 bool res = new bool();
                 Services services = new Services();
                 services = db.Services.Find(id);
-                services.Approved_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                services.Approved_DateTime = DateTime.Now;
+                services.Is_Approval = true;
+                services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -719,12 +703,10 @@ namespace E2E.Models
                 system_Statuses = db.System_Statuses
                     .Where(w => w.Status_Index == 2)
                     .FirstOrDefault();
-                DateTime dateTime = DateTime.Now;
 
                 services.Service_EstimateTime = model.Service_EstimateTime;
-                services.Action_DateTime = dateTime;
                 services.Status_Id = system_Statuses.Status_Id;
-                services.Update = dateTime;
+                services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -846,7 +828,51 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Services_SetReject(ServiceComments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
+                if (!services.Department_Id.HasValue)
+                {
+                    Services_SetToDepartment(model.Service_Id);
+                }
 
+                System_Statuses system_Statuses = new System_Statuses();
+                system_Statuses = db.System_Statuses
+                    .Where(w => w.Status_Index == 5)
+                    .FirstOrDefault();
+
+                services.Update = DateTime.Now;
+                services.Status_Id = system_Statuses.Status_Id;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    if (!string.IsNullOrEmpty(model.Comment_Content))
+                    {
+                        serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = services.Service_Id;
+                        serviceComments.Comment_Content = model.Comment_Content;
+                        Services_Comment(serviceComments);
+                    }
+
+                    serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name);
+                    res = Services_Comment(serviceComments);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public List<SelectListItem> SelectListItems_Priority()
         {
             try

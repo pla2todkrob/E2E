@@ -51,16 +51,9 @@
                             }
                         </ul>
                     </dd>
-                    <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Required_User_Code)</dt>
-                    <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Required_User_Code) - <b>@Html.DisplayFor(m => m.Services.Required_Approve_DateTime)</b></dd>
-                    @if (Model.Services.Approved_DateTime.HasValue)
-                    {
-                        <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Approved_User_Code)</dt>
-                        <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Approved_User_Code) - <b>@Html.DisplayFor(m => m.Services.Approved_DateTime)</b></dd>
-                    }
                 </dl>
                 @{
-                    if (!Model.Services.Approved_User_Id.HasValue)
+                    if (!Model.Services.Is_Approval)
                     {
                         if (ViewBag.AuthorizeIndex != 3)
                         {
