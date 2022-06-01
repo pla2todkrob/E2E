@@ -28,16 +28,18 @@
                         </div>
                         <div class="col-md-9 col-6">
                             <div class="d-flex justify-content-between flex-wrap">
-                                <b>@Html.DisplayFor(i => item.Users.User_Code)</b>
+                                <small>
+                                    <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)
+                                </small>
                                 <small>
                                     @{
                                         if (item.Update.HasValue)
                                         {
-                                            @Html.DisplayFor(i => item.Update)
+                                            <b>@Html.DisplayNameFor(m => m.Update):</b> @Html.DisplayFor(i => item.Update)
                                         }
                                         else
                                         {
-                                            @Html.DisplayFor(i => item.Create)
+                                            <b>@Html.DisplayNameFor(m => m.Create):</b> @Html.DisplayFor(i => item.Create)
                                         }
                                     }
                                 </small>

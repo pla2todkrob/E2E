@@ -14,6 +14,8 @@ namespace E2E.Models.Tables
         public Guid EForm_Id { get; set; }
 
         public string EForm_Title { get; set; }
+
+        [DisplayName("LINK")]
         public string EForm_Link { get; set; }
 
         [DataType(DataType.MultilineText)]
@@ -22,7 +24,11 @@ namespace E2E.Models.Tables
         public DateTime? Update { get; set; }
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }
+
+        [DisplayName("Start Date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime EForm_Start { get; set; }
+
+        [DisplayName("End Date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? EForm_End { get; set; }
         public bool Active { get; set; }
 

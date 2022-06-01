@@ -16,7 +16,7 @@
             <tr>
                 <td>
                     <div class="row">
-                        <div class="col-12 mb-3">
+                        <div class="col-12">
                             @Html.ActionLink(item.EForm_Title, "EForms_Content", new { id = item.EForm_Id }) &nbsp;
 
                             @{
@@ -29,28 +29,31 @@
                                 }
                             }
                         </div>
-                        <div class="col-md-12 col-6">
-                            <div class="d-flex justify-content-between flex-wrap">
-
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-12 col-sm-6">
                                     <small>
                                         <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)   <br />
                                         @{
                                             if (item.Update.HasValue)
                                             {
-                                                <b>Update :</b> @Html.DisplayFor(i => item.Update)
+                                                <b>@Html.DisplayNameFor(m => m.Update):</b> @Html.DisplayFor(i => item.Update)
                                             }
                                             else
                                             {
-                                                <b>Create :</b> @Html.DisplayFor(i => item.Create)
+                                                <b>@Html.DisplayNameFor(m => m.Create):</b> @Html.DisplayFor(i => item.Create)
                                             }
                                         }
                                     </small>
-
-                                 
-                                <small>
-                                    <b>EForm_Start:</b> @Html.DisplayFor(i => item.EForm_Start)<br/>
-                                    <b>EForm_End:</b> @Html.DisplayFor(i => item.EForm_End)<br/>
-                                </small>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="d-flex">
+                                        <small class="ml-sm-auto">
+                                            <b>@Html.DisplayNameFor(m => m.EForm_Start):</b> @Html.DisplayFor(i => item.EForm_Start)<br />
+                                            <b>@Html.DisplayNameFor(m => m.EForm_End):</b> @Html.DisplayFor(i => item.EForm_End)<br />
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
