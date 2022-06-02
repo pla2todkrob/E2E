@@ -19,11 +19,10 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44325</IISExpressSSLPort>
+    <IISExpressSSLPort>44316</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>
-    </IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -803,10 +802,11 @@
     <Content Include="Views\Services\SetComplete.cshtml" />
     <Content Include="site.webmanifest" />
     <Content Include="Views\Services\SetReject.cshtml" />
+    <Content Include="Views\Configurations\Index.cshtml" />
+    <Content Include="Views\Configurations\Configurations_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Configurations\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

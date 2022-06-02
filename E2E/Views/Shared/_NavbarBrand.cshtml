@@ -1,15 +1,18 @@
-﻿@model string
+﻿@model E2E.Models.Tables.System_Configurations
 
-
-    <a href="@Url.Action("Index","Home")" class="navbar-brand">
-        @{
-            if (string.IsNullOrEmpty(Model))
-            {
-                <h2>E2E</h2>
-            }
-            else
-            {
-                <img id="logo" src="@Model" class="img-thumbnail logo" alt="@Path.GetFileName(Model)" />
-            }
+<a href="@Url.Action("Index","Home")" class="navbar-brand">
+    @{
+        if (Model.Configuration_Brand != null)
+        {
+            <img id="logo" src="@Model.Configuration_Brand" class="img-thumbnail logo" alt="@Path.GetFileName(Model.Configuration_Brand)" />
         }
-    </a>
+        else if (Model.SystemName != null)
+        {
+            @Html.DisplayFor(m=>m.SystemName)
+        }
+        else
+        {
+            <h2>E2E</h2>
+        }
+    }
+</a>

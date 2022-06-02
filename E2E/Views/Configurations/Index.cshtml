@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section scripts{
+    <script>
+
+        $(function () {
+            reloadTable();
+        });
+
+        $(document).on('submit', '#SaveConfig', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("Configurations_Table", "Configurations")',this);
+            return false;
+        });
+
+        function reloadTable() {
+            callTable_NoSort('@Url.Action("Configurations_Table", "Configurations")', true, 0).then(function () {
+
+            });
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Configurations</li>
+        </ol>
+    </nav>
+}
+
+
+
+<div class="row" id="datalist"></div>
