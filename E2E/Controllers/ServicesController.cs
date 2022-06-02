@@ -15,7 +15,6 @@ namespace E2E.Controllers
     {
         private clsManageService data = new clsManageService();
         private clsContext db = new clsContext();
-
         public ActionResult Index()
         {
             Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
@@ -34,7 +33,6 @@ namespace E2E.Controllers
 
             return View();
         }
-
         public ActionResult Index_Table_WaitCommit()
         {
             try
@@ -46,7 +44,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult Index_Table_WaitAction()
         {
             try
@@ -58,7 +55,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult Form(Guid? id)
         {
             try
@@ -83,7 +79,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Form(Services model)
         {
@@ -166,7 +161,6 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult _File(Guid id)
         {
             try
@@ -178,7 +172,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult DeleteFile(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -230,7 +223,6 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult Commit(Guid id)
         {
             try
@@ -243,7 +235,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Commit(clsServices model)
         {
@@ -327,7 +318,6 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult Commit_Required(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -384,7 +374,6 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
-
         public ActionResult Commit_ToDepartment(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -441,7 +430,6 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
-
         public ActionResult Action(Guid id)
         {
             try
@@ -453,7 +441,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult Action_Set(Guid id)
         {
             try
@@ -465,7 +452,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Action_Set(Services model)
         {
@@ -550,7 +536,6 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult AllTask()
         {
             return View();
@@ -587,7 +572,6 @@ namespace E2E.Controllers
         {
             return View();
         }
-
         public ActionResult Approve_Table_Waiting()
         {
             try
@@ -599,7 +583,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult Approve_Table_Approved()
         {
             try
@@ -611,7 +594,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult Approve_Form(Guid id)
         {
             try
@@ -628,7 +610,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult Approve_Set(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -686,12 +667,10 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult MyRequest()
         {
             return View();
         }
-
         public ActionResult MyRequest_Table()
         {
             try
@@ -703,12 +682,10 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult MyTask()
         {
             return View();
         }
-
         public ActionResult MyTask_Table()
         {
             try
@@ -720,7 +697,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult ServiceInfomation(Guid id)
         {
             try
@@ -747,7 +723,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetReject(ServiceComments model)
         {
@@ -870,6 +845,10 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult RequestChangeDue(Guid id)
+        {
+            return View();
+        }
         public ActionResult _RefService(Guid id)
         {
             try
@@ -881,7 +860,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult _CommentHistory(Guid id)
         {
             try
@@ -893,7 +871,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult _Comment(Guid id)
         {
             try
@@ -907,7 +884,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult _Comment(ServiceComments model)
         {
@@ -963,7 +939,6 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult GetPriorityDateRange(Guid id)
         {
             try
@@ -979,7 +954,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
         public ActionResult GetOwnerUser(Guid id)
         {
             try
