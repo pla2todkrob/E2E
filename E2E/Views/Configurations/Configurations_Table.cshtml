@@ -1,0 +1,102 @@
+﻿@model IEnumerable<E2E.Models.Tables.System_Configurations>
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveConfig", @class = "was-validated", enctype = "multipath/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="card mb-5">
+        <div class="card-body">
+            <div class="text-center row">
+                <div class="form-group col-4">
+                    @Html.DisplayNameFor(m => m.Configuration_Brand)
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().Configuration_Brand, new { @class = "form-control mb-3 form-control", style = "width:300px;" })
+                    @Html.DisplayNameFor(m => m.User_Id)
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().Users.User_Code, new { @class = "form-control", style = "width:300px;" })
+                </div>
+                <div class="form-group col-4">
+                    @Html.DisplayNameFor(m => m.CreateDateTime)
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().CreateDateTime, new { @class = "form-control mb-3", style = "width:300px;" })
+                    @Html.DisplayNameFor(m => m.Configuration_Point)
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().Configuration_Point, new { @class = "form-control", style = "width:300px;" })
+                </div>
+
+                <div class="form-group col-4">
+                    @Html.DisplayNameFor(m => m.Copyright)
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().Copyright, new { @class = "form-control mb-3", style = "width:300px;" })
+                    @Html.DisplayNameFor(m => m.SystemName)
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().SystemName, new { @class = "form-control", style = "width:300px;" })
+                </div>
+            </div>
+
+
+
+
+        </div>
+        <div class="text-center mb-3">
+            <button type="submit" class="btn btn-primary">SAVE</button>
+        </div>
+    </div>
+}
+
+
+
+<table class="table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(m => m.CreateDateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Configuration_Brand)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.SystemName)
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Copyright)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Configuration_Point)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Users.User_Code)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Configuration_Id)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(i => item.CreateDateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Configuration_Brand)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.SystemName)
+
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Copyright)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Configuration_Point)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Users.User_Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Configuration_Id)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
