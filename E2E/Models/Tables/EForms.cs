@@ -13,12 +13,15 @@ namespace E2E.Models.Tables
         [Key]
         public Guid EForm_Id { get; set; }
 
+        [DisplayName("Title")]
         public string EForm_Title { get; set; }
 
         [DisplayName("LINK")]
         public string EForm_Link { get; set; }
 
         [DataType(DataType.MultilineText)]
+
+        [DisplayName("Content")]
         public string EForm_Description { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }

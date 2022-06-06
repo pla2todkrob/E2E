@@ -23,3 +23,6 @@ img#img-table{
 .PreLine {
     white-space:pre-line;
 }
+.logo {
+    max-height: calc(4rem - .3125rem - .3125rem);
+}
