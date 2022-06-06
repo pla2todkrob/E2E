@@ -18,7 +18,7 @@ namespace E2E.Models.Views
         public Services Services { get; set; }
         public List<ServiceFiles> ServiceFiles { get; set; }
         public List<clsServiceComments> ClsServiceComments { get; set; }
-
+        public ServiceChangeDueDate ServiceChangeDueDate { get; set; }
         public clsServices()
         {
             ServiceFiles = new List<ServiceFiles>();

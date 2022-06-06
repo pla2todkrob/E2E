@@ -315,7 +315,7 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -382,7 +382,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -545,7 +545,7 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -613,7 +613,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -775,7 +775,7 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -842,7 +842,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1003,7 +1003,7 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1070,7 +1070,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1287,7 +1287,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1705,7 +1705,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

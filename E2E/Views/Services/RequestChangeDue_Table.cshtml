@@ -1,0 +1,45 @@
+﻿@model IEnumerable<E2E.Models.Tables.ServiceChangeDueDate>
+
+@{ 
+    Layout = null;
+}
+
+<table class="display table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th class="fit"></th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.Services.Service_Subject)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.DueDate)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.DueDate_New)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.System_DueDateStatuses.DueDateStatus_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <th>
+                @if (!item.Update.HasValue)
+                {
+                    <button class="btn btn-outline-danger" onclick="setDangerByIdReTable('@Url.Action("RequestChangeDue_Reject","Services",new { id=item.ChangeDueDate_Id })')">Reject</button>
+                    <button class="btn btn-success" onclick="setSuccessByIdReTable('@Url.Action("RequestChangeDue_Accept","Services",new { id=item.ChangeDueDate_Id })')">Accept</button>
+                }
+
+            </th>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>
+                <b>[@Html.DisplayFor(i => item.Services.Service_Key)]</b>
+                <span>@Html.DisplayFor(i => item.Services.Service_Subject)</span>
+            </td>
+            <td>@Html.DisplayFor(i => item.DueDate)</td>
+            <td>@Html.DisplayFor(i => item.DueDate_New)</td>
+            <td class="text-center"><span class="@Html.ValueFor(i => item.System_DueDateStatuses.DueDateStatus_Class)">@Html.DisplayFor(i => item.System_DueDateStatuses.DueDateStatus_Name)</span></td>
+            <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
+        }
+    </tbody>
+</table>

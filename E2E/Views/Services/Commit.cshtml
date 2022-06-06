@@ -35,12 +35,54 @@
     <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
-<div class="card">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-12 col-lg-8">
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <div class="card" id="serviceInfo">
+            <div class="card-body">
                 <div class="row">
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-7 order-md-1">
+                        <dl class="row">
+                            <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+                            <dd class="col-12 col-xl-8"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
+                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
+                            <dd class="col-8">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
+                            @if (Model.Services.Update.HasValue)
+                            {
+                                <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                                <dd class="col-8">@Html.DisplayFor(m => m.Services.Update)</dd>
+                            }
+                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
+                            <dd class="col-8"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
+                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
+                            <dd class="col-8"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
+                            <dt class="col-4">Files</dt>
+                            <dd class="col-8">
+                                @Model.ServiceFiles.Count Attachments
+                                @if (Model.ServiceFiles.Count > 0)
+                                {
+                                    <ul class="list-unstyled">
+                                        @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+                                        {
+                                            <li>
+                                                <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </dd>
+                        </dl>
+                        <div class="form-group">
+                            <div class="d-flex justify-content-between">
+                                @if (!Model.Services.Is_MustBeApproved)
+                                {
+                                    <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Must approved</button>
+                                }
+
+                                <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to department</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-5 order-md-0">
 
                         @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CommitForm" }))
                         {
@@ -97,73 +139,27 @@
                                 </select>
                             </div>
                             <div class="d-flex">
+                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Reject</button>
                                 <button type="submit" class="btn btn-primary ml-auto">Commit</button>
                             </div>
                         }
                     </div>
-                    <div class="col-12 col-md-7">
-                        @if (!Model.Services.Is_MustBeApproved)
-                        {
-                            <div class="form-group">
-                                <div class="d-flex">
-                                    <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Reject</button>
-                                    <button type="button" class="btn btn-warning ml-auto" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Must be approved</button>
-                                </div>
-                            </div>
 
-
-                        }
-
-                        <dl class="row">
-                            <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
-                            <dd class="col-12 col-xl-8"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
-                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
-                            <dd class="col-8">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
-                            @if (Model.Services.Update.HasValue)
-                            {
-                                <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                                <dd class="col-8">@Html.DisplayFor(m => m.Services.Update)</dd>
-                            }
-                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
-                            <dd class="col-8"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
-                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
-                            <dd class="col-8"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
-                            <dt class="col-4">Files</dt>
-                            <dd class="col-8">
-                                @Model.ServiceFiles.Count Attachments
-                                @if (Model.ServiceFiles.Count > 0)
-                                {
-                                    <ul class="list-unstyled">
-                                        @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
-                                        {
-                                            <li>
-                                                <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-                            </dd>
-                        </dl>
-                        <div class="form-group">
-                            <div class="d-flex">
-                                <button type="button" class="btn btn-secondary ml-auto" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to department</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex align-items-stretch">
-                <div class="card w-100">
-                    <div class="card-header">
-                        <h5 class="card-title">Comments</h5>
-                    </div>
-                    <div class="card-body">
-                        @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
+    <div class="col-12 col-lg-4 d-flex align-items-stretch">
+        <div class="card w-100" id="serviceComment">
+            <div class="card-header">
+                <h5 class="card-title">Comments</h5>
+            </div>
+            <div class="card-body overflow-auto">
+                @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
+            </div>
+        </div>
+
+    </div>
 </div>
+
 @{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }

@@ -387,3 +387,132 @@ function getSelectOp(urlAjax, val, desSelectId) {
         }
     });
 }
+function setSuccessByIdRePage(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "If is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                location.reload();
+                            }
+                        });
+
+                    }
+                });
+                return false;
+            }
+        });
+}
+
+function setDangerByIdRePage(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "If is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true,
+        dangerMode:true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                location.reload();
+                            }
+                        });
+
+                    }
+                });
+                return false;
+            }
+        });
+}
+
+function setSuccessByIdReTable(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "If is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                reloadTable();
+                            }
+                        });
+
+                    }
+                });
+                return false;
+            }
+        });
+}
+
+function setDangerByIdReTable(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "If is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true,
+        dangerMode:true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                reloadTable();
+                            }
+                        });
+
+                    }
+                });
+                return false;
+            }
+        });
+}

@@ -19,10 +19,11 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44316</IISExpressSSLPort>
+    <IISExpressSSLPort>44325</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>
+    </IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -804,6 +805,9 @@
     <Content Include="Views\Services\SetReject.cshtml" />
     <Content Include="Views\Configurations\Index.cshtml" />
     <Content Include="Views\Configurations\Configurations_Table.cshtml" />
+    <Content Include="Views\Services\RequestChangeDue.cshtml" />
+    <Content Include="Views\Services\RequestChangeDue_Form.cshtml" />
+    <Content Include="Views\Services\RequestChangeDue_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

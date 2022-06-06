@@ -1,4 +1,11 @@
-﻿function callModalForm(urlAjax, urlGetDate, urlGetRef, bigSize = false) {
+﻿$(function () {
+    if ($(document).find('#serviceInfo').length) {
+        var infoHeight = $('#serviceInfo').innerHeight();
+        $('#serviceComment').innerHeight(infoHeight);
+    }
+});
+
+function callModalForm(urlAjax, urlGetDate, urlGetRef, bigSize = false) {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -142,38 +149,6 @@ function setCommitToDepartment(urlAjax, urlRedirect) {
         });
 
     return false;
-}
-
-function setApprove(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "If approval is confirmed, it cannot be reversed.",
-        icon: "warning",
-        buttons: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
-                        }).then(function () {
-                            if (res.icon == 'success') {
-                                location.reload();
-                            }
-                        });
-                        
-                    }
-                });
-                return false;
-            }
-        });
 }
 
 function setUserRef(urlAjax, val) {

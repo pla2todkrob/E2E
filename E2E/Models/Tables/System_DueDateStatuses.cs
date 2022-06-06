@@ -10,6 +10,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public int DueDateStatus_Id { get; set; }
+        [Display(Name ="Status")]
         public string DueDateStatus_Name { get; set; }
         public string DueDateStatus_Class { get; set; }
         public static List<System_DueDateStatuses> DefaultList()

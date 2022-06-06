@@ -14,7 +14,7 @@
 
         $(document).on('submit', '#SaveForm', function (e) {
             e.preventDefault();
-            callSubmitModal('@Url.Action("Form", "Services")', this);
+            callSubmitRedirect('@Url.Action("Form", "Services")', this,'@Url.Action("ServiceInfomation","Services")');
             return false;
         });
 

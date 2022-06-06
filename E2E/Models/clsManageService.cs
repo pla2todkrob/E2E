@@ -289,6 +289,10 @@ namespace E2E.Models
                     clsServices.Action_Email = userDetails.Users.User_Email;
                     clsServices.Action_Name = master.Users_GetInfomation(userDetails.User_Id);
                 }
+                clsServices.ServiceChangeDueDate = db.ServiceChangeDueDates
+                    .Where(w => w.Service_Id == id && w.DueDateStatus_Id == 1)
+                    .OrderByDescending(o => o.Create)
+                    .FirstOrDefault();
 
                 return clsServices;
             }
@@ -404,7 +408,40 @@ namespace E2E.Models
                 throw;
             }
         }
+        public ServiceChangeDueDate ServiceChangeDueDate_New(Guid id)
+        {
+            try
+            {
+                ServiceChangeDueDate serviceChangeDueDate = new ServiceChangeDueDate();
+                serviceChangeDueDate.DueDate = db.Services.Find(id).Service_DueDate.Value;
+                serviceChangeDueDate.Service_Id = id;
+                return serviceChangeDueDate;
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+        }
+        public List<ServiceChangeDueDate> ServiceChangeDues_List()
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                List<Guid> ids = Services_GetAllRequest_IQ()
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Service_Id)
+                    .ToList();
+                return db.ServiceChangeDueDates
+                    .Where(w => ids.Contains(w.Service_Id))
+                    .ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Services_Save(Services model, HttpFileCollectionBase files)
         {
             try
@@ -862,6 +899,129 @@ namespace E2E.Models
                     serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
                     serviceComments.Comment_Content = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name);
+                    res = Services_Comment(serviceComments);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model)
+        {
+            try
+            {
+                bool res = new bool();
+                DateTime dateTime = DateTime.Now;
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                model.User_Id = userId;
+                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = model.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Request change due date from {0} to {1}",model.DueDate.ToString("d"),model.DueDate_New.Value.ToString("d"));
+                    serviceComments.User_Id = userId;
+                    res = Services_Comment(serviceComments);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public bool ServiceChangeDueDate_Accept(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
+                serviceChangeDueDate.DueDateStatus_Id = 2;
+                serviceChangeDueDate.Update = DateTime.Now;
+                db.Entry(serviceChangeDueDate).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Comment_Content = "Accept due date change request";
+                    serviceComments.Service_Id = serviceChangeDueDate.Service_Id;
+                    serviceComments.User_Id = userId;
+                    if (Services_Comment(serviceComments))
+                    {
+                        Services services = db.Services.Find(serviceChangeDueDate.Service_Id);
+                        services.Service_DueDate = serviceChangeDueDate.DueDate_New;
+                        services.Update = DateTime.Now;
+                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                        if (db.SaveChanges() > 0)
+                        {
+                            serviceComments = new ServiceComments();
+                            serviceComments.Comment_Content = string.Format("Change due date from {0} to {1}", serviceChangeDueDate.DueDate.ToString("d"), serviceChangeDueDate.DueDate_New.Value.ToString("d"));
+                            serviceComments.Service_Id = serviceChangeDueDate.Service_Id;
+                            serviceComments.User_Id = userId;
+                            res = Services_Comment(serviceComments);
+                        }
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool ServiceChangeDueDate_Reject(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
+                serviceChangeDueDate.DueDateStatus_Id = 3;
+                serviceChangeDueDate.Update = DateTime.Now;
+                db.Entry(serviceChangeDueDate).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Comment_Content = "Reject due date change request";
+                    serviceComments.Service_Id = serviceChangeDueDate.Service_Id;
+                    serviceComments.User_Id = userId;
+                    res = Services_Comment(serviceComments);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool ServiceChangeDueDate_Cancel(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
+                serviceChangeDueDate.DueDateStatus_Id = 4;
+                serviceChangeDueDate.Update = DateTime.Now;
+                db.Entry(serviceChangeDueDate).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Comment_Content = "Cancel due date change request";
+                    serviceComments.Service_Id = serviceChangeDueDate.Service_Id;
+                    serviceComments.User_Id = userId;
                     res = Services_Comment(serviceComments);
                 }
 

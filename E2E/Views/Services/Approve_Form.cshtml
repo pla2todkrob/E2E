@@ -24,10 +24,10 @@
     <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
-<div class="card mb-3">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-12 col-md-6 col-lg-7 col-xl-8 mb-3">
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-7 col-xl-8 mb-3">
+        <div class="card" id="serviceInfo">
+            <div class="card-body">
                 <dl class="row">
                     <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                     <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
@@ -57,28 +57,27 @@
                     {
                         if (ViewBag.AuthorizeIndex != 3)
                         {
-                                <div class="d-flex justify-content-between">
-                                    <button type="button" class="btn btn-outline-danger"><i class="fa fa-ban" aria-hidden="true"></i></button>
-                                    <button type="button" class="btn btn-primary" onclick="setApprove('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
-                                </div>
-                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-danger">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="setSuccessByIdRePage('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
+                            </div>
+
                         }
 
                     }
                 }
             </div>
-            <div class="col-12 col-md-6 col-lg-5 col-xl-4 d-flex align-items-stretch">
-                <div class="card w-100">
-                    <div class="card-header">
-                        <h5 class="card-title">Comments</h5>
-                    </div>
-                    <div class="card-body">
-                        @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
-                    </div>
-                </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-5 col-xl-4 d-flex align-items-stretch">
+        <div class="card w-100" id="serviceComment">
+            <div class="card-header">
+                <h5 class="card-title">Comments</h5>
+            </div>
+            <div class="card-body overflow-auto">
+                @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
             </div>
         </div>
-        
     </div>
 </div>
 @{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }

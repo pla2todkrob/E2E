@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "Request change due date";
+}
+
+@section scripts{
+
+    <script src="~/Asset/Service.min.js"></script>
+
+    <script>
+        $(function () {
+            reloadTable();
+        });
+
+        function reloadTable() {
+            callTable('@Url.Action("RequestChangeDue_Table", "Services")', true, true,1);
+        }
+
+
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+            <li class="breadcrumb-item active" aria-current="page">Request change due date</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="row" id="datalist"></div>
+    </div>
+</div>

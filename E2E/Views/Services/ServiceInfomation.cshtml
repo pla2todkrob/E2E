@@ -9,8 +9,6 @@
     <script src="~/Asset/Service.min.js"></script>
     <script>
         $(function () {
-            var infoHeight = $('#serviceInfo').innerHeight();
-            $('#serviceComment').innerHeight(infoHeight);
             $('#refService').load('@Url.Action("_RefService","Services",new { id = Model.Services.Service_Id })');
             reloadComment();
         });

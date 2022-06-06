@@ -6,14 +6,16 @@
 @section scripts{
     <script src="~/Asset/Service.min.js"></script>
     <script>
-        $(function () {
-            setTable_File('#reqFiles', true, false);
-            setDropdown_Form();
-        });
 
         $(document).on('submit', '#SaveForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("Action_Set", "Services")', this,'@Url.Action("ServiceInfomation", "Services")');
+            return false;
+        });
+
+        $(document).on('submit', '#RequestForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
             return false;
         });
     </script>
@@ -32,11 +34,10 @@
     <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
-
-<div class="card mb-3">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-12 col-md-6 col-lg-7 col-xl-8 mb-3">
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-7 mb-3">
+        <div class="card" id="serviceInfo">
+            <div class="card-body">
                 <dl class="row">
                     <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                     <dd class="col-12 col-lg-9">@Html.DisplayFor(m => m.Services.Service_Description)</dd>
@@ -66,21 +67,35 @@
                         </ul>
                     </dd>
                 </dl>
-
-                <button class="btn btn-primary ml-auto" onclick="callModal('@Url.Action("Action_Set","Services",new { id=Model.Services.Service_Id })')">Start job</button>
-            </div>
-            <div class="col-12 col-md-6 col-lg-5 col-xl-4 d-flex align-items-stretch">
-                <div class="card w-100">
-                    <div class="card-header">
-                        <h5 class="card-title">Comments</h5>
-                    </div>
-                    <div class="card-body">
-                        @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
-                    </div>
+                <div class="d-flex justify-content-between">
+                    @if (Model.ServiceChangeDueDate == null)
+                    {
+                        <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
+                    }
+                    else
+                    {
+                        Guid myId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                        if (Model.ServiceChangeDueDate.User_Id.Value.Equals(myId))
+                        {
+                            <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
+                        }
+                    }
+                    <button class="btn btn-primary" onclick="callModal('@Url.Action("Action_Set","Services",new { id=Model.Services.Service_Id })')">Start job</button>
                 </div>
             </div>
         </div>
-        
+
+    </div>
+    <div class="col-12 col-md-6 col-lg-5 d-flex align-items-stretch">
+        <div class="card w-100" id="serviceComment">
+            <div class="card-header">
+                <h5 class="card-title">Comments</h5>
+            </div>
+            <div class="card-body overflow-auto">
+                @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
+            </div>
+        </div>
     </div>
 </div>
+
 @{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }
