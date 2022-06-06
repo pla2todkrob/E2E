@@ -17,6 +17,8 @@ namespace E2E.Models.Tables
         public string Copyright { get; set; }
         public string SystemName { get; set; }
         public DateTime CreateDateTime { get; set; }
+
+        [Display(Name = "Point")]
         public int Configuration_Point { get; set; }
 
         public System_Configurations()

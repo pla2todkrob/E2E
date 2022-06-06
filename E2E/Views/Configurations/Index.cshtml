@@ -3,6 +3,7 @@
 }
 
 @section scripts{
+    <script src="~/Asset/Configurations.js"></script>
     <script>
 
         $(function () {
@@ -11,7 +12,7 @@
 
         $(document).on('submit', '#SaveConfig', function (e) {
             e.preventDefault();
-            callSubmitModal('@Url.Action("Configurations_Table", "Configurations")',this);
+            callSubmitPage('@Url.Action("Configurations_Table", "Configurations")', this);
             return false;
         });
 

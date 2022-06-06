@@ -16,6 +16,7 @@ namespace E2E.Controllers
     {
         private clsContext db = new clsContext();
         private clsManageMaster obj = new clsManageMaster();
+        private clsServiceFTP ftp = new clsServiceFTP();
         [Authorize]
         public ActionResult Index()
         {
@@ -34,6 +35,7 @@ namespace E2E.Controllers
         {
             clsSwal swal = new clsSwal();
             bool res = new bool();
+            HttpFileCollectionBase files = Request.Files;
             if (ModelState.IsValid)
             {
                 using (TransactionScope scope = new TransactionScope())
@@ -42,7 +44,22 @@ namespace E2E.Controllers
                     {
                         System_Configurations system_Configurations = new System_Configurations();
 
-                        system_Configurations.Configuration_Brand = model.Configuration_Brand;
+
+
+
+                        if (files[0].ContentLength != 0)
+                        {
+                                HttpPostedFileBase file = files[0];
+                                string dir = "Configurations/" + system_Configurations.Configuration_Id;
+                                string FileName = file.FileName;
+                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+
+                                system_Configurations.Configuration_Brand = filepath;
+                        }
+                        else
+                        {
+                            system_Configurations.Configuration_Brand = model.Configuration_Brand;
+                        }
                         system_Configurations.Copyright = model.Copyright;
                         system_Configurations.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
                         system_Configurations.Configuration_Point = model.Configuration_Point;
@@ -53,6 +70,9 @@ namespace E2E.Controllers
                         {
                             res = true;
                         }
+
+
+
 
                         if (res)
                         {
