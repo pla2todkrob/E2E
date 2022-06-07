@@ -7,6 +7,11 @@
         $(function () {
             setTable_File('#reqFiles', true, false);
         });
+
+        $(document).on('submit', '#CancelForm', function () {
+            callSubmitRedirect('@Url.Action("SetCancel","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
+            return false;
+        });
     </script>
 }
 
@@ -58,7 +63,7 @@
                         if (ViewBag.AuthorizeIndex != 3)
                         {
                             <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-outline-danger">Cancel</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetCancel","Services",new { id=Model.Services.Service_Id })')">Cancel</button>
                                 <button type="button" class="btn btn-primary" onclick="setSuccessByIdRePage('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
                             </div>
 

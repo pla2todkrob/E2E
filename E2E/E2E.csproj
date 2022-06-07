@@ -808,6 +808,7 @@
     <Content Include="Views\Services\RequestChangeDue.cshtml" />
     <Content Include="Views\Services\RequestChangeDue_Form.cshtml" />
     <Content Include="Views\Services\RequestChangeDue_Table.cshtml" />
+    <Content Include="Views\Services\SetCancel.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

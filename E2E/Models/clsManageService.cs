@@ -802,6 +802,48 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Services_SetCancel(ServiceComments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
+
+                System_Statuses system_Statuses = new System_Statuses();
+                system_Statuses = db.System_Statuses
+                    .Where(w => w.Status_Id == 6)
+                    .FirstOrDefault();
+
+                services.Update = DateTime.Now;
+                services.Status_Id = system_Statuses.Status_Id;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    if (!string.IsNullOrEmpty(model.Comment_Content))
+                    {
+                        serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = services.Service_Id;
+                        serviceComments.Comment_Content = model.Comment_Content;
+                        Services_Comment(serviceComments);
+                    }
+
+                    serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Cancel task, Status update to {0}", system_Statuses.Status_Name);
+                    res = Services_Comment(serviceComments);
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
         {
             try
@@ -1032,12 +1074,21 @@ namespace E2E.Models
         {
             try
             {
-                return Services_GetNoPending_IQ()
-                .Select(s => new SelectListItem()
+                List<Services> allData = Services_GetNoPending_IQ()
+                    .Where(w => w.Status_Id < 5)
+                    .ToList();
+                List<SelectListItem> res = new List<SelectListItem>();
+                foreach (var item in allData)
                 {
-                    Value = s.Service_Id.ToString(),
-                    Text = s.Service_Key + "(" + s.Service_Subject + ")"
-                }).ToList();
+                    if (!allData.Any(a => a.Ref_Service_Id == item.Service_Id))
+                    {
+                        SelectListItem selectListItem = new SelectListItem();
+                        selectListItem.Text = item.Service_Key + "(" + item.Service_Subject + ")";
+                        selectListItem.Value = item.Service_Id.ToString();
+                        res.Add(selectListItem);
+                    }
+                }
+                return res;
             }
             catch (Exception)
             {
