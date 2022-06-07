@@ -25,7 +25,7 @@
                 <td>
                     <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
                     <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                    @if (item.System_Statuses.Status_Index == 1)
+                    @if (item.Status_Id == 1)
                     {
                         <button type="button" class="btn" onclick="callModalForm('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")','@Url.Action("GetOwnerUser","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
                     }

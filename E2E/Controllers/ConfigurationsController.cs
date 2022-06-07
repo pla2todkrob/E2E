@@ -251,6 +251,7 @@ namespace E2E.Controllers
                         res = db.Services
                             .Where(w => w.Is_MustBeApproved &&
                             !w.Is_Approval &&
+                            w.Status_Id == 1 &&
                             w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
                     }
                 }

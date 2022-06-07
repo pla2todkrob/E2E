@@ -4,11 +4,11 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "RejectForm" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CancelForm" }))
 {
     @Html.AntiForgeryToken()
     <div class="modal-header">
-        <h5 class="modal-title">Set reject</h5>
+        <h5 class="modal-title">Set cancel</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -17,7 +17,7 @@
         @Html.HiddenFor(m => m.Service_Id)
         <div class="form-group">
             @Html.LabelFor(m => m.Comment_Content)
-            @Html.TextAreaFor(m => m.Comment_Content, new { @class = "form-control", required="required" })
+            @Html.TextAreaFor(m => m.Comment_Content, new { @class = "form-control", required = "required" })
         </div>
     </div>
     <div class="modal-footer">

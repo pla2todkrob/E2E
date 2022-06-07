@@ -126,7 +126,7 @@
                         Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                         if (Model.Services.Action_User_Id == userId)
                         {
-                            if (Model.Services.System_Statuses.Status_Index == 2)
+                            if (Model.Services.Status_Id == 2)
                             {
                                 <button type="button" class="btn btn-outline-secondary">Forward</button>
                                 <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
@@ -135,7 +135,7 @@
                         }
                         if (Model.Services.User_Id == userId)
                         {
-                            if (Model.Services.System_Statuses.Status_Index == 3)
+                            if (Model.Services.Status_Id == 3)
                             {
                                 <button type="button" class="btn btn-success">Close</button>
                             }
@@ -151,7 +151,7 @@
                 <h5 class="card-title">Comment</h5>
             </div>
             <div class="card-body overflow-auto" id="commentHis"></div>
-            @if (Model.Services.System_Statuses.Status_Index < 4)
+            @if (Model.Services.Status_Id < 4)
             {
                 <div class="card-footer" id="commentNew"></div>
             }
