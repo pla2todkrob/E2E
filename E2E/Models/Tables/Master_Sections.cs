@@ -17,6 +17,7 @@ namespace E2E.Models.Tables
 
         [Description("Autorun number")]
         public int Code { get; set; }
+        [Display(Name = "Department")]
         public Guid? Department_Id { get; set; }
         public virtual Master_Departments Master_Departments { get; set; }
         public bool Active { get; set; }

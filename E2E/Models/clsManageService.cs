@@ -43,14 +43,9 @@ namespace E2E.Models
         {
             try
             {
-                Guid statusId = db.System_Statuses
-                .Where(w => w.Status_Index == 1)
-                .Select(s => s.Status_Id)
-                .FirstOrDefault();
-
                 return db.Services
-                    .Where(w => !w.Is_Commit && w.Status_Id == statusId && (!w.Is_MustBeApproved || (w.Is_Approval && w.Is_MustBeApproved)))
-                    .OrderByDescending(o => o.System_Priorities.Priority_Index)
+                    .Where(w => !w.Is_Commit && w.Status_Id == 1 && (!w.Is_MustBeApproved || (w.Is_Approval && w.Is_MustBeApproved)))
+                    .OrderByDescending(o => o.Priority_Id)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
             }
             catch (Exception)
@@ -87,14 +82,9 @@ namespace E2E.Models
         {
             try
             {
-                Guid statusId = db.System_Statuses
-                .Where(w => w.Status_Index == 1)
-                .Select(s => s.Status_Id)
-                .FirstOrDefault();
-
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Is_Commit && w.Status_Id == statusId)
-                    .OrderByDescending(o => o.System_Priorities.Priority_Index)
+                    .Where(w => w.Is_Commit && w.Status_Id == 1)
+                    .OrderByDescending(o => o.Priority_Id)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
 
                 if (id.HasValue)
@@ -129,14 +119,9 @@ namespace E2E.Models
 
         private IQueryable<Services> Services_GetNoPending_IQ()
         {
-            Guid statusId = db.System_Statuses
-                .Where(w => w.Status_Index == 1)
-                .Select(s => s.Status_Id)
-                .FirstOrDefault();
-
             return db.Services
-                .Where(w => w.Status_Id != statusId)
-                .OrderByDescending(o => o.System_Priorities.Priority_Index)
+                .Where(w => w.Status_Id != 1)
+                .OrderByDescending(o => o.Priority_Id)
                 .ThenBy(o => new { o.Create, o.Service_DueDate });
         }
 
@@ -392,16 +377,11 @@ namespace E2E.Models
         {
             try
             {
-                Guid statusId = db.System_Statuses
-                .Where(w => w.Status_Index == 1)
-                .Select(s => s.Status_Id)
-                .FirstOrDefault();
-
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 Guid deptId = db.Users.Find(id).Master_Processes.Master_Sections.Department_Id.Value;
                 List<Guid> userIdList = db.Users
                     .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId).Select(s => s.User_Id).ToList();
-                return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == statusId).ToList();
+                return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
             }
             catch (Exception)
             {
@@ -498,10 +478,7 @@ namespace E2E.Models
                     .Count();
                 todayCount += 1;
                 model.Service_Key = string.Concat(DateTime.Now.ToString("yyMMdd"), todayCount.ToString().PadLeft(3, '0'));
-                model.Status_Id = db.System_Statuses
-                    .Where(w => w.Status_Index == 1)
-                    .Select(s => s.Status_Id)
-                    .FirstOrDefault();
+                model.Status_Id = 1;
                 if (files[0].ContentLength > 0)
                 {
                     model.Service_FileCount = files.Count;
@@ -738,7 +715,7 @@ namespace E2E.Models
 
                 System_Statuses system_Statuses = new System_Statuses();
                 system_Statuses = db.System_Statuses
-                    .Where(w => w.Status_Index == 2)
+                    .Where(w => w.Status_Id == 2)
                     .FirstOrDefault();
 
                 services.Service_EstimateTime = model.Service_EstimateTime;
@@ -793,7 +770,7 @@ namespace E2E.Models
 
                 System_Statuses system_Statuses = new System_Statuses();
                 system_Statuses = db.System_Statuses
-                    .Where(w => w.Status_Index == 3)
+                    .Where(w => w.Status_Id == 3)
                     .FirstOrDefault();
 
                 services.Update = DateTime.Now;
@@ -879,7 +856,7 @@ namespace E2E.Models
 
                 System_Statuses system_Statuses = new System_Statuses();
                 system_Statuses = db.System_Statuses
-                    .Where(w => w.Status_Index == 5)
+                    .Where(w => w.Status_Id == 5)
                     .FirstOrDefault();
 
                 services.Update = DateTime.Now;
@@ -1038,7 +1015,7 @@ namespace E2E.Models
             try
             {
                 return db.System_Priorities
-                .OrderBy(o => o.Priority_Index)
+                .OrderBy(o => o.Priority_Id)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Priority_Id.ToString(),

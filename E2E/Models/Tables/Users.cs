@@ -22,6 +22,7 @@ namespace E2E.Models.Tables
         public DateTime Create { get; set; }
 
         [Required]
+        [Display(Name = "Grade")]
         public Guid Grade_Id { get; set; }
 
         public virtual Master_Grades Master_Grades { get; set; }
@@ -29,10 +30,12 @@ namespace E2E.Models.Tables
         public virtual Master_Processes Master_Processes { get; set; }
 
         [Required]
+        [Display(Name = "Process")]
         public Guid Process_Id { get; set; }
 
         [Required]
-        public Guid Role_Id { get; set; }
+        [Display(Name = "Role")]
+        public int Role_Id { get; set; }
 
         public virtual System_Roles System_Roles { get; set; }
 

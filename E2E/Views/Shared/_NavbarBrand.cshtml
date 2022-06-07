@@ -2,13 +2,20 @@
 
 <a href="@Url.Action("Index","Home")" class="navbar-brand">
     @{
-        if (Model.Configuration_Brand != null)
+        if (Model != null)
         {
-            <img id="logo" src="@Model.Configuration_Brand" class="logo" alt="@Path.GetFileName(Model.Configuration_Brand)" />
-        }
-        else if (Model.SystemName != null)
-        {
-            @Html.DisplayFor(m=>m.SystemName)
+            if (Model.Configuration_Brand != null)
+            {
+                <img id="logo" src="@Model.Configuration_Brand" class="logo" alt="@Path.GetFileName(Model.Configuration_Brand)" />
+            }
+            else if (Model.SystemName != null)
+            {
+                @Html.DisplayFor(m => m.SystemName)
+            }
+            else
+            {
+                <h2>E2E</h2>
+            }
         }
         else
         {
