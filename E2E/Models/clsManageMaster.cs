@@ -18,11 +18,11 @@ namespace E2E.Models
     {
         private clsContext db = new clsContext();
 
-        public Guid? Prefix_EN_GetId(string val, bool create = false)
+        public int? Prefix_EN_GetId(string val, bool create = false)
         {
             try
             {
-                Guid? res = null;
+                int? res = null;
             FindModel:
                 System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
                 system_Prefix_EN = db.System_Prefix_ENs
@@ -73,11 +73,11 @@ namespace E2E.Models
             }
         }
 
-        public Guid? Prefix_TH_GetId(string val, bool create = false)
+        public int? Prefix_TH_GetId(string val, bool create = false)
         {
             try
             {
-                Guid? res = null;
+                int? res = null;
             FindModel:
                 System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
                 system_Prefix_TH = db.System_Prefix_THs
@@ -121,36 +121,6 @@ namespace E2E.Models
                     res = true;
                 }
                 return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Guid Role_AdminId()
-        {
-            try
-            {
-                return db.System_Roles
-                    .Where(w => w.Role_Index == 1)
-                    .Select(s => s.Role_Id)
-                    .FirstOrDefault();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Guid Role_UserId()
-        {
-            try
-            {
-                return db.System_Roles
-                    .Where(w => w.Role_Index == 2)
-                    .Select(s => s.Role_Id)
-                    .FirstOrDefault();
             }
             catch (Exception)
             {
@@ -1327,24 +1297,15 @@ namespace E2E.Models
                             master_LineWorks.LineWork_Name = val;
                             if (val.StartsWith("J"))
                             {
-                                master_LineWorks.Authorize_Id = db.System_Authorizes
-                                    .Where(w => w.Authorize_Index == 1)
-                                    .Select(s => s.Authorize_Id)
-                                    .FirstOrDefault();
+                                master_LineWorks.Authorize_Id = 1;
                             }
                             else if (val.StartsWith("M"))
                             {
-                                master_LineWorks.Authorize_Id = db.System_Authorizes
-                                    .Where(w => w.Authorize_Index == 2)
-                                    .Select(s => s.Authorize_Id)
-                                    .FirstOrDefault();
+                                master_LineWorks.Authorize_Id = 2;
                             }
                             else
                             {
-                                master_LineWorks.Authorize_Id = db.System_Authorizes
-                                    .Where(w => w.Authorize_Index == 3)
-                                    .Select(s => s.Authorize_Id)
-                                    .FirstOrDefault();
+                                master_LineWorks.Authorize_Id = 3;
                             }
                             if (LineWork_Save(master_LineWorks))
                             {
@@ -1412,10 +1373,8 @@ namespace E2E.Models
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks.Code = db.Master_LineWorks.Count() + 1;
                 master_LineWorks.LineWork_Name = model.LineWork_Name.Trim();
-                if (model.Authorize_Id.HasValue)
-                {
-                    master_LineWorks.Authorize_Id = model.Authorize_Id;
-                }
+                master_LineWorks.Authorize_Id = model.Authorize_Id;
+
                 db.Master_LineWorks.Add(master_LineWorks);
                 if (db.SaveChanges() > 0)
                 {

@@ -2,6 +2,7 @@
     if ($(document).find('#serviceInfo').length) {
         var infoHeight = $('#serviceInfo').innerHeight();
         $('#serviceComment').innerHeight(infoHeight);
+        $('#commentHis').animate({ scrollTop: 5000 });
     }
 });
 

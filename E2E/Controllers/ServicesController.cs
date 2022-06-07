@@ -23,7 +23,7 @@ namespace E2E.Controllers
             {
                 ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
+                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
             }
             catch (Exception)
@@ -602,7 +602,7 @@ namespace E2E.Controllers
                 Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
+                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
                 return View(data.ClsServices_View(id));
             }
@@ -1182,7 +1182,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult GetPriorityDateRange(Guid id)
+        public ActionResult GetPriorityDateRange(int id)
         {
             try
             {

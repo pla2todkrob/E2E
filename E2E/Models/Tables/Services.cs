@@ -40,12 +40,12 @@ namespace E2E.Models.Tables
         public Guid? Action_User_Id { get; set; }
 
         [Display(Name = "Status")]
-        public Guid Status_Id { get; set; }
+        public int Status_Id { get; set; }
 
         public virtual System_Statuses System_Statuses { get; set; }
 
         [Display(Name = "Priority")]
-        public Guid Priority_Id { get; set; }
+        public int Priority_Id { get; set; }
 
         public virtual System_Priorities System_Priorities { get; set; }
 

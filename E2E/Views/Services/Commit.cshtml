@@ -45,7 +45,7 @@
                             <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                             <dd class="col-12 col-xl-8"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
                             <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
-                            <dd class="col-8">@Html.DisplayFor(m => m.Services.Users.User_Code)</dd>
+                            <dd class="col-8"><b class="text-info">@Html.DisplayFor(m => m.Services.Users.User_Code)</b></dd>
                             @if (Model.Services.Update.HasValue)
                             {
                                 <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>

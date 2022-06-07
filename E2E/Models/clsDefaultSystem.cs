@@ -54,9 +54,8 @@ namespace E2E.Models
                         item.YearSetPoint = thisYear;
                         db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                     }
+                    db.SaveChanges();
                 }
-
-                db.SaveChanges();
             }
         }
 

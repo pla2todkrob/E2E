@@ -22,7 +22,8 @@ namespace E2E.Models.Tables
         public int Code { get; set; }
 
         public DateTime Create { get; set; }
-        public Guid? Authorize_Id { get; set; }
+        [Display(Name ="Authorize")]
+        public int Authorize_Id { get; set; }
         public virtual System_Authorize System_Authorize { get; set; }
 
         [Key]

@@ -169,7 +169,7 @@ namespace E2E.Controllers
                 Guid id = Guid.Parse(HttpContext.User.Identity.Name);
                 res = db.Users
                     .Where(w => w.User_Id == id)
-                    .Select(s => s.System_Roles.Role_Index)
+                    .Select(s => s.Role_Id)
                     .FirstOrDefault();
             }
 
@@ -209,7 +209,7 @@ namespace E2E.Controllers
 
                     int authorIndex = db.Users
                         .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
+                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                         .FirstOrDefault();
 
                     if (authorIndex == 3)
@@ -243,7 +243,7 @@ namespace E2E.Controllers
 
                     int authorIndex = db.Users
                         .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Grades.Master_LineWorks.System_Authorize.Authorize_Index)
+                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                         .FirstOrDefault();
 
                     if (authorIndex != 3)
