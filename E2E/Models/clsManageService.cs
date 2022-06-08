@@ -1107,6 +1107,34 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Service_AddTeam(clsServiceTeams model)
+        {
+            try
+            {
+                bool res = new bool();
+                foreach (var item in model.User_Ids)
+                {
+                    ServiceTeams serviceTeams = new ServiceTeams();
+                    serviceTeams.Service_Id = model.Service_Id;
+                    serviceTeams.User_Id = item;
+                    db.Entry(serviceTeams).State = System.Data.Entity.EntityState.Added;
+                    if (db.SaveChanges() > 0)
+                    {
+                        ServiceComments serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = model.Service_Id;
+                        serviceComments.Comment_Content = string.Format("Add {0} to join team", master.Users_GetInfomation(item));
+                        res = Services_Comment(serviceComments);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public List<SelectListItem> SelectListItems_Priority()
         {
             try
