@@ -9,9 +9,9 @@ namespace E2E.Models.Views
 {
     public class clsServices
     {
-        [Display(Name = "Name")]
+        [Display(Name = "Request by")]
         public string User_Name { get; set; }
-        [Display(Name = "Name")]
+        [Display(Name = "Action by")]
         public string Action_Name { get; set; }
         [Display(Name = "Email")]
         public string Action_Email { get; set; }
@@ -19,10 +19,12 @@ namespace E2E.Models.Views
         public List<ServiceFiles> ServiceFiles { get; set; }
         public List<clsServiceComments> ClsServiceComments { get; set; }
         public ServiceChangeDueDate ServiceChangeDueDate { get; set; }
+        public List<clsServiceTeams> ClsServiceTeams { get; set; }
         public clsServices()
         {
             ServiceFiles = new List<ServiceFiles>();
             ClsServiceComments = new List<clsServiceComments>();
+            ClsServiceTeams = new List<clsServiceTeams>();
         }
     }
 }

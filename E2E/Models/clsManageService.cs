@@ -264,7 +264,9 @@ namespace E2E.Models
                         ServiceFiles = gj.ToList(),
                         Services = m
                     }).FirstOrDefault();
+
                 clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
+
                 if (clsServices.Services.Action_User_Id.HasValue)
                 {
                     UserDetails userDetails = new UserDetails();
@@ -274,10 +276,19 @@ namespace E2E.Models
                     clsServices.Action_Email = userDetails.Users.User_Email;
                     clsServices.Action_Name = master.Users_GetInfomation(userDetails.User_Id);
                 }
+
                 clsServices.ServiceChangeDueDate = db.ServiceChangeDueDates
                     .Where(w => w.Service_Id == id && w.DueDateStatus_Id == 1)
                     .OrderByDescending(o => o.Create)
                     .FirstOrDefault();
+
+                foreach (var item in ServiceTeams_IQ(id))
+                {
+                    clsServiceTeams clsServiceTeams = new clsServiceTeams();
+                    clsServiceTeams.ServiceTeams = item;
+                    clsServiceTeams.User_Name = master.Users_GetInfomation(item.User_Id);
+                    clsServices.ClsServiceTeams.Add(clsServiceTeams);
+                }
 
                 return clsServices;
             }
@@ -285,6 +296,12 @@ namespace E2E.Models
             {
                 throw;
             }
+        }
+
+        private IQueryable<ServiceTeams> ServiceTeams_IQ(Guid id)
+        {
+            return db.ServiceTeams
+                    .Where(w => w.Service_Id == id);
         }
 
         public clsServices ClsServices_ViewComment(Guid id)
@@ -303,7 +320,7 @@ namespace E2E.Models
                     .OrderBy(o => o.ServiceComments.Create)
                     .ToList();
 
-                clsServices.ClsServiceComments.ForEach(f => f.UserInfomation = master.Users_GetInfomation(f.ServiceComments.User_Id.Value));
+                clsServices.ClsServiceComments.ForEach(f => f.User_Name = master.Users_GetInfomation(f.ServiceComments.User_Id.Value));
 
                 return clsServices;
             }
@@ -844,6 +861,44 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Services_SetReturnJob(ServiceComments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
+
+                services.Update = DateTime.Now;
+                services.Is_Commit = false;
+                services.Department_Id = null;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    if (!string.IsNullOrEmpty(model.Comment_Content))
+                    {
+                        serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = services.Service_Id;
+                        serviceComments.Comment_Content = model.Comment_Content;
+                        Services_Comment(serviceComments);
+                    }
+
+                    serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = "Return job to center room";
+                    res = Services_Comment(serviceComments);
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
         {
             try
@@ -1100,17 +1155,49 @@ namespace E2E.Models
         {
             try
             {
-                return db.Users
-                .Where(w => w.Active)
-                .OrderBy(o => o.User_Code)
+                return db.UserDetails
+                .Where(w => w.Users.Active)
+                .OrderBy(o => o.Users.User_Code)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.User_Id.ToString(),
-                    Text = s.User_Code + " [Point: " + s.User_Point + "]"
+                    Text = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "][" + s.Users.User_Point + "]"
                 }).ToList();
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public List<SelectListItem> SelectListItems_Team(Guid id)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid departmentId = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Processes.Master_Sections.Department_Id.Value)
+                    .FirstOrDefault();
+
+                List<Guid> userIdInTeam = ServiceTeams_IQ(id)
+                    .Select(s => s.User_Id)
+                    .ToList();
+
+                return db.UserDetails
+                    .Where(w => w.Users.Master_Processes.Master_Sections.Department_Id == departmentId && 
+                    w.Users.Active &&
+                    !userIdInTeam.Contains(w.User_Id) &&
+                    w.User_Id != userId)
+                    .Select(s => new SelectListItem()
+                    {
+                        Text = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "]",
+                        Value = s.User_Id.ToString()
+                    }).ToList();
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }

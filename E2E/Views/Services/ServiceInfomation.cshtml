@@ -9,13 +9,21 @@
     <script src="~/Asset/Service.min.js"></script>
     <script>
         $(function () {
-            $('#refService').load('@Url.Action("_RefService","Services",new { id = Model.Services.Service_Id })');
+            if ($(document).find('#TeamForm').length) {
+                $('#TeamForm').find('select').each(function () {
+                    $(this).select2({
+                        theme: 'bootstrap4',
+                        width: '100%'
+                    });
+                });
+            }
+            $('#refService').load('@Url.Action("_RefService", "Services", new { id = Model.Services.Service_Id })');
             reloadComment();
         });
 
         function reloadComment() {
-            $('#commentHis').load('@Url.Action("_CommentHistory","Services",new { id=Model.Services.Service_Id })');
-            $('#commentNew').load('@Url.Action("_Comment", "Services",new { id=Model.Services.Service_Id })');
+            $('#commentHis').load('@Url.Action("_CommentHistory", "Services", new { id = Model.Services.Service_Id })');
+            $('#commentNew').load('@Url.Action("_Comment", "Services", new { id = Model.Services.Service_Id })');
             $('#commentHis').animate({ scrollTop:5000});
         }
 
@@ -52,7 +60,7 @@
 
         $(document).on('submit', '#CompleteForm', function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("SetComplete","Services")',this);
+            callSubmitPage('@Url.Action("SetComplete", "Services")',this);
             return false;
         });
     </script>
@@ -61,9 +69,9 @@
 @section breadcrumb{
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-            <li class="breadcrumb-item active" >Profile</li>
-            <li class="breadcrumb-item active" >Task</li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+            <li class="breadcrumb-item active">Task</li>
             <li class="breadcrumb-item active" aria-current="page">Service information</li>
         </ol>
     </nav>
@@ -112,12 +120,47 @@
                             }
                         </ul>
                     </dd>
-                    @if (Model.Services.Action_User_Id.HasValue)
-                    {
-                        <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
-                        <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Action_Name)</dd>
-                    }
+                    @{
+                        Guid actionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                        if (Model.Services.Action_User_Id.HasValue)
+                        {
+                            <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
+                            <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Action_Name)</dd>
+                            <dt class="col-12 col-md-3">Team</dt>
+                            <dd class="col-12 col-md-9">
+                                @if (Model.ClsServiceTeams.Count > 0)
+                                {
+                                    <ul>
+                                        @foreach (var item in Model.ClsServiceTeams)
+                                        {
+                                            <li>@item.User_Name</li>
+                                        }
+                                    </ul>
 
+                                }
+                                @if (Model.Services.Action_User_Id.Value == actionId)
+                                {
+                                    using (Html.BeginForm("", "", FormMethod.Post, new { id = "TeamForm", @class = "was-validated" }))
+                                    {
+                                        <div class="form-row">
+                                            <div class="form-group col-9">
+                                                <select class="form-control" id="teamList" multiple required>
+                                                    @foreach (SelectListItem item in ViewBag.TeamList)
+                                                    {
+                                                        <option value="@item.Value">@item.Text</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-3">
+                                                <button type="submit" class="btn btn-primary">Add team</button>
+                                            </div>
+                                        </div>
+
+                                    }
+                                }
+                            </dd>
+                        }
+                    }
                 </dl>
             </div>
             <div class="card-footer">

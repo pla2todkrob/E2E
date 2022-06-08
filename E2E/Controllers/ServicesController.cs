@@ -17,10 +17,9 @@ namespace E2E.Controllers
         private clsContext db = new clsContext();
         public ActionResult Index()
         {
-            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-
             try
             {
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
@@ -435,6 +434,11 @@ namespace E2E.Controllers
         {
             try
             {
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.AuthorizeIndex = db.Users
+                .Where(w => w.User_Id == userId)
+                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                .FirstOrDefault();
                 return View(data.ClsServices_View(id));
             }
             catch (Exception)
@@ -702,6 +706,7 @@ namespace E2E.Controllers
         {
             try
             {
+                ViewBag.TeamList = data.SelectListItems_Team(id);
                 return View(data.ClsServices_View(id));
             }
             catch (Exception)
@@ -869,6 +874,70 @@ namespace E2E.Controllers
                         swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
                         swal.title = "Successful";
                         swal.option = model.Service_Id;
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult SetReturnJob(Guid id)
+        {
+            ServiceComments serviceComments = new ServiceComments();
+            serviceComments.Service_Id = id;
+
+            return View(serviceComments);
+        }
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult SetReturnJob(ServiceComments model)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.Services_SetReturnJob(model))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
                     }
                     else
                     {

@@ -30,6 +30,7 @@ namespace E2E.Models
         public DbSet<ServiceComments> ServiceComments { get; set; }
         public DbSet<ServiceFiles> ServiceFiles { get; set; }
         public DbSet<Services> Services { get; set; }
+        public DbSet<ServiceTeams> ServiceTeams { get; set; }
         public DbSet<System_Authorize> System_Authorizes { get; set; }
         public DbSet<System_Configurations> System_Configurations { get; set; }
         public DbSet<System_DueDateStatuses> System_DueDateStatuses { get; set; }
