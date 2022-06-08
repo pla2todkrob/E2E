@@ -37,7 +37,10 @@ $(document).ajaxStart(function () {
 
 function reloadCount() {
     $('#nav_service').load(baseUrl + '/Configurations/_NavService');
-    $('#nav_department').load(baseUrl +'/Configurations/_NavDepartment');
+    $('#nav_department').load(baseUrl + '/Configurations/_NavDepartment');
+    $('#nav_Newtopic').load(baseUrl + '/Topics/_Newtopic');
+    $('._reloadCountA').load(baseUrl + '/Topics/_SortTopicAnnounce');
+    $('._reloadCountN').load(baseUrl + '/Topics/_SortTopicNew');
 }
 function callSpin(active) {
     var opts = {
@@ -306,7 +309,7 @@ function callSubmitRedirect(urlAjax,form, urlRedirect) {
                     }).then(function (e) {
                         if (res.icon == 'success') {
                             console.log(res.option);
-                            if (res.option != null) {
+                            if (res.option != '') {
                                 urlRedirect += '/' + res.option;
                             }
 

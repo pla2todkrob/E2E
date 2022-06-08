@@ -10,7 +10,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Configuration_Id { get; set; }
-
+        [Display(Name = "Brand")]
         public string Configuration_Brand { get; set; }
         public Guid User_Id { get; set; }
         public virtual Users Users { get; set; }

@@ -27,7 +27,7 @@
         function reloadTable() {
             callTable_NoSort('@Url.Action("EForms_Table", "EForms",new { res=1})', true, 0).then(function () {
                 callTable_NoSort('@Url.Action("EForms_Table", "EForms", new { res=2})', true, 0, '#datalist2').then(function () {
-                    callTable_NoSort('@Url.Action("EForms_Table", "EForms", new { res=3})', true, 0, '#datalist3');
+                    @*callTable_NoSort('@Url.Action("EForms_Table", "EForms", new { res=3})', true, 0, '#datalist3');*@
                 });
             });
         }
@@ -55,7 +55,7 @@
         <div class="nav flex-md-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
             <a class="nav-link active" id="v-pills-announce-tab" data-toggle="pill" href="#v-pills-announce" role="tab" aria-controls="v-pills-announce" aria-selected="true">Publish</a>
             <a class="nav-link" id="v-pills-new-tab" data-toggle="pill" href="#v-pills-new" role="tab" aria-controls="v-pills-new" aria-selected="false">My Form</a>
-            <a class="nav-link" id="v-pills-top-tab" data-toggle="pill" href="#v-pills-top" role="tab" aria-controls="v-pills-top" aria-selected="false">Expired Form</a>
+            @*<a class="nav-link" id="v-pills-top-tab" data-toggle="pill" href="#v-pills-top" role="tab" aria-controls="v-pills-top" aria-selected="false">Expired Form</a>*@
         </div>
     </div>
     <div class="col-md-9 col-lg-10">
@@ -66,9 +66,9 @@
             <div class="tab-pane fade" id="v-pills-new" role="tabpanel" aria-labelledby="v-pills-new-tab">
                 <div class="row" id="datalist2"></div>
             </div>
-            <div class="tab-pane fade" id="v-pills-top" role="tabpanel" aria-labelledby="v-pills-top-tab">
+            @*<div class="tab-pane fade" id="v-pills-top" role="tabpanel" aria-labelledby="v-pills-top-tab">
                 <div class="row" id="datalist3"></div>
-            </div>
+            </div>*@
         </div>
     </div>
 </div>

@@ -20,7 +20,7 @@
     </ul>
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Boards","Topics")">Topics</a>
+            <a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@{ Html.RenderAction("_Newtopic", "Topics"); } </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>
