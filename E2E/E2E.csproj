@@ -19,10 +19,11 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44316</IISExpressSSLPort>
+    <IISExpressSSLPort>44325</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>
+    </IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -208,6 +209,7 @@
     <Compile Include="Models\Tables\ServiceComments.cs" />
     <Compile Include="Models\Tables\ServiceFiles.cs" />
     <Compile Include="Models\Tables\Services.cs" />
+    <Compile Include="Models\Tables\ServiceTeams.cs" />
     <Compile Include="Models\Tables\System_Authorize.cs" />
     <Compile Include="Models\Tables\System_Configurations.cs" />
     <Compile Include="Models\Tables\System_DueDateStatuses.cs" />
@@ -233,6 +235,7 @@
     <Compile Include="Models\Views\clsSections.cs" />
     <Compile Include="Models\Views\clsServiceComments.cs" />
     <Compile Include="Models\Views\clsServices.cs" />
+    <Compile Include="Models\Views\clsServiceTeams.cs" />
     <Compile Include="Models\Views\clsSwal.cs" />
     <Compile Include="Models\Views\clsTopic.cs" />
     <Compile Include="Models\Views\clsUsers.cs" />
@@ -812,6 +815,7 @@
     <Content Include="Views\Shared\_Newtopic.cshtml" />
     <Content Include="Views\Shared\_SortTopicAnnounce.cshtml" />
     <Content Include="Views\Shared\_SortTopicNew.cshtml" />
+    <Content Include="Views\Services\SetReturnJob.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
