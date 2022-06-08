@@ -31,7 +31,7 @@
     </div>
 
     <footer class="mt-3">
-        <small>&copy; @DateTime.Now.Year - Thai Parkerizing</small>
+        <small>&copy;&nbsp;@{ Html.RenderAction("_Copyright", "Configurations"); }</small>
     </footer>
 
     <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">

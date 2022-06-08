@@ -46,10 +46,10 @@ namespace E2E.Controllers
                     query = db.EForms.Where(w => w.User_Id == id);
                     ViewBag.MyForm = true;
                 }
-                if (res == 3)
-                {
-                    query = db.EForms.Where(w => w.EForm_End < DateTime.Today);
-                }
+                //if (res == 3)
+                //{
+                //    query = db.EForms.Where(w => w.EForm_End < DateTime.Today);
+                //}
 
                 return View(query.ToList());
             }

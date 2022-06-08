@@ -700,5 +700,29 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult _Newtopic()
+        {
+            DateTime Todate = DateTime.Today;
+            int Count = db.Topics.Where(w => w.Create >= Todate).Count();
+
+            return PartialView("_Newtopic", Count);
+        }
+
+        public ActionResult _SortTopicAnnounce()
+        {
+            DateTime Todate = DateTime.Today;
+            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin ==  true).Count();
+
+            return PartialView("_SortTopicAnnounce", Count);
+        }
+
+        public ActionResult _SortTopicNew()
+        {
+            DateTime Todate = DateTime.Today;
+            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin != true).Count();
+
+            return PartialView("_SortTopicNew", Count);
+        }
     }
 }

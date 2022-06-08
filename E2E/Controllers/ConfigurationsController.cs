@@ -49,18 +49,18 @@ namespace E2E.Controllers
 
                         if (files[0].ContentLength != 0)
                         {
-                                HttpPostedFileBase file = files[0];
-                                string dir = "Configurations/" + system_Configurations.Configuration_Id;
-                                string FileName = file.FileName;
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                            HttpPostedFileBase file = files[0];
+                            string dir = "Configurations/" + system_Configurations.Configuration_Id;
+                            string FileName = file.FileName;
+                            string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
 
-                                system_Configurations.Configuration_Brand = filepath;
+                            system_Configurations.Configuration_Brand = filepath;
                         }
                         else
                         {
                             system_Configurations.Configuration_Brand = model.Configuration_Brand;
                         }
-                        system_Configurations.Copyright = model.Copyright;
+                        system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
                         system_Configurations.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
                         system_Configurations.Configuration_Point = model.Configuration_Point;
                         system_Configurations.SystemName = model.SystemName;
@@ -222,7 +222,6 @@ namespace E2E.Controllers
                         res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                     }
                 }
-
                 return PartialView("_NavService", res);
             }
             catch (Exception)
@@ -262,6 +261,83 @@ namespace E2E.Controllers
             {
                 throw;
             }
+        }
+
+        public ActionResult _Copyright()
+        {
+            System_Configurations system_Configurations = new System_Configurations();
+
+            system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
+            return PartialView("_Copyright", system_Configurations);
+        }
+
+        public ActionResult deletelogo()
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    System_Configurations system_Configurations = new System_Configurations();
+
+                    system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
+
+
+                    system_Configurations.Configuration_Brand = string.Empty;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Complete();
+
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อย";
+                        swal.title = "Successful";
+                    }
+
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ลบข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+
+
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
     }
 }
