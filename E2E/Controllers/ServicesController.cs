@@ -706,7 +706,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ViewBag.TeamList = data.SelectListItems_Team(id);
+                
                 return View(data.ClsServices_View(id));
             }
             catch (Exception)
@@ -1178,6 +1178,79 @@ namespace E2E.Controllers
                 try
                 {
                     if (data.ServiceChangeDueDate_Cancel(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult _AddTeam(Guid id)
+        {
+            try
+            {
+                ViewBag.TeamList = data.SelectListItems_Team(id);
+                clsServiceTeams clsServiceTeams = new clsServiceTeams();
+                clsServiceTeams.Service_Id = id;
+                return PartialView("_AddTeam", clsServiceTeams);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+        }
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult _AddTeam(clsServiceTeams model)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.Service_AddTeam(model))
                     {
                         scope.Complete();
                         swal.dangerMode = false;

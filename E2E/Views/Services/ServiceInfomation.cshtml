@@ -63,6 +63,12 @@
             callSubmitPage('@Url.Action("SetComplete", "Services")',this);
             return false;
         });
+
+        $(document).on('submit', '#TeamForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("_AddTeam", "Services")',this);
+            return false;
+        });
     </script>
 }
 
@@ -140,23 +146,7 @@
                                 }
                                 @if (Model.Services.Action_User_Id.Value == actionId)
                                 {
-                                    using (Html.BeginForm("", "", FormMethod.Post, new { id = "TeamForm", @class = "was-validated" }))
-                                    {
-                                        <div class="form-row">
-                                            <div class="form-group col-9">
-                                                <select class="form-control" id="teamList" multiple required>
-                                                    @foreach (SelectListItem item in ViewBag.TeamList)
-                                                    {
-                                                        <option value="@item.Value">@item.Text</option>
-                                                    }
-                                                </select>
-                                            </div>
-                                            <div class="form-group col-3">
-                                                <button type="submit" class="btn btn-primary">Add team</button>
-                                            </div>
-                                        </div>
-
-                                    }
+                                    Html.RenderAction("_AddTeam", "Services", new { id = Model.Services.Service_Id });
                                 }
                             </dd>
                         }

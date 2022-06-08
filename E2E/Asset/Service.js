@@ -166,7 +166,4 @@ function setUserRef(urlAjax, val) {
             }
         });
     }
-    else {
-        $('#User_Id').prop('disabled', false);
-    }
 }
