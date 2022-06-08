@@ -9,7 +9,7 @@ namespace E2E.Models.Views
     public class clsServiceComments
     {
         public ServiceComments ServiceComments { get; set; }
-        public string UserInfomation { get; set; }
+        public string User_Name { get; set; }
         public List<ServiceCommentFiles> ServiceCommentFiles { get; set; }
 
         public clsServiceComments()
