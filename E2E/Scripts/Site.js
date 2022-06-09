@@ -309,7 +309,7 @@ function callSubmitRedirect(urlAjax,form, urlRedirect) {
                     }).then(function (e) {
                         if (res.icon == 'success') {
                             console.log(res.option);
-                            if (res.option != '') {
+                            if (res.option != null) {
                                 urlRedirect += '/' + res.option;
                             }
 

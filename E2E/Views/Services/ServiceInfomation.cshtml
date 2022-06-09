@@ -69,6 +69,12 @@
             callSubmitPage('@Url.Action("_AddTeam", "Services")',this);
             return false;
         });
+
+        $(document).on('submit', '#ReturnForm', function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetPending", "Services")',this,'@Url.Action("Index","Services")');
+            return false;
+        });
     </script>
 }
 
@@ -127,7 +133,7 @@
                         </ul>
                     </dd>
                     @{
-                        Guid actionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                        Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                         if (Model.Services.Action_User_Id.HasValue)
                         {
                             <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
@@ -144,7 +150,7 @@
                                     </ul>
 
                                 }
-                                @if (Model.Services.Action_User_Id.Value == actionId)
+                                @if (Model.Services.Action_User_Id.Value == userId)
                                 {
                                     Html.RenderAction("_AddTeam", "Services", new { id = Model.Services.Service_Id });
                                 }
@@ -156,13 +162,16 @@
             <div class="card-footer">
                 <div class="d-flex justify-content-between">
                     @{
-                        Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                         if (Model.Services.Action_User_Id == userId)
                         {
                             if (Model.Services.Status_Id == 2)
                             {
-                                <button type="button" class="btn btn-outline-secondary">Forward</button>
-                                <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary">Forward</button>
+                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
+                                </div>
+                                
                             }
 
                         }

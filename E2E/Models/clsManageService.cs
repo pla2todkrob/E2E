@@ -899,6 +899,44 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Services_SetPending(ServiceComments model)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
+
+                services.Update = DateTime.Now;
+                services.Action_User_Id = null;
+                services.Status_Id = 1;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    if (!string.IsNullOrEmpty(model.Comment_Content))
+                    {
+                        serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = services.Service_Id;
+                        serviceComments.Comment_Content = model.Comment_Content;
+                        Services_Comment(serviceComments);
+                    }
+
+                    serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = services.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Return job to department {0}",services.Master_Departments.Department_Name);
+                    res = Services_Comment(serviceComments);
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
         {
             try
