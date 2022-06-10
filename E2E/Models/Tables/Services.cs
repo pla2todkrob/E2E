@@ -37,6 +37,7 @@ namespace E2E.Models.Tables
         public bool Is_MustBeApproved { get; set; }
         public bool Is_Approval { get; set; }
         public bool Is_Action { get; set; }
+        public bool Is_FreePoint { get; set; }
         public Guid? Action_User_Id { get; set; }
 
         [Display(Name = "Status")]

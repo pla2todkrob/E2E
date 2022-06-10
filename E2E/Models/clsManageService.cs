@@ -348,8 +348,26 @@ namespace E2E.Models
                         }).FirstOrDefault();
                     clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
 
+                    UserDetails userDetails = new UserDetails();
+                    userDetails = db.UserDetails
+                        .Where(w => w.User_Id == clsServices.Services.Action_User_Id)
+                        .FirstOrDefault();
+
+                    clsServices.Action_Email = userDetails.Users.User_Email;
+                    clsServices.Action_Name = master.Users_GetInfomation(userDetails.User_Id);
+
+                    foreach (var item in ServiceTeams_IQ(refId.Value))
+                    {
+                        clsServiceTeams clsServiceTeams = new clsServiceTeams();
+                        clsServiceTeams.ServiceTeams = item;
+                        clsServiceTeams.User_Name = master.Users_GetInfomation(item.User_Id);
+                        clsServices.ClsServiceTeams.Add(clsServiceTeams);
+                    }
+
                     res.Add(clsServices);
                     refId = clsServices.Services.Ref_Service_Id;
+
+
                 }
 
                 return res;
@@ -439,7 +457,7 @@ namespace E2E.Models
                 throw;
             }
         }
-        public bool Services_Save(Services model, HttpFileCollectionBase files)
+        public bool Services_Save(Services model, HttpFileCollectionBase files, bool isForward = false)
         {
             try
             {
@@ -463,7 +481,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    res = Services_Insert(model, files);
+                    res = Services_Insert(model, files, isForward);
                 }
 
                 return res;
@@ -474,20 +492,40 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Insert(Services model, HttpFileCollectionBase files)
+        public bool Services_Insert(Services model, HttpFileCollectionBase files,bool isForward = false)
         {
             try
             {
-                Users users = new Users();
-                users = db.Users.Find(model.User_Id);
-                int usePoint = db.System_Priorities.Find(model.Priority_Id).Priority_Point;
-                if (users.User_Point < usePoint)
+                if (isForward)
                 {
-                    return false;
+                    Services services = new Services();
+                    services = db.Services.Find(model.Ref_Service_Id);
+                    services.Status_Id = 3;
+                    services.Update = DateTime.Now;
+                    db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                    if (db.SaveChanges() > 0)
+                    {
+                        model.Is_FreePoint = true;
+                        goto InsertProcess;
+                        
+                    }
+                }
+                else
+                {
+                    Users users = new Users();
+                    users = db.Users.Find(model.User_Id);
+                    int usePoint = db.System_Priorities.Find(model.Priority_Id).Priority_Point;
+                    if (users.User_Point < usePoint)
+                    {
+                        return false;
+                    }
+
+                    users.User_Point -= usePoint;
+                    db.Entry(users).State = System.Data.Entity.EntityState.Modified;
+
                 }
 
-                users.User_Point -= usePoint;
-                db.Entry(users).State = System.Data.Entity.EntityState.Modified;
+            InsertProcess:
 
                 bool res = new bool();
                 int todayCount = db.Services
@@ -515,7 +553,29 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    if (model.Ref_Service_Id.HasValue)
+                    {
+                        System_Statuses system_Statuses = new System_Statuses();
+                        system_Statuses = db.System_Statuses
+                            .Where(w => w.Status_Id == 3)
+                            .FirstOrDefault();
+
+                        ServiceComments serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = model.Ref_Service_Id.Value;
+                        serviceComments.Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
+                        
+                        if (Services_Comment(serviceComments))
+                        {
+                            serviceComments = new ServiceComments();
+                            serviceComments.Service_Id = model.Ref_Service_Id.Value;
+                            serviceComments.Comment_Content = string.Format("Forward this job to new service key {0}", model.Service_Key);
+                            res = Services_Comment(serviceComments);
+                        }
+                    }
+                    else
+                    {
+                        res = true;
+                    }
                 }
 
                 return res;
@@ -743,7 +803,7 @@ namespace E2E.Models
                 {
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Start task, Status update to {0}", system_Statuses.Status_Name);
+                    serviceComments.Comment_Content = string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime,system_Statuses.Status_Name);
                     res = Services_Comment(serviceComments);
                 }
                 
@@ -910,6 +970,7 @@ namespace E2E.Models
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
                 services.Status_Id = 1;
+                services.Service_EstimateTime = 0;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
@@ -934,46 +995,6 @@ namespace E2E.Models
             catch (Exception)
             {
 
-                throw;
-            }
-        }
-        public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
-        {
-            try
-            {
-                bool res = new bool();
-                model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                model.Create = DateTime.Now;
-                db.Entry(model).State = System.Data.Entity.EntityState.Added;
-                if (files != null)
-                {
-                    for (int i = 0; i < files.Count; i++)
-                    {
-                        if (files[i].ContentLength == 0)
-                        {
-                            break;
-                        }
-                        ServiceCommentFiles serviceCommentFiles = new ServiceCommentFiles();
-                        serviceCommentFiles.ServiceCommentFile_Name = files[i].FileName;
-                        string dir = string.Format("Service/{0}/Comment/{1}/", model.Service_Id, DateTime.Today.ToString("yyMMdd"));
-                        serviceCommentFiles.ServiceCommentFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
-                        serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
-                        serviceCommentFiles.ServiceComment_Seq = i;
-                        serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
-                        db.Entry(serviceCommentFiles).State = System.Data.Entity.EntityState.Added;
-                    }
-                }
-                
-
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
                 throw;
             }
         }
@@ -1022,6 +1043,111 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Services_SetFreePoint(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.Is_FreePoint = true;
+                services.Update = DateTime.Now;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = id;
+                    serviceComments.Comment_Content = "This request is not deducted points.";
+                    if (Services_Comment(serviceComments))
+                    {
+                        int point = db.System_Priorities.Find(services.Priority_Id).Priority_Point;
+                        Users users = db.Users.Find(services.User_Id);
+                        users.User_Point += point;
+                        db.Entry(users).State = System.Data.Entity.EntityState.Modified;
+                        if (db.SaveChanges() > 0)
+                        {
+                            serviceComments = new ServiceComments();
+                            serviceComments.Service_Id = id;
+                            serviceComments.Comment_Content = string.Format("Give back {0} points to {1}", point, master.Users_GetInfomation(services.User_Id));
+                            res = Services_Comment(serviceComments);
+                        }
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public bool Services_SetClose(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = new Services();
+                services = db.Services.Find(id);
+                services.Status_Id = 4;
+                services.Update = DateTime.Now;
+                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = id;
+                    serviceComments.Comment_Content = "Close job";
+                    res = Services_Comment(serviceComments);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
+        {
+            try
+            {
+                bool res = new bool();
+                model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                model.Create = DateTime.Now;
+                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                if (files != null)
+                {
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        if (files[i].ContentLength == 0)
+                        {
+                            break;
+                        }
+                        ServiceCommentFiles serviceCommentFiles = new ServiceCommentFiles();
+                        serviceCommentFiles.ServiceCommentFile_Name = files[i].FileName;
+                        string dir = string.Format("Service/{0}/Comment/{1}/", model.Service_Id, DateTime.Today.ToString("yyMMdd"));
+                        serviceCommentFiles.ServiceCommentFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
+                        serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
+                        serviceCommentFiles.ServiceComment_Seq = i;
+                        serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
+                        db.Entry(serviceCommentFiles).State = System.Data.Entity.EntityState.Added;
+                    }
+                }
+                
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
         public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model)
         {
             try
@@ -1173,6 +1299,32 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Service_DeleteTeam(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                ServiceTeams serviceTeams = new ServiceTeams();
+                serviceTeams = db.ServiceTeams.Find(id);
+                Guid serviceId = serviceTeams.Service_Id;
+                string userName = master.Users_GetInfomation(serviceTeams.User_Id);
+                db.Entry(serviceTeams).State = System.Data.Entity.EntityState.Deleted;
+                if (db.SaveChanges() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments();
+                    serviceComments.Service_Id = serviceId;
+                    serviceComments.Comment_Content = string.Format("Delete {0} from this team", userName);
+                    res = Services_Comment(serviceComments);
+
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public List<SelectListItem> SelectListItems_Priority()
         {
             try
@@ -1190,25 +1342,33 @@ namespace E2E.Models
                 throw;
             }
         }
-
-        public List<SelectListItem> SelectListItems_RefService()
+        public List<SelectListItem> SelectListItems_RefService(Guid userId)
         {
             try
             {
-                List<Services> allData = Services_GetNoPending_IQ()
-                    .Where(w => w.Status_Id < 5)
+                List<Guid?> Ids = Services_GetNoPending_IQ()
+                    .Where(w => w.Status_Id < 5 &&
+                    w.User_Id == userId)
+                    .Select(s => s.Ref_Service_Id)
                     .ToList();
+
                 List<SelectListItem> res = new List<SelectListItem>();
-                foreach (var item in allData)
+                res.Add(new SelectListItem()
                 {
-                    if (!allData.Any(a => a.Ref_Service_Id == item.Service_Id))
+                    Text = "Select Reference",
+                    Value = ""
+                });
+                res.AddRange(Services_GetNoPending_IQ()
+                    .Where(w => !Ids.Contains(w.Service_Id) &&
+                    w.Status_Id < 5 &&
+                    w.User_Id == userId)
+                    .Select(s => new SelectListItem()
                     {
-                        SelectListItem selectListItem = new SelectListItem();
-                        selectListItem.Text = item.Service_Key + "(" + item.Service_Subject + ")";
-                        selectListItem.Value = item.Service_Id.ToString();
-                        res.Add(selectListItem);
-                    }
-                }
+                        Text = s.Service_Key + "(" + s.Service_Subject + ")",
+                        Value = s.Service_Id.ToString()
+                    }).OrderByDescending(o => o.Text)
+                    .ToList());
+
                 return res;
             }
             catch (Exception)

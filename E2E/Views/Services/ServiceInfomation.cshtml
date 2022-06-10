@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Service information";
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 }
 
 @section scripts{
@@ -17,14 +18,16 @@
                     });
                 });
             }
-            $('#refService').load('@Url.Action("_RefService", "Services", new { id = Model.Services.Service_Id })');
             reloadComment();
         });
 
         function reloadComment() {
             $('#commentHis').load('@Url.Action("_CommentHistory", "Services", new { id = Model.Services.Service_Id })');
             $('#commentNew').load('@Url.Action("_Comment", "Services", new { id = Model.Services.Service_Id })');
-            $('#commentHis').animate({ scrollTop:5000});
+            adjustHeight().then(function () {
+                $('#commentHis').animate({ scrollTop: 5000 });
+            });
+            
         }
 
         $(document).on('submit', '#CommentForm', function (e) {
@@ -75,6 +78,12 @@
             callSubmitRedirect('@Url.Action("SetPending", "Services")',this,'@Url.Action("Index","Services")');
             return false;
         });
+
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("Form_Forward", "Services")',this,'@Url.Action("Index", "Services")');
+            return false;
+        });
     </script>
 }
 
@@ -99,6 +108,19 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between">
                     <h5 class="card-title">Service detail</h5>
+                    @if (Model.Services.Ref_Service_Id.HasValue)
+                    {
+                        if (!Model.Services.Is_FreePoint)
+                        {
+                            if (Model.Services.Action_User_Id.HasValue)
+                            {
+                                if (Model.Services.Action_User_Id.Equals(userId))
+                                {
+                                    <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                                }
+                            }
+                        }
+                    }
                 </div>
             </div>
             <div class="card-body">
@@ -107,8 +129,8 @@
                     <dd class="col-8 col-md-9"><span class="@Model.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => m.Services.System_Statuses.Status_Name)</span></dd>
                     <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                     <dd class="col-12 col-md-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Users.User_Code)</dt>
-                    <dd class="col-8 col-md-9"><b class="text-info">@Html.DisplayFor(m => m.Services.Users.User_Code)</b></dd>
+                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
+                    <dd class="col-8 col-md-9"><b class="text-info">@Html.DisplayFor(m => m.User_Name)</b></dd>
                     @if (Model.Services.Update.HasValue)
                     {
                         <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
@@ -133,7 +155,7 @@
                         </ul>
                     </dd>
                     @{
-                        Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                        
                         if (Model.Services.Action_User_Id.HasValue)
                         {
                             <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
@@ -145,12 +167,17 @@
                                     <ul>
                                         @foreach (var item in Model.ClsServiceTeams)
                                         {
-                                            <li>@item.User_Name</li>
+                                            <li>
+                                                <div class="d-flex justify-content-between">
+                                                    @item.User_Name
+                                                    <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
+                                                </div>
+                                            </li>
                                         }
                                     </ul>
 
                                 }
-                                @if (Model.Services.Action_User_Id.Value == userId)
+                                @if (Model.Services.Action_User_Id.Value == userId && Model.Services.Status_Id == 2)
                                 {
                                     Html.RenderAction("_AddTeam", "Services", new { id = Model.Services.Service_Id });
                                 }
@@ -160,18 +187,22 @@
                 </dl>
             </div>
             <div class="card-footer">
-                <div class="d-flex justify-content-between">
+                <div class="d-flex">
                     @{
+                        if (ViewBag.AuthorizeIndex < 3)
+                        {
+                            <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
+                        }
                         if (Model.Services.Action_User_Id == userId)
                         {
                             if (Model.Services.Status_Id == 2)
                             {
                                 <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
-                                <div>
-                                    <button type="button" class="btn btn-outline-secondary">Forward</button>
+                                <div class="ml-auto">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
                                     <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
                                 </div>
-                                
+
                             }
 
                         }
@@ -179,7 +210,7 @@
                         {
                             if (Model.Services.Status_Id == 3)
                             {
-                                <button type="button" class="btn btn-success">Close</button>
+                                <button type="button" class="btn btn-outline-success ml-auto" onclick="setSuccessByIdRePage('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
                             }
                         }
                     }
@@ -202,4 +233,4 @@
     </div>
 </div>
 
-<div id="refService"></div>
+@{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }

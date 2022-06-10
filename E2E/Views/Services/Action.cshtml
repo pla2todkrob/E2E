@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Action";
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 }
 @section scripts{
     <script src="~/Asset/Service.min.js"></script>
@@ -24,6 +25,12 @@
             callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
             return false;
         });
+
+        $(document).on('submit', "#RejectForm", function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
+            return false;
+        });
     </script>
 }
 @section breadcrumb{
@@ -41,13 +48,32 @@
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
 <div class="row">
-    <div class="col-12 col-md-6 col-lg-7 mb-3">
+    <div class="col-12 col-md-6 col-lg-7">
         <div class="card" id="serviceInfo">
             <div class="card-body">
-                @if (ViewBag.AuthorizeIndex < 3)
-                {
-                    <button class="btn btn-outline-danger mb-3" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id})')">Return job</button>
-                }
+                <div class="d-flex">
+                    @{
+                        if (ViewBag.AuthorizeIndex < 3)
+                        {
+                            <button class="btn btn-outline-danger mb-3" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id})')">Return job</button>
+                        }
+                        if (Model.Services.Ref_Service_Id.HasValue)
+                        {
+                            if (!Model.Services.Is_FreePoint)
+                            {
+                                if (Model.Services.Action_User_Id.HasValue)
+                                {
+                                    if (Model.Services.Action_User_Id.Equals(userId))
+                                    {
+                                        <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                </div>
+                
 
                 <dl class="row">
                     <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
@@ -78,20 +104,26 @@
                         </ul>
                     </dd>
                 </dl>
-                <div class="d-flex justify-content-between">
-                    @if (Model.ServiceChangeDueDate == null)
+                <div class="d-flex">
+                    @if (ViewBag.AuthorizeIndex < 3)
                     {
-                        <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
+                        <button class="btn btn-outline-danger mb-3" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
                     }
-                    else
-                    {
-                        Guid myId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                        if (Model.ServiceChangeDueDate.User_Id.Value.Equals(myId))
+                    <div class="ml-auto">
+                        @if (Model.ServiceChangeDueDate == null)
                         {
-                            <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
+                            <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
                         }
-                    }
-                    <button class="btn btn-primary" onclick="callModal('@Url.Action("Action_Set","Services",new { id=Model.Services.Service_Id })')">Start job</button>
+                        else
+                        {
+                            
+                            if (Model.ServiceChangeDueDate.User_Id.Value.Equals(userId))
+                            {
+                                <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
+                            }
+                        }
+                        <button class="btn btn-primary" onclick="callModal('@Url.Action("Action_Set","Services",new { id=Model.Services.Service_Id })')">Start job</button>
+                    </div>
                 </div>
             </div>
         </div>

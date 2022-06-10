@@ -32,13 +32,13 @@
 
         $(document).on('submit', '#SaveComment', function (e) {
             e.preventDefault();
-            callSubmit_Reply('@Url.Action("Boards_Comment", "Topics")',this);
+            callSubmitPage('@Url.Action("Boards_Comment", "Topics")',this);
             return false;
         });
 
 $(document).on('submit', '#SaveReply', function (e) {
-            e.preventDefault();
-            callSubmit_Reply('@Url.Action("Boards_Reply", "Topics")',this);
+    e.preventDefault();
+    callSubmitPage('@Url.Action("Boards_Reply", "Topics")', this);
             return false;
         });
     </script>
@@ -121,7 +121,7 @@ $(document).on('submit', '#SaveReply', function (e) {
                                 </h6>
                             </div>
                             <div class="card-body">
-                                <span class="PreLine">@Html.DisplayFor(i => item.Comment_Content)</span>   
+                                <span class="PreLine">@Html.DisplayFor(i => item.Comment_Content)</span>
 
                             </div>
                             <div class="card-footer">
@@ -156,7 +156,7 @@ $(document).on('submit', '#SaveReply', function (e) {
                                         </h6>
                                     </div>
                                     <div class="card-body">
-                                    
+
                                         <span class="PreLine">    @Html.DisplayFor(i => item2.Comment_Content)</span>
                                     </div>
                                     <div class="card-footer">
