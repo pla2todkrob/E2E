@@ -141,31 +141,3 @@ function previewMultiple(event) {
         }
     }
 }
-
-function callSubmit_Reply(urlAjax, form) {
-
-    var fd = new FormData(form);
-
-    $.ajax({
-        url: urlAjax,
-        method: "POST",
-        async: true,
-        data: fd,
-        processData: false,
-        contentType: false,
-        traditional: true,
-        success: function (res) {
-            swal({
-                title: res.title,
-                text: res.text,
-                icon: res.icon,
-                button: res.button,
-                dangerMode: res.dangerMode
-            }).then(function () {
-                location.reload();
-            });
-        }
-    });
-
-    return false;
-}

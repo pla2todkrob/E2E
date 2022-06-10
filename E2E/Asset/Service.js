@@ -1,12 +1,28 @@
 ﻿$(function () {
+    adjustHeight();
+    $(window).resize(function () {
+        adjustHeight();
+    });
+});
+
+async function adjustHeight() {
     if ($(document).find('#serviceInfo').length) {
+        $('#serviceComment').innerHeight(0);
         var infoHeight = $('#serviceInfo').innerHeight();
         $('#serviceComment').innerHeight(infoHeight);
         $('#commentHis').animate({ scrollTop: 5000 });
     }
-});
 
-function callModalForm(urlAjax, urlGetDate, urlGetRef, bigSize = false) {
+    if ($(document).find('#refSection').length) {
+        $('#refSection').find('.refInfo').each(function () {
+            $(this).find('.refComment').innerHeight(0);
+            var dataHeight = $(this).find('.refData').innerHeight();
+            $(this).find('.refComment').innerHeight(dataHeight);
+        });
+    }
+}
+
+function callModalService(urlAjax, bigSize = false) {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -23,20 +39,22 @@ function callModalForm(urlAjax, urlGetDate, urlGetRef, bigSize = false) {
                 $(this).select2({
                     theme: 'bootstrap4',
                     width: '100%'
-                });
+                }).trigger('change.select2');
             });
-
-            $('#Ref_Service_Id').on('select2:select', function (e) {
-                setUserRef(urlGetRef, e.params.data.id);
+            
+            $('#User_Id').on('select2:select',function (e) {
+                getSelectOp(baseUrl + '/Services/GetServiceRef', e.params.data.id, '#Ref_Service_Id');
+                
             });
 
             $('#Priority_Id').on('select2:select', function (e) {
-                setDateRange(urlGetDate, e.params.data.id);
+                setDateRange(e.params.data.id);
             });
 
             $('#modalArea').modal('show');
         }
     });
+
     return false;
 }
 
@@ -72,9 +90,9 @@ function deleteFile(urlAjax, urlLoad) {
         });
 }
 
-function setDateRange(urlAjax, val) {
+function setDateRange(val) {
     $.ajax({
-        url: urlAjax,
+        url: baseUrl + '/Services/GetPriorityDateRange',
         data: {
             id: val
         },
@@ -150,20 +168,4 @@ function setCommitToDepartment(urlAjax, urlRedirect) {
         });
 
     return false;
-}
-
-function setUserRef(urlAjax, val) {
-    $('#User_Id').val('').trigger('change');
-    if (val != '') {
-        $.ajax({
-            url: urlAjax,
-            data: {
-                id: val
-            },
-            async: true,
-            success: function (res) {
-                $('#User_Id').val(res).trigger('change');
-            }
-        });
-    }
 }

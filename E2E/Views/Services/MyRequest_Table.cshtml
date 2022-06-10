@@ -27,7 +27,7 @@
                     <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
                     @if (item.Status_Id == 1)
                     {
-                        <button type="button" class="btn" onclick="callModalForm('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")','@Url.Action("GetOwnerUser","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                        <button type="button" class="btn" onclick="callModalService('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")','@Url.Action("GetOwnerUser","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
                     }
 
                 </td>

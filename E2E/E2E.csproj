@@ -817,6 +817,7 @@
     <Content Include="Views\Shared\_SortTopicNew.cshtml" />
     <Content Include="Views\Services\SetReturnJob.cshtml" />
     <Content Include="Views\Services\_AddTeam.cshtml" />
+    <Content Include="Views\Services\Form_Forward.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

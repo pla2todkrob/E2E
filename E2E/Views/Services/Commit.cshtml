@@ -11,12 +11,14 @@
             setDropdown_Form();
         });
 
-        $('form').submit(function () {
+        $('form').submit(function (e) {
+            e.preventDefault();
             callSubmitRedirect('@Url.Action("Commit","Services")', this, '@Url.Action("Index","Services")');
             return false;
         });
 
-        $(document).on('submit', "#RejectForm", function () {
+        $(document).on('submit', "#RejectForm", function (e) {
+            e.preventDefault();
             callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
             return false;
         });
@@ -36,7 +38,7 @@
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
 <div class="row">
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-lg-8 mb-3 mb-lg-0">
         <div class="card" id="serviceInfo">
             <div class="card-body">
                 <div class="row">

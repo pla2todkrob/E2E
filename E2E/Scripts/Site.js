@@ -308,12 +308,11 @@ function callSubmitRedirect(urlAjax,form, urlRedirect) {
                         dangerMode: res.dangerMode
                     }).then(function (e) {
                         if (res.icon == 'success') {
-                            console.log(res.option);
                             if (res.option != null) {
                                 urlRedirect += '/' + res.option;
                             }
 
-                            window.location.replace(urlRedirect);
+                            window.location.href = urlRedirect;
                         }
                     });
                 }
