@@ -60,7 +60,11 @@ namespace E2E.Controllers
                         {
                             system_Configurations.Configuration_Brand = model.Configuration_Brand;
                         }
-                        system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
+                        if (!string.IsNullOrEmpty(model.Copyright))
+                        {
+                            system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
+                        }
+                        
                         system_Configurations.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
                         system_Configurations.Configuration_Point = model.Configuration_Point;
                         system_Configurations.SystemName = model.SystemName;

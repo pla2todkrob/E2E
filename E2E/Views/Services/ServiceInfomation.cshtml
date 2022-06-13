@@ -170,7 +170,11 @@
                                             <li>
                                                 <div class="d-flex justify-content-between">
                                                     @item.User_Name
-                                                    <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
+                                                    @if (Model.Services.Status_Id == 2)
+                                                    {
+                                                        <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
+                                                    }
+
                                                 </div>
                                             </li>
                                         }

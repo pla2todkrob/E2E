@@ -12,6 +12,7 @@ namespace E2E.Models.Tables
         public Guid ServiceFile_Id { get; set; }
 
         public Guid Service_Id { get; set; }
+        public virtual Services Services { get; set; }
 
         [Display(Name = "Path")]
         public string ServiceFile_Path { get; set; }

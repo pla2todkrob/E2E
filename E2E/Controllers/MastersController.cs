@@ -1084,7 +1084,160 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+        public ActionResult InquiryTopic()
+        {
+            return View();
+        }
+        public ActionResult InquiryTopic_Table()
+        {
+            return View(data.InquiryTopics_GetAll());
+        }
+        public ActionResult InquiryTopic_Form(Guid? id)
+        {
+            bool isNew = new bool();
+            Master_InquiryTopics master_InquiryTopics = new Master_InquiryTopics();
+            master_InquiryTopics.InquiryTopic_Index = 1;
 
+            if (db.Master_InquiryTopics.Count() > 0)
+            {
+                master_InquiryTopics.InquiryTopic_Index = db.Master_InquiryTopics.Max(m => m.InquiryTopic_Index + 1);
+            }
+
+            if (id.HasValue)
+            {
+                master_InquiryTopics = db.Master_InquiryTopics.Find(id.Value);
+            }
+            else
+            {
+                isNew = true;
+            }
+
+            ViewBag.IsNew = isNew;
+
+            return View(master_InquiryTopics);
+        }
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult InquiryTopic_Form(Master_InquiryTopics model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.InquiryTopic_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult InquiryTopic_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    clsSaveResult clsSaveResult = data.InquiryTopic_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
         public ActionResult Users()
         {
             return View();

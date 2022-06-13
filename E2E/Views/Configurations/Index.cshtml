@@ -17,9 +17,7 @@
         });
 
         function reloadTable() {
-            callTable_NoSort('@Url.Action("Configurations_Table", "Configurations")', true, 0).then(function () {
-
-            });
+            callTable('@Url.Action("Configurations_Table", "Configurations")', true);
         }
     </script>
 }

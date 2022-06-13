@@ -589,6 +589,108 @@ namespace E2E.Models
             }
         }
 
+        public bool InquiryTopic_Save(Master_InquiryTopics model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_InquiryTopics master_InquiryTopics = new Master_InquiryTopics();
+                master_InquiryTopics = db.Master_InquiryTopics.Find(model.InquiryTopic_Id);
+                if (master_InquiryTopics != null)
+                {
+                    model.Create = master_InquiryTopics.Create;
+                    res = InquiryTopic_Update(model);
+                }
+                else
+                {
+                    res = InquiryTopic_Insert(model);
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool InquiryTopic_Insert(Master_InquiryTopics model)
+        {
+            try
+            {
+                bool res = new bool();
+                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool InquiryTopic_Update(Master_InquiryTopics model)
+        {
+            try
+            {
+                bool res = new bool();
+                model.Update = DateTime.Now;
+                db.Entry(model).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public clsSaveResult InquiryTopic_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_InquiryTopics master_InquiryTopics = new Master_InquiryTopics();
+                master_InquiryTopics = db.Master_InquiryTopics.Find(id);
+
+                int satCount = db.SatisfactionDetails
+                    .Where(w => w.InquiryTopic_Id == master_InquiryTopics.InquiryTopic_Id)
+                    .Count();
+
+                if (satCount > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Entry(master_InquiryTopics).State = System.Data.Entity.EntityState.Deleted;
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public List<Master_InquiryTopics> InquiryTopics_GetAll()
+        {
+            return db.Master_InquiryTopics
+                .OrderBy(o => o.InquiryTopic_Index)
+                .ToList();
+        }
         public Master_Departments Department_Get(Guid id)
         {
             return db.Master_Departments.Find(id);

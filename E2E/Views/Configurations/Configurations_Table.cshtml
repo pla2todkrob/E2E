@@ -65,57 +65,60 @@
 
     <div class="card">
         <div class="card-body">
-            <table class="table table-bordered table-hover nowrap w-100">
-                <thead>
-                    <tr>
-                        <th>
-                            @Html.DisplayNameFor(m => m.CreateDateTime)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(m => m.Configuration_Brand)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(m => m.SystemName)
-
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(m => m.Copyright)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(m => m.Configuration_Point)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(m => m.Users.User_Code)
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+            <div class="row">
+                <table class="table table-bordered table-hover nowrap w-100">
+                    <thead>
                         <tr>
-                            <td>
-                                @Html.DisplayFor(i => item.CreateDateTime)
-                            </td>
-                            <td>
-                                <img alt="  @Html.DisplayFor(i => item.Configuration_Brand)" src="  @Html.DisplayFor(i => item.Configuration_Brand)" class="logo" />
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.SystemName)
+                            <th>
+                                @Html.DisplayNameFor(m => m.CreateDateTime)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(m => m.Configuration_Brand)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(m => m.SystemName)
 
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.Copyright)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.Configuration_Point)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.Users.User_Code)
-                            </td>
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(m => m.Copyright)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(m => m.Configuration_Point)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(m => m.Users.User_Code)
+                            </th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(i => item.CreateDateTime)
+                                </td>
+                                <td>
+                                    <img alt="  @Html.DisplayFor(i => item.Configuration_Brand)" src="  @Html.DisplayFor(i => item.Configuration_Brand)" class="logo" />
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(i => item.SystemName)
+
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(i => item.Copyright)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(i => item.Configuration_Point)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(i => item.Users.User_Code)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
         </div>
     </div>
 
