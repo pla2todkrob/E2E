@@ -46,7 +46,7 @@ namespace E2E.Models
                 return db.Services
                     .Where(w => !w.Is_Commit && w.Status_Id == 1 && (!w.Is_MustBeApproved || (w.Is_Approval && w.Is_MustBeApproved)))
                     .OrderByDescending(o => o.Priority_Id)
-                    .ThenBy(o => new { o.Create, o.Service_DueDate });
+                    .ThenBy(t => new { t.Create, t.Service_DueDate });
             }
             catch (Exception)
             {

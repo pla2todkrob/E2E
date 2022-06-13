@@ -700,7 +700,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
+        [AllowAnonymous]
         public ActionResult _Newtopic()
         {
             DateTime Todate = DateTime.Today;

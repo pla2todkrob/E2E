@@ -191,7 +191,11 @@
                     @{
                         if (ViewBag.AuthorizeIndex < 3)
                         {
-                            <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
+                            if (Model.Services.Status_Id < 3)
+                            {
+                                <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
+                            }
+
                         }
                         if (Model.Services.Action_User_Id == userId)
                         {
