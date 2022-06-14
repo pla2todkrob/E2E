@@ -498,17 +498,8 @@ namespace E2E.Models
             {
                 if (isForward)
                 {
-                    Services services = new Services();
-                    services = db.Services.Find(model.Ref_Service_Id);
-                    services.Status_Id = 3;
-                    services.Update = DateTime.Now;
-                    db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-                    if (db.SaveChanges() > 0)
-                    {
-                        model.Is_FreePoint = true;
-                        goto InsertProcess;
-                        
-                    }
+                    model.Is_FreePoint = true;
+                    goto InsertProcess;
                 }
                 else
                 {
@@ -522,7 +513,7 @@ namespace E2E.Models
 
                     users.User_Point -= usePoint;
                     db.Entry(users).State = System.Data.Entity.EntityState.Modified;
-
+                    db.SaveChanges();
                 }
 
             InsertProcess:
@@ -559,6 +550,13 @@ namespace E2E.Models
                         system_Statuses = db.System_Statuses
                             .Where(w => w.Status_Id == 3)
                             .FirstOrDefault();
+
+                        Services services = new Services();
+                        services = db.Services.Find(model.Ref_Service_Id);
+                        services.Status_Id = 3;
+                        services.Update = DateTime.Now;
+                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
 
                         ServiceComments serviceComments = new ServiceComments();
                         serviceComments.Service_Id = model.Ref_Service_Id.Value;
@@ -1087,23 +1085,78 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(id);
-                services.Status_Id = 4;
-                services.Update = DateTime.Now;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                Guid? nextId = id;
+                while (nextId.HasValue)
+                {
+                    Services services = new Services();
+                    services = db.Services.Find(nextId.Value);
+                    if (services.Status_Id == 3)
+                    {
+                        services.Status_Id = 4;
+                        services.Update = DateTime.Now;
+                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                        if (db.SaveChanges() > 0)
+                        {
+                            if (Services_SetSatisfaction(nextId.Value))
+                            {
+                                ServiceComments serviceComments = new ServiceComments();
+                                serviceComments.Service_Id = nextId.Value;
+                                serviceComments.Comment_Content = "Close job";
+                                res = Services_Comment(serviceComments);
+                            }
+
+                        }
+                    }
+
+                    if (services.Ref_Service_Id.HasValue)
+                    {
+                        nextId = services.Ref_Service_Id.Value;
+                    }
+                    else
+                    {
+                        nextId = null;
+                    }
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Services_SetSatisfaction(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+                Satisfactions satisfactions = new Satisfactions();
+                satisfactions.Service_Id = id;
+                List<Master_InquiryTopics> master_InquiryTopics = db.Master_InquiryTopics.OrderBy(o => o.InquiryTopic_Index).ToList();
+                List<SatisfactionDetails> dataList = new List<SatisfactionDetails>();
+                foreach (var item in master_InquiryTopics)
+                {
+                    SatisfactionDetails satisfactionDetails = new SatisfactionDetails();
+                    satisfactionDetails.Satisfaction_Id = satisfactions.Satisfaction_Id;
+                    satisfactionDetails.InquiryTopic_Id = item.InquiryTopic_Id;
+                    satisfactionDetails.Point = 5;
+                    dataList.Add(satisfactionDetails);
+                }
+                satisfactions.Satisfaction_Average = dataList.Sum(s => s.Point) / master_InquiryTopics.Count();
+                db.Entry(satisfactions).State = System.Data.Entity.EntityState.Added;
+                db.SatisfactionDetails.AddRange(dataList);
                 if (db.SaveChanges() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
-                    serviceComments.Service_Id = id;
-                    serviceComments.Comment_Content = "Close job";
-                    res = Services_Comment(serviceComments);
+                    res = true;
                 }
 
                 return res;
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
