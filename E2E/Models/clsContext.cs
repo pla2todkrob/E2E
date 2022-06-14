@@ -21,10 +21,13 @@ namespace E2E.Models
         public DbSet<Master_Departments> Master_Departments { get; set; }
         public DbSet<Master_Divisions> Master_Divisions { get; set; }
         public DbSet<Master_Grades> Master_Grades { get; set; }
+        public DbSet<Master_InquiryTopics> Master_InquiryTopics { get; set; }
         public DbSet<Master_LineWorks> Master_LineWorks { get; set; }
         public DbSet<Master_Plants> Master_Plants { get; set; }
         public DbSet<Master_Processes> Master_Processes { get; set; }
         public DbSet<Master_Sections> Master_Sections { get; set; }
+        public DbSet<SatisfactionDetails> SatisfactionDetails { get; set; }
+        public DbSet<Satisfactions> Satisfactions { get; set; }
         public DbSet<ServiceChangeDueDate> ServiceChangeDueDates { get; set; }
         public DbSet<ServiceCommentFiles> ServiceCommentFiles { get; set; }
         public DbSet<ServiceComments> ServiceComments { get; set; }

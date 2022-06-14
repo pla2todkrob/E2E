@@ -199,11 +199,14 @@
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
+    <Compile Include="Models\Tables\Master_InquiryTopics.cs" />
     <Compile Include="Models\Tables\Master_LineWorks.cs" />
     <Compile Include="Models\Tables\Master_Plants.cs" />
     <Compile Include="Models\Tables\Master_Departments.cs" />
     <Compile Include="Models\Tables\Master_Sections.cs" />
     <Compile Include="Models\Tables\Master_Processes.cs" />
+    <Compile Include="Models\Tables\SatisfactionDetails.cs" />
+    <Compile Include="Models\Tables\Satisfactions.cs" />
     <Compile Include="Models\Tables\ServiceChangeDueDate.cs" />
     <Compile Include="Models\Tables\ServiceCommentFiles.cs" />
     <Compile Include="Models\Tables\ServiceComments.cs" />
@@ -818,6 +821,9 @@
     <Content Include="Views\Services\SetReturnJob.cshtml" />
     <Content Include="Views\Services\_AddTeam.cshtml" />
     <Content Include="Views\Services\Form_Forward.cshtml" />
+    <Content Include="Views\Masters\InquiryTopic.cshtml" />
+    <Content Include="Views\Masters\InquiryTopic_Form.cshtml" />
+    <Content Include="Views\Masters\InquiryTopic_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

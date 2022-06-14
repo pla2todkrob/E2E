@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewBag.Title = "Inquiry topic";
+}
+
+@section scripts{
+
+    <script src="~/Asset/Master.min.js"></script>
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit', '#SaveForm', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("InquiryTopic_Form", "Masters")', this);
+            return false;
+        });
+
+        function reloadTable() {
+            callTable('@Url.Action("InquiryTopic_Table", "Masters")', true, true, 1);
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Master</li>
+            <li class="breadcrumb-item active" aria-current="page">Inquiry topic</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex">
+            <div class="ml-auto">
+                <button class="btn btn-secondary" onclick="callModal('@Url.Action("InquiryTopic_Form","Masters")')"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row" id="datalist">
+        </div>
+    </div>
+</div>
