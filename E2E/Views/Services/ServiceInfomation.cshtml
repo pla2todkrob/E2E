@@ -27,7 +27,7 @@
             adjustHeight().then(function () {
                 $('#commentHis').animate({ scrollTop: 5000 });
             });
-            
+
         }
 
         $(document).on('submit', '#CommentForm', function (e) {
@@ -155,7 +155,7 @@
                         </ul>
                     </dd>
                     @{
-                        
+
                         if (Model.Services.Action_User_Id.HasValue)
                         {
                             <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
@@ -170,7 +170,11 @@
                                             <li>
                                                 <div class="d-flex justify-content-between">
                                                     @item.User_Name
-                                                    <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
+                                                    @if (Model.Services.Status_Id == 2)
+                                                    {
+                                                        <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
+                                                    }
+
                                                 </div>
                                             </li>
                                         }

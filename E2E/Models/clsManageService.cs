@@ -972,13 +972,21 @@ namespace E2E.Models
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
+                    
                     ServiceComments serviceComments = new ServiceComments();
                     if (!string.IsNullOrEmpty(model.Comment_Content))
                     {
                         serviceComments = new ServiceComments();
                         serviceComments.Service_Id = services.Service_Id;
                         serviceComments.Comment_Content = model.Comment_Content;
-                        Services_Comment(serviceComments);
+                        
+                        if (Services_Comment(serviceComments))
+                        {
+                            foreach (var item in db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id))
+                            {
+                                Service_DeleteTeam(item.Team_Id);
+                            }
+                        }
                     }
 
                     serviceComments = new ServiceComments();
