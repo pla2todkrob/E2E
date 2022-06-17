@@ -1,0 +1,42 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+
+@section scripts{
+
+    <script>
+
+        $(function () {
+            reloadTable();
+        });
+
+        $(document).on('submit', '#SaveManual', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("Manuals_Table", "Manuals")', this);
+            return false;
+        });
+
+        function reloadTable() {
+            callTable_NoSort('@Url.Action("Manuals_Table", "Manuals")', true, 0).then(function () {
+
+            });
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Manual</li>
+        </ol>
+    </nav>
+}
+
+
+
+<div class="row" id="datalist"></div>

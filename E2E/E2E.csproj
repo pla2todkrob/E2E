@@ -19,11 +19,10 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44325</IISExpressSSLPort>
+    <IISExpressSSLPort>44316</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>
-    </IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -179,6 +178,7 @@
     <Compile Include="Controllers\ConfigurationsController.cs" />
     <Compile Include="Controllers\EFormsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ManualsController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
@@ -197,6 +197,9 @@
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
+    <Compile Include="Models\Tables\System_Language.cs" />
+    <Compile Include="Models\Tables\System_Manuals.cs" />
+    <Compile Include="Models\Tables\System_ManualType.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
     <Compile Include="Models\Tables\Master_InquiryTopics.cs" />
@@ -824,6 +827,9 @@
     <Content Include="Views\Masters\InquiryTopic.cshtml" />
     <Content Include="Views\Masters\InquiryTopic_Form.cshtml" />
     <Content Include="Views\Masters\InquiryTopic_Table.cshtml" />
+    <Content Include="Views\Manuals\Index.cshtml" />
+    <Content Include="Views\Manuals\Manuals_Table.cshtml" />
+    <Content Include="Views\Home\Manual_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
