@@ -17,6 +17,16 @@ namespace E2E.Models
                 Authorize_Save();
             }
 
+            if (db.System_Language.Count() != System_Language.DefaultList().Count())
+            {
+                Language_Save();
+            }
+
+            if (db.System_ManualType.Count() != System_ManualType.DefaultList().Count())
+            {
+                ManualType_Save();
+            }
+
             if (db.System_Roles.Count() != System_Roles.DefaultList().Count())
             {
                 Role_Save();
@@ -66,6 +76,30 @@ namespace E2E.Models
                 if (db.System_Authorizes.Where(w => w.Authorize_Name == item.Authorize_Name).Count() == 0)
                 {
                     db.System_Authorizes.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Language_Save()
+        {
+            foreach (var item in System_Language.DefaultList())
+            {
+                if (db.System_Language.Where(w => w.Language_Name == item.Language_Name).Count() == 0)
+                {
+                    db.System_Language.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void ManualType_Save()
+        {
+            foreach (var item in System_ManualType.DefaultList())
+            {
+                if (db.System_ManualType.Where(w => w.Manual_TypeName == item.Manual_TypeName).Count() == 0)
+                {
+                    db.System_ManualType.Add(item);
                     db.SaveChanges();
                 }
             }

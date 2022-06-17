@@ -1,0 +1,91 @@
+﻿@model IEnumerable<E2E.Models.Tables.System_Manuals>
+
+@{
+    Layout = null;
+}
+<div class="col-12">
+
+    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveManual", @class = "was-validated", enctype = "multipath/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="card mb-5">
+            <div class="card-body">
+                <div class="row">
+                    <div class="offset-3 col-6">
+                        <div class="form-group">
+                            <label for="fileImage"></label>
+                            <input name="fileImage" id="fileImage" type="file" class="form-control-file" required="required" />
+                        </div>
+                        <div class="form-group">
+                            @Html.DisplayNameFor(m => m.System_Language.Language_Name)
+                            @Html.DropDownListFor(m => m.FirstOrDefault().Language_Id, new SelectList(ViewBag.Language_Name, "Value", "Text"), new { @class = "form-control", required = "required" })
+                        </div>
+                        <div class="form-group">
+                            @Html.DisplayNameFor(m => m.System_ManualType.Manual_TypeName)
+                            @Html.DropDownListFor(m => m.FirstOrDefault().Manual_Type_Id, new SelectList(ViewBag.Manual_TypeName, "Value", "Text"), new { @class = "form-control", required = "required" })
+                        </div>
+                    </div>
+                    <div class="col-12 text-right">
+                        <button type="submit" class="btn btn-primary">SAVE</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered table-hover nowrap w-100">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(m => m.Create)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(m => m.Manual_Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(m => m.System_Language.Language_Name)
+
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(m => m.System_ManualType.Manual_TypeName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(m => m.Users.User_Code)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(i => item.Create)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(i => item.Manual_Name)
+
+                            </td>
+                            <td>
+                                @Html.DisplayFor(i => item.System_Language.Language_Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(i => item.System_ManualType.Manual_TypeName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(i => item.Users.User_Code)
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
