@@ -51,6 +51,7 @@ namespace E2E.Controllers
                             HttpPostedFileBase file = files[0];
                             string dir = "Manuals/" + system_Manuals.Manual_Id;
                             string FileName = file.FileName;
+
                             string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
 
                             system_Manuals.Manual_Path = filepath;

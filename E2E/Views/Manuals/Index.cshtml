@@ -3,8 +3,6 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
-
 
 @section scripts{
 
@@ -12,7 +10,9 @@
 
         $(function () {
             reloadTable();
+
         });
+
 
         $(document).on('submit', '#SaveManual', function (e) {
             e.preventDefault();
@@ -21,6 +21,7 @@
         });
 
         function reloadTable() {
+
             callTable_NoSort('@Url.Action("Manuals_Table", "Manuals")', true, 0).then(function () {
 
             });
