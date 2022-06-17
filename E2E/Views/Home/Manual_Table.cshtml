@@ -5,14 +5,13 @@
 }
 
 <div class="col-12">
+    <h3>Manual</h3>
     <div class="card">
         <div class="card-body">
-            <table class="table table-bordered table-hover nowrap w-100">
+            <table class="table-borderless table-hover nowrap w-100">
                 <thead>
                     <tr>
-                        <th>
-                            @Html.DisplayNameFor(m => m.Create)
-                        </th>
+
                         <th>
                             @Html.DisplayNameFor(m => m.Manual_Name)
                         </th>
@@ -23,18 +22,14 @@
                         <th>
                             @Html.DisplayNameFor(m => m.System_ManualType.Manual_TypeName)
                         </th>
-                        <th>
-                            @Html.DisplayNameFor(m => m.Users.User_Code)
-                        </th>
+
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>
-                                @Html.DisplayFor(i => item.Create)
-                            </td>
+
                             <td>
                                 <a href="@Html.DisplayFor(m=>item.Manual_Path)" target="_blank">@Html.DisplayFor(m => item.Manual_Name)</a>
                             </td>
@@ -44,9 +39,7 @@
                             <td>
                                 @Html.DisplayFor(i => item.System_ManualType.Manual_TypeName)
                             </td>
-                            <td>
-                                @Html.DisplayFor(i => item.Users.User_Code)
-                            </td>
+
                         </tr>
                     }
                 </tbody>

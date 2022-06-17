@@ -118,6 +118,12 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
         async: true,
         success: function (res) {
             $(blockId).html(res);
+            $(blockId).find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
             var table;
             $(blockId).find('table').each(function (i, v) {
                 if (hasDate) {
@@ -140,6 +146,20 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
     });
     return true;
 }
+
+async function callTable_Manuals(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
+    $.ajax({
+        url: urlAjax,
+        async: true,
+        success: function (res) {
+            $(blockId).html(res);
+
+            reloadCount();
+        }
+    });
+    return true;
+}
+
 function setTable_File(tableId, bOrder = false, bSearch = false) {
     var table = $(tableId).DataTable({
         "ordering": bOrder,
