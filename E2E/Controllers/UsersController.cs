@@ -103,6 +103,11 @@ namespace E2E.Controllers
                     }
 
                 SetAuthen:
+                    int year = DateTime.Today.Year;
+                    if (!int.Equals(users.YearSetPoint,year))
+                    {
+                        clsDefaultSystem.Generate();
+                    }
                     FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
                     if (!string.IsNullOrEmpty(returnUrl))
                     {
@@ -140,6 +145,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
 
         public ActionResult Signout()
         {
