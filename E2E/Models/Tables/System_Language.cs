@@ -10,6 +10,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Language_Id { get; set; }
+        [Display(Name = "Language")]
         public string Language_Name { get; set; }
         public DateTime Create { get; set; }
 

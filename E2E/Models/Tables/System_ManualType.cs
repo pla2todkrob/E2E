@@ -10,6 +10,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Manual_Type_Id { get; set; }
+        [Display(Name = "Type")]
         public string Manual_TypeName { get; set; }
         public DateTime Create { get; set; }
 

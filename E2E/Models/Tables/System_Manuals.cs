@@ -11,6 +11,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Manual_Id { get; set; }
         public string Manual_Path { get; set; }
+        [Display(Name = "Name")]
         public string Manual_Name { get; set; }
         public string Manual_Extension { get; set; }
         public Guid Manual_Type_Id { get; set; }

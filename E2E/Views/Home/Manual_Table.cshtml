@@ -22,6 +22,9 @@
                         <th>
                             @Html.DisplayNameFor(m => m.System_ManualType.Manual_TypeName)
                         </th>
+                        <th>
+                          @Html.DisplayName("Download")
+                        </th>
 
                     </tr>
                 </thead>
@@ -31,7 +34,7 @@
                         <tr>
 
                             <td>
-                                <a href="@Html.DisplayFor(m=>item.Manual_Path)" target="_blank">@Html.DisplayFor(m => item.Manual_Name)</a>
+                                @Html.DisplayFor(m => item.Manual_Name)
                             </td>
                             <td>
                                 @Html.DisplayFor(i => item.System_Language.Language_Name)
@@ -39,7 +42,9 @@
                             <td>
                                 @Html.DisplayFor(i => item.System_ManualType.Manual_TypeName)
                             </td>
-
+                            <td>
+                                <button class="btn" type="button" onclick=" window.open('@Html.DisplayFor(m=>item.Manual_Path)', '_blank')"><i class="fa fa-cloud-download text-primary"></i></button>
+                            </td>
                         </tr>
                     }
                 </tbody>
