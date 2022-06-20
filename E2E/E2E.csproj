@@ -234,6 +234,7 @@
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsEForm.cs" />
     <Compile Include="Models\Views\clsGrades.cs" />
+    <Compile Include="Models\Views\clsHome.cs" />
     <Compile Include="Models\Views\clsImage.cs" />
     <Compile Include="Models\Views\clsLogin.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
@@ -830,6 +831,7 @@
     <Content Include="Views\Manuals\Index.cshtml" />
     <Content Include="Views\Manuals\Manuals_Table.cshtml" />
     <Content Include="Views\Home\Manual_Table.cshtml" />
+    <Content Include="Views\Shared\_LayoutHome.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
