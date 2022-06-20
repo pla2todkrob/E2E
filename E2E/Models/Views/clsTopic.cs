@@ -13,11 +13,13 @@ namespace E2E.Models.Views
         public List<TopicComments> TopicComments { get; set; }
         public List<TopicFiles> TopicFiles { get; set; }
         public List<TopicGalleries> TopicGalleries { get; set; }
+        public List<TopicSections> TopicSections { get; set; }
         public clsTopic()
         {
             TopicComments = new List<TopicComments>();
             TopicFiles = new List<TopicFiles>();
             TopicGalleries = new List<TopicGalleries>();
+            TopicSections = new List<TopicSections>();
         }
     }
 }

@@ -222,12 +222,6 @@ namespace E2E.Controllers
 
         public ActionResult Boards_Form(Guid? id)
         {
-            Guid id_emp = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.Usercode = db.Users
-                .Where(w => w.User_Id == id_emp)
-                .Select(s => s.User_Code)
-                .FirstOrDefault();
-
             clsTopic clsTopic = new clsTopic();
 
             if (id.HasValue)
@@ -240,13 +234,116 @@ namespace E2E.Controllers
                     }
                 }
 
-                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id).FirstOrDefault();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
-                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id).OrderBy(o => o.Create).ToList();
-                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id.Value).FirstOrDefault();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).ToList();
+                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).ToList();
+                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).ToList();
             }
 
             return View(clsTopic);
+        }
+        public ActionResult Boards_Section(Guid topicId, Guid? id)
+        {
+            try
+            {
+                TopicSections topicSections = new TopicSections();
+                topicSections.Topic_Id = topicId;
+                if (id.HasValue)
+                {
+                    topicSections = db.TopicSections.Find(id);
+                }
+                return View(topicSections);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Section(TopicSections model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Boards_Section_Save(model, Request.Files))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Boards_Comment(Guid id, Guid? comment_id)
