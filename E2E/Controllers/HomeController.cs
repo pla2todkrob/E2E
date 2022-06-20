@@ -1,5 +1,6 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,13 @@ namespace E2E.Controllers
 
         public ActionResult Index()
         {
-            return View();
+
+            DateTime Last7 = DateTime.Today.AddDays(-7);
+            clsHome clsHome = new clsHome();
+            clsHome.TopicAnnounce = db.Topics.Where(w => w.Topic_Pin).ToList();
+            clsHome.TopicWeek = db.Topics.Where(w => w.Create >= Last7).Take(10).OrderByDescending(o=>o.Count_View).ToList();
+            clsHome.EForms = db.EForms.Where(w => w.Create >= Last7).Take(10).OrderByDescending(o => o.Create).ToList();
+            return View(clsHome);
         }
 
         public ActionResult Manual_Table()
