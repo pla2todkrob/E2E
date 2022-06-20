@@ -4,6 +4,7 @@
 @{
     ViewBag.Title = "Boards_Form";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 }
 @section breadcrumb{
     <nav aria-label="breadcrumb">
@@ -33,6 +34,12 @@
         $(document).on('submit', '#SaveComment', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("Boards_Comment", "Topics")',this);
+            return false;
+        });
+
+        $(document).on('submit', '#SectionForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("Boards_Section", "Topics")',this);
             return false;
         });
 
@@ -87,6 +94,48 @@ $(document).on('submit', '#SaveReply', function (e) {
             </ul>
         }
 
+        <div class="card mt-5">
+            <div class="card-body">
+                @foreach (var item in Model.TopicSections)
+                {
+                    <div class="row">
+                        <div class="col-md-4 col-lg-3">
+                            @if (item.TopicSection_ContentType.StartsWith("image"))
+                            {
+                                <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
+                            }
+                            else
+                            {
+                                <video class="section_video">
+                                    <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
+                                </video>
+                            }
+                        </div>
+                        <div class="col-md-8 col-lg-9">
+                            <h5>@item.TopicSection_Title</h5>
+                            <small>@item.TopicSection_Description</small>
+                            <div class="d-flex">
+                                @if (string.IsNullOrEmpty(item.TopicSection_Link))
+                                {
+                                    <span>LINK: <a href="@item.TopicSection_Link">@item.TopicSection_Link</a></span>
+                                }
+                                <span class="ml-auto">@item.Create</span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <hr />
+                }
+
+                @if (Guid.Equals(Model.Topics.User_Id, userId))
+                {
+                    <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
+                }
+
+            </div>
+        </div>
+        
+
     </div>
 
     <div class="card-footer">
@@ -133,7 +182,7 @@ $(document).on('submit', '#SaveReply', function (e) {
                                     <div class="ml-auto">
                                         <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
                                         @{
-                                            if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                            if (Guid.Equals(item.User_Id, userId))
                                             {
                                                 <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
                                             }
@@ -166,7 +215,7 @@ $(document).on('submit', '#SaveReply', function (e) {
                                                 @Html.DisplayFor(i => item2.Create)
                                             </div>
                                             @{
-                                                if (string.Equals(item2.Users.User_Code, ViewBag.Usercode))
+                                                if (Guid.Equals(item2.User_Id, userId))
                                                 {
                                                     <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
                                                 }

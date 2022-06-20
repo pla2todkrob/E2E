@@ -75,7 +75,80 @@ namespace E2E.Models
                 throw;
             }
         }
+        public bool Boards_Section_Save(TopicSections model,HttpFileCollectionBase files)
+        {
+            try
+            {
+                bool res = new bool();
+                TopicSections topicSections = new TopicSections();
+                topicSections = db.TopicSections.Find(model.TopicSection_Id);
 
+                if (topicSections == null)
+                {
+                    res = Boards_Section_Insert(model, files);
+                }
+                else
+                {
+                    res = Boards_Section_Update(model, files);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool Boards_Section_Insert(TopicSections model, HttpFileCollectionBase files)
+        {
+            try
+            {
+                bool res = new bool();
+                TopicSections topicSections = new TopicSections();
+                topicSections.TopicSection_Description = model.TopicSection_Description;
+                topicSections.TopicSection_Link = model.TopicSection_Link;
+                topicSections.TopicSection_Title = model.TopicSection_Title;
+                topicSections.Topic_Id = model.Topic_Id;
+                if (files[0].ContentLength > 0)
+                {
+                    HttpPostedFileBase file = files[0];
+                    topicSections.TopicSection_ContentType = file.ContentType;
+                    topicSections.TopicSection_Extension = Path.GetExtension(file.FileName);
+                    topicSections.TopicSection_Name = file.FileName;
+                    
+                    string fulldir = string.Format("Topic/{0}/{1}/", model.Topic_Id, model.TopicSection_Id);
+                    topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString("", file);
+                }
+                db.TopicSections.Add(topicSections);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool Boards_Section_Update(TopicSections model, HttpFileCollectionBase files)
+        {
+            try
+            {
+                bool res = new bool();
+
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public bool Board_Delete(Guid id, List<string> File_ = null)
         {
             try
