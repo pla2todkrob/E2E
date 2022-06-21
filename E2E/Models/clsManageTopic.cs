@@ -75,7 +75,7 @@ namespace E2E.Models
                 throw;
             }
         }
-        public bool Boards_Section_Save(TopicSections model,HttpFileCollectionBase files)
+        public bool Boards_Section_Save(TopicSections model, HttpFileCollectionBase files)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace E2E.Models
                     topicSections.TopicSection_ContentType = file.ContentType;
                     topicSections.TopicSection_Extension = Path.GetExtension(file.FileName);
                     topicSections.TopicSection_Name = file.FileName;
-                    
+
                     string fulldir = string.Format("Topic/{0}/{1}/", model.Topic_Id, model.TopicSection_Id);
                     topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString("", file);
                 }

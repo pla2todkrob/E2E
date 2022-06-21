@@ -109,21 +109,56 @@
                     {
                         <button class="btn btn-outline-danger mb-3" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
                     }
-                    <div class="ml-auto">
-                        @if (Model.ServiceChangeDueDate == null)
+                <div class="ml-auto">
+
+                    @if (Model.Services.Action_User_Id.HasValue)
+                    {
+                        if (Model.Services.Action_User_Id == userId)
+                        {
+                            if (Model.ServiceChangeDueDate == null)
+                            {
+                                <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
+                            }
+                            else
+                            {
+
+                                if (Model.ServiceChangeDueDate.User_Id.Value.Equals(userId))
+                                {
+                                    <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
+                                }
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        if (Model.ServiceChangeDueDate == null)
                         {
                             <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
                         }
                         else
                         {
-                            
+
                             if (Model.ServiceChangeDueDate.User_Id.Value.Equals(userId))
                             {
                                 <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
                             }
                         }
+                    }
+
+
+                    @if (Model.Services.Action_User_Id.HasValue)
+                    {
+                        if (Model.Services.Action_User_Id == userId)
+                        {
+                            <button class="btn btn-primary" onclick="callModal('@Url.Action("Action_Set","Services",new { id=Model.Services.Service_Id })')">Start job</button>
+                        }
+                    }
+                    else
+                    {
                         <button class="btn btn-primary" onclick="callModal('@Url.Action("Action_Set","Services",new { id=Model.Services.Service_Id })')">Start job</button>
-                    </div>
+                    }
+                </div>
                 </div>
             </div>
         </div>

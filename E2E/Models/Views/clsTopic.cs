@@ -19,7 +19,6 @@ namespace E2E.Models.Views
             TopicComments = new List<TopicComments>();
             TopicFiles = new List<TopicFiles>();
             TopicGalleries = new List<TopicGalleries>();
-            TopicSections = new List<TopicSections>();
         }
     }
 }

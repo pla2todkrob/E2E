@@ -809,7 +809,7 @@ namespace E2E.Controllers
         public ActionResult _SortTopicAnnounce()
         {
             DateTime Todate = DateTime.Today;
-            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin ==  true).Count();
+            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin == true).Count();
 
             return PartialView("_SortTopicAnnounce", Count);
         }

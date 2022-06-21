@@ -12,10 +12,11 @@ namespace E2E.Models.Tables
         public Guid TopicSection_Id { get; set; }
         public Guid Topic_Id { get; set; }
         public virtual Topics Topics { get; set; }
-        [Required]
+        [Required,Display(Name ="Title")]
         public string TopicSection_Title { get; set; }
-        [Required]
+        [Required, Display(Name = "Description")]
         public string TopicSection_Description { get; set; }
+        [Display(Name ="Attach link")]
         public string TopicSection_Link { get; set; }
         public string TopicSection_Path { get; set; }
         public string TopicSection_Name { get; set; }

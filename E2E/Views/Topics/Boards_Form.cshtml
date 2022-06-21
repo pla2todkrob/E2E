@@ -29,6 +29,14 @@
             $("#mygallery").justifiedGallery({
                 rowHeight: 200
             });
+
+            $('#mediaSection').find('.mediaRow').each(function () {
+                var width = $(this).width();
+                if ($(this).find('.section_video').length) {
+                    $(this).find('.section_video').width(width);
+                }
+
+            });
         });
 
         $(document).on('submit', '#SaveComment', function (e) {
@@ -93,48 +101,65 @@ $(document).on('submit', '#SaveReply', function (e) {
                 }
             </ul>
         }
+        @if (Model.TopicSections.Count() > 0)
+        {
+            <div class="card mt-5">
+                <div class="card-body" id="mediaSection">
+                    @foreach (var item in Model.TopicSections)
+                    {
+                        <div class="row">
+                            <div class="col-md-4 col-lg-3 mediaRow">
+                                @if (item.TopicSection_ContentType.StartsWith("image"))
+                                {
+                                    <a href="@item.TopicSection_Path" target="_blank">
+                                        <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
+                                    </a>
 
-        <div class="card mt-5">
-            <div class="card-body">
-                @foreach (var item in Model.TopicSections)
-                {
-                    <div class="row">
-                        <div class="col-md-4 col-lg-3">
-                            @if (item.TopicSection_ContentType.StartsWith("image"))
-                            {
-                                <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
-                            }
-                            else
-                            {
-                                <video class="section_video">
-                                    <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
-                                </video>
-                            }
-                        </div>
-                        <div class="col-md-8 col-lg-9">
-                            <h5>@item.TopicSection_Title</h5>
-                            <small>@item.TopicSection_Description</small>
-                            <div class="d-flex">
-                                @if (string.IsNullOrEmpty(item.TopicSection_Link))
+                                }
+                                else
+                                {
+                                    <video class="section_video" controls>
+                                        <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
+                                    </video>
+                                }
+                            </div>
+                            <div class="col-md-8 col-lg-9">
+                                <div class="d-flex">
+                                    <h5>@item.TopicSection_Title</h5>
+                                    <span class="ml-auto">@item.Create</span>
+                                </div>
+
+                                <small>@item.TopicSection_Description</small>
+                                @if (!string.IsNullOrEmpty(item.TopicSection_Link))
                                 {
                                     <span>LINK: <a href="@item.TopicSection_Link">@item.TopicSection_Link</a></span>
                                 }
-                                <span class="ml-auto">@item.Create</span>
                             </div>
-                            
                         </div>
-                    </div>
-                    <hr />
-                }
+                        <hr />
+                    }
 
-                @if (Guid.Equals(Model.Topics.User_Id, userId))
-                {
-                    <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
-                }
+                    @if (Guid.Equals(Model.Topics.User_Id, userId))
+                    {
+                        <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
+                    }
 
+                </div>
             </div>
-        </div>
-        
+        }
+        else
+        {
+            if (Guid.Equals(Model.Topics.User_Id, userId))
+            {
+                <div class="card mt-5">
+                    <div class="card-body">
+                        <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
+                    </div>
+                </div>
+
+            }
+        }
+
 
     </div>
 
