@@ -118,8 +118,8 @@ namespace E2E.Models
                     topicSections.TopicSection_Extension = Path.GetExtension(file.FileName);
                     topicSections.TopicSection_Name = file.FileName;
 
-                    string fulldir = string.Format("Topic/{0}/{1}/", model.Topic_Id, model.TopicSection_Id);
-                    topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString("", file);
+                    string fulldir = string.Format("Topic/{0}/Media/", model.Topic_Id);
+                    topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString(fulldir, file);
                 }
                 db.TopicSections.Add(topicSections);
                 if (db.SaveChanges() > 0)

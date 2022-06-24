@@ -8,14 +8,12 @@ namespace E2E.Models.Views
 {
     public class clsHome
     {
-        public List<Topics> TopicAnnounce { get; set; }
-        public List<Topics> TopicWeek { get; set; }
+        public List<Topics> Topics { get; set; }
         public List<EForms> EForms { get; set; }
 
         public clsHome()
         {
-            TopicAnnounce = new List<Topics>();
-            TopicWeek = new List<Topics>();
+            Topics = new List<Topics>();
             EForms = new List<EForms>();
         }
     }

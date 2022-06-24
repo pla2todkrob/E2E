@@ -126,13 +126,14 @@ $(document).on('submit', '#SaveReply', function (e) {
                             <div class="col-md-8 col-lg-9">
                                 <div class="d-flex">
                                     <h5>@item.TopicSection_Title</h5>
-                                    <span class="ml-auto">@item.Create</span>
+                                    <small class="ml-auto">@item.Create</small>
                                 </div>
 
-                                <small>@item.TopicSection_Description</small>
+                                <p class="font-weight-lighter">@item.TopicSection_Description</p>
                                 @if (!string.IsNullOrEmpty(item.TopicSection_Link))
                                 {
-                                    <span>LINK: <a href="@item.TopicSection_Link">@item.TopicSection_Link</a></span>
+                                    <hr />
+                                    <p><em>LINK: <a href="@item.TopicSection_Link" target="_blank">@item.TopicSection_Link</a></em></p>
                                 }
                             </div>
                         </div>

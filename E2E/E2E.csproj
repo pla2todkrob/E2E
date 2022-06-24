@@ -837,6 +837,7 @@
     <Content Include="Views\Home\Manual_Table.cshtml" />
     <Content Include="Views\Shared\_LayoutHome.cshtml" />
     <Content Include="Views\Topics\Boards_Section.cshtml" />
+    <Content Include="Views\Services\All.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -238,7 +238,7 @@ namespace E2E.Controllers
                 clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).ToList();
                 clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
                 clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).ToList();
-                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).ToList();
+                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
             }
 
             return View(clsTopic);

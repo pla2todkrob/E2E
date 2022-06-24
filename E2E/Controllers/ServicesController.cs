@@ -54,6 +54,19 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
+        public ActionResult All()
+        {
+            try
+            {
+                return View(db.Services.OrderByDescending(o => o.Priority_Id).ThenBy(t => new { t.Service_DueDate, t.Create }).ToList());
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public ActionResult Form(Guid? id)
         {
             try

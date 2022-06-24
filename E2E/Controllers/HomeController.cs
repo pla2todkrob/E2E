@@ -19,9 +19,9 @@ namespace E2E.Controllers
 
             DateTime Last7 = DateTime.Today.AddDays(-7);
             clsHome clsHome = new clsHome();
-            clsHome.TopicAnnounce = db.Topics.Where(w => w.Topic_Pin).ToList();
-            clsHome.TopicWeek = db.Topics.Where(w => w.Create >= Last7).Take(10).OrderByDescending(o=>o.Count_View).ToList();
-            clsHome.EForms = db.EForms.Where(w => w.Create >= Last7).Take(10).OrderByDescending(o => o.Create).ToList();
+            clsHome.Topics = db.Topics.Where(w => w.Topic_Pin).OrderBy(o => o.Create).ToList();
+            clsHome.Topics.AddRange(db.Topics.Where(w => !w.Topic_Pin).Take(10).OrderByDescending(o=>o.Create).ToList());
+            clsHome.EForms = db.EForms.Take(10).OrderByDescending(o => o.Create).ToList();
             return View(clsHome);
         }
 

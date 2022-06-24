@@ -31,9 +31,9 @@
 
 <div class="row">
     <div class="col-12 col-lg-8 col-xl-9">
-        <h5>Topic announce</h5>
+        <h5>Latest Topics</h5>
         <div class="list-group mb-5">
-            @foreach (var item in Model.TopicAnnounce)
+            @foreach (var item in Model.Topics)
             {
 
                 <a href="@Url.Action("Boards_Form","Topics",new { id=item.Topic_Id})" class="list-group-item list-group-item-action flex-column align-items-start">
@@ -58,33 +58,7 @@
 
             }
         </div>
-        <h5>Topic last 7 days</h5>
-        <div class="list-group mb-5">
-            @foreach (var item in Model.TopicWeek)
-            {
-
-                <a href="@Url.Action("Boards_Form","Topics",new { id=item.Topic_Id})" class="list-group-item list-group-item-action flex-column align-items-start">
-
-                    <div class="d-flex w-100 justify-content-between">
-
-                        <h5 class="mb-1">@item.Topic_Title</h5>
-
-                        <small class="text-muted">@item.Create.ToString("d")</small>
-                    </div>
-                    @if (item.Topic_Content.Length > 200)
-                    {
-                        <small class="text-muted">@item.Topic_Content.Substring(0, 199)</small>
-                    }
-                    else
-                    {
-                        <small class="text-muted">@item.Topic_Content</small>
-                    }
-
-                </a>
-
-            }
-        </div>
-        <h5>E-Form last 7 days</h5>
+        <h5>Latest E-Form</h5>
         <div class="list-group mb-5">
             @foreach (var item in Model.EForms)
             {

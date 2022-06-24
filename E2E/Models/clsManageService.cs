@@ -89,24 +89,14 @@ namespace E2E.Models
 
                 if (id.HasValue)
                 {
-                    int roleId = db.Users
-                        .Where(w => w.User_Id == id.Value)
-                        .Select(s => s.Role_Id)
-                        .FirstOrDefault();
-
-                    if (roleId == 2)
-                    {
-                        Guid? deptId = db.Users
+                    Guid? deptId = db.Users
                         .Where(w => w.User_Id == id.Value)
                         .Select(s => s.Master_Processes.Master_Sections.Department_Id)
                         .FirstOrDefault();
-                        if (deptId.HasValue)
-                        {
-                            query = query.Where(w => (w.Department_Id == deptId.Value && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
-                        }
+                    if (deptId.HasValue)
+                    {
+                        query = query.Where(w => (w.Department_Id == deptId.Value && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
                     }
-
-                    
                 }
 
                 return query;
