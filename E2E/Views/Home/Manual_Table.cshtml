@@ -12,7 +12,7 @@
                 @foreach (var item in Model)
                 {
                     <li>
-                        <small><a href="@item.Manual_Path" target="_blank">@item.Manual_Name</a></small>
+                        <small><a href="@item.Manual_Path" target="_blank" download="@item.Manual_Name">@item.Manual_Name</a></small>
                     </li>
                 }
             </ul>

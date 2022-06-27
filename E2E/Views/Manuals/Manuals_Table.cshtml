@@ -59,29 +59,35 @@
                         <th>
                             @Html.DisplayNameFor(m => m.Users.User_Code)
                         </th>
+                        <th>
+                            @Html.DisplayNameFor(m => m.Ver)
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(i => item.Create)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.Manual_Name)
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(i => item.Create)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Manual_Name)
 
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.System_Language.Language_Name)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.System_ManualType.Manual_TypeName)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(i => item.Users.User_Code)
-                            </td>
-                        </tr>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.System_Language.Language_Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.System_ManualType.Manual_TypeName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Users.User_Code)
+                        </td>
+                        <th>
+                            @Html.DisplayFor(m => item.Ver)
+                        </th>
+                    </tr>
                     }
 
                 </tbody>

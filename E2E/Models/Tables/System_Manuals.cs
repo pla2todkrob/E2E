@@ -20,6 +20,7 @@ namespace E2E.Models.Tables
         public virtual System_Language System_Language { get; set; }
         public virtual Users Users { get; set; }
         public Guid User_Id { get; set; }
+        public int Ver { get; set; }
         public DateTime Create { get; set; }
 
         public System_Manuals()
