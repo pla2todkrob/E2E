@@ -63,6 +63,8 @@ namespace E2E.Controllers
                         system_Manuals.Language_Id = model.Language_Id;
                         system_Manuals.Manual_Type_Id = model.Manual_Type_Id;
                         system_Manuals.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                        system_Manuals.Ver = db.System_Manuals.Where(w=>w.Language_Id == model.Language_Id & w.Manual_Type_Id == model.Manual_Type_Id).Count() +1;
+
 
 
                         db.System_Manuals.Add(system_Manuals);

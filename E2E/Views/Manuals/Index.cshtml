@@ -22,7 +22,7 @@
 
         function reloadTable() {
 
-            callTable_NoSort('@Url.Action("Manuals_Table", "Manuals")', true, 0).then(function () {
+            callTable('@Url.Action("Manuals_Table", "Manuals")', true,false, 0).then(function () {
 
             });
         }
