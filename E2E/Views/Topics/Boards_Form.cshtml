@@ -29,14 +29,6 @@
             $("#mygallery").justifiedGallery({
                 rowHeight: 200
             });
-
-            $('#mediaSection').find('.mediaRow').each(function () {
-                var width = $(this).width();
-                if ($(this).find('.section_video').length) {
-                    $(this).find('.section_video').width(width);
-                }
-
-            });
         });
 
         $(document).on('submit', '#SaveComment', function (e) {
@@ -118,25 +110,38 @@ $(document).on('submit', '#SaveReply', function (e) {
                                 }
                                 else
                                 {
-                                    <video class="section_video" controls>
-                                        <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
-                                    </video>
+                                    <div class="embed-responsive embed-responsive-16by9">
+                                        <iframe class="embed-responsive-item" src="@item.TopicSection_Path" allowfullscreen></iframe>
+                                    </div>
                                 }
                             </div>
                             <div class="col-md-8 col-lg-9">
-                                <div class="d-flex">
-                                    <h5>@item.TopicSection_Title</h5>
-                                    <small class="ml-auto">@item.Create</small>
+                                <div class="d-flex justify-content-between flex-column h-100">
+                                    <div>
+                                        <div class="d-flex">
+                                            <h5>@item.TopicSection_Title</h5>
+                                            <small class="ml-auto">@item.Create</small>
+                                        </div>
+
+                                        <p class="font-weight-lighter PreLine">@item.TopicSection_Description</p>
+
+                                        @if (!string.IsNullOrEmpty(item.TopicSection_Link))
+                                        {
+                                            <hr />
+                                            <p><em>LINK: <a href="@item.TopicSection_Link" target="_blank">@item.TopicSection_Link</a></em></p>
+                                        }
+                                    </div>
+                                    <div class="text-right">
+                                        @if (Guid.Equals(Model.Topics.User_Id, userId))
+                                        {
+                                            <button class="btn " type="button" onclick="callModal('@Url.Action("Boards_Section","Topics",new {  topicId=Html.ValueFor(w=>item.Topic_Id),id = Html.ValueFor(w=>item.TopicSection_Id)})')"><i class="fa fa-pencil"></i></button>@*Edit*@
+                                        }
+                                    </div>
                                 </div>
 
-                                <p class="font-weight-lighter PreLine">@item.TopicSection_Description</p>
-                                @if (!string.IsNullOrEmpty(item.TopicSection_Link))
-                                {
-                                    <hr />
-                                    <p><em>LINK: <a href="@item.TopicSection_Link" target="_blank">@item.TopicSection_Link</a></em></p>
-                                }
                             </div>
                         </div>
+
                         <hr />
                     }
 

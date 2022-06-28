@@ -89,13 +89,13 @@ namespace E2E.Models
 
                 if (id.HasValue)
                 {
-                    Guid? deptId = db.Users
+                    string deptName = db.Users
                         .Where(w => w.User_Id == id.Value)
-                        .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                         .FirstOrDefault();
-                    if (deptId.HasValue)
+                    if (!string.IsNullOrEmpty(deptName))
                     {
-                        query = query.Where(w => (w.Department_Id == deptId.Value && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
+                        query = query.Where(w => (w.Master_Departments.Department_Name == deptName && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
                     }
                 }
 
@@ -158,12 +158,12 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                Guid departmentId = db.Users
+                string departmentName = db.Users
                     .Where(w => w.User_Id == id)
-                    .Select(s => s.Master_Processes.Master_Sections.Department_Id.Value)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
                 List<Guid> userIds = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId)
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == departmentName)
                     .Select(s => s.User_Id)
                     .ToList();
                 IQueryable<Services> query = db.Services
@@ -210,13 +210,13 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                Guid departmentId = db.Users
+                string departmentName = db.Users
                     .Where(w => w.User_Id == id)
-                    .Select(s => s.Master_Processes.Master_Sections.Department_Id.Value)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
 
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Department_Id == departmentId);
+                    .Where(w => w.Master_Departments.Department_Name == departmentName);
 
                 return query;
             }
@@ -413,9 +413,9 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                Guid deptId = db.Users.Find(id).Master_Processes.Master_Sections.Department_Id.Value;
+                string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                 List<Guid> userIdList = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId).Select(s => s.User_Id).ToList();
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
                 return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
             }
             catch (Exception)
