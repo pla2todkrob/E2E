@@ -997,6 +997,59 @@ namespace E2E.Models
             }
         }
 
+        public bool Delete_Boards_Section(Guid id)
+        {
+            try
+            {
+            
+                bool res = new bool();
+
+                var TopicSections = db.TopicSections.Where(w => w.TopicSection_Id == id).FirstOrDefault();
+
+                db.TopicSections.Remove(TopicSections);
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                    if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
+                    {
+                        res = ftp.Ftp_DeleteFile(TopicSections.TopicSection_Path);
+                    }
+                
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Delete_Boards_Section_Attached(Guid id)
+        {
+            try
+            {
+
+                bool res = new bool();
+
+                var TopicSections = db.TopicSections.Where(w => w.TopicSection_Id == id).FirstOrDefault();
+
+                TopicSections.TopicSection_Path = string.Empty;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = ftp.Ftp_DeleteFile(TopicSections.TopicSection_Path);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 
 }
