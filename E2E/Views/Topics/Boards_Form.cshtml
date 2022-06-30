@@ -100,19 +100,22 @@ $(document).on('submit', '#SaveReply', function (e) {
                     @foreach (var item in Model.TopicSections)
                     {
                         <div class="row">
-                            <div class="col-md-4 col-lg-3 mediaRow">
-                                @if (item.TopicSection_ContentType.StartsWith("image"))
+                            <div class="col-md-4 col-lg-3 mediaRow" id="@item.TopicSection_Id">
+                                @if (!string.IsNullOrEmpty(item.TopicSection_ContentType))
                                 {
-                                    <a href="@item.TopicSection_Path" target="_blank">
-                                        <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
-                                    </a>
+                                    if (item.TopicSection_ContentType.StartsWith("image"))
+                                    {
+                                        <a href="@item.TopicSection_Path" target="_blank">
+                                            <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
+                                        </a>
 
-                                }
-                                else
-                                {
-                                    <div class="embed-responsive embed-responsive-16by9">
-                                        <iframe class="embed-responsive-item" src="@item.TopicSection_Path" allowfullscreen></iframe>
-                                    </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="embed-responsive embed-responsive-16by9">
+                                            <iframe class="embed-responsive-item" src="@item.TopicSection_Path" allowfullscreen></iframe>
+                                        </div>
+                                    }
                                 }
                             </div>
                             <div class="col-md-8 col-lg-9">

@@ -80,6 +80,12 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
         async: true,
         success: function (res) {
             $(blockId).html(res);
+            $(blockId).find('select').each(function () {
+                $(this).select2({
+                    theme: 'bootstrap4',
+                    width: '100%'
+                });
+            });
             $(blockId).find('table').each(function () {
                 if (hasDate && hasButton) {
                     $(this).DataTable({
@@ -537,4 +543,39 @@ function setDangerByIdReTable(urlAjax) {
                 return false;
             }
         });
+}
+
+function callDeleteIMG_SC(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "Once you delete this information, you cannot recover it.",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((cf) => {
+        if (cf) {
+            $.ajax({
+                url: urlAjax,
+                async: true,
+                success: function (res) {
+                    swal({
+                        title: res.title,
+                        text: res.text,
+                        icon: res.icon,
+                        button: res.button,
+                        dangerMode: res.dangerMode
+                    }).then(function () {
+                        if (res.icon == 'success') {
+                            var id = res.option;
+                        
+                            $('#MediaSC').empty();
+                            $('#' + id).empty();
+                        }
+                    });
+                }
+            });
+
+            return false;
+        }
+    });
 }

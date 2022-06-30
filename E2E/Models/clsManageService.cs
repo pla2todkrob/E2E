@@ -462,6 +462,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                model.Create_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 Services services = new Services();
                 services = db.Services.Find(model.Service_Id);
                 if (services != null)

@@ -28,12 +28,12 @@ namespace E2E.Controllers
 
             ViewBag.Manual_TypeName = SelectListItems_Manual_TypeName();
 
-           var system_Manuals = db.System_Manuals.OrderByDescending(o => o.Create).ToList();
+           var system_Manuals = db.Manuals.OrderByDescending(o => o.Create).ToList();
             return View(system_Manuals);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Manuals_Table(System_Manuals model)
+        public ActionResult Manuals_Table(Manuals model)
         {
             clsSwal swal = new clsSwal();
             bool res = new bool();
@@ -44,7 +44,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        System_Manuals system_Manuals = new System_Manuals();
+                        Manuals system_Manuals = new Manuals();
 
                         if (files[0].ContentLength != 0)
                         {
@@ -63,11 +63,11 @@ namespace E2E.Controllers
                         system_Manuals.Language_Id = model.Language_Id;
                         system_Manuals.Manual_Type_Id = model.Manual_Type_Id;
                         system_Manuals.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
-                        system_Manuals.Ver = db.System_Manuals.Where(w=>w.Language_Id == model.Language_Id & w.Manual_Type_Id == model.Manual_Type_Id).Count() +1;
+                        system_Manuals.Ver = db.Manuals.Where(w=>w.Language_Id == model.Language_Id & w.Manual_Type_Id == model.Manual_Type_Id).Count() +1;
 
 
 
-                        db.System_Manuals.Add(system_Manuals);
+                        db.Manuals.Add(system_Manuals);
                         if (db.SaveChanges() > 0)
                         {
                             res = true;

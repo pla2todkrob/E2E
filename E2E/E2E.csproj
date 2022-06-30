@@ -19,11 +19,10 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44325</IISExpressSSLPort>
+    <IISExpressSSLPort>44316</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>
-    </IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -199,7 +198,7 @@
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
     <Compile Include="Models\Tables\System_Language.cs" />
-    <Compile Include="Models\Tables\System_Manuals.cs" />
+    <Compile Include="Models\Tables\Manuals.cs" />
     <Compile Include="Models\Tables\System_ManualType.cs" />
     <Compile Include="Models\Tables\Master_Divisions.cs" />
     <Compile Include="Models\Tables\Master_Grades.cs" />
