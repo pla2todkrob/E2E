@@ -274,6 +274,7 @@ namespace E2E.Controllers
                         swal.icon = "success";
                         swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
                         swal.title = "Successful";
+                        swal.option = id;
                     }
                     else
                     {
@@ -329,8 +330,12 @@ namespace E2E.Controllers
             {
                 TopicSections topicSections = new TopicSections();
                 topicSections.Topic_Id = topicId;
+
+                ViewBag.IsNew = true;
+
                 if (id.HasValue)
                 {
+                    ViewBag.IsNew = false;
                     topicSections = db.TopicSections.Find(id);
                 }
                 return View(topicSections);

@@ -27,7 +27,7 @@ namespace E2E.Controllers
 
         public ActionResult Manual_Table()
         {
-            List<System_Manuals> system_Manuals = new List<System_Manuals>();
+            List<Manuals> system_Manuals = new List<Manuals>();
             List<Guid> List_Language = db.System_Language.Select(s => s.Language_Id).ToList();
             List<Guid> List_ManualType = db.System_ManualType.Select(s => s.Manual_Type_Id).ToList();
 
@@ -35,7 +35,7 @@ namespace E2E.Controllers
             {
                 foreach (var item2 in List_Language)
                 {
-                    var CHK = db.System_Manuals.Where(w => w.Manual_Type_Id == item1 & w.Language_Id == item2).OrderByDescending(o => o.Create).FirstOrDefault();
+                    var CHK = db.Manuals.Where(w => w.Manual_Type_Id == item1 & w.Language_Id == item2).OrderByDescending(o => o.Create).FirstOrDefault();
 
                     if (CHK != null)
                     {

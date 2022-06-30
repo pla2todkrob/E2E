@@ -140,6 +140,31 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                TopicSections topicSections = new TopicSections();
+                topicSections = db.TopicSections
+                    .Where(w => w.TopicSection_Id == model.TopicSection_Id)
+                    .FirstOrDefault();
+
+                topicSections.TopicSection_Link = model.TopicSection_Link;
+                topicSections.TopicSection_Title = model.TopicSection_Title;
+                topicSections.TopicSection_Description = model.TopicSection_Description;
+                if (files[0].ContentLength > 0)
+                {
+                    HttpPostedFileBase file = files[0];
+                    topicSections.TopicSection_ContentType = file.ContentType;
+                    topicSections.TopicSection_Extension = Path.GetExtension(file.FileName);
+                    topicSections.TopicSection_Name = file.FileName;
+
+                    string fulldir = string.Format("Topic/{0}/Media/", model.Topic_Id);
+                    topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString(fulldir, file);
+                }
+                topicSections.Update = DateTime.Now;
+
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
 
                 return res;
             }
@@ -1036,10 +1061,18 @@ namespace E2E.Models
                 var TopicSections = db.TopicSections.Where(w => w.TopicSection_Id == id).FirstOrDefault();
 
                 TopicSections.TopicSection_Path = string.Empty;
+                TopicSections.TopicSection_Name = string.Empty;
+                TopicSections.TopicSection_Extension = string.Empty;
+                TopicSections.TopicSection_ContentType = string.Empty;
 
+                res = true;
                 if (db.SaveChanges() > 0)
                 {
-                    res = ftp.Ftp_DeleteFile(TopicSections.TopicSection_Path);
+                    if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
+                    {
+                        res = ftp.Ftp_DeleteFile(TopicSections.TopicSection_Path);
+                    }
+             
                 }
 
                 return res;

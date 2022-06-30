@@ -6,7 +6,7 @@ using System.Web;
 
 namespace E2E.Models.Tables
 {
-    public class System_Manuals
+    public class Manuals
     {
         [Key]
         public Guid Manual_Id { get; set; }
@@ -23,7 +23,7 @@ namespace E2E.Models.Tables
         public int Ver { get; set; }
         public DateTime Create { get; set; }
 
-        public System_Manuals()
+        public Manuals()
         {
             Manual_Id = Guid.NewGuid();
             Create = DateTime.Now;
