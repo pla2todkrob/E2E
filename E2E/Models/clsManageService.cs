@@ -983,7 +983,8 @@ namespace E2E.Models
                         
                         if (Services_Comment(serviceComments))
                         {
-                            foreach (var item in db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id))
+                            List<ServiceTeams> serviceTeams = db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToList();
+                            foreach (var item in serviceTeams)
                             {
                                 Service_DeleteTeam(item.Team_Id);
                             }
@@ -1368,8 +1369,8 @@ namespace E2E.Models
                 bool res = new bool();
                 ServiceTeams serviceTeams = new ServiceTeams();
                 serviceTeams = db.ServiceTeams.Find(id);
-                Guid serviceId = serviceTeams.Service_Id;
                 string userName = master.Users_GetInfomation(serviceTeams.User_Id);
+                Guid serviceId = serviceTeams.Service_Id;
                 db.Entry(serviceTeams).State = System.Data.Entity.EntityState.Deleted;
                 if (db.SaveChanges() > 0)
                 {
