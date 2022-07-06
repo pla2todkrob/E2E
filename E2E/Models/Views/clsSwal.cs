@@ -18,7 +18,7 @@ namespace E2E.Models.Views
         public string button { get; set; }
         public bool dangerMode { get; set; }
         public string icon { get; set; }
-        public object option { get; set; }
+        public dynamic option { get; set; }
         public string text { get; set; }
         public string title { get; set; }
     }

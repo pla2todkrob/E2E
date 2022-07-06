@@ -3,6 +3,9 @@
     $(window).resize(function () {
         adjustHeight();
     });
+
+    
+
 });
 
 async function adjustHeight() {
@@ -41,10 +44,9 @@ function callModalService(urlAjax, bigSize = false) {
                     width: '100%'
                 }).trigger('change.select2');
             });
-            
-            $('#User_Id').on('select2:select',function (e) {
+
+            $('#User_Id').on('select2:select', function (e) {
                 getSelectOp(baseUrl + '/Services/GetServiceRef', e.params.data.id, '#Ref_Service_Id');
-                
             });
 
             $('#Priority_Id').on('select2:select', function (e) {
