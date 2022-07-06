@@ -16,8 +16,6 @@ namespace E2E.Controllers
 
         public ActionResult Index()
         {
-
-            DateTime Last7 = DateTime.Today.AddDays(-7);
             clsHome clsHome = new clsHome();
             clsHome.Topics = db.Topics.Where(w => w.Topic_Pin).OrderBy(o => o.Create).ToList();
             clsHome.Topics.AddRange(db.Topics.Where(w => !w.Topic_Pin).Take(10).OrderByDescending(o=>o.Create).ToList());

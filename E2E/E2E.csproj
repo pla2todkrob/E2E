@@ -19,10 +19,11 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44316</IISExpressSSLPort>
+    <IISExpressSSLPort>44325</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
+    <IISExpressUseClassicPipelineMode>
+    </IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -810,7 +811,7 @@
     <Content Include="Views\Shared\_NavDepartment.cshtml" />
     <Content Include="Views\Services\Approve_Table_Waiting.cshtml" />
     <Content Include="Views\Services\Approve_Table_Approved.cshtml" />
-    <Content Include="Views\Services\Action_Set.cshtml" />
+    <Content Include="Views\Services\SetInProgress.cshtml" />
     <Content Include="Views\Services\MyTask_Table.cshtml" />
     <Content Include="Views\Services\ServiceInfomation.cshtml" />
     <Content Include="Views\EForms\Index.cshtml" />

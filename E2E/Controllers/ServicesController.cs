@@ -559,7 +559,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
-        public ActionResult Action_Set(Guid id)
+        public ActionResult SetInProgress(Guid id)
         {
             try
             {
@@ -571,7 +571,7 @@ namespace E2E.Controllers
             }
         }
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Action_Set(Services model)
+        public ActionResult SetInProgress(Services model)
         {
             clsSwal swal = new clsSwal();
             if (ModelState.IsValid)
