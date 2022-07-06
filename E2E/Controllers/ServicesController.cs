@@ -15,6 +15,7 @@ namespace E2E.Controllers
     {
         private clsManageService data = new clsManageService();
         private clsContext db = new clsContext();
+
         public ActionResult Index()
         {
             try
@@ -32,6 +33,7 @@ namespace E2E.Controllers
 
             return View();
         }
+
         public ActionResult Index_Table_WaitCommit()
         {
             try
@@ -43,6 +45,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult Index_Table_WaitAction()
         {
             try
@@ -63,10 +66,10 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public ActionResult Form(Guid? id)
         {
             try
@@ -92,6 +95,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Form(Services model)
         {
@@ -175,6 +179,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Form_Forward(Guid id)
         {
             try
@@ -188,10 +193,10 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Form_Forward(Services model)
         {
@@ -202,7 +207,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.Services_Save(model, Request.Files,true))
+                        if (data.Services_Save(model, Request.Files, true))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -274,6 +279,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult _File(Guid id)
         {
             try
@@ -285,6 +291,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult DeleteFile(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -336,6 +343,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Commit(Guid id)
         {
             try
@@ -348,6 +356,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Commit(clsServices model)
         {
@@ -431,6 +440,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult Commit_Required(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -487,6 +497,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Commit_ToDepartment(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -543,6 +554,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         public ActionResult Action(Guid id)
         {
             try
@@ -559,6 +571,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult SetInProgress(Guid id)
         {
             try
@@ -570,6 +583,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetInProgress(Services model)
         {
@@ -654,10 +668,12 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult AllTask()
         {
             return View();
         }
+
         public ActionResult AllTask_Table()
         {
             try
@@ -666,14 +682,15 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public ActionResult AllRequest()
         {
             return View();
         }
+
         public ActionResult AllRequest_Table()
         {
             try
@@ -682,14 +699,15 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public ActionResult Approve()
         {
             return View();
         }
+
         public ActionResult Approve_Table_Waiting()
         {
             try
@@ -701,6 +719,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult Approve_Table_Approved()
         {
             try
@@ -712,6 +731,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult Approve_Form(Guid id)
         {
             try
@@ -728,6 +748,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult Approve_Set(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -785,10 +806,12 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult MyRequest()
         {
             return View();
         }
+
         public ActionResult MyRequest_Table()
         {
             try
@@ -800,10 +823,12 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult MyTask()
         {
             return View();
         }
+
         public ActionResult MyTask_Table()
         {
             try
@@ -815,6 +840,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult ServiceInfomation(Guid id)
         {
             try
@@ -831,6 +857,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult SetReject(Guid id)
         {
             try
@@ -842,10 +869,10 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetReject(ServiceComments model)
         {
@@ -904,6 +931,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetComplete(Guid id)
         {
             ServiceComments serviceComments = new ServiceComments();
@@ -911,7 +939,8 @@ namespace E2E.Controllers
 
             return View(serviceComments);
         }
-        [HttpPost,ValidateAntiForgeryToken]
+
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetComplete(ServiceComments model)
         {
             clsSwal swal = new clsSwal();
@@ -968,6 +997,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetCancel(Guid id)
         {
             ServiceComments serviceComments = new ServiceComments();
@@ -975,6 +1005,7 @@ namespace E2E.Controllers
 
             return View(serviceComments);
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetCancel(ServiceComments model)
         {
@@ -1033,6 +1064,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetReturnJob(Guid id)
         {
             ServiceComments serviceComments = new ServiceComments();
@@ -1040,6 +1072,7 @@ namespace E2E.Controllers
 
             return View(serviceComments);
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetReturnJob(ServiceComments model)
         {
@@ -1097,6 +1130,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetPending(ServiceComments model)
         {
@@ -1154,6 +1188,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetFreePoint(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -1210,6 +1245,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetClose(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -1266,16 +1302,18 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult RequestChangeDue()
         {
             return View();
         }
+
         public ActionResult RequestChangeDue_Form(Guid id)
         {
             return View(data.ServiceChangeDueDate_New(id));
         }
 
-        [HttpPost,ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult RequestChangeDue_Form(ServiceChangeDueDate model)
         {
             clsSwal swal = new clsSwal();
@@ -1332,6 +1370,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult RequestChangeDue_Table()
         {
             try
@@ -1340,10 +1379,10 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public ActionResult RequestChangeDue_Reject(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -1400,6 +1439,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult RequestChangeDue_Accept(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -1456,6 +1496,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult RequestChangeDue_Cancel(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -1512,7 +1553,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-        
+
         public ActionResult _DeleteTeam(Guid id)
         {
             clsSwal swal = new clsSwal();
@@ -1569,6 +1610,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult _AddTeam(Guid id)
         {
             try
@@ -1580,11 +1622,10 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
-            
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult _AddTeam(clsServiceTeams model)
         {
@@ -1642,6 +1683,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult _RefService(Guid id)
         {
             try
@@ -1653,6 +1695,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult _CommentHistory(Guid id)
         {
             try
@@ -1664,6 +1707,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult _Comment(Guid id)
         {
             try
@@ -1677,6 +1721,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult _Comment(ServiceComments model)
         {
@@ -1689,6 +1734,8 @@ namespace E2E.Controllers
                     {
                         scope.Complete();
                         swal.icon = "success";
+
+                        swal.option = model;
                     }
                     else
                     {
@@ -1732,6 +1779,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult GetPriorityDateRange(int id)
         {
             try
@@ -1747,6 +1795,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult GetServiceRef(Guid id)
         {
             try

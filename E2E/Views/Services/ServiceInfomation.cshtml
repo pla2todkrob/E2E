@@ -19,6 +19,51 @@
                 });
             }
             reloadComment();
+
+            chat = $.connection.clsChatHub;
+
+            // Declare a function on the chat hub so the server can invoke it
+            chat.client.addChatMessage = function (message) {
+                reloadComment();
+            };
+
+            $.connection.hub.start(function () {
+                chat.server.joinGroup($('#Services_Service_Id').val());
+            });
+        });
+
+        $(document).on('submit', '#CommentForm', function (e) {
+            e.preventDefault();
+            var fd = new FormData(this);
+
+            $.ajax({
+                url: baseUrl + '/Services/_Comment',
+                method: "POST",
+                async: true,
+                data: fd,
+                processData: false,
+                contentType: false,
+                traditional: true,
+                success: function (res) {
+                    console.log(res.option.Service_Id);
+                    if (res.icon != 'success') {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        });
+                    }
+                    else {
+                        
+                        $.connection.hub.start().done(function () {
+                            chat.server.sendMessageToGroup(res.option.Service_Id, res.option.Comment_Content);
+                        });
+                    }
+                }
+            });
+            return false;
         });
 
         function reloadComment() {
@@ -29,37 +74,6 @@
             });
 
         }
-
-        $(document).on('submit', '#CommentForm', function (e) {
-            e.preventDefault();
-            var fd = new FormData(this);
-
-            $.ajax({
-                url: '@Url.Action("_Comment", "Services")',
-                method: "POST",
-                async: true,
-                data: fd,
-                processData: false,
-                contentType: false,
-                traditional: true,
-                success: function (res) {
-                    if (res.icon == 'success') {
-                        reloadComment();
-                    }
-                    else {
-                        swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
-                        });
-                    }
-
-                }
-            });
-            return false;
-        });
 
         $(document).on('submit', '#CompleteForm', function (e) {
             e.preventDefault();
@@ -102,6 +116,7 @@
     <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
+@Html.HiddenFor(m=>m.Services.Service_Id)
 <div class="row mb-3">
     <div class="col-lg-7 mb-3 mb-lg-0">
         <div class="card" id="serviceInfo">
@@ -174,7 +189,6 @@
                                                     {
                                                         <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
                                                     }
-
                                                 </div>
                                             </li>
                                         }
@@ -236,7 +250,6 @@
             {
                 <div class="card-footer" id="commentNew"></div>
             }
-
         </div>
     </div>
 </div>

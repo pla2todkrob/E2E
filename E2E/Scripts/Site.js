@@ -3,7 +3,7 @@
 
 //For develop
 var baseUrl = '';
-
+var chat;
 $(function () {
     var classEmpty = true;
     var url = window.location.pathname,
@@ -231,7 +231,7 @@ function callModalTable(urlAjax, bigSize = false) {
     });
     return false;
 }
-function callSubmitModal(urlAjax,form) {
+function callSubmitModal(urlAjax, form) {
     swal({
         title: "Are you sure?",
         text: "This information is saved to the database.",
@@ -270,7 +270,7 @@ function callSubmitModal(urlAjax,form) {
     return false;
 }
 
-function callSubmitPage(urlAjax,form) {
+function callSubmitPage(urlAjax, form) {
     swal({
         title: "Are you sure?",
         text: "This information is saved to the database.",
@@ -307,7 +307,7 @@ function callSubmitPage(urlAjax,form) {
 
     return false;
 }
-function callSubmitRedirect(urlAjax,form, urlRedirect) {
+function callSubmitRedirect(urlAjax, form, urlRedirect) {
     swal({
         title: "Are you sure?",
         text: "This information is saved to the database.",
@@ -378,7 +378,6 @@ function callDeleteItem(urlAjax, reloadPage = false) {
                             }
                         }
                     });
-                    
                 }
             });
 
@@ -439,7 +438,6 @@ function setSuccessByIdRePage(urlAjax) {
                                 location.reload();
                             }
                         });
-
                     }
                 });
                 return false;
@@ -453,7 +451,7 @@ function setDangerByIdRePage(urlAjax) {
         text: "If is confirmed, it cannot be reversed.",
         icon: "warning",
         buttons: true,
-        dangerMode:true
+        dangerMode: true
     })
         .then((cf) => {
             if (cf) {
@@ -472,7 +470,6 @@ function setDangerByIdRePage(urlAjax) {
                                 location.reload();
                             }
                         });
-
                     }
                 });
                 return false;
@@ -504,7 +501,6 @@ function setSuccessByIdReTable(urlAjax) {
                                 reloadTable();
                             }
                         });
-
                     }
                 });
                 return false;
@@ -518,7 +514,7 @@ function setDangerByIdReTable(urlAjax) {
         text: "If is confirmed, it cannot be reversed.",
         icon: "warning",
         buttons: true,
-        dangerMode:true
+        dangerMode: true
     })
         .then((cf) => {
             if (cf) {
@@ -537,7 +533,6 @@ function setDangerByIdReTable(urlAjax) {
                                 reloadTable();
                             }
                         });
-
                     }
                 });
                 return false;
@@ -567,7 +562,7 @@ function callDeleteIMG_SC(urlAjax) {
                     }).then(function () {
                         if (res.icon == 'success') {
                             var id = res.option;
-                        
+
                             $('#MediaSC').empty();
                             $('#' + id).empty();
                         }
