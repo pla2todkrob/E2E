@@ -67,6 +67,128 @@ namespace E2E.Models
                     db.SaveChanges();
                 }
             }
+            else
+            {
+                Master_LineWorks master_LineWorks = new Master_LineWorks();
+                master_LineWorks.Active = true;
+                master_LineWorks.Authorize_Id = 3;
+                master_LineWorks.Code = 0;
+                master_LineWorks.LineWork_Name = "E-Engineering";
+
+                db.Master_LineWorks.Add(master_LineWorks);
+
+                if (db.SaveChanges() > 0)
+                {
+                    Master_Grades master_Grades = new Master_Grades();
+                    master_Grades.Active = true;
+                    master_Grades.Code = 0;
+                    master_Grades.Grade_Name = "E8";
+                    master_Grades.Grade_Position = "Engineer";
+                    master_Grades.LineWork_Id = master_LineWorks.LineWork_Id;
+                    db.Master_Grades.Add(master_Grades);
+                    if (db.SaveChanges() > 0)
+                    {
+                        Master_Plants master_Plants = new Master_Plants();
+                        master_Plants.Active = true;
+                        master_Plants.Code = 0;
+                        master_Plants.Plant_Name = "Bangpoo12";
+
+                        db.Master_Plants.Add(master_Plants);
+                        if (db.SaveChanges() > 0)
+                        {
+                            Master_Divisions master_Divisions = new Master_Divisions();
+                            master_Divisions.Active = true;
+                            master_Divisions.Code = 0;
+                            master_Divisions.Division_Name = "Administrative";
+                            master_Divisions.Plant_Id = master_Plants.Plant_Id;
+                            db.Master_Divisions.Add(master_Divisions);
+
+                            if (db.SaveChanges() > 0)
+                            {
+                                Master_Departments master_Departments = new Master_Departments();
+                                master_Departments.Active = true;
+                                master_Departments.Code = 0;
+                                master_Departments.Department_Name = "Information Technology";
+                                master_Departments.Division_Id = master_Divisions.Division_Id;
+
+                                db.Master_Departments.Add(master_Departments);
+
+                                if (db.SaveChanges() > 0)
+                                {
+                                    Master_Sections master_Sections = new Master_Sections();
+                                    master_Sections.Active = true;
+                                    master_Sections.Code = 0;
+                                    master_Sections.Section_Name = "SAP & Application";
+                                    master_Sections.Department_Id = master_Departments.Department_Id;
+
+                                    db.Master_Sections.Add(master_Sections);
+
+                                    if (db.SaveChanges() > 0)
+                                    {
+                                        Master_Processes master_Processes = new Master_Processes();
+                                        master_Processes.Active = true;
+                                        master_Processes.Code = 0;
+                                        master_Processes.Process_Name = "Information Technology Bangpoo";
+                                        master_Processes.Section_Id = master_Sections.Section_Id;
+
+                                        db.Master_Processes.Add(master_Processes);
+
+                                        if (db.SaveChanges() > 0)
+                                        {
+                                            Users users = new Users();
+                                            users.Active = true;
+                                            users.Grade_Id = master_Grades.Grade_Id;
+                                            users.Process_Id = master_Processes.Process_Id;
+
+                                            users.Role_Id = 1;
+                                            users.User_Code = "1640488";
+                                            users.User_CostCenter = "41100";
+                                            users.User_Email = "nopparat@thaiparker.co.th";
+                                            users.User_Point = 50;
+                                            users.YearSetPoint = DateTime.Today.Year;
+
+                                            db.Users.Add(users);
+
+                                            if (db.SaveChanges() > 0)
+                                            {
+                                                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
+                                                system_Prefix_EN.Prefix_EN_Name = "Mr.";
+
+                                                db.System_Prefix_ENs.Add(system_Prefix_EN);
+
+                                                if (db.SaveChanges() > 0)
+                                                {
+                                                    System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
+                                                    system_Prefix_TH.Prefix_TH_Name = "นาย";
+
+                                                    db.System_Prefix_THs.Add(system_Prefix_TH);
+
+                                                    if (db.SaveChanges() > 0)
+                                                    {
+                                                        UserDetails userDetails = new UserDetails();
+
+                                                        userDetails.Detail_EN_FirstName = "Nopparat";
+                                                        userDetails.Detail_EN_LastName = "Thongnuapad";
+                                                        userDetails.Detail_TH_FirstName = "นพรัตน์";
+                                                        userDetails.Detail_TH_LastName = "ทองเนื้อแปด";
+                                                        userDetails.Prefix_EN_Id = system_Prefix_EN.Prefix_EN_Id;
+                                                        userDetails.Prefix_TH_Id = system_Prefix_TH.Prefix_TH_Id;
+                                                        userDetails.User_Id = users.User_Id;
+
+                                                        db.UserDetails.Add(userDetails);
+
+                                                        db.SaveChanges();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static void Authorize_Save()
