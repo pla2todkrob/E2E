@@ -1284,7 +1284,9 @@ namespace E2E.Controllers
                                             {
                                                 for (int row = 1; row <= sheet.Dimension.End.Row; row++)
                                                 {
-                                                    if (row > 3)
+                                                    int startData = 0;
+                                                    var recNo = sheet.Cells[row, 1].Text;
+                                                    if (int.TryParse(recNo, out startData))
                                                     {
                                                         if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
                                                         {
