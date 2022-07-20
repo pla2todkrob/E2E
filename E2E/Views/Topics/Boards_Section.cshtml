@@ -36,7 +36,9 @@
                         else
                         {
                             <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="@Model.TopicSection_Path" allowfullscreen></iframe>
+                                <video class="embed-responsive-item"  controls>
+                                    <source src="@Model.TopicSection_Path" type="@Model.TopicSection_ContentType" />
+                                </video>
                             </div>
                         }
                     }
