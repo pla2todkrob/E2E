@@ -140,7 +140,10 @@
             {
                 <div class="mr-auto">
                     <button type="button" class="btn btn-outline-danger" onclick="callDeleteItem('@Url.Action("Users_Delete","Masters",new { id=Html.ValueFor(m => m.User_Id) })')"><i class="fa fa-trash" aria-hidden="true"></i></button>
-                    <button type="button" class="btn btn-outline-warning ">Reset Password</button>
+                    @if (!string.IsNullOrEmpty(Model.Detail_Password))
+                    {
+                        <button type="button" class="btn btn-outline-warning ">Reset Password</button>
+                    }
                 </div>
 
             }
