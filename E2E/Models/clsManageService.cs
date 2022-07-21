@@ -652,26 +652,14 @@ namespace E2E.Models
                     string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                     var GetApprover = db.Users
                         .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Email).ToList();
-                    string strName = "Dear ";
 
-                    for (int i = 0; i < GetApprover.Count; i++)
-                    {
-                        string[] cutname = GetApprover[i].Split('@');
-                        strName += cutname[0];
-
-                        strName += ", ";
-                    }
-
-                    int position = strName.Length - 2;
-
-                    strName = strName.Remove(position, 1);
-
-                    string subject = "[Please Approve] E2E system Job No." + services.Service_Key + " Subject " + services.Service_Subject;
+                    string subject = "[E2E][Please approve] Job no - " + services.Service_Key + " Subject " + services.Service_Subject;
                     string strBody = "<html>";
                     strBody += "<head>";
                     strBody += "</head>";
                     strBody += "<body>";
-                    strBody += "<p><b>" + strName + "</b></p>";
+                    strBody += "<br/>";
+                    strBody += "<br/>";
                     strBody += "Form: <a href=mailto:" + services.Users.User_Email + ">" + services.Users.User_Email + "</a>";
                     strBody += "<br/>";
                     strBody += "<br/>";
@@ -806,28 +794,28 @@ namespace E2E.Models
                     serviceComments.Comment_Content = "Approved";
                     res = Services_Comment(serviceComments);
 
-                    string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                    //string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
 
-                    List<string> GetEmail = new List<string>();
-                    GetEmail.Add(db.ServiceComments.Where(w => w.Service_Id == id && w.Comment_Content == "Approval required").OrderByDescending(o => o.Create).Select(s => s.Users.User_Email).FirstOrDefault());
-                    string strName = "Dear ";
+                    //List<string> GetEmail = new List<string>();
+                    //GetEmail.Add(db.ServiceComments.Where(w => w.Service_Id == id && w.Comment_Content == "Approval required").OrderByDescending(o => o.Create).Select(s => s.Users.User_Email).FirstOrDefault());
+                    //string strName = "Dear ";
 
-                    string[] CutName = services.Users.User_Email.Split('@');
+                    //string[] CutName = services.Users.User_Email.Split('@');
 
-                    string subject = "[Approved successfully] E2E system Job No." + services.Service_Key + " Subject " + services.Service_Subject;
-                    string strBody = "<html>";
-                    strBody += "<head>";
-                    strBody += "</head>";
-                    strBody += "<body>";
-                    strBody += "<p><b>" + strName + " " + CutName[0] + "</b></p>";
-                    strBody += "JOB NO : " + services.Service_Key + "<br/>Manager User [Approved successfully]";
-                    strBody += "<br/>";
-                    strBody += "<a href=https://tp-portal.thaiparker.co.th/E2E/Services" + ">Click here to service detail</a>";
-                    strBody += "<p>Thank you</p>";
-                    strBody += "</body>";
-                    strBody += "</html>";
+                    //string subject = "[Approved successfully] E2E system Job No." + services.Service_Key + " Subject " + services.Service_Subject;
+                    //string strBody = "<html>";
+                    //strBody += "<head>";
+                    //strBody += "</head>";
+                    //strBody += "<body>";
+                    //strBody += "<p><b>" + strName + " " + CutName[0] + "</b></p>";
+                    //strBody += "JOB NO : " + services.Service_Key + "<br/>Manager User [Approved successfully]";
+                    //strBody += "<br/>";
+                    //strBody += "<a href=https://tp-portal.thaiparker.co.th/E2E/Services" + ">Click here to service detail</a>";
+                    //strBody += "<p>Thank you</p>";
+                    //strBody += "</body>";
+                    //strBody += "</html>";
 
-                    SendMail(GetEmail, subject, strBody);
+                    //SendMail(GetEmail, subject, strBody);
                 }
 
                 return res;
@@ -1551,6 +1539,21 @@ namespace E2E.Models
                 bool res = new bool();
                 MailMessage msg = new MailMessage();
 
+                string content = "Dear ";
+
+                for (int i = 0; i < strTo.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        content += ", ";
+                    }
+
+                    string[] cutname = strTo[i].Split('@');
+                    content += cutname[0];
+                }
+
+                content += strBody;
+
                 msg.To.Add(new MailAddress("somboonlap@thaiparker.co.th"));
                 //foreach (var item in strTo)
                 //{
@@ -1559,8 +1562,8 @@ namespace E2E.Models
 
                 msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
                 msg.Subject = strSubject;
-                msg.Body = strBody;
-                msg.Body = new MessageBody(BodyType.HTML, strBody);
+                msg.Body = content;
+                msg.Body = new MessageBody(BodyType.HTML, content);
                 msg.IsBodyHtml = true;
 
                 //ใช้ในกรณี ส่งเมลไม่ออกทั้งที่ Code ถูกต้องหมดทุกอย่าง
