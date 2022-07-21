@@ -49,6 +49,44 @@ namespace E2E.Models
                     dear += receiveDatas[i].NameEN;
                 }
 
+                if (sendCC.Count() > 0)
+                {
+                    List<ReceiveData> receiveCC = db.UserDetails
+                    .Where(w => sendCC.Contains(w.User_Id))
+                    .Select(s => new ReceiveData()
+                    {
+                        Email = s.Users.User_Email,
+                        NameEN = s.Detail_EN_FirstName,
+                        NameTH = s.Detail_TH_FirstName,
+                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
+                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
+                    }).ToList();
+
+                    foreach (var item in receiveCC)
+                    {
+                        msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                    }
+                }
+
+                if (sendBCC.Count() > 0)
+                {
+                    List<ReceiveData> receiveBCC = db.UserDetails
+                    .Where(w => sendBCC.Contains(w.User_Id))
+                    .Select(s => new ReceiveData()
+                    {
+                        Email = s.Users.User_Email,
+                        NameEN = s.Detail_EN_FirstName,
+                        NameTH = s.Detail_TH_FirstName,
+                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
+                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
+                    }).ToList();
+
+                    foreach (var item in receiveBCC)
+                    {
+                        msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                    }
+                }
+
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 UserDetails userDetails = new UserDetails();
