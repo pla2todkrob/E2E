@@ -1914,7 +1914,7 @@ namespace E2E.Models
                 users.User_Code = model.Users.User_Code.Trim();
                 users.Grade_Id = model.Users.Grade_Id;
                 users.Process_Id = model.Users.Process_Id;
-                users.Role_Id = model.Users.Role_Id;
+                users.Role_Id = 2;
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
                 users.User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]);
                 users.YearSetPoint = DateTime.Now.Year;

@@ -117,6 +117,10 @@
                         {
                             if (Model.ServiceChangeDueDate == null)
                             {
+                                if (!ViewBag.Is_MustBeApproved)
+                                {
+                                    <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id),show=true })','@Url.Action("Index","Services")')">Must approved</button>
+                                }
                                 <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
                             }
                             else
@@ -134,7 +138,10 @@
                     {
                         if (Model.ServiceChangeDueDate == null)
                         {
-                            <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
+                            if (!ViewBag.Is_MustBeApproved)
+                            {
+                              <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id),show=true })','@Url.Action("Index","Services")')">Must approved</button>
+                            } <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services",new { id=Model.Services.Service_Id })')">Change due date</button>
                         }
                         else
                         {

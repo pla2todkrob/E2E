@@ -35,6 +35,7 @@ namespace E2E.Models.Tables
         public DateTime? Update { get; set; }
         public bool Is_Commit { get; set; }
         public bool Is_MustBeApproved { get; set; }
+        public bool Is_ShowWaitingAction { get; set; }
         public bool Is_Approval { get; set; }
         public bool Is_Action { get; set; }
 
