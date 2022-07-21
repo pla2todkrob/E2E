@@ -203,6 +203,7 @@
     <Compile Include="Models\clsChatHub.cs" />
     <Compile Include="Models\clsContext.cs" />
     <Compile Include="Models\clsDefaultSystem.cs" />
+    <Compile Include="Models\clsMail.cs" />
     <Compile Include="Models\clsManageEForm.cs" />
     <Compile Include="Models\clsManageMaster.cs" />
     <Compile Include="Models\clsManageService.cs" />

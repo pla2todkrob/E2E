@@ -19,6 +19,7 @@ namespace E2E.Models
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
+        private clsMail mail = new clsMail();
 
         public List<Services> Services_GetWaitCommitList()
         {
@@ -647,28 +648,27 @@ namespace E2E.Models
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = id;
                     serviceComments.Comment_Content = "Approval required";
-                    res = Services_Comment(serviceComments);
+                    if (Services_Comment(serviceComments))
+                    {
+                        string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                        List<Guid> sendTo = db.Users
+                            .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
+                            .Select(s => s.User_Id)
+                            .ToList();
 
-                    string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-                    var GetApprover = db.Users
-                        .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Email).ToList();
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl = linkUrl.Replace("Commit_Required", "Approve_Form");
 
-                    string subject = "[E2E][Please approve] Job no - " + services.Service_Key + " Subject " + services.Service_Subject;
-                    string strBody = "<html>";
-                    strBody += "<head>";
-                    strBody += "</head>";
-                    strBody += "<body>";
-                    strBody += "<br/>";
-                    strBody += "<br/>";
-                    strBody += "Form: <a href=mailto:" + services.Users.User_Email + ">" + services.Users.User_Email + "</a>";
-                    strBody += "<br/>";
-                    strBody += "<br/>";
-                    strBody += "<a href=https://tp-portal.thaiparker.co.th/E2E/Services/Approve_Form/" + id + ">Please, click here to more detail and approve this request</a>";
-                    strBody += "<p>Thank you for your consideration</p>";
-                    strBody += "</body>";
-                    strBody += "</html>";
-
-                    SendMail(GetApprover, subject, strBody);
+                        string subject = string.Format("[E2E][Please approve] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(services.User_Id));
+                        content += "<br />";
+                        content += string.Format("<b>Description:</b> {0}",services.Service_Description);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
+                    }
+                    
                 }
 
                 return res;
@@ -1532,68 +1532,6 @@ namespace E2E.Models
             }
         }
 
-        public bool SendMail(List<string> strTo, string strSubject, string strBody)
-        {
-            try
-            {
-                bool res = new bool();
-                MailMessage msg = new MailMessage();
-
-                string content = "Dear ";
-
-                for (int i = 0; i < strTo.Count; i++)
-                {
-                    if (i != 0)
-                    {
-                        content += ", ";
-                    }
-
-                    string[] cutname = strTo[i].Split('@');
-                    content += cutname[0];
-                }
-
-                content += strBody;
-
-                msg.To.Add(new MailAddress("somboonlap@thaiparker.co.th"));
-                //foreach (var item in strTo)
-                //{
-                //    msg.To.Add(new MailAddress(item));
-                //}
-
-                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
-                msg.Subject = strSubject;
-                msg.Body = content;
-                msg.Body = new MessageBody(BodyType.HTML, content);
-                msg.IsBodyHtml = true;
-
-                //ใช้ในกรณี ส่งเมลไม่ออกทั้งที่ Code ถูกต้องหมดทุกอย่าง
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                              | SecurityProtocolType.Tls11
-                              | SecurityProtocolType.Tls12;
-
-                SmtpClient client = new SmtpClient();
-                client.UseDefaultCredentials = false;
-                client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"]);
-                client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"]); // You can use Port 25 for online, Port 587 is for local
-                client.Host = ConfigurationManager.AppSettings["Mail_Host"];
-                client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                client.EnableSsl = true;
-                try
-                {
-                    client.Send(msg);
-                    res = true;
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-
-                return res;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+        
     }
 }
