@@ -1,9 +1,13 @@
 ﻿using E2E.Models.Tables;
 using E2E.Models.Views;
+using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
@@ -15,6 +19,7 @@ namespace E2E.Models
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
+
         public List<Services> Services_GetWaitCommitList()
         {
             try
@@ -83,7 +88,7 @@ namespace E2E.Models
             try
             {
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Is_Commit && w.Status_Id == 1)
+                    .Where(w => w.Is_Commit && w.Status_Id == 1 && w.Is_ShowWaitingAction == false)
                     .OrderByDescending(o => o.Priority_Id)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
 
@@ -95,7 +100,7 @@ namespace E2E.Models
                         .FirstOrDefault();
                     if (!string.IsNullOrEmpty(deptName))
                     {
-                        query = query.Where(w => (w.Master_Departments.Department_Name == deptName && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
+                        query = query.Where(w => (w.Master_Departments.Department_Name == deptName && !w.Action_User_Id.HasValue && w.Is_ShowWaitingAction == false) || w.Action_User_Id == id && w.Is_ShowWaitingAction == false);
                     }
                 }
 
@@ -148,7 +153,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -173,10 +177,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public List<Services> Services_GetMyTask()
         {
             try
@@ -200,7 +204,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -222,10 +225,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public Services Services_View(Guid id)
         {
             try
@@ -258,9 +261,10 @@ namespace E2E.Models
             try
             {
                 clsServices clsServices = new clsServices();
-                clsServices =  db.Services
+                clsServices = db.Services
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new clsServices() {
+                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new clsServices()
+                    {
                         ServiceFiles = gj.ToList(),
                         Services = m
                     }).FirstOrDefault();
@@ -366,8 +370,6 @@ namespace E2E.Models
 
                     res.Add(clsServices);
                     refId = clsServices.Services.Ref_Service_Id;
-
-
                 }
 
                 return res;
@@ -416,6 +418,7 @@ namespace E2E.Models
                 string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                 List<Guid> userIdList = db.Users
                     .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
+                var sql = db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
                 return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
             }
             catch (Exception)
@@ -423,6 +426,7 @@ namespace E2E.Models
                 throw;
             }
         }
+
         public ServiceChangeDueDate ServiceChangeDueDate_New(Guid id)
         {
             try
@@ -434,10 +438,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public List<ServiceChangeDueDate> ServiceChangeDues_List()
         {
             try
@@ -453,10 +457,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_Save(Services model, HttpFileCollectionBase files, bool isForward = false)
         {
             try
@@ -493,7 +497,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Insert(Services model, HttpFileCollectionBase files,bool isForward = false)
+        public bool Services_Insert(Services model, HttpFileCollectionBase files, bool isForward = false)
         {
             try
             {
@@ -562,7 +566,7 @@ namespace E2E.Models
                         ServiceComments serviceComments = new ServiceComments();
                         serviceComments.Service_Id = model.Ref_Service_Id.Value;
                         serviceComments.Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
-                        
+
                         if (Services_Comment(serviceComments))
                         {
                             serviceComments = new ServiceComments();
@@ -621,14 +625,21 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetRequired(Guid id)
+        public bool Services_SetRequired(Guid id, bool? show)
         {
             try
             {
                 bool res = new bool();
+                bool SH = new bool();
+                if (show == true)
+                {
+                    SH = true;
+                }
+
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.Is_MustBeApproved = true;
+                services.Is_ShowWaitingAction = SH;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
@@ -637,6 +648,39 @@ namespace E2E.Models
                     serviceComments.Service_Id = id;
                     serviceComments.Comment_Content = "Approval required";
                     res = Services_Comment(serviceComments);
+
+                    string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                    var GetApprover = db.Users
+                        .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Email).ToList();
+                    string strName = "Dear ";
+
+                    for (int i = 0; i < GetApprover.Count; i++)
+                    {
+                        string[] cutname = GetApprover[i].Split('@');
+                        strName += cutname[0];
+
+                        strName += ", ";
+                    }
+
+                    int position = strName.Length - 2;
+
+                    strName = strName.Remove(position, 1);
+
+                    string subject = "[Please Approve] E2E system Job No." + services.Service_Key + " Subject " + services.Service_Subject;
+                    string strBody = "<html>";
+                    strBody += "<head>";
+                    strBody += "</head>";
+                    strBody += "<body>";
+                    strBody += "<p><b>" + strName + "</b></p>";
+                    strBody += "Form: <a href=mailto:" + services.Users.User_Email + ">" + services.Users.User_Email + "</a>";
+                    strBody += "<br/>";
+                    strBody += "<br/>";
+                    strBody += "<a href=https://tp-portal.thaiparker.co.th/E2E/Services/Approve_Form/" + id + ">Please, click here to more detail and approve this request</a>";
+                    strBody += "<p>Thank you for your consideration</p>";
+                    strBody += "</body>";
+                    strBody += "</html>";
+
+                    SendMail(GetApprover, subject, strBody);
                 }
 
                 return res;
@@ -659,7 +703,7 @@ namespace E2E.Models
                 }
 
                 string deptName = db.Master_Departments.Find(deptId).Department_Name;
-                
+
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.Department_Id = deptId;
@@ -705,15 +749,11 @@ namespace E2E.Models
                     serviceComments.Comment_Content = string.Format("Commit Task, Assign task to the {0} department, Assign task to {1}", deptName, master.Users_GetInfomation(userId));
                     res = Services_Comment(serviceComments);
                 }
-                
-
-                
 
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -756,6 +796,7 @@ namespace E2E.Models
                 Services services = new Services();
                 services = db.Services.Find(id);
                 services.Is_Approval = true;
+                services.Is_ShowWaitingAction = false;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
@@ -764,6 +805,29 @@ namespace E2E.Models
                     serviceComments.Service_Id = id;
                     serviceComments.Comment_Content = "Approved";
                     res = Services_Comment(serviceComments);
+
+                    string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+
+                    List<string> GetEmail = new List<string>();
+                    GetEmail.Add(db.ServiceComments.Where(w => w.Service_Id == id && w.Comment_Content == "Approval required").OrderByDescending(o => o.Create).Select(s => s.Users.User_Email).FirstOrDefault());
+                    string strName = "Dear ";
+
+                    string[] CutName = services.Users.User_Email.Split('@');
+
+                    string subject = "[Approved successfully] E2E system Job No." + services.Service_Key + " Subject " + services.Service_Subject;
+                    string strBody = "<html>";
+                    strBody += "<head>";
+                    strBody += "</head>";
+                    strBody += "<body>";
+                    strBody += "<p><b>" + strName + " " + CutName[0] + "</b></p>";
+                    strBody += "JOB NO : " + services.Service_Key + "<br/>Manager User [Approved successfully]";
+                    strBody += "<br/>";
+                    strBody += "<a href=https://tp-portal.thaiparker.co.th/E2E/Services" + ">Click here to service detail</a>";
+                    strBody += "<p>Thank you</p>";
+                    strBody += "</body>";
+                    strBody += "</html>";
+
+                    SendMail(GetEmail, subject, strBody);
                 }
 
                 return res;
@@ -802,10 +866,9 @@ namespace E2E.Models
                 {
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime,system_Statuses.Status_Name);
+                    serviceComments.Comment_Content = string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime, system_Statuses.Status_Name);
                     res = Services_Comment(serviceComments);
                 }
-                
 
                 return res;
             }
@@ -836,6 +899,7 @@ namespace E2E.Models
                 throw;
             }
         }
+
         public bool Services_SetComplete(ServiceComments model)
         {
             try
@@ -869,15 +933,14 @@ namespace E2E.Models
                     res = Services_Comment(serviceComments);
                 }
 
-
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_SetCancel(ServiceComments model)
         {
             try
@@ -911,15 +974,14 @@ namespace E2E.Models
                     res = Services_Comment(serviceComments);
                 }
 
-
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_SetReturnJob(ServiceComments model)
         {
             try
@@ -949,15 +1011,14 @@ namespace E2E.Models
                     res = Services_Comment(serviceComments);
                 }
 
-
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_SetPending(ServiceComments model)
         {
             try
@@ -973,14 +1034,13 @@ namespace E2E.Models
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
-                    
                     ServiceComments serviceComments = new ServiceComments();
                     if (!string.IsNullOrEmpty(model.Comment_Content))
                     {
                         serviceComments = new ServiceComments();
                         serviceComments.Service_Id = services.Service_Id;
                         serviceComments.Comment_Content = model.Comment_Content;
-                        
+
                         if (Services_Comment(serviceComments))
                         {
                             List<ServiceTeams> serviceTeams = db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToList();
@@ -993,19 +1053,18 @@ namespace E2E.Models
 
                     serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Return job to department {0}",services.Master_Departments.Department_Name);
+                    serviceComments.Comment_Content = string.Format("Return job to department {0}", services.Master_Departments.Department_Name);
                     res = Services_Comment(serviceComments);
                 }
-
 
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_SetReject(ServiceComments model)
         {
             try
@@ -1047,10 +1106,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_SetFreePoint(Guid id)
         {
             try
@@ -1086,10 +1145,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_SetClose(Guid id)
         {
             try
@@ -1114,7 +1173,6 @@ namespace E2E.Models
                                 serviceComments.Comment_Content = "Close job";
                                 res = Services_Comment(serviceComments);
                             }
-
                         }
                     }
 
@@ -1127,7 +1185,6 @@ namespace E2E.Models
                         nextId = null;
                     }
                 }
-
 
                 return res;
             }
@@ -1166,10 +1223,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
         {
             try
@@ -1196,7 +1253,6 @@ namespace E2E.Models
                         db.Entry(serviceCommentFiles).State = System.Data.Entity.EntityState.Added;
                     }
                 }
-                
 
                 if (db.SaveChanges() > 0)
                 {
@@ -1210,7 +1266,7 @@ namespace E2E.Models
                 throw;
             }
         }
-        
+
         public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model)
         {
             try
@@ -1224,7 +1280,7 @@ namespace E2E.Models
                 {
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = model.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Request change due date from {0} to {1}",model.DueDate.ToString("d"),model.DueDate_New.Value.ToString("d"));
+                    serviceComments.Comment_Content = string.Format("Request change due date from {0} to {1}", model.DueDate.ToString("d"), model.DueDate_New.Value.ToString("d"));
                     serviceComments.User_Id = userId;
                     res = Services_Comment(serviceComments);
                 }
@@ -1233,10 +1289,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool ServiceChangeDueDate_Accept(Guid id)
         {
             try
@@ -1274,7 +1330,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1302,7 +1357,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1330,10 +1384,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Service_AddTeam(clsServiceTeams model)
         {
             try
@@ -1358,10 +1412,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool Service_DeleteTeam(Guid id)
         {
             try
@@ -1378,16 +1432,15 @@ namespace E2E.Models
                     serviceComments.Service_Id = serviceId;
                     serviceComments.Comment_Content = string.Format("Delete {0} from this team", userName);
                     res = Services_Comment(serviceComments);
-
                 }
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public List<SelectListItem> SelectListItems_Priority()
         {
             try
@@ -1405,6 +1458,7 @@ namespace E2E.Models
                 throw;
             }
         }
+
         public List<SelectListItem> SelectListItems_RefService(Guid userId)
         {
             try
@@ -1474,7 +1528,7 @@ namespace E2E.Models
                     .ToList();
 
                 return db.UserDetails
-                    .Where(w => w.Users.Master_Processes.Master_Sections.Department_Id == departmentId && 
+                    .Where(w => w.Users.Master_Processes.Master_Sections.Department_Id == departmentId &&
                     w.Users.Active &&
                     !userIdInTeam.Contains(w.User_Id) &&
                     w.User_Id != userId)
@@ -1486,8 +1540,56 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
+            }
+        }
+
+        public bool SendMail(List<string> strTo, string strSubject, string strBody)
+        {
+            try
+            {
+                bool res = new bool();
+                MailMessage msg = new MailMessage();
+
+                msg.To.Add(new MailAddress("somboonlap@thaiparker.co.th"));
+                //foreach (var item in strTo)
+                //{
+                //    msg.To.Add(new MailAddress(item));
+                //}
+
+                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+                msg.Subject = strSubject;
+                msg.Body = strBody;
+                msg.Body = new MessageBody(BodyType.HTML, strBody);
+                msg.IsBodyHtml = true;
+
+                //ใช้ในกรณี ส่งเมลไม่ออกทั้งที่ Code ถูกต้องหมดทุกอย่าง
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                              | SecurityProtocolType.Tls11
+                              | SecurityProtocolType.Tls12;
+
+                SmtpClient client = new SmtpClient();
+                client.UseDefaultCredentials = false;
+                client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"]);
+                client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"]); // You can use Port 25 for online, Port 587 is for local
+                client.Host = ConfigurationManager.AppSettings["Mail_Host"];
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                client.EnableSsl = true;
+                try
+                {
+                    client.Send(msg);
+                    res = true;
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
     }

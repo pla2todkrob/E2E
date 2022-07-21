@@ -441,14 +441,14 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Commit_Required(Guid id)
+        public ActionResult Commit_Required(Guid id, bool? show)
         {
             using (TransactionScope scope = new TransactionScope())
             {
                 clsSwal swal = new clsSwal();
                 try
                 {
-                    if (data.Services_SetRequired(id))
+                    if (data.Services_SetRequired(id, show))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -559,6 +559,7 @@ namespace E2E.Controllers
         {
             try
             {
+                ViewBag.Is_MustBeApproved = db.Services.Where(w => w.Service_Id == id).Select(s => s.Is_MustBeApproved).FirstOrDefault();
                 Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 ViewBag.AuthorizeIndex = db.Users
                 .Where(w => w.User_Id == userId)
