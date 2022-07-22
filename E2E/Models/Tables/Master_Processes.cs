@@ -15,8 +15,6 @@ namespace E2E.Models.Tables
         [Description("Process name"), Display(Name = "Process")]
         public string Process_Name { get; set; }
 
-        [Description("Autorun number")]
-        public int Code { get; set; }
         [Display(Name = "Section")]
         public Guid? Section_Id { get; set; }
         public virtual Master_Sections Master_Sections { get; set; }

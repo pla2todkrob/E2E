@@ -15,8 +15,6 @@ namespace E2E.Models.Tables
         [Description("Section name"), Display(Name = "Section")]
         public string Section_Name { get; set; }
 
-        [Description("Autorun number")]
-        public int Code { get; set; }
         [Display(Name = "Department")]
         public Guid? Department_Id { get; set; }
         public virtual Master_Departments Master_Departments { get; set; }

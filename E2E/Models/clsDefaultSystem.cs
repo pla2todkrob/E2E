@@ -72,7 +72,6 @@ namespace E2E.Models
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks.Active = true;
                 master_LineWorks.Authorize_Id = 3;
-                master_LineWorks.Code = 0;
                 master_LineWorks.LineWork_Name = "E-Engineering";
 
                 db.Master_LineWorks.Add(master_LineWorks);
@@ -81,7 +80,6 @@ namespace E2E.Models
                 {
                     Master_Grades master_Grades = new Master_Grades();
                     master_Grades.Active = true;
-                    master_Grades.Code = 0;
                     master_Grades.Grade_Name = "E8";
                     master_Grades.Grade_Position = "Engineer";
                     master_Grades.LineWork_Id = master_LineWorks.LineWork_Id;
@@ -90,7 +88,6 @@ namespace E2E.Models
                     {
                         Master_Plants master_Plants = new Master_Plants();
                         master_Plants.Active = true;
-                        master_Plants.Code = 0;
                         master_Plants.Plant_Name = "Bangpoo12";
 
                         db.Master_Plants.Add(master_Plants);
@@ -98,7 +95,6 @@ namespace E2E.Models
                         {
                             Master_Divisions master_Divisions = new Master_Divisions();
                             master_Divisions.Active = true;
-                            master_Divisions.Code = 0;
                             master_Divisions.Division_Name = "Administrative";
                             master_Divisions.Plant_Id = master_Plants.Plant_Id;
                             db.Master_Divisions.Add(master_Divisions);
@@ -107,7 +103,6 @@ namespace E2E.Models
                             {
                                 Master_Departments master_Departments = new Master_Departments();
                                 master_Departments.Active = true;
-                                master_Departments.Code = 0;
                                 master_Departments.Department_Name = "Information Technology";
                                 master_Departments.Division_Id = master_Divisions.Division_Id;
 
@@ -117,7 +112,6 @@ namespace E2E.Models
                                 {
                                     Master_Sections master_Sections = new Master_Sections();
                                     master_Sections.Active = true;
-                                    master_Sections.Code = 0;
                                     master_Sections.Section_Name = "SAP & Application";
                                     master_Sections.Department_Id = master_Departments.Department_Id;
 
@@ -127,7 +121,6 @@ namespace E2E.Models
                                     {
                                         Master_Processes master_Processes = new Master_Processes();
                                         master_Processes.Active = true;
-                                        master_Processes.Code = 0;
                                         master_Processes.Process_Name = "Information Technology Bangpoo";
                                         master_Processes.Section_Id = master_Sections.Section_Id;
 
