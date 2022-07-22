@@ -18,8 +18,6 @@ namespace E2E.Models.Tables
 
         public bool Active { get; set; }
 
-        [Description("Autorun number")]
-        public int Code { get; set; }
 
         public DateTime Create { get; set; }
 

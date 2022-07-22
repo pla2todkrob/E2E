@@ -198,7 +198,6 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_Processes master_Processes = new Master_Processes();
-                master_Processes.Code = db.Master_Processes.Count() + 1;
                 master_Processes.Process_Name = val.Trim();
                 master_Processes.Section_Id = sectionId;
                 db.Master_Processes.Add(master_Processes);
@@ -265,17 +264,6 @@ namespace E2E.Models
                 master_Processes.Process_Name = model.Process_Name;
                 master_Processes.Active = model.Active;
                 master_Processes.Section_Id = model.Section_Id;
-
-                var query = db.Master_Processes.FirstOrDefault();
-
-                if (query == null)
-                {
-                    master_Processes.Code = 1;
-                }
-                else
-                {
-                    master_Processes.Code = db.Master_Processes.Max(m => m.Code) + 1;
-                }
 
                 db.Master_Processes.Add(master_Processes);
                 if (db.SaveChanges() > 0)
@@ -427,7 +415,6 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_Sections master_Sections = new Master_Sections();
-                master_Sections.Code = db.Master_Sections.Count() + 1;
                 master_Sections.Department_Id = departmentId;
                 master_Sections.Section_Name = val.Trim();
                 db.Master_Sections.Add(master_Sections);
@@ -495,17 +482,6 @@ namespace E2E.Models
                 master_Sections.Section_Name = model.Section_Name;
                 master_Sections.Active = model.Active;
                 master_Sections.Department_Id = model.Department_Id;
-
-                var query = db.Master_Sections.FirstOrDefault();
-
-                if (query == null)
-                {
-                    master_Sections.Code = 1;
-                }
-                else
-                {
-                    master_Sections.Code = db.Master_Sections.Max(m => m.Code) + 1;
-                }
 
                 db.Master_Sections.Add(master_Sections);
                 if (db.SaveChanges() > 0)
@@ -657,7 +633,6 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_Departments master_Departments = new Master_Departments();
-                master_Departments.Code = db.Master_Departments.Count() + 1;
                 master_Departments.Department_Name = val.Trim();
                 master_Departments.Division_Id = divisionId;
                 db.Master_Departments.Add(master_Departments);
@@ -725,17 +700,6 @@ namespace E2E.Models
                 master_Departments.Department_Name = model.Department_Name;
                 master_Departments.Active = model.Active;
                 master_Departments.Division_Id = model.Division_Id;
-
-                var query = db.Master_Plants.FirstOrDefault();
-
-                if (query == null)
-                {
-                    master_Departments.Code = 1;
-                }
-                else
-                {
-                    master_Departments.Code = db.Master_Departments.Max(m => m.Code) + 1;
-                }
 
                 db.Master_Departments.Add(master_Departments);
                 if (db.SaveChanges() > 0)
@@ -885,7 +849,6 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_Divisions master_Divisions = new Master_Divisions();
-                master_Divisions.Code = db.Master_Divisions.Count() + 1;
                 master_Divisions.Division_Name = val.Trim();
                 master_Divisions.Plant_Id = plantId;
                 db.Master_Divisions.Add(master_Divisions);
@@ -953,17 +916,6 @@ namespace E2E.Models
                 master_Divisions.Division_Name = model.Division_Name;
                 master_Divisions.Active = model.Active;
                 master_Divisions.Plant_Id = model.Plant_Id;
-
-                var query = db.Master_Plants.FirstOrDefault();
-
-                if (query == null)
-                {
-                    master_Divisions.Code = 1;
-                }
-                else
-                {
-                    master_Divisions.Code = db.Master_Plants.Max(m => m.Code) + 1;
-                }
 
                 db.Master_Divisions.Add(master_Divisions);
                 if (db.SaveChanges() > 0)
@@ -1168,17 +1120,6 @@ namespace E2E.Models
                 master_Grades.Grade_Position = model.Grade_Position.Trim();
                 master_Grades.Active = model.Active;
 
-                var query = db.Master_Grades.FirstOrDefault();
-
-                if (query == null)
-                {
-                    master_Grades.Code = 1;
-                }
-                else
-                {
-                    master_Grades.Code = db.Master_Grades.Max(m => m.Code) + 1;
-                }
-
                 db.Master_Grades.Add(master_Grades);
                 if (db.SaveChanges() > 0)
                 {
@@ -1371,7 +1312,6 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
-                master_LineWorks.Code = db.Master_LineWorks.Count() + 1;
                 master_LineWorks.LineWork_Name = model.LineWork_Name.Trim();
                 master_LineWorks.Authorize_Id = model.Authorize_Id;
 
@@ -1511,7 +1451,6 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Master_Plants master_Plants = new Master_Plants();
-                master_Plants.Code = db.Master_Plants.Count() + 1;
                 master_Plants.Plant_Name = val.Trim();
                 db.Master_Plants.Add(master_Plants);
                 if (db.SaveChanges() > 0)
@@ -1577,17 +1516,6 @@ namespace E2E.Models
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants.Plant_Name = model.Plant_Name;
                 master_Plants.Active = model.Active;
-
-                var query = db.Master_Plants.FirstOrDefault();
-
-                if (query == null)
-                {
-                    master_Plants.Code = 1;
-                }
-                else
-                {
-                    master_Plants.Code = db.Master_Plants.Max(m => m.Code) + 1;
-                }
 
                 db.Master_Plants.Add(master_Plants);
                 if (db.SaveChanges() > 0)
