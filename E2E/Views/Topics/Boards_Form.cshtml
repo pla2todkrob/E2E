@@ -113,7 +113,9 @@ $(document).on('submit', '#SaveReply', function (e) {
                                     else
                                     {
                                         <div class="embed-responsive embed-responsive-16by9">
-                                            <iframe class="embed-responsive-item" src="@item.TopicSection_Path" allowfullscreen></iframe>
+                                            <video class="embed-responsive-item" controls>
+                                                <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
+                                            </video>
                                         </div>
                                     }
                                 }
