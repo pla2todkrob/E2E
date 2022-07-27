@@ -24,6 +24,155 @@ namespace E2E.Controllers
             return View();
         }
 
+        public ActionResult Categories()
+        {
+            return View();
+        }
+
+        public ActionResult Categories_Create(Guid? id)
+        {
+            ViewBag.IsNew = true;
+            if (id.HasValue)
+            {
+                var query = db.Master_Categories.Find(id);
+
+                ViewBag.IsNew = false;
+
+                return View(query);
+            }
+
+            return View();
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Categories_Create(Master_Categories model)
+        {
+            clsSwal swal = new clsSwal();
+            if (model != null)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Categories_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Categories_Table()
+        {
+            var query = db.Master_Categories.ToList();
+            return View(query);
+        }
+
+        public ActionResult Categories_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    clsSaveResult clsSaveResult = data.Categories_Delete(id);
+                    if (clsSaveResult.CanSave)
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.text = clsSaveResult.Message;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public ActionResult Departments_Table()
         {
             return View(data.Department_GetAllView());
@@ -1265,12 +1414,12 @@ namespace E2E.Controllers
                     foreach (string item in files)
                     {
                         var file = files[item];
-                        
+
                         if (file.ContentLength > 0)
                         {
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             clsServiceFTP serviceFTP = new clsServiceFTP();
-                            string filePath= serviceFTP.Ftp_UploadFileToString(dir, file);
+                            string filePath = serviceFTP.Ftp_UploadFileToString(dir, file);
                             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(filePath);
                             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                             {
@@ -1411,14 +1560,17 @@ namespace E2E.Controllers
         {
             return Json(data.SelectListItems_Users(id), JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult InquiryTopic()
         {
             return View();
         }
+
         public ActionResult InquiryTopic_Table()
         {
             return View(data.InquiryTopics_GetAll());
         }
+
         public ActionResult InquiryTopic_Form(Guid? id)
         {
             bool isNew = new bool();
@@ -1443,6 +1595,7 @@ namespace E2E.Controllers
 
             return View(master_InquiryTopics);
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult InquiryTopic_Form(Master_InquiryTopics model)
         {

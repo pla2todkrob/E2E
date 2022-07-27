@@ -1606,10 +1606,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public Users Users_Get(string val)
         {
             try
@@ -1618,10 +1618,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public List<Users> Users_GetAll()
         {
             try
@@ -1630,7 +1630,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1639,7 +1638,6 @@ namespace E2E.Models
         {
             try
             {
-
                 return db.UserDetails
                 .Select(s => new clsUsers()
                 {
@@ -1665,7 +1663,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1700,7 +1697,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1735,7 +1731,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -1770,10 +1765,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public UserDetails UserDetails_Get(string val)
         {
             try
@@ -1783,10 +1778,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public clsSaveResult Users_Delete(Guid id)
         {
             clsSaveResult res = new clsSaveResult();
@@ -2016,10 +2011,10 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
         public bool InquiryTopic_Save(Master_InquiryTopics model)
         {
             try
@@ -2040,7 +2035,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -2059,7 +2053,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -2079,7 +2072,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -2116,12 +2108,110 @@ namespace E2E.Models
                 throw;
             }
         }
+
+        public bool Categories_Save(Master_Categories model)
+        {
+            try
+            {
+                bool res = new bool();
+                var master_Categories = db.Master_Categories.Find(model.Category_Id);
+
+                if (master_Categories != null)
+                {
+                    res = Categories_Update(model);
+                }
+                else
+                {
+                    res = Categories_Insert(model);               
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Categories_Insert(Master_Categories model)
+        {
+            try
+            {
+                bool res = new bool();
+                Master_Categories master_Categories = new Master_Categories();
+
+                master_Categories.Category_Name = model.Category_Name;
+
+                db.Master_Categories.Add(master_Categories);
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
+        public bool Categories_Update(Master_Categories model)
+        {
+            bool res = new bool();
+            var master_Categories = db.Master_Categories.Find(model.Category_Id);
+            master_Categories.Category_Name = model.Category_Name;
+            master_Categories.Active = model.Active;
+            master_Categories.Update = DateTime.Now;
+
+            if (db.SaveChanges() > 0)
+            {
+                res = true;
+            }
+            return res;
+        }
+
+        public clsSaveResult Categories_Delete(Guid id)
+        {
+            clsSaveResult res = new clsSaveResult();
+            try
+            {
+                Master_Categories master_Categories = new Master_Categories();
+                master_Categories = db.Master_Categories.Where(w => w.Category_Id == id).FirstOrDefault();
+
+                int Count = db.Topics.Where(w => w.Category_Id == id).Count();
+
+                if (Count > 0)
+                {
+                    res.Message = "ข้อมูลถูกใช้งานอยู่";
+                    res.CanSave = false;
+                }
+                else
+                {
+                    db.Master_Categories.Remove(master_Categories);
+                    if (db.SaveChanges() > 0)
+                    {
+                        res.CanSave = true;
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<Master_InquiryTopics> InquiryTopics_GetAll()
         {
             return db.Master_InquiryTopics
                 .OrderBy(o => o.InquiryTopic_Index)
                 .ToList();
         }
+
         public List<SelectListItem> SelectListItems_Role()
         {
             IQueryable<System_Roles> query = db.System_Roles;

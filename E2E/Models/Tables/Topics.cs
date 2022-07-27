@@ -10,14 +10,19 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Topic_Id { get; set; }
+
         [Display(Name = "Title")]
         public string Topic_Title { get; set; }
+
         [Display(Name = "Content")]
         public string Topic_Content { get; set; }
+
         [Display(Name = "Pin")]
         public bool Topic_Pin { get; set; }
+
         [Display(Name = "Pin EndDate")]
         public DateTime? Topic_Pin_EndDate { get; set; }
+
         public int Count_View { get; set; }
         public int Count_Comment { get; set; }
         public DateTime Create { get; set; }
@@ -26,6 +31,9 @@ namespace E2E.Models.Tables
         public virtual Users Users { get; set; }
         public int Topic_FileCount { get; set; }
         public int Topic_GalleryCount { get; set; }
+
+        public Guid? Category_Id { get; set; }
+        public virtual Master_Categories Master_Categories { get; set; }
 
         public Topics()
         {

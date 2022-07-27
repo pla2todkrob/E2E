@@ -14,6 +14,7 @@ namespace E2E.Models
         {
         }
 
+        public DbSet<Master_Categories> Master_Categories { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
         public DbSet<EForms> EForms { get; set; }
@@ -53,6 +54,7 @@ namespace E2E.Models
         public DbSet<Manuals> Manuals { get; set; }
         public DbSet<System_ManualType> System_ManualType { get; set; }
         public DbSet<System_Language> System_Language { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
