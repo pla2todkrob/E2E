@@ -212,6 +212,7 @@
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
+    <Compile Include="Models\Tables\Master_Categories.cs" />
     <Compile Include="Models\Tables\System_Language.cs" />
     <Compile Include="Models\Tables\Manuals.cs" />
     <Compile Include="Models\Tables\System_ManualType.cs" />
@@ -854,6 +855,9 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\Masters\Categories.cshtml" />
+    <Content Include="Views\Masters\Categories_Create.cshtml" />
+    <Content Include="Views\Masters\Categories_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

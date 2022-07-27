@@ -1,0 +1,50 @@
+﻿@model IEnumerable<E2E.Models.Tables.Master_Categories>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover w-100">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                @Html.DisplayNameFor(m => m.Create)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Category_Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Update)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Active)
+            </th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+
+    {
+        <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <button onclick="callModal('@Url.Action("Categories_Create","Masters",new { id = Html.ValueFor(m => item.Category_Id) })')" class="btn btn-outline-secondary"><i class="fa fa-pencil"></i></button>
+                    </div>
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Create)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Category_Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Update)
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Active)
+                </td>
+            </tr>
+        </tbody>
+    }
+</table>

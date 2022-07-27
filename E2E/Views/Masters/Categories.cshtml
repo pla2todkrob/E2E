@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Categories";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Categories</h2>
+
+@section scripts{
+    <script src="~/Asset/Topic.min.js"></script>
+    <script>
+
+        $(function () {
+            reloadTable();
+        });
+
+        $(document).on('submit', '#SaveCategories', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("Categories_Create", "Masters")',this);
+            return false;
+        });
+
+        function reloadTable() {
+            callTable_NoSort('@Url.Action("Categories_Table", "Masters", new { res=1})', true, 0).then(function () {
+
+            });
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item active">Topic</li>
+        </ol>
+    </nav>
+}
+
+<div class="d-flex mb-3">
+    <div class="ml-auto">
+        <button type="button" onclick="callModal('@Url.Action("Categories_Create","Masters")')" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+    </div>
+</div>
+
+
+    <div class="row" id="datalist"></div>

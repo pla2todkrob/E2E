@@ -187,8 +187,11 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                var serviceTeams = db.ServiceTeams.Where(w => w.User_Id == id).Select(s => s.Service_Id).ToList();
+
                 return Services_GetAllTask_IQ()
-                    .Where(w => w.Action_User_Id == id)
+                    .Where(w => w.Action_User_Id == id || serviceTeams.Contains(w.Service_Id))
                     .ToList();
             }
             catch (Exception)
@@ -662,13 +665,12 @@ namespace E2E.Models
                         string subject = string.Format("[E2E][Please approve] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(services.User_Id));
                         content += "<br />";
-                        content += string.Format("<b>Description:</b> {0}",services.Service_Description);
+                        content += string.Format("<b>Description:</b> {0}", services.Service_Description);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
                         res = mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
                     }
-                    
                 }
 
                 return res;
@@ -1531,7 +1533,5 @@ namespace E2E.Models
                 throw;
             }
         }
-
-        
     }
 }
