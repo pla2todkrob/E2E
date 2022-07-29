@@ -28,7 +28,7 @@
         <tbody>
             <tr>
                 <td>
-                    <div>
+                    <div class="text-center">
                         <button onclick="callModal('@Url.Action("Categories_Create","Masters",new { id = Html.ValueFor(m => item.Category_Id) })')" class="btn btn-outline-secondary"><i class="fa fa-pencil"></i></button>
                     </div>
                 </td>
@@ -41,7 +41,7 @@
                 <td>
                     @Html.DisplayFor(i => item.Update)
                 </td>
-                <td>
+                <td class="text-center">
                     @Html.DisplayFor(i => item.Active)
                 </td>
             </tr>
