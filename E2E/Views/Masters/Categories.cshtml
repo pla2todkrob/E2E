@@ -6,7 +6,6 @@
 <h2>Categories</h2>
 
 @section scripts{
-    <script src="~/Asset/Topic.min.js"></script>
     <script>
 
         $(function () {
@@ -20,10 +19,12 @@
         });
 
         function reloadTable() {
-            callTable_NoSort('@Url.Action("Categories_Table", "Masters", new { res=1})', true, 0).then(function () {
 
-            });
+            callTable('@Url.Action("Categories_Table", "Masters")', true, true, 1);
+
         }
+
+
     </script>
 }
 
@@ -36,11 +37,21 @@
     </nav>
 }
 
-<div class="d-flex mb-3">
-    <div class="ml-auto">
-        <button type="button" onclick="callModal('@Url.Action("Categories_Create","Masters")')" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex">
+            <div class="mr-auto"></div>
+            <div class="ml-auto">
+                <button type="button" onclick="callModal('@Url.Action("Categories_Create","Masters")')" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row" id="datalist">
+        </div>
     </div>
 </div>
 
 
-    <div class="row" id="datalist"></div>
