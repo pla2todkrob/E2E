@@ -56,7 +56,7 @@
                         });
                     }
                     else {
-                        
+
                         $.connection.hub.start().done(function () {
                             chat.server.sendMessageToGroup(res.option.Service_Id, res.option.Comment_Content);
                         });
@@ -80,6 +80,66 @@
             callSubmitPage('@Url.Action("SetComplete", "Services")',this);
             return false;
         });
+
+        function SaveCloseForm() {
+            let arr = [];
+
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this imaginary file!",
+                icon: "warning",
+                buttons: true,
+            })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        var id_service = $('#Services_Service_Id').val();
+                        $('.score-group').find('.score').each(function () {
+                            var obj = {};
+                            obj.id = $(this).attr('id');
+                            obj.score = $('input[name=' + obj.id + ']:checked').val();
+                            arr.push(obj);
+                        });
+
+                        $.ajax({
+                            type: "POST",
+                            data: { id: id_service, score: arr },
+                            url: '@Url.Action("SetClose","Services")',
+                            success: function (res) {
+                                swal({
+                                    title: res.title,
+                                    text: res.text,
+                                    icon: res.icon,
+                                    button: res.button,
+                                    dangerMode: res.dangerMode
+                                }).then(function () {
+                                    if (res.icon == 'success') {
+                                        location.reload();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+            return false;
+        }
+        function callModalPoint(urlAjax) {
+            $.ajax({
+                url: urlAjax,
+                async: true,
+                success: function (res) {
+
+                    $('#modalContent').html(res);
+
+                    $('.Point').click(function () {
+                        $(this).find('input').prop('checked',true);
+                    });
+                }
+            });
+            $('#modalArea').modal('show');
+            return false;
+        }
+
 
         $(document).on('submit', '#TeamForm', function (e) {
             e.preventDefault();
@@ -116,7 +176,7 @@
     <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayFor(m => m.Services.Create)</cite></small>
 </blockquote>
-@Html.HiddenFor(m=>m.Services.Service_Id)
+@Html.HiddenFor(m => m.Services.Service_Id)
 <div class="row mb-3">
     <div class="col-lg-7 mb-3 mb-lg-0">
         <div class="card" id="serviceInfo">
@@ -232,7 +292,7 @@
                         {
                             if (Model.Services.Status_Id == 3)
                             {
-                                <button type="button" class="btn btn-outline-success ml-auto" onclick="setSuccessByIdRePage('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
+                                <button type="button" class="btn btn-outline-success ml-auto" onclick="callModalPoint('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
                             }
                         }
                     }

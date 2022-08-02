@@ -1872,6 +1872,12 @@ namespace E2E.Models
                     userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 }
 
+                if (string.IsNullOrEmpty(users.User_Email))
+                {
+                    userDetails.Detail_Password = Users_Password(users.User_Code.Trim());
+                    userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
+                }
+
                 if (!string.IsNullOrEmpty(model.Detail_Tel))
                 {
                     userDetails.Detail_Tel = model.Detail_Tel.Trim();
@@ -2122,9 +2128,8 @@ namespace E2E.Models
                 }
                 else
                 {
-                    res = Categories_Insert(model);               
+                    res = Categories_Insert(model);
                 }
-
 
                 return res;
             }
@@ -2156,7 +2161,6 @@ namespace E2E.Models
             {
                 throw;
             }
-
         }
 
         public bool Categories_Update(Master_Categories model)
@@ -2197,6 +2201,30 @@ namespace E2E.Models
                         res.CanSave = true;
                     }
                 }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool SaveChangePassword(clsPassword model)
+        {
+            try
+            {
+                bool res = new bool();
+                var UserDetails = db.UserDetails.Where(w => w.User_Id == model.User_Id).FirstOrDefault();
+                if (UserDetails.Detail_Password == Users_Password(model.OldPassword))
+                {
+                    UserDetails.Detail_Password = Users_Password(model.NewPassword);
+                    UserDetails.Detail_ConfirmPassword = UserDetails.Detail_Password;
+                    if (db.SaveChanges() > 0)
+                    {
+                        res = true;
+                    }
+                }
+
                 return res;
             }
             catch (Exception)

@@ -4,8 +4,10 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Entity.Validation;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -104,7 +106,7 @@ namespace E2E.Controllers
 
                 SetAuthen:
                     int year = DateTime.Today.Year;
-                    if (!int.Equals(users.YearSetPoint,year))
+                    if (!int.Equals(users.YearSetPoint, year))
                     {
                         clsDefaultSystem.Generate();
                     }
@@ -122,6 +124,9 @@ namespace E2E.Controllers
                 {
                     throw;
                 }
+            }
+            else
+            {
             }
 
             return View(model);
@@ -146,7 +151,6 @@ namespace E2E.Controllers
             }
         }
 
-
         public ActionResult Signout()
         {
             FormsAuthentication.SignOut();
@@ -157,13 +161,126 @@ namespace E2E.Controllers
         {
             try
             {
-                return Json(data.clsUsers_GetView(val),JsonRequestBehavior.AllowGet);
+                return Json(data.clsUsers_GetView(val), JsonRequestBehavior.AllowGet);
             }
             catch (Exception)
             {
-
                 throw;
             }
+        }
+
+        public ActionResult ChangePassword()
+        {
+            try
+            {
+                clsPassword clsPassword = new clsPassword();
+                clsPassword.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+
+                return View(clsPassword);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(clsPassword model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.SaveChangePassword(model))
+                        {
+                            scope.Complete();
+
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "รหัสผ่านเก่าไม่ถูกต้อง";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult _ShowChangePassword()
+        {
+            bool res = new bool();
+            var id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+            var Password = db.UserDetails.Where(w => w.User_Id == id).Select(s => s.Detail_Password).FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(Password))
+            {
+                res = true;
+            }
+
+            return PartialView("_ShowChangePassword", res);
         }
     }
 }

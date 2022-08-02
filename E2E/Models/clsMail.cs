@@ -49,7 +49,7 @@ namespace E2E.Models
                     dear += receiveDatas[i].NameEN;
                 }
 
-                if (sendCC.Count() > 0)
+                if (sendCC != null)
                 {
                     List<ReceiveData> receiveCC = db.UserDetails
                     .Where(w => sendCC.Contains(w.User_Id))
@@ -68,7 +68,7 @@ namespace E2E.Models
                     }
                 }
 
-                if (sendBCC.Count() > 0)
+                if (sendBCC != null)
                 {
                     List<ReceiveData> receiveBCC = db.UserDetails
                     .Where(w => sendBCC.Contains(w.User_Id))

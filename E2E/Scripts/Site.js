@@ -181,7 +181,7 @@ function setDropdown_Form() {
         });
     });
 }
-function callModal(urlAjax, bigSize = false) {
+function callModal(urlAjax, bigSize = false, callback = null) {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -200,9 +200,10 @@ function callModal(urlAjax, bigSize = false) {
                     width: '100%'
                 });
             });
-            $('#modalArea').modal('show');
+            callback;
         }
     });
+    $('#modalArea').modal('show');
     return false;
 }
 function callModalTable(urlAjax, bigSize = false) {

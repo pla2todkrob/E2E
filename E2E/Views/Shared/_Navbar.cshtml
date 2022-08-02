@@ -9,11 +9,11 @@
         <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","Home")">Home</a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
         </li>
-        
+
         <li class="nav-item dropdown" id="nav_department">
             @{ Html.RenderAction("_NavDepartment", "Configurations"); }
         </li>
@@ -41,6 +41,7 @@
                     <a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
                     <a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">Request change due date</a>
                     <div class="dropdown-divider"></div>
+                    @{ Html.RenderAction("_ShowChangePassword", "Users"); }
                     <a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
                 </div>
             </li>

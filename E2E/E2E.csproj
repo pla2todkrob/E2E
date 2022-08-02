@@ -253,7 +253,10 @@
     <Compile Include="Models\Views\clsGrades.cs" />
     <Compile Include="Models\Views\clsHome.cs" />
     <Compile Include="Models\Views\clsImage.cs" />
+    <Compile Include="Models\Views\clsInquiryTopics.cs" />
     <Compile Include="Models\Views\clsLogin.cs" />
+    <Compile Include="Models\Views\clsEstimate.cs" />
+    <Compile Include="Models\Views\clsPassword.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
@@ -858,6 +861,9 @@
     <Content Include="Views\Masters\Categories.cshtml" />
     <Content Include="Views\Masters\Categories_Create.cshtml" />
     <Content Include="Views\Masters\Categories_Table.cshtml" />
+    <Content Include="Views\Services\SetClose.cshtml" />
+    <Content Include="Views\Users\ChangePassword.cshtml" />
+    <Content Include="Views\Shared\_ShowChangePassword.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

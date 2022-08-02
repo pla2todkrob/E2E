@@ -1249,12 +1249,22 @@ namespace E2E.Controllers
 
         public ActionResult SetClose(Guid id)
         {
+            clsInquiryTopics clsInquiryTopics = new clsInquiryTopics();
+            clsInquiryTopics.Services = db.Services.Find(id);
+            clsInquiryTopics.List_Master_InquiryTopics = db.Master_InquiryTopics.OrderBy(o => o.InquiryTopic_Index).ToList();
+
+            return View(clsInquiryTopics);
+        }
+
+        [HttpPost]
+        public ActionResult SetClose(Guid id, List<clsEstimate> score)
+        {
             clsSwal swal = new clsSwal();
             using (TransactionScope scope = new TransactionScope())
             {
                 try
                 {
-                    if (data.Services_SetClose(id))
+                    if (data.SaveEstimate(id, score))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
