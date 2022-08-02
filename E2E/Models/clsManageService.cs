@@ -1533,5 +1533,41 @@ namespace E2E.Models
                 throw;
             }
         }
+
+        public bool SaveEstimate(Guid id, List<clsEstimate> score)
+        {
+            try
+            {
+                bool res = new bool();
+      
+                var average = score.Select(x => x.score).Average();
+
+                Satisfactions satisfactions = new Satisfactions();
+                satisfactions.Service_Id = id;
+                satisfactions.Satisfaction_Average = average;
+                db.Satisfactions.Add(satisfactions);
+
+                foreach (var item in score)
+                {
+                    SatisfactionDetails satisfactionDetails = new SatisfactionDetails();
+                    satisfactionDetails.Satisfaction_Id = satisfactions.Satisfaction_Id;
+                    satisfactionDetails.InquiryTopic_Id = item.id;
+                    satisfactionDetails.Point = item.score;
+
+                    db.SatisfactionDetails.Add(satisfactionDetails);
+                }
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = Services_SetClose(id);
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

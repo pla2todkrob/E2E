@@ -10,10 +10,12 @@ namespace E2E.Models.Tables
     {
         [Key]
         public Guid Satisfaction_Id { get; set; }
+
         public Guid Service_Id { get; set; }
         public virtual Services Services { get; set; }
-        public decimal Satisfaction_Average { get; set; }
+        public double Satisfaction_Average { get; set; }
         public DateTime Create { get; set; }
+
         public Satisfactions()
         {
             Satisfaction_Id = Guid.NewGuid();

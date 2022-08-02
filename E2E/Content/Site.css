@@ -11,9 +11,9 @@
     max-height: 192px;
 }
 
-img#img-table{
- height:108px;
- width:192px;
+img#img-table {
+    height: 108px;
+    width: 192px;
 }
 
 #serviceInfo {
@@ -21,12 +21,13 @@ img#img-table{
 }
 
 .PreLine {
-    white-space:pre-line;
+    white-space: pre-line;
 }
+
 .logo {
     max-height: calc(4rem - .3125rem - .3125rem);
 }
 
-.section_video{
-    object-fit:contain;
+.section_video {
+    object-fit: contain;
 }

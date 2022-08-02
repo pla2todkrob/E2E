@@ -22,29 +22,29 @@
             </th>
         </tr>
     </thead>
-    @foreach (var item in Model)
+    <tbody>
+        @foreach (var item in Model)
 
-    {
-        <tbody>
+        {
+
             <tr>
-                <td>
-                    <div class="text-center">
-                        <button onclick="callModal('@Url.Action("Categories_Create","Masters",new { id = Html.ValueFor(m => item.Category_Id) })')" class="btn btn-outline-secondary"><i class="fa fa-pencil"></i></button>
-                    </div>
+                <td class="fit">
+                    <button onclick="callModal('@Url.Action("Categories_Create", "Masters", new { id = Html.ValueFor(m => item.Category_Id) })')" class="btn btn-outline-secondary"><i class="fa fa-pencil"></i></button>
                 </td>
-                <td>
+                <td class="fit">
                     @Html.DisplayFor(i => item.Create)
                 </td>
                 <td>
                     @Html.DisplayFor(i => item.Category_Name)
                 </td>
-                <td>
+                <td class="fit">
                     @Html.DisplayFor(i => item.Update)
                 </td>
-                <td class="text-center">
+                <td class="fit text-center">
                     @Html.DisplayFor(i => item.Active)
                 </td>
             </tr>
-        </tbody>
-    }
+
+        }
+    </tbody>
 </table>

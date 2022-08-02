@@ -1,0 +1,49 @@
+﻿@model E2E.Models.Views.clsInquiryTopics
+
+@{
+    Layout = null;
+}
+
+<div id="SaveCloseForm">
+    <div class="modal-header">
+        <h5 class="modal-title">Satisfaction Assessment Form</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        @Html.HiddenFor(m => m.Services.Service_Id)
+        <table class="score-group table table-bordered table-striped w-100">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>5</th>
+                    <th>4</th>
+                    <th>3</th>
+                    <th>2</th>
+                    <th>1</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.List_Master_InquiryTopics)
+                {
+                    <tr class="score" id="@item.InquiryTopic_Id">
+                        <td>
+                            @Html.DisplayFor(m => item.Description_TH)
+                            <br />
+                            <small>(@Html.DisplayFor(m => item.Description_EN))</small>
+                        </td>
+                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id"  value="5" checked /></td>
+                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id"  value="4" /></td>
+                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id"  value="3" /></td>
+                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id"  value="2" /></td>
+                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id"  value="1" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button id="btn_SaveCloseForm" onclick="SaveCloseForm()" type="button" class="btn btn-success">Save</button>
+    </div>
+</div>
