@@ -27,7 +27,7 @@
         </li>
         @if (Model.HasValue)
         {
-            if (Model == 1)
+            if (Model.Value == 1)
             {
                 Html.RenderPartial("_NavbarAdmin");
             }

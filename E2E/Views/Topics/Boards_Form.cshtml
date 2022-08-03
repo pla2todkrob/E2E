@@ -11,7 +11,12 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
             <li class="breadcrumb-item"><a href="@Url.Action("Boards","Topics")">Topic</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Topics.Master_Categories.Category_Name</li>
+            <li class="breadcrumb-item active" aria-current="page">
+                @if (Model.Topics.Master_Categories != null)
+                {
+                    <span>@Model.Topics.Master_Categories.Category_Name</span>
+                }
+            </li>
         </ol>
     </nav>
 }
