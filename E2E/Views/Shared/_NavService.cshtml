@@ -6,8 +6,8 @@
 <span>Service</span>
 @if (Model.HasValue)
 {
-    if (Model > 0)
+    if (Model.Value > 0)
     {
-        <span id="count" class="badge badge-pill badge-warning">@Model</span>
+        <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
     }
 }

@@ -193,6 +193,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManualsController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
+    <Compile Include="Controllers\PostController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -200,6 +201,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\clsApi.cs" />
     <Compile Include="Models\clsChatHub.cs" />
     <Compile Include="Models\clsContext.cs" />
     <Compile Include="Models\clsDefaultSystem.cs" />

@@ -60,19 +60,12 @@ namespace E2E.Controllers
                 {
                     Users users = new Users();
                     users = db.Users
-                        .Where(w => w.User_Code == model.Username.Trim())
+                        .Where(w => w.User_Code == model.Username.Trim() || w.User_Email == model.Username.Trim())
                         .FirstOrDefault();
                     if (users == null)
                     {
-                        users = new Users();
-                        users = db.Users
-                            .Where(w => w.User_Email == model.Username.Trim())
-                            .FirstOrDefault();
-                        if (users == null)
-                        {
-                            ModelState.AddModelError("Username", string.Format("Username {0} not found", model.Username));
-                            return View(model);
-                        }
+                        ModelState.AddModelError("Username", string.Format("Username {0} not found", model.Username));
+                        return View(model);
                     }
 
                     string password = db.UserDetails
@@ -81,7 +74,7 @@ namespace E2E.Controllers
                         .FirstOrDefault();
                     if (string.IsNullOrEmpty(password))
                     {
-                        if (LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
+                        if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
                         {
                             goto SetAuthen;
                         }
@@ -132,24 +125,7 @@ namespace E2E.Controllers
             return View(model);
         }
 
-        private bool LoginDomain(string email, string password)
-        {
-            try
-            {
-                bool res = new bool();
-                string domainName = ConfigurationManager.AppSettings["DomainName"];
-                using (var context = new PrincipalContext(ContextType.Domain, domainName))
-                {
-                    res = context.ValidateCredentials(email, password);
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        
 
         public ActionResult Signout()
         {

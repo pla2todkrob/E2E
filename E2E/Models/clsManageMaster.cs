@@ -2005,6 +2005,24 @@ namespace E2E.Models
             }
         }
 
+        public bool LoginDomain(string email, string password)
+        {
+            try
+            {
+                bool res = new bool();
+                string domainName = ConfigurationManager.AppSettings["DomainName"];
+                using (var context = new PrincipalContext(ContextType.Domain, domainName))
+                {
+                    res = context.ValidateCredentials(email, password);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public string Users_GetInfomation(Guid id)
         {
             try
