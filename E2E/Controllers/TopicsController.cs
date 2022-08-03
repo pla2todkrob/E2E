@@ -26,14 +26,44 @@ namespace E2E.Controllers
 
         public ActionResult Boards()
         {
-            //clsTopic clsTopic = new clsTopic();
-            //clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == ).FirstOrDefault();
-            //clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id ==).ToList();
+            ViewBag.Categories = SelectListItems_Category_Name();
 
             return View();
         }
 
-        public ActionResult Boards_Table(int res)
+        public List<SelectListItem> SelectListItems_Category_Name()
+        {
+            IQueryable<Master_Categories> query = db.Master_Categories;
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "All topics", Value = "" });
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Category_Name.ToString(),
+                    Text = s.Category_Name
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
+        }
+
+        public List<SelectListItem> SelectListItems_Create_Category_Name()
+        {
+            IQueryable<Master_Categories> query = db.Master_Categories.Where(w=>w.Active);
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select category", Value = "" });
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Category_Id.ToString(),
+                    Text = s.Category_Name
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
+        }
+
+        public ActionResult Boards_Table(int? res, string category = "")
         {
             try
             {
@@ -50,23 +80,33 @@ namespace E2E.Controllers
                     .Select(s => s.User_Code)
                     .FirstOrDefault();
 
-                var query = db.Topics.Where(w => w.Topic_Pin == val).OrderByDescending(o => o.Update).ThenByDescending(t => t.Create).ToList();
+                IQueryable<Topics> query = db.Topics.OrderByDescending(o => o.Create).ThenByDescending(t => t.Update);
+
                 if (val)
                 {
-                    foreach (var item in query.Where(w => w.Topic_Pin_EndDate < DateTime.Today))
+                    query = query.Where(w => w.Topic_Pin == val);
+                    foreach (var item in query.Where(w => w.Topic_Pin_EndDate < DateTime.Today).ToList())
                     {
                         item.Topic_Pin = false;
                         item.Topic_Pin_EndDate = null;
                         db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                         db.SaveChanges();
                     }
-                    query = query.Where(w => w.Topic_Pin_EndDate >= DateTime.Today).ToList();
+                    query = query.Where(w => w.Topic_Pin_EndDate >= DateTime.Today);
                 }
-                if (res == 3)
+
+                if (res == 3)//top rate
                 {
-                    query = db.Topics.OrderByDescending(o => o.Count_View).Take(10).ToList();
+                    query = query.OrderByDescending(o => o.Count_View).Take(10);
                 }
-                return View(query);
+
+                if (category != "")
+                {
+                    var categorys = db.Master_Categories.Where(w => w.Category_Name == category).FirstOrDefault();
+                    query = query.Where(w => w.Category_Id == categorys.Category_Id);
+                }
+
+                return View(query.ToList());
             }
             catch (Exception)
             {
@@ -78,6 +118,7 @@ namespace E2E.Controllers
         {
             try
             {
+                ViewBag.Create_Categories = SelectListItems_Create_Category_Name();
                 Topics topics = new Topics();
                 bool isNew = true;
                 if (id.HasValue)
@@ -324,6 +365,7 @@ namespace E2E.Controllers
 
             return View(clsTopic);
         }
+
         public ActionResult Boards_Section(Guid topicId, Guid? id)
         {
             try
@@ -342,7 +384,6 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -882,6 +923,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         [AllowAnonymous]
         public ActionResult _Newtopic()
         {

@@ -359,6 +359,7 @@ namespace E2E.Models
                 topics.Topic_Pin_EndDate = model.Topic_Pin_EndDate;
                 topics.Create = DateTime.Now;
                 topics.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                topics.Category_Id = model.Category_Id;
 
                 db.Topics.Add(topics);
                 if (db.SaveChanges() > 0)
@@ -434,6 +435,7 @@ namespace E2E.Models
                 topics.Topic_Pin = model.Topic_Pin;
                 topics.Topic_Pin_EndDate = model.Topic_Pin_EndDate;
                 topics.Update = DateTime.Now;
+                topics.Category_Id = model.Category_Id;
 
                 if (db.SaveChanges() > 0)
                 {
