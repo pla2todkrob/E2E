@@ -737,7 +737,22 @@ namespace E2E.Models
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
                     serviceComments.Comment_Content = string.Format("Commit Task, Assign task to the {0} department, Assign task to {1}", deptName, master.Users_GetInfomation(userId));
-                    res = Services_Comment(serviceComments);
+
+                    if (Services_Comment(serviceComments))
+                    {
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl = linkUrl.Replace("Commit", "Action");
+
+                        string subject = string.Format("[E2E][Please action] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Assign by:</b> {0}", master.Users_GetInfomation(userActionId));
+                        content += "<br />";
+                        content += "<br />";
+                        content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(userId, subject, content);
+                    }
                 }
 
                 return res;
@@ -920,7 +935,22 @@ namespace E2E.Models
                     serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
                     serviceComments.Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
-                    res = Services_Comment(serviceComments);
+                    if (Services_Comment(serviceComments))
+                    {
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl += "/" + services.Service_Id;
+                        linkUrl = linkUrl.Replace("SetComplete", "ServiceInfomation");
+
+                        string subject = string.Format("[E2E][Please close your job] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(services.Action_User_Id.Value));
+                        content += "<br />";
+                        content += "<br />";
+                        content += string.Format("<b>Conment:</b> {0}", model.Comment_Content);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(services.User_Id, subject, content);
+                    }
                 }
 
                 return res;
@@ -1089,7 +1119,22 @@ namespace E2E.Models
                     serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
                     serviceComments.Comment_Content = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name);
-                    res = Services_Comment(serviceComments);
+                    if (Services_Comment(serviceComments))
+                    {
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl += "/" + services.Service_Id;
+                        linkUrl = linkUrl.Replace("SetReject", "ServiceInfomation");
+
+                        string subject = string.Format("[E2E][Reject] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Reject by:</b> {0}", master.Users_GetInfomation(Guid.Parse(HttpContext.Current.User.Identity.Name)));
+                        content += "<br />";
+                        content += "<br />";
+                        content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(services.User_Id, subject, content);
+                    }
                 }
 
                 return res;
@@ -1272,7 +1317,23 @@ namespace E2E.Models
                     serviceComments.Service_Id = model.Service_Id;
                     serviceComments.Comment_Content = string.Format("Request change due date from {0} to {1}", model.DueDate.ToString("d"), model.DueDate_New.Value.ToString("d"));
                     serviceComments.User_Id = userId;
-                    res = Services_Comment(serviceComments);
+                    if (Services_Comment(serviceComments))
+                    {
+                        Services services = new Services();
+                        services = db.Services.Find(model.Service_Id);
+
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl = linkUrl.Replace("RequestChangeDue_Form", "RequestChangeDue");
+
+                        string subject = string.Format("[E2E][Please approve change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(userId));
+                        content += "<br />";
+                        content += string.Format("<b>Description:</b> {0}", serviceComments.Comment_Content);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(userId, subject, content);
+                    }
                 }
 
                 return res;
@@ -1383,6 +1444,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                string Getteam = string.Empty;
                 foreach (var item in model.User_Ids)
                 {
                     ServiceTeams serviceTeams = new ServiceTeams();
@@ -1398,6 +1460,37 @@ namespace E2E.Models
                     }
                 }
 
+                var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                linkUrl += "/" + model.Service_Id;
+                linkUrl = linkUrl.Replace("_AddTeam", "ServiceInfomation");
+
+                Services services = new Services();
+                services = db.Services.Find(model.Service_Id);
+
+                List<Guid> listTeam = new List<Guid>();
+                listTeam = db.ServiceTeams
+                    .Where(w => w.Service_Id == services.Service_Id)
+                    .Select(s => s.User_Id)
+                    .ToList();
+
+                foreach (var item in listTeam)
+                {
+                    Getteam += master.Users_GetInfomation(item) + "<br />";
+                }
+
+                string subject = string.Format("[E2E][Notify add team] {0} - {1}", services.Service_Key, services.Service_Subject);
+                string content = string.Format("<p><b>Action by:</b> {0}", master.Users_GetInfomation(services.Action_User_Id.Value));
+                content += "<br />";
+                content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                content += "<br />";
+                content += "<br />";
+                content += "<b>Current member</b><br/>";
+                content += Getteam;
+                content += "</p>";
+                content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                content += "<p>Thank you for your consideration</p>";
+                res = mail.SendMail(listTeam, subject, content);
+
                 return res;
             }
             catch (Exception)
@@ -1411,6 +1504,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
+                string getTeam = string.Empty;
                 ServiceTeams serviceTeams = new ServiceTeams();
                 serviceTeams = db.ServiceTeams.Find(id);
                 string userName = master.Users_GetInfomation(serviceTeams.User_Id);
@@ -1421,7 +1515,41 @@ namespace E2E.Models
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = serviceId;
                     serviceComments.Comment_Content = string.Format("Delete {0} from this team", userName);
-                    res = Services_Comment(serviceComments);
+                    if (Services_Comment(serviceComments))
+                    {
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl = linkUrl.Replace("_DeleteTeam", "ServiceInfomation");
+
+                        Services services = new Services();
+                        services = db.Services.Find(serviceId);
+
+                        List<Guid> listTeam = new List<Guid>();
+                        listTeam = db.ServiceTeams
+                            .Where(w => w.Service_Id == serviceId)
+                            .Select(s => s.User_Id)
+                            .ToList();
+
+                        foreach (var item in listTeam)
+                        {
+                            getTeam += master.Users_GetInfomation(item) + "<br />";
+                        }
+
+                        listTeam.Add(serviceTeams.User_Id);
+
+                        string subject = string.Format("[E2E][Notify delete member] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Action by:</b> {0}", master.Users_GetInfomation(services.Action_User_Id.Value));
+                        content += "<br />";
+                        content += "<br />";
+                        content += "<b>Delete: </b>" + userName;
+                        content += "<br />";
+                        content += "<br />";
+                        content += "<b>Current member</b><br/>";
+                        content += getTeam;
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(listTeam, subject, content);
+                    }
                 }
                 return res;
             }
@@ -1539,7 +1667,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-      
+
                 var average = score.Select(x => x.score).Average();
 
                 Satisfactions satisfactions = new Satisfactions();
