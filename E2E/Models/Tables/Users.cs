@@ -41,10 +41,10 @@ namespace E2E.Models.Tables
 
         public DateTime? Update { get; set; }
 
-        [Description("Employee code"), Display(Name = "Code"), Required]
+        [ Display(Name = "Code"), Required]
         public string User_Code { get; set; }
 
-        [Description("Employee email"), Display(Name = "Email")]
+        [Display(Name = "Email")]
         public string User_Email { get; set; }
 
         [Key]

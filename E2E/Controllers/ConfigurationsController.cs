@@ -181,14 +181,19 @@ namespace E2E.Controllers
             try
             {
                 clsUsers clsUsers = new clsUsers();
-                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-                clsUsers = db.Users
-                    .Where(w => w.User_Id == id)
-                    .Select(s => new clsUsers()
-                    {
-                        User_Code = s.User_Code,
-                        User_Point = s.User_Point
-                    }).FirstOrDefault();
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    clsUsers = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .AsEnumerable()
+                        .Select(s => new clsUsers()
+                        {
+                            User_Code = s.User_Code,
+                            User_Point = s.User_Point
+                        }).FirstOrDefault();
+                }
+                
 
                 return PartialView("_Profile", clsUsers);
             }

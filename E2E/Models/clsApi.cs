@@ -10,8 +10,7 @@ namespace E2E.Models
     {
         public bool isSuccess { get; set; }
         public string Message { get; set; }
-        public object Value { get; set; }
-        public dynamic ValueClass { get; set; }
+        public dynamic Value { get; set; }
         public clsApi()
         {
             isSuccess = new bool();
