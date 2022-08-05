@@ -1871,8 +1871,7 @@ namespace E2E.Models
                     userDetails.Detail_Password = Users_Password(model.Detail_Password.Trim());
                     userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 }
-
-                if (string.IsNullOrEmpty(users.User_Email))
+                else if (string.IsNullOrEmpty(users.User_Email))
                 {
                     userDetails.Detail_Password = Users_Password(users.User_Code.Trim());
                     userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
@@ -1938,7 +1937,6 @@ namespace E2E.Models
 
                 users.Grade_Id = model.Users.Grade_Id;
                 users.Process_Id = model.Users.Process_Id;
-                users.Role_Id = model.Users.Role_Id;
                 users.User_Code = model.Users.User_Code.Trim();
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
 

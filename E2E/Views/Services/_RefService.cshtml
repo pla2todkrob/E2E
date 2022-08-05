@@ -25,13 +25,15 @@
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                                     <dd class="col-8 col-md-9"><span class="PreLine">@Html.DisplayFor(m => item.Services.Service_Description)</span></dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                                    <dd class="col-8 col-md-9"><b class="text-info">@Html.DisplayFor(m => item.User_Name)</b></dd>
+                                    <dd class="col-8 col-md-9"><b class="text-primary">@Html.DisplayFor(m => item.User_Name)</b></dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
                                     <dd class="col-8 col-md-9"><b>@Html.DisplayFor(m => item.Services.Update)</b></dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
                                     <dd class="col-8 col-md-9"><span class="@item.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => item.Services.System_Priorities.Priority_Name)</span></dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
                                     <dd class="col-8 col-md-9"><b>@Html.DisplayFor(m => item.Services.Service_DueDate)</b></dd>
+                                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Create_Name)</dt>
+                                    <dd class="col-8 col-md-9"><b class="text-info">@Html.DisplayFor(m => item.Create_Name)</b></dd>
                                     <dt class="col-4 col-md-3">Files</dt>
                                     <dd class="col-8 col-md-9">
                                         @item.ServiceFiles.Count Attachments

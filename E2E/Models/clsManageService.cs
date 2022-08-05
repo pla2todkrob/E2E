@@ -89,7 +89,7 @@ namespace E2E.Models
             try
             {
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Is_Commit && w.Status_Id == 1 && w.Is_ShowWaitingAction == false)
+                    .Where(w => w.Is_Commit && w.Status_Id == 1 && (w.Is_Approval || !w.Is_MustBeApproved))
                     .OrderByDescending(o => o.Priority_Id)
                     .ThenBy(o => new { o.Create, o.Service_DueDate });
 
@@ -101,7 +101,7 @@ namespace E2E.Models
                         .FirstOrDefault();
                     if (!string.IsNullOrEmpty(deptName))
                     {
-                        query = query.Where(w => (w.Master_Departments.Department_Name == deptName && !w.Action_User_Id.HasValue && w.Is_ShowWaitingAction == false) || w.Action_User_Id == id && w.Is_ShowWaitingAction == false);
+                        query = query.Where(w => (w.Master_Departments.Department_Name == deptName && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
                     }
                 }
 
@@ -274,6 +274,7 @@ namespace E2E.Models
                     }).FirstOrDefault();
 
                 clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
+                clsServices.Create_Name = master.Users_GetInfomation(clsServices.Services.Create_User_Id);
 
                 if (clsServices.Services.Action_User_Id.HasValue)
                 {
@@ -629,28 +630,22 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetRequired(Guid id, bool? show)
+        public bool Services_SetRequired(ServiceComments model)
         {
             try
             {
                 bool res = new bool();
-                bool SH = new bool();
-                if (show == true)
-                {
-                    SH = true;
-                }
 
                 Services services = new Services();
-                services = db.Services.Find(id);
+                services = db.Services.Find(model.Service_Id);
                 services.Is_MustBeApproved = true;
-                services.Is_ShowWaitingAction = SH;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
-                    serviceComments.Service_Id = id;
-                    serviceComments.Comment_Content = "Approval required";
+                    serviceComments.Service_Id = model.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Approval required, \n {0}",model.Comment_Content);
                     if (Services_Comment(serviceComments))
                     {
                         string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
@@ -658,14 +653,17 @@ namespace E2E.Models
                             .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
                             .Select(s => s.User_Id)
                             .ToList();
+                        sendTo.Add(services.User_Id);
 
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace("Commit_Required", "Approve_Form");
+                        linkUrl += "/" + services.Service_Id;
+                        linkUrl = linkUrl.Replace("SetMustApprove", "Approve_Form");
 
-                        string subject = string.Format("[E2E][Please approve] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(services.User_Id));
+                        string subject = string.Format("[E2E][Require approve] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
                         content += "<br />";
-                        content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                        content += "<br />";
+                        content += string.Format("<b>Comment:</b> {0}", serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
@@ -721,7 +719,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Guid userActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid userSetId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 string deptName = db.Master_Departments.Find(deptId).Department_Name;
 
@@ -743,11 +741,13 @@ namespace E2E.Models
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace("Commit", "Action");
 
-                        string subject = string.Format("[E2E][Please action] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Assign by:</b> {0}", master.Users_GetInfomation(userActionId));
-                        content += "<br />";
+                        string subject = string.Format("[E2E][Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
                         content += "<br />";
                         content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                        content += "<br />";
+                        content += "<br />";
+                        content += string.Format("<b>Comment:</b> {0}", serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
@@ -793,46 +793,36 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetApprove(Guid id)
+        public bool Services_SetApprove(ServiceComments model)
         {
             try
             {
                 bool res = new bool();
                 Services services = new Services();
-                services = db.Services.Find(id);
+                services = db.Services.Find(model.Service_Id);
                 services.Is_Approval = true;
-                services.Is_ShowWaitingAction = false;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
-                    serviceComments.Service_Id = id;
-                    serviceComments.Comment_Content = "Approved";
-                    res = Services_Comment(serviceComments);
+                    serviceComments.Service_Id = model.Service_Id;
+                    serviceComments.Comment_Content = string.Format("Approved,\n{0}",model.Comment_Content);
+                    if (Services_Comment(serviceComments))
+                    {
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl += "/" + services.Service_Id;
+                        linkUrl = linkUrl.Replace("SetApproved", "Approve_Form");
 
-                    //string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                        string subject = string.Format("[E2E][Approval] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        res = mail.SendMail(services.User_Id, subject, content);
+                    }
 
-                    //List<string> GetEmail = new List<string>();
-                    //GetEmail.Add(db.ServiceComments.Where(w => w.Service_Id == id && w.Comment_Content == "Approval required").OrderByDescending(o => o.Create).Select(s => s.Users.User_Email).FirstOrDefault());
-                    //string strName = "Dear ";
-
-                    //string[] CutName = services.Users.User_Email.Split('@');
-
-                    //string subject = "[Approved successfully] E2E system Job No." + services.Service_Key + " Subject " + services.Service_Subject;
-                    //string strBody = "<html>";
-                    //strBody += "<head>";
-                    //strBody += "</head>";
-                    //strBody += "<body>";
-                    //strBody += "<p><b>" + strName + " " + CutName[0] + "</b></p>";
-                    //strBody += "JOB NO : " + services.Service_Key + "<br/>Manager User [Approved successfully]";
-                    //strBody += "<br/>";
-                    //strBody += "<a href=https://tp-portal.thaiparker.co.th/E2E/Services" + ">Click here to service detail</a>";
-                    //strBody += "<p>Thank you</p>";
-                    //strBody += "</body>";
-                    //strBody += "</html>";
-
-                    //SendMail(GetEmail, subject, strBody);
+                    
                 }
 
                 return res;
@@ -939,13 +929,10 @@ namespace E2E.Models
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace("SetComplete", "ServiceInfomation");
+                        linkUrl = linkUrl.Replace("Complete", "ServiceInfomation");
 
-                        string subject = string.Format("[E2E][Please close your job] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(services.Action_User_Id.Value));
-                        content += "<br />";
-                        content += "<br />";
-                        content += string.Format("<b>Conment:</b> {0}", model.Comment_Content);
+                        string subject = string.Format("[E2E][Require close job] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
@@ -1126,10 +1113,7 @@ namespace E2E.Models
                         linkUrl = linkUrl.Replace("SetReject", "ServiceInfomation");
 
                         string subject = string.Format("[E2E][Reject] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Reject by:</b> {0}", master.Users_GetInfomation(Guid.Parse(HttpContext.Current.User.Identity.Name)));
-                        content += "<br />";
-                        content += "<br />";
-                        content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
+                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
@@ -1325,10 +1309,8 @@ namespace E2E.Models
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace("RequestChangeDue_Form", "RequestChangeDue");
 
-                        string subject = string.Format("[E2E][Please approve change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Requestor:</b> {0}", master.Users_GetInfomation(userId));
-                        content += "<br />";
-                        content += string.Format("<b>Description:</b> {0}", serviceComments.Comment_Content);
+                        string subject = string.Format("[E2E][Request change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Description:</b> {0}", serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
@@ -1479,9 +1461,7 @@ namespace E2E.Models
                 }
 
                 string subject = string.Format("[E2E][Notify add team] {0} - {1}", services.Service_Key, services.Service_Subject);
-                string content = string.Format("<p><b>Action by:</b> {0}", master.Users_GetInfomation(services.Action_User_Id.Value));
-                content += "<br />";
-                content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
                 content += "<br />";
                 content += "<br />";
                 content += "<b>Current member</b><br/>";
@@ -1537,10 +1517,7 @@ namespace E2E.Models
                         listTeam.Add(serviceTeams.User_Id);
 
                         string subject = string.Format("[E2E][Notify delete member] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Action by:</b> {0}", master.Users_GetInfomation(services.Action_User_Id.Value));
-                        content += "<br />";
-                        content += "<br />";
-                        content += "<b>Delete: </b>" + userName;
+                        string content = "<p><b>Delete: </b>" + userName;
                         content += "<br />";
                         content += "<br />";
                         content += "<b>Current member</b><br/>";

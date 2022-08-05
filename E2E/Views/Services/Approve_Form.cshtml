@@ -12,6 +12,12 @@
             callSubmitRedirect('@Url.Action("SetCancel","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
             return false;
         });
+
+        $(document).on('submit', "#ApprovedForm", function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("SetApproved", "Services")', this);
+            return false;
+        });
     </script>
 }
 
@@ -64,7 +70,7 @@
                         {
                             <div class="d-flex justify-content-between">
                                 <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetCancel","Services",new { id=Model.Services.Service_Id })')">Cancel</button>
-                                <button type="button" class="btn btn-primary" onclick="setSuccessByIdRePage('@Url.Action("Approve_Set","Services",new { id=Model.Services.Service_Id })');">Approve</button>
+                                <button type="button" class="btn btn-primary" onclick="callModal('@Url.Action("SetApproved","Services",new { id=Model.Services.Service_Id })');">Approve</button>
                             </div>
 
                         }

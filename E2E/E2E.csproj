@@ -256,6 +256,7 @@
     <Compile Include="Models\Tables\UserDetails.cs" />
     <Compile Include="Models\Tables\Users.cs" />
     <Compile Include="Models\Tables\System_Roles.cs" />
+    <Compile Include="Models\Tables\UserUploadHistories.cs" />
     <Compile Include="Models\Views\clsDepartments.cs" />
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsEForm.cs" />
@@ -873,6 +874,9 @@
     <Content Include="Views\Services\SetClose.cshtml" />
     <Content Include="Views\Users\ChangePassword.cshtml" />
     <Content Include="Views\Shared\_ShowChangePassword.cshtml" />
+    <Content Include="Views\Users\_UploadHistory.cshtml" />
+    <Content Include="Views\Services\SetMustApprove.cshtml" />
+    <Content Include="Views\Services\SetApproved.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -51,6 +51,7 @@ namespace E2E.Models
         public DbSet<TopicSections> TopicSections { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<UserUploadHistories> UserUploadHistories { get; set; }
         public DbSet<Manuals> Manuals { get; set; }
         public DbSet<System_ManualType> System_ManualType { get; set; }
         public DbSet<System_Language> System_Language { get; set; }

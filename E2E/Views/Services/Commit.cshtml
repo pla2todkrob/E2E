@@ -22,6 +22,12 @@
             callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
             return false;
         });
+
+        $(document).on('submit', "#MustApproveForm", function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetMustApprove", "Services")', this,'@Url.Action("Index", "Services")');
+            return false;
+        });
     </script>
 }
 @section breadcrumb{
@@ -47,7 +53,7 @@
                             <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                             <dd class="col-12 col-xl-8"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
                             <dt class="col-4">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                            <dd class="col-8"><b class="text-info">@Html.DisplayFor(m => m.User_Name)</b></dd>
+                            <dd class="col-8"><b class="text-primary">@Html.DisplayFor(m => m.User_Name)</b></dd>
                             @if (Model.Services.Update.HasValue)
                             {
                                 <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
@@ -57,6 +63,8 @@
                             <dd class="col-8"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
                             <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
                             <dd class="col-8"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
+                            <dt class="col-4">@Html.DisplayNameFor(m => m.Create_Name)</dt>
+                            <dd class="col-8"><b class="text-info">@Html.DisplayFor(m => m.Create_Name)</b></dd>
                             <dt class="col-4">Files</dt>
                             <dd class="col-8">
                                 @Model.ServiceFiles.Count Attachments
@@ -77,7 +85,7 @@
                             <div class="d-flex justify-content-between">
                                 @if (!Model.Services.Is_MustBeApproved)
                                 {
-                                    <button type="button" class="btn btn-warning" onclick="setRequired('@Url.Action("Commit_Required","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Must approved</button>
+                                    <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Must approved</button>
                                 }
 
                                 <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to department</button>

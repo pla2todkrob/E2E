@@ -258,5 +258,9 @@ namespace E2E.Controllers
 
             return PartialView("_ShowChangePassword", res);
         }
+        public ActionResult _UploadHistory()
+        {
+            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
+        }
     }
 }

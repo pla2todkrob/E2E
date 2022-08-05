@@ -13,6 +13,8 @@ namespace E2E.Models.Views
         public string User_Name { get; set; }
         [Display(Name = "Action by")]
         public string Action_Name { get; set; }
+        [Display(Name = "Create by")]
+        public string Create_Name { get; set; }
         [Display(Name = "Email")]
         public string Action_Email { get; set; }
         public Services Services { get; set; }
