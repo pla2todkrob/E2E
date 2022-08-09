@@ -3,9 +3,6 @@
     $(window).resize(function () {
         adjustHeight();
     });
-
-    
-
 });
 
 async function adjustHeight() {
@@ -23,6 +20,32 @@ async function adjustHeight() {
             $(this).find('.refComment').innerHeight(dataHeight);
         });
     }
+}
+
+function CheckNotClose(urlAjax, urlAjaxCHK, bigSize = false) {
+    $.ajax({
+        url: urlAjaxCHK,
+        async: true,
+        success: function (res) {
+            if (res.option != null) {
+                swal({
+                    title: res.title,
+                    text: res.text,
+                    icon: res.icon,
+                    button: res.button,
+                    dangerMode: res.dangerMode
+                }).then(function () {
+                    if (res.icon == 'warning') {
+                        window.location.href = baseUrl + '/Services/ServiceInfomation/' + res.option;
+                    }
+                });
+            }
+            else {
+                callModalService(urlAjax, bigSize);
+            }
+        }
+    });
+    return false;
 }
 
 function callModalService(urlAjax, bigSize = false) {
