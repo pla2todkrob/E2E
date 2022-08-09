@@ -75,6 +75,7 @@ namespace E2E.Controllers
             try
             {
                 Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+
                 ViewBag.PriorityList = data.SelectListItems_Priority();
                 ViewBag.RefServiceList = data.SelectListItems_RefService(userId);
                 ViewBag.UserList = data.SelectListItems_User();
@@ -94,6 +95,26 @@ namespace E2E.Controllers
             {
                 throw;
             }
+        }
+
+        public ActionResult Check_Close_Job()
+        {
+            clsSwal res = new clsSwal();
+
+            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+
+            var ID_service = data.Service_CHK_CloseJob(userId);
+
+            if (ID_service != null)
+            {
+                res.icon = "warning";
+                res.dangerMode = true;
+                res.text = "You have a job that hasn't been closed.";
+                res.title = "Please close job";
+                res.option = ID_service;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -743,10 +764,12 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult SetMustApprove(Guid id)
         {
             return View(new ServiceComments() { Service_Id = id });
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetMustApprove(ServiceComments model)
         {
@@ -804,10 +827,12 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetApproved(Guid id)
         {
             return View(new ServiceComments() { Service_Id = id });
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult SetApproved(ServiceComments model)
         {
@@ -866,6 +891,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public ActionResult SetReject(Guid id)
         {
             try

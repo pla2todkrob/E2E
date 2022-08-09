@@ -645,7 +645,7 @@ namespace E2E.Models
                 {
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = model.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Approval required, \n {0}",model.Comment_Content);
+                    serviceComments.Comment_Content = string.Format("Approval required, \n {0}", model.Comment_Content);
                     if (Services_Comment(serviceComments))
                     {
                         string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
@@ -807,7 +807,7 @@ namespace E2E.Models
                 {
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = model.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Approved,\n{0}",model.Comment_Content);
+                    serviceComments.Comment_Content = string.Format("Approved,\n{0}", model.Comment_Content);
                     if (Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
@@ -821,8 +821,6 @@ namespace E2E.Models
                         content += "<p>Thank you for your consideration</p>";
                         res = mail.SendMail(services.User_Id, subject, content);
                     }
-
-                    
                 }
 
                 return res;
@@ -1529,6 +1527,27 @@ namespace E2E.Models
                     }
                 }
                 return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Guid? Service_CHK_CloseJob(Guid id)
+        {
+            try
+            {
+                var res = db.Services.Where(w => w.User_Id == id && w.Status_Id == 3).FirstOrDefault();
+
+                Guid? id2 = null;
+
+                if (res != null)
+                {
+                    id2 = res.Service_Id;
+                }
+
+                return id2;
             }
             catch (Exception)
             {
