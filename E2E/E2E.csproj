@@ -198,6 +198,7 @@
     <Compile Include="Controllers\ConfigurationsController.cs" />
     <Compile Include="Controllers\EFormsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ManagementController.cs" />
     <Compile Include="Controllers\ManualsController.cs" />
     <Compile Include="Controllers\MastersController.cs" />
     <Compile Include="Controllers\PostController.cs" />
@@ -222,6 +223,9 @@
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
     <Compile Include="Models\Tables\Master_Categories.cs" />
+    <Compile Include="Models\Tables\Master_Documents.cs" />
+    <Compile Include="Models\Tables\Master_DocumentVersions.cs" />
+    <Compile Include="Models\Tables\ServiceDocuments.cs" />
     <Compile Include="Models\Tables\System_Language.cs" />
     <Compile Include="Models\Tables\Manuals.cs" />
     <Compile Include="Models\Tables\System_ManualType.cs" />
@@ -877,10 +881,12 @@
     <Content Include="Views\Users\_UploadHistory.cshtml" />
     <Content Include="Views\Services\SetMustApprove.cshtml" />
     <Content Include="Views\Services\SetApproved.cshtml" />
+    <Content Include="Views\Shared\_NavManagement.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="External_Dll\" />
+    <Folder Include="Views\Management\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

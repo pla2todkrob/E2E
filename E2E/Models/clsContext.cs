@@ -18,7 +18,8 @@ namespace E2E.Models
         public DbSet<EForm_Files> EForm_Files { get; set; }
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
         public DbSet<EForms> EForms { get; set; }
-
+        public DbSet<Master_Documents> Master_Documents { get; set; }
+        public DbSet<Master_DocumentVersions> Master_DocumentVersions { get; set; }
         public DbSet<Master_Departments> Master_Departments { get; set; }
         public DbSet<Master_Divisions> Master_Divisions { get; set; }
         public DbSet<Master_Grades> Master_Grades { get; set; }
@@ -32,6 +33,7 @@ namespace E2E.Models
         public DbSet<ServiceChangeDueDate> ServiceChangeDueDates { get; set; }
         public DbSet<ServiceCommentFiles> ServiceCommentFiles { get; set; }
         public DbSet<ServiceComments> ServiceComments { get; set; }
+        public DbSet<ServiceDocuments> ServiceDocuments { get; set; }
         public DbSet<ServiceFiles> ServiceFiles { get; set; }
         public DbSet<Services> Services { get; set; }
         public DbSet<ServiceTeams> ServiceTeams { get; set; }
