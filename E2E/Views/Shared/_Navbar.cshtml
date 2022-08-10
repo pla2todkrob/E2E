@@ -7,10 +7,6 @@
 <div class="collapse navbar-collapse" id="navbar_top">
     <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Index","Home")">Home</a>
-        </li>
-
-        <li class="nav-item">
             <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
         </li>
 
@@ -31,6 +27,8 @@
             {
                 Html.RenderPartial("_NavbarAdmin");
             }
+
+            Html.RenderAction("_NavManagement", "Configurations");
 
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

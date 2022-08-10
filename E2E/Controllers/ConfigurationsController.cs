@@ -267,7 +267,29 @@ namespace E2E.Controllers
                 throw;
             }
         }
+        public ActionResult _NavManagement()
+        {
+            bool res = new bool();
+            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+            try
+            {
+                int authur = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+                if (authur == 2)
+                {
+                    res = true;
+                }
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+
+            return PartialView("_NavManagement", res);
+        }
         public ActionResult _Copyright()
         {
             System_Configurations system_Configurations = new System_Configurations();
