@@ -1,0 +1,104 @@
+﻿@model E2E.Models.Views.clsDocuments
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveDocControl", @class = "was-validated", enctype = "multipath/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Form</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m => m.Master_Documents.Document_Id)
+        <div class="form-row">
+
+            <div class="form-group col-md-6">
+                @Html.LabelFor(m => m.Master_Documents.Document_Name)
+                @Html.TextBoxFor(m => m.Master_Documents.Document_Name, new { @class = "form-control", required = "required" })
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="FileDoc">Document</label>
+                <input type="file" class="form-control-file" name="FileDoc" id="FileDoc">
+            </div>
+
+            <div class="col-md-12">
+                @{
+                    if (ViewBag.IsNew == false)
+                    {
+                        <div class="form-group form-check">
+                            @Html.CheckBoxFor(m => m.Master_Documents.Active, new { @class = "form-check-input" })
+                            @Html.LabelFor(m => m.Master_Documents.Active, new { @class = "form-check-label" })
+                        </div>
+                    }
+
+                }
+            </div>
+        </div>
+
+        @if (ViewBag.IsNew == false)
+        {
+            if (Model.Master_DocumentVersions.ToList().Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(m => m.Master_DocumentVersions.FirstOrDefault().Create)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(m => m.Master_DocumentVersions.FirstOrDefault().DocumentVersion_Name)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(m => m.Master_DocumentVersions.FirstOrDefault().DocumentVersion_Number)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(m => m.Master_DocumentVersions.FirstOrDefault().Users.User_Code)
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.Master_DocumentVersions)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(i => item.Create)
+                                    </td>
+                                    <td>
+
+                                        <a href="@item.DocumentVersion_Path" target="_blank" download="@item.DocumentVersion_Name"> @Html.DisplayFor(i => item.DocumentVersion_Name)</a>
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(i => item.DocumentVersion_Number)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(i => item.Users.User_Code)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        }
+    </div>
+    <div class="modal-footer">
+        @{
+            if (ViewBag.IsNew == false)
+            {
+                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_DocumentControl_Create","Management",new { id=Html.ValueFor(w=>w.Master_Documents.Document_Id)})')"><i class="fa fa-trash"></i></button>
+            }
+        }
+        <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i></button>
+    </div>
+}

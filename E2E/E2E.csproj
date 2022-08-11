@@ -215,6 +215,7 @@
     <Compile Include="Models\clsDefaultSystem.cs" />
     <Compile Include="Models\clsMail.cs" />
     <Compile Include="Models\clsManageEForm.cs" />
+    <Compile Include="Models\clsManageManagement.cs" />
     <Compile Include="Models\clsManageMaster.cs" />
     <Compile Include="Models\clsManageService.cs" />
     <Compile Include="Models\clsManageTopic.cs" />
@@ -263,6 +264,7 @@
     <Compile Include="Models\Tables\UserUploadHistories.cs" />
     <Compile Include="Models\Views\clsDepartments.cs" />
     <Compile Include="Models\Views\clsDivisions.cs" />
+    <Compile Include="Models\Views\clsDocuments.cs" />
     <Compile Include="Models\Views\clsEForm.cs" />
     <Compile Include="Models\Views\clsGrades.cs" />
     <Compile Include="Models\Views\clsHome.cs" />
@@ -882,11 +884,13 @@
     <Content Include="Views\Services\SetMustApprove.cshtml" />
     <Content Include="Views\Services\SetApproved.cshtml" />
     <Content Include="Views\Shared\_NavManagement.cshtml" />
+    <Content Include="Views\Management\DocumentControl.cshtml" />
+    <Content Include="Views\Management\DocumentControl_Table.cshtml" />
+    <Content Include="Views\Management\DocumentControl_Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="External_Dll\" />
-    <Folder Include="Views\Management\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

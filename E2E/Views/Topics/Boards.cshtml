@@ -32,21 +32,11 @@
 
             let select = document.getElementById('Categories');
 
-            select.addEventListener('change', function () {
-
-                var url = '@Url.Action("Boards_Table", "Topics")';
-                console.log(url);
-
-                url += '?category=' + select.value;
-                console.log(url);
-
-                if (select.value != 'All topics') {
-                    callTable_NoSort(url, true, 0, '#datalist2');
-                }
-                else {
-                    reloadTable();
-                }
-
+            $(select).on('select2:select', function (e) {
+                var data = e.params.data.id;
+                 var url = '@Url.Action("Boards_Table", "Topics")';
+                url += '?category=' + data;
+                callTable_NoSort(url, true, 0, '#datalist2');
             });
 
         });
