@@ -1,0 +1,61 @@
+﻿@{
+    ViewBag.Title = "DocumentControl";
+}
+
+
+@section scripts{
+
+    <script>
+
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit', '#SaveDocControl', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("DocumentControl_Create", "Management")', this);
+            return false;
+        });
+
+        $("#Edits").click(function () {
+            alert('Click');
+            @*callTable('@Url.Action("DocumentControl_Table", "Management")', true, false, 0,"#version").then(function () {
+
+            });*@
+        });
+
+
+        function reloadTable() {
+
+            callTable('@Url.Action("DocumentControl_Table", "Management")', true,false, 0).then(function () {
+
+            });
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item ">Managements</li>
+            <li class="breadcrumb-item active">Document control</li>
+        </ol>
+    </nav>
+}
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex">
+            <div class="mr-auto"></div>
+            <div class="ml-auto">
+                <button type="button" onclick="callModal('@Url.Action("DocumentControl_Create","Management")', true)" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row" id="datalist">
+        </div>
+    </div>
+</div>

@@ -927,7 +927,7 @@ namespace E2E.Models
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace("Complete", "ServiceInfomation");
+                        linkUrl = linkUrl.Replace("SetComplete", "ServiceInfomation");
 
                         string subject = string.Format("[E2E][Require close job] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);

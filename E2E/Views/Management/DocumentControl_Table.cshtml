@@ -1,0 +1,46 @@
+﻿@model IEnumerable<E2E.Models.Tables.Master_Documents>
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                @Html.DisplayNameFor(m => m.Create)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Document_Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Update)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Active)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="fit">
+                    <button id="Edits" onclick="callModal('@Url.Action("DocumentControl_Create", "Management", new { id = Html.ValueFor(m => item.Document_Id) })',true)" class="btn btn-outline-secondary"><i class="fa fa-pencil"></i></button>
+                </td>
+                <td class="fit">
+                    @Html.DisplayFor(i => item.Create, new { @class = "form-control" })
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Document_Name)
+                </td>
+                <td class="fit">
+                    @Html.DisplayFor(i => item.Update)
+                </td>
+                <td class="fit">
+                    @Html.DisplayFor(i => item.Active)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
