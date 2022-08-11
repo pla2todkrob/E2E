@@ -1975,7 +1975,7 @@ namespace E2E.Models
             }
         }
 
-        private string GetEmailAD(string code)
+        public string GetEmailAD(string code)
         {
             try
             {
