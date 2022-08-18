@@ -17,10 +17,10 @@ namespace E2E.Controllers
         private clsContext db = new clsContext();
         private clsManageMaster obj = new clsManageMaster();
         private clsServiceFTP ftp = new clsServiceFTP();
+
         [Authorize]
         public ActionResult Index()
         {
-
             return View();
         }
 
@@ -43,9 +43,6 @@ namespace E2E.Controllers
                     try
                     {
                         System_Configurations system_Configurations = new System_Configurations();
-
-
-
 
                         if (files[0].ContentLength != 0)
                         {
@@ -71,12 +68,8 @@ namespace E2E.Controllers
                             res = true;
                         }
 
-
-
-
                         if (res)
                         {
-
                             scope.Complete();
 
                             swal.dangerMode = false;
@@ -148,7 +141,6 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
-
         }
 
         public ActionResult _NavbarBrand()
@@ -193,7 +185,6 @@ namespace E2E.Controllers
                             User_Point = s.User_Point
                         }).FirstOrDefault();
                 }
-                
 
                 return PartialView("_Profile", clsUsers);
             }
@@ -267,6 +258,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
         public ActionResult _NavManagement()
         {
             bool res = new bool();
@@ -284,18 +276,51 @@ namespace E2E.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
 
             return PartialView("_NavManagement", res);
         }
+
         public ActionResult _Copyright()
         {
             System_Configurations system_Configurations = new System_Configurations();
 
             system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
             return PartialView("_Copyright", system_Configurations);
+        }
+
+        public ActionResult _NavEForms()
+        {
+            try
+            {
+                int? res = null;
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+
+                    int authorIndex = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                        .FirstOrDefault();
+
+                    var val = db.UserDetails.Where(w => w.User_Id == userId).Select(s => s.Users.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+
+                    ViewBag.Author = val;
+                }
+
+                string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                List<Guid> userIdList = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
+                res = db.EForms.Where(w => w.Status_Id == 1 && userIdList.Contains(w.User_Id)).ToList().Count();
+
+                return PartialView("_NavEForms", res);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult deletelogo()
@@ -309,7 +334,6 @@ namespace E2E.Controllers
 
                     system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
 
-
                     system_Configurations.Configuration_Brand = string.Empty;
 
                     if (db.SaveChanges() > 0)
@@ -321,15 +345,12 @@ namespace E2E.Controllers
                         swal.text = "ลบข้อมูลเรียบร้อย";
                         swal.title = "Successful";
                     }
-
                     else
                     {
                         swal.icon = "warning";
                         swal.text = "ลบข้อมูลไม่สำเร็จ";
                         swal.title = "Warning";
                     }
-
-
                 }
                 catch (DbEntityValidationException ex)
                 {

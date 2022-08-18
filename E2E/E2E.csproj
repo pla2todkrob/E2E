@@ -266,6 +266,7 @@
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsDocuments.cs" />
     <Compile Include="Models\Views\clsEForm.cs" />
+    <Compile Include="Models\Views\clsEFormApprover.cs" />
     <Compile Include="Models\Views\clsGrades.cs" />
     <Compile Include="Models\Views\clsHome.cs" />
     <Compile Include="Models\Views\clsImage.cs" />
@@ -887,6 +888,12 @@
     <Content Include="Views\Management\DocumentControl.cshtml" />
     <Content Include="Views\Management\DocumentControl_Table.cshtml" />
     <Content Include="Views\Management\DocumentControl_Create.cshtml" />
+    <Content Include="Views\Configurations\_NavEForms.cshtml" />
+    <Content Include="Views\EForms\EForms_MyForms.cshtml" />
+    <Content Include="Views\EForms\Approve.cshtml" />
+    <Content Include="Views\EForms\Approve_Table_Waiting.cshtml" />
+    <Content Include="Views\EForms\Approve_Table_Approved.cshtml" />
+    <Content Include="Views\EForms\Approve_Forms.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

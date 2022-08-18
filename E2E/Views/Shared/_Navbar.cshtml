@@ -18,9 +18,12 @@
         <li class="nav-item">
             <a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@{ Html.RenderAction("_Newtopic", "Topics"); } </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>
+
+        <li class="nav-item dropdown">
+            @{ Html.RenderAction("_NavEForms", "Configurations"); }
+            @*<a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>*@
         </li>
+
         @if (Model.HasValue)
         {
             if (Model.Value == 1)

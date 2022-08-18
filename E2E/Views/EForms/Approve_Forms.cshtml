@@ -1,15 +1,16 @@
-﻿@model E2E.Models.Views.clsEForm
+﻿@model  E2E.Models.Views.clsEForm
 
 @{
-    ViewBag.Title = "Boards_Form";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Approve_Forms";
 }
+
 @section breadcrumb{
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
             <li class="breadcrumb-item"><a href="@Url.Action("Index","EForms")">E-Forms</a></li>
-            <li class="breadcrumb-item active" aria-current="page">EFormsContent</li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Approve","EForms")">Approve</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Form</li>
         </ol>
     </nav>
 }
@@ -28,27 +29,31 @@
                 rowHeight: 200,
             });
         });
-
     </script>
 }
 
+@if (Model.EForms.Status_Id == 1)
+{
+    <div class="d-flex mb-3">
+        <div class="ml-auto">
+            <input type="button" name="Cancel" id="Cancel" class="btn btn-warning" value="Cancel" onclick="setDangerByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = false } )', '@Url.Action("Approve", "EForms")')" />
+            <input type="button" name="Approve" id="Approve" class="btn btn-success" value="Approve" onclick="setSuccessByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = true } )', '@Url.Action("Approve", "EForms")')" />
+        </div>
+    </div>
+}
 
 <div class="card">
     <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="card-title">
-                [@Html.DisplayFor(m => m.EForms.Users.User_Code)]
-                @Html.DisplayFor(m => m.EForms.EForm_Title)
-            </h5>
-        </div>
-        
-
+        <h5 class="card-title">
+            @Html.DisplayFor(m => m.EForms.Users.User_Code)
+            @Html.DisplayFor(m => m.EForms.EForm_Title)
+        </h5>
     </div>
     <div class="card-body">
 
-        <p><b>@Html.DisplayNameFor(m=>m.EForms.EForm_Link):</b> <a href="@Html.ValueFor(m => m.EForms.EForm_Link)" target="_blank" class="db">@Html.ValueFor(m => m.EForms.EForm_Title)</a></p>
+        <p><b>@Html.DisplayNameFor(m => m.EForms.EForm_Link):</b> <a href="@Html.ValueFor(m => m.EForms.EForm_Link)" target="_blank" class="db">@Html.ValueFor(m => m.EForms.EForm_Title)</a></p>
 
-        <span class="PreLine">  @Html.DisplayFor(m=>m.EForms.EForm_Description)</span>
+        <span class="PreLine">  @Html.DisplayFor(m => m.EForms.EForm_Description)</span>
 
         @if (Model.EForm_Galleries.Count > 0)
         {
@@ -57,7 +62,6 @@
             <div id="mygallery" class="justified-gallery">
                 @foreach (var img in Model.EForm_Galleries)
                 {
-
 
                     <a href="@img.EForm_Gallery_Original" target="_blank">
                         <img alt="@img.EForm_Gallery_Name" src="@img.EForm_Gallery_Original" />
@@ -82,7 +86,6 @@
                 }
             </ul>
         }
-
     </div>
 
     <div class="card-footer">
@@ -96,6 +99,3 @@
         </div>
     </div>
 </div>
-
-
-

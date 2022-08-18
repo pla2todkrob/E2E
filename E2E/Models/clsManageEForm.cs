@@ -13,6 +13,7 @@ namespace E2E.Models
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsImage clsImag = new clsImage();
+
         public bool EForm_Save(EForms model, HttpFileCollectionBase files)
         {
             try
@@ -53,7 +54,7 @@ namespace E2E.Models
                 eForms.EForm_Start = model.EForm_Start;
                 eForms.EForm_End = model.EForm_End;
                 eForms.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
+                eForms.Status_Id = 1;
                 db.EForms.Add(eForms);
                 if (db.SaveChanges() > 0)
                 {
@@ -101,14 +102,12 @@ namespace E2E.Models
                             }
                         }
                     }
-
                 }
 
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -136,7 +135,6 @@ namespace E2E.Models
                     res = true;
                     if (files[0].ContentLength != 0)
                     {
-
                         for (int i = 0; i < files.Count; i++)
                         {
                             HttpPostedFileBase file = files[i];
@@ -182,11 +180,9 @@ namespace E2E.Models
                 }
 
                 return res;
-
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -231,7 +227,6 @@ namespace E2E.Models
         {
             try
             {
-
                 bool res = new bool();
                 EForm_Galleries eForm_Galleries = new EForm_Galleries();
                 var Count = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_Gallery_Seq).FirstOrDefault();
@@ -241,7 +236,7 @@ namespace E2E.Models
                 eForm_Galleries.EForm_Gallery_Thumbnail = clsImage.ThumbnailPath;
                 eForm_Galleries.EForm_Gallery_Name = file;
                 eForm_Galleries.EForm_Gallery_Extension = Path.GetExtension(file);
-                
+
                 if (Count == null)
                 {
                     eForm_Galleries.EForm_Gallery_Seq = 1;
@@ -250,8 +245,6 @@ namespace E2E.Models
                 {
                     eForm_Galleries.EForm_Gallery_Seq = Count.EForm_Gallery_Seq++;
                 }
-            
-
 
                 db.EForm_Galleries.Add(eForm_Galleries);
                 if (db.SaveChanges() > 0)
@@ -263,7 +256,6 @@ namespace E2E.Models
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -272,7 +264,7 @@ namespace E2E.Models
         {
             try
             {
-               File_Insert(model, filepath, file);
+                File_Insert(model, filepath, file);
             }
             catch (Exception)
             {
@@ -284,7 +276,6 @@ namespace E2E.Models
         {
             try
             {
-
                 bool res = new bool();
                 EForm_Files eForm_Files = new EForm_Files();
                 var Count = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_File_Seq).FirstOrDefault();
@@ -311,9 +302,8 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception )
+            catch (Exception)
             {
-
                 throw;
             }
         }
@@ -325,7 +315,7 @@ namespace E2E.Models
                 bool res = new bool();
                 EForms eForms = new EForms();
                 eForms = db.EForms.Where(w => w.EForm_Id == id).FirstOrDefault();
-                
+
                 db.EForms.Remove(eForms);
                 if (db.SaveChanges() > 0)
                 {
@@ -364,9 +354,7 @@ namespace E2E.Models
                     {
                         DeleteFile(item.EForm_File_Id, false);
                     }
-
                 }
-
 
                 clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
                 FilePath.AddRange(clsEForm.EForm_Galleries.Select(s => s.EForm_Gallery_Original).ToList());
@@ -377,7 +365,6 @@ namespace E2E.Models
                     {
                         DeleteGallery(item.EForm_Gallery_Id, false);
                     }
-
                 }
 
                 res = EForm_Delete(id, FilePath);
@@ -394,13 +381,11 @@ namespace E2E.Models
         {
             try
             {
-
                 bool res = new bool();
 
                 var Galleries = db.EForm_Galleries.Where(w => w.EForm_Gallery_Id == id).FirstOrDefault();
 
                 db.EForm_Galleries.Remove(Galleries);
-
 
                 if (db.SaveChanges() > 0)
                 {
@@ -424,13 +409,11 @@ namespace E2E.Models
         {
             try
             {
-
                 bool res = new bool();
 
                 var Files = db.EForm_Files.Where(w => w.EForm_File_Id == id).FirstOrDefault();
 
                 db.EForm_Files.Remove(Files);
-
 
                 if (db.SaveChanges() > 0)
                 {
@@ -438,9 +421,8 @@ namespace E2E.Models
                     {
                         ftp.Ftp_DeleteFile(Files.EForm_File_Path);
                     }
-            
-                    res = true;
 
+                    res = true;
                 }
 
                 return res;
@@ -493,11 +475,27 @@ namespace E2E.Models
                 }
 
                 return res;
-
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
 
+        public List<EForms> EForm_GetRequiredApprove(int val)
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                List<Guid> userIdList = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
+                var sql = db.EForms.Where(w => w.Status_Id == val && userIdList.Contains(w.User_Id)).ToList();
+
+                return sql;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }
