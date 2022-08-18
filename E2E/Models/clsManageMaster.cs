@@ -1934,7 +1934,10 @@ namespace E2E.Models
                 bool res = new bool();
 
                 Users users = db.Users.Where(w => w.User_Code == model.Users.User_Code).FirstOrDefault();
-
+                if (model.Users.Role_Id > 0)
+                {
+                    users.Role_Id = model.Users.Role_Id;
+                }
                 users.Grade_Id = model.Users.Grade_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.User_Code = model.Users.User_Code.Trim();

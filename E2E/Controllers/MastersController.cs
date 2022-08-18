@@ -1463,7 +1463,6 @@ namespace E2E.Controllers
                                                             Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
 
                                                             userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
-                                                            //userDetails.Users.Role_Id = 2;
                                                             userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
                                                             userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
                                                             if (data.Users_Save(userDetails))
