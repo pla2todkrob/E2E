@@ -20,9 +20,9 @@ namespace E2E.Models.Tables
         public string EForm_Link { get; set; }
 
         [DataType(DataType.MultilineText)]
-
         [DisplayName("Content")]
         public string EForm_Description { get; set; }
+
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
         public Guid User_Id { get; set; }
@@ -33,7 +33,13 @@ namespace E2E.Models.Tables
 
         [DisplayName("End Date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? EForm_End { get; set; }
+
         public bool Active { get; set; }
+
+        public virtual System_Statuses System_Statuses { get; set; }
+        public int? Status_Id { get; set; }
+
+        public Guid? ActionUserId { get; set; }
 
         public EForms()
         {

@@ -1,0 +1,96 @@
+﻿@model IEnumerable<E2E.Models.Tables.EForms>
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item ">E-Forms</li>
+            <li class="breadcrumb-item active">My form</li>
+        </ol>
+    </nav>
+}
+
+@section scripts{
+    <script src="~/Scripts/jquery.justifiedGallery.min.js"></script>
+    <script src="~/Asset/EForm.js"></script>
+    <script>
+
+        $('#MyForms').DataTable({
+            "ordering": false,
+        });
+
+        $(document).on('submit', '#SaveEForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("EForms_Create", "EForms")', this);
+            return false;
+        });
+
+        function reloadTable() {
+            window.location.reload();
+        }
+    </script>
+}
+
+<table class="table table-bordered table-hover w-100" id="MyForms">
+    <thead>
+        <tr>
+            <th><i class="fa fa-bullhorn" aria-hidden="true"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <div class="row">
+                        <div class="col-12">
+                            @Html.ActionLink(item.EForm_Title, "EForms_Content", new { id = item.EForm_Id }) &nbsp;
+
+                            @{
+                                if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                {
+                                    if (ViewBag.MyForm == true)
+                                    {
+                                        <button onclick="callModalEForms('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })', '@Url.Action("_FileCollections", "EForms", new { id = item.EForm_Id })', true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                    }
+                                }
+                            }
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+
+                                <div class="col-12 col-sm-6">
+                                    <div class="d-flex">
+                                        <small class="mr-sm-auto">
+
+                                            <b>@Html.DisplayNameFor(m => m.EForm_Start):</b> @Html.DisplayFor(i => item.EForm_Start)<br />
+                                            <b>@Html.DisplayNameFor(m => m.EForm_End):</b> @Html.DisplayFor(i => item.EForm_End)<br />
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="d-flex">
+                                        <small class="ml-auto">
+                                            <b>@Html.DisplayNameFor(m => m.System_Statuses.Status_Name):</b> <span class="@item.System_Statuses.Status_Class"> @Html.DisplayFor(i => item.System_Statuses.Status_Name)</span><br />
+                                            @{
+                                                if (item.Update.HasValue)
+                                                {
+                                                    <b>@Html.DisplayNameFor(m => m.Update):</b> @Html.DisplayFor(i => item.Update)
+                                                }
+                                                else
+                                                {
+                                                    <b>@Html.DisplayNameFor(m => m.Create):</b> @Html.DisplayFor(i => item.Create)
+                                                }
+                                            }
+                                        </small>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

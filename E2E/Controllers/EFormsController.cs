@@ -17,13 +17,42 @@ namespace E2E.Controllers
         private clsManageEForm data = new clsManageEForm();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+
         // GET: EForms
         public ActionResult Index()
         {
+            ViewBag.Categories = SelectListItems_Category_Name();
             return View();
         }
 
-        public ActionResult EForms_Table(int res)
+        public ActionResult EForms_Table(Guid? id)
+        {
+            try
+            {
+                IQueryable<EForms> query = db.EForms.Where(w => w.EForm_Start <= DateTime.Today && w.Status_Id == 3 && (!w.EForm_End.HasValue || w.EForm_End >= DateTime.Today)).OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t => t.EForm_Start);
+
+                if (id.HasValue)
+                {
+                    var DeptName = db.Master_Departments.Find(id).Department_Name;
+
+                    var DeptUser = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == DeptName).Select(s => s.User_Id).ToList();
+
+                    //var FormAll = db.EForms.Where(w => DeptUser.Contains(w.User_Id)).ToList();
+
+                    query = query.Where(w => DeptUser.Contains(w.User_Id));
+                    //var categorys = db.Master_Categories.Where(w => w.Category_Id == category).FirstOrDefault();
+                    //query = query.Where(w => w.Category_Id == categorys.Category_Id);
+                }
+
+                return View(query.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult EForms_MyForms(int? res = 2)
         {
             try
             {
@@ -35,15 +64,11 @@ namespace E2E.Controllers
 
                 ViewBag.MyForm = false;
 
-                IQueryable<EForms> query = db.EForms.OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t=>t.EForm_Start) ;
+                IQueryable<EForms> query = db.EForms.OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t => t.EForm_Start);
 
-                if (res == 1)
-                {
-                    query = query.Where(w => (w.EForm_Start <= DateTime.Today && w.EForm_End >= DateTime.Today)||(w.EForm_Start <= DateTime.Today && !w.EForm_End.HasValue));
-                }
                 if (res == 2)
                 {
-                    query = db.EForms.Where(w => w.User_Id == id);
+                    query = db.EForms.Where(w => w.User_Id == id).OrderByDescending(o => o.Create);
                     ViewBag.MyForm = true;
                 }
                 //if (res == 3)
@@ -178,7 +203,6 @@ namespace E2E.Controllers
             return View(clsEForm);
         }
 
-    
         public ActionResult SaveSeq(string model)
         {
             List<EForm_Galleries> eForm_Galleries = new List<EForm_Galleries>();
@@ -439,6 +463,106 @@ namespace E2E.Controllers
             }
 
             return View(clsEForm);
+        }
+
+        public ActionResult Approve()
+        {
+            return View();
+        }
+
+        public ActionResult Approve_Table_Waiting()
+        {
+            try
+            {
+                return View(data.EForm_GetRequiredApprove(1));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Approve_Table_Approved()
+        {
+            try
+            {
+                return View(data.EForm_GetRequiredApprove(3));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Approve_Forms(Guid id, bool? res = null)
+        {
+            try
+            {
+                clsSwal swal = new clsSwal();
+                EForms eForms = new EForms();
+                if (res == true)
+                {
+                    eForms = db.EForms.Find(id);
+                    eForms.Status_Id = 3;
+                    eForms.ActionUserId = Guid.Parse(HttpContext.User.Identity.Name);
+
+                    swal.dangerMode = false;
+                    swal.icon = "success";
+                    swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                    swal.title = "Successful";
+
+                    db.SaveChanges();
+
+                    return Json(swal, JsonRequestBehavior.AllowGet);
+                }
+                else if (res == false)
+                {
+                    eForms = db.EForms.Find(id);
+                    eForms.Status_Id = 6;
+                    eForms.ActionUserId = Guid.Parse(HttpContext.User.Identity.Name);
+
+                    swal.dangerMode = false;
+                    swal.icon = "success";
+                    swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                    swal.title = "Successful";
+
+                    db.SaveChanges();
+
+                    return Json(swal, JsonRequestBehavior.AllowGet);
+                }
+
+                clsEForm clsEForm = new clsEForm();
+                clsEForm.EForms = db.EForms.Find(id);
+                clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+                clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+
+                return View(clsEForm);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<SelectListItem> SelectListItems_Category_Name()
+        {
+            Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
+            var DeptDistinct = db.Master_Departments.Select(s => s.Department_Name).ToList().Distinct();
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Category", Value = "" });
+            foreach (var item1 in DeptDistinct)
+            {
+                var sql = db.Master_Departments.Where(w => w.Department_Name == item1)
+                    .Select(s => new SelectListItem()
+                    {
+                        Value = s.Department_Id.ToString(),
+                        Text = s.Department_Name
+                    })
+                    .FirstOrDefault();
+                item.Add(sql);
+            }
+
+            return item;
         }
     }
 }

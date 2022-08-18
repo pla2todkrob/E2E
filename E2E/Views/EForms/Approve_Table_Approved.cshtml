@@ -1,0 +1,31 @@
+﻿@model IEnumerable<E2E.Models.Tables.EForms>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.EForm_Title)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.EForm_Description)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.EForm_Start)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.EForm_End)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td>
+                    <a href="@Url.Action("Approve_Forms","EForms",new { id = item.EForm_Id })"> @Html.DisplayFor(i => item.EForm_Title)</a>
+                </td>
+                <td>  @Html.DisplayFor(i => item.EForm_Description)</td>
+                <td>  @Html.DisplayFor(i => item.EForm_Start)</td>
+                <td>  @Html.DisplayFor(i => item.EForm_End)</td>
+            </tr>
+        }
+    </tbody>
+</table>

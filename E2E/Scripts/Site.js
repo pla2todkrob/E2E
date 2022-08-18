@@ -542,6 +542,77 @@ function setDangerByIdReTable(urlAjax) {
         });
 }
 
+function setSuccessByIdReDirect(urlAjax, urlRedirect) {
+    swal({
+        title: "Are you sure?",
+        text: "If is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                if (res.option != null) {
+                                    urlRedirect += '/' + res.option;
+                                }
+
+                                window.location.href = urlRedirect;
+                            }
+                        });
+                    }
+                });
+                return false;
+            }
+        });
+}
+
+function setDangerByIdReDirect(urlAjax, urlRedirect) {
+    swal({
+        title: "Are you sure?",
+        text: "If is confirmed, it cannot be reversed.",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        }).then(function () {
+                            if (res.icon == 'success') {
+                                if (res.option != null) {
+                                    urlRedirect += '/' + res.option;
+                                }
+
+                                window.location.href = urlRedirect;
+                            }
+                        });
+                    }
+                });
+                return false;
+            }
+        });
+}
+
 function callDeleteIMG_SC(urlAjax) {
     swal({
         title: "Are you sure?",

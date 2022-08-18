@@ -767,6 +767,17 @@ namespace E2E.Controllers
 
         public ActionResult SetMustApprove(Guid id)
         {
+            var Services = db.Services.Find(id);
+            string deptName = db.Users.Find(Services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+            List<Guid> sendTo = db.Users
+                .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
+                .Select(s => s.User_Id)
+                .ToList();
+
+            ViewBag.sendTo = db.UserDetails.Where(w => sendTo.Contains(w.User_Id)).Select(s => s.Detail_EN_FirstName + " " + s.Detail_EN_LastName);
+
+            var result = ViewBag.sendTo;
+
             return View(new ServiceComments() { Service_Id = id });
         }
 

@@ -40,7 +40,7 @@ namespace E2E.Controllers
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
-                    Value = s.Category_Name.ToString(),
+                    Value = s.Category_Id.ToString(),
                     Text = s.Category_Name
                 }).OrderBy(o => o.Text).ToList());
 
@@ -49,7 +49,7 @@ namespace E2E.Controllers
 
         public List<SelectListItem> SelectListItems_Create_Category_Name()
         {
-            IQueryable<Master_Categories> query = db.Master_Categories.Where(w=>w.Active);
+            IQueryable<Master_Categories> query = db.Master_Categories.Where(w => w.Active);
 
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select category", Value = "" });
@@ -63,7 +63,7 @@ namespace E2E.Controllers
             return item;
         }
 
-        public ActionResult Boards_Table(int? res, string category = "")
+        public ActionResult Boards_Table(int? res, Guid? category = null)
         {
             try
             {
@@ -100,9 +100,9 @@ namespace E2E.Controllers
                     query = query.OrderByDescending(o => o.Count_View).Take(10);
                 }
 
-                if (category != "")
+                if (category != null)
                 {
-                    var categorys = db.Master_Categories.Where(w => w.Category_Name == category).FirstOrDefault();
+                    var categorys = db.Master_Categories.Where(w => w.Category_Id == category).FirstOrDefault();
                     query = query.Where(w => w.Category_Id == categorys.Category_Id);
                 }
 
