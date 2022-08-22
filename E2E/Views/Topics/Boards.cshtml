@@ -36,16 +36,15 @@
                 var data = e.params.data.id;
                  var url = '@Url.Action("Boards_Table", "Topics")';
                 url += '?category=' + data;
-                callTable_NoSort(url, true, 0, '#datalist2');
+                callTable_NoSort(url, false, [], '#datalist2');
             });
 
         });
 
-
         function reloadTable() {
-            callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=1})', true, 0).then(function () {
-                callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})', true, 0, '#datalist2').then(function () {
-                    callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=3})', true, 0, '#datalist3');
+            callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=1})').then(function () {
+                callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})', false, [], '#datalist2').then(function () {
+                    callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=3})', false, [], '#datalist3');
                 });
             });
         }
@@ -89,10 +88,8 @@
             <div class="col-md-8 col-lg-9 my-3">
 
                 <div class="row" id="datalist2"></div>
-
             </div>
         </div>
-
     </div>
 </div>
 
@@ -104,11 +101,3 @@
         <div class="row" id="datalist3"></div>
     </div>
 </div>
-
-
-
-
-
-
-
-

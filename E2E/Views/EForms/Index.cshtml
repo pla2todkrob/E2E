@@ -36,7 +36,7 @@
 
                  var url = '@Url.Action("EForms_Table", "EForms")';
                 url += '/' + data;
-                callTable_NoSort(url, true, 0);
+                callTable_NoSort(url);
             });
 
         });
@@ -57,14 +57,11 @@
     </nav>
 }
 
-
-
 <div class="d-flex mb-3">
     <div class="ml-auto">
         <button type="button" onclick="callModalEForms('@Url.Action("EForms_Create","EForms")', '', true)" class="btn btn-primary"><i class="fa fa-plus"></i></button>
     </div>
 </div>
-
 
 <div class="card mb-5">
     <div class="card-header">
@@ -79,9 +76,7 @@
             <div class="col-md-8 col-lg-9 my-3">
 
                 <div class="row" id="datalist"></div>
-
             </div>
         </div>
-
     </div>
 </div>

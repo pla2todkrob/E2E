@@ -15,13 +15,187 @@ namespace E2E.Controllers
     public class ConfigurationsController : Controller
     {
         private clsContext db = new clsContext();
-        private clsManageMaster obj = new clsManageMaster();
         private clsServiceFTP ftp = new clsServiceFTP();
+        private clsManageMaster obj = new clsManageMaster();
 
-        [Authorize]
-        public ActionResult Index()
+        public ActionResult _Copyright()
         {
-            return View();
+            System_Configurations system_Configurations = new System_Configurations();
+
+            system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
+            return PartialView("_Copyright", system_Configurations);
+        }
+
+        public ActionResult _Navbar()
+        {
+            int? res = null;
+            if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+            {
+                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
+                res = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Role_Id)
+                    .FirstOrDefault();
+            }
+
+            return PartialView("_Navbar", res);
+        }
+
+        public ActionResult _NavbarBrand()
+        {
+            System_Configurations system_Configurations = new System_Configurations();
+            system_Configurations = db.System_Configurations
+                .OrderByDescending(o => o.CreateDateTime)
+                .FirstOrDefault();
+
+            return PartialView("_NavbarBrand", system_Configurations);
+        }
+
+        public ActionResult _NavDepartment()
+        {
+            try
+            {
+                int? res = null;
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+
+                    int authorIndex = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                        .FirstOrDefault();
+
+                    if (authorIndex != 3)
+                    {
+                        res = db.Services
+                            .Where(w => w.Is_MustBeApproved &&
+                            !w.Is_Approval &&
+                            w.Status_Id == 1 &&
+                            w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
+                    }
+                }
+
+                return PartialView("_NavDepartment", res);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult _NavEForms()
+        {
+            try
+            {
+                int? res = null;
+
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+
+                    int authorIndex = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                        .FirstOrDefault();
+
+                    var val = db.UserDetails.Where(w => w.User_Id == userId).Select(s => s.Users.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+
+                    ViewBag.Author = val;
+                    string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                    List<Guid> userIdList = db.Users
+                        .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
+                    res = db.EForms.Where(w => w.Status_Id == 1 && userIdList.Contains(w.User_Id)).ToList().Count();
+                }
+
+                return PartialView("_NavEForms", res);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult _NavManagement()
+        {
+            bool res = new bool();
+            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+            try
+            {
+                int authur = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+                if (authur == 2)
+                {
+                    res = true;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return PartialView("_NavManagement", res);
+        }
+
+        public ActionResult _NavService()
+        {
+            try
+            {
+                int? res = null;
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+
+                    int authorIndex = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                        .FirstOrDefault();
+
+                    if (authorIndex == 3)
+                    {
+                        res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                    }
+                    else
+                    {
+                        res = new clsManageService().Services_GetWaitCommitCount();
+                        res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                    }
+                }
+                return PartialView("_NavService", res);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult _Profile()
+        {
+            try
+            {
+                clsUsers clsUsers = new clsUsers();
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    clsUsers = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .AsEnumerable()
+                        .Select(s => new clsUsers()
+                        {
+                            User_Code = s.User_Code,
+                            User_Point = s.User_Point
+                        }).FirstOrDefault();
+                }
+
+                return PartialView("_Profile", clsUsers);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Configurations_Table()
@@ -143,186 +317,6 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult _NavbarBrand()
-        {
-            System_Configurations system_Configurations = new System_Configurations();
-            system_Configurations = db.System_Configurations
-                .OrderByDescending(o => o.CreateDateTime)
-                .FirstOrDefault();
-
-            return PartialView("_NavbarBrand", system_Configurations);
-        }
-
-        public ActionResult _Navbar()
-        {
-            int? res = null;
-            if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
-            {
-                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-                res = db.Users
-                    .Where(w => w.User_Id == id)
-                    .Select(s => s.Role_Id)
-                    .FirstOrDefault();
-            }
-
-            return PartialView("_Navbar", res);
-        }
-
-        public ActionResult _Profile()
-        {
-            try
-            {
-                clsUsers clsUsers = new clsUsers();
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
-                {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    clsUsers = db.Users
-                        .Where(w => w.User_Id == userId)
-                        .AsEnumerable()
-                        .Select(s => new clsUsers()
-                        {
-                            User_Code = s.User_Code,
-                            User_Point = s.User_Point
-                        }).FirstOrDefault();
-                }
-
-                return PartialView("_Profile", clsUsers);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public ActionResult _NavService()
-        {
-            try
-            {
-                int? res = null;
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
-                {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-
-                    int authorIndex = db.Users
-                        .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                        .FirstOrDefault();
-
-                    if (authorIndex == 3)
-                    {
-                        res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
-                    }
-                    else
-                    {
-                        res = new clsManageService().Services_GetWaitCommitCount();
-                        res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
-                    }
-                }
-                return PartialView("_NavService", res);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public ActionResult _NavDepartment()
-        {
-            try
-            {
-                int? res = null;
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
-                {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
-
-                    int authorIndex = db.Users
-                        .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                        .FirstOrDefault();
-
-                    if (authorIndex != 3)
-                    {
-                        res = db.Services
-                            .Where(w => w.Is_MustBeApproved &&
-                            !w.Is_Approval &&
-                            w.Status_Id == 1 &&
-                            w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
-                    }
-                }
-
-                return PartialView("_NavDepartment", res);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public ActionResult _NavManagement()
-        {
-            bool res = new bool();
-            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-            try
-            {
-                int authur = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                    .FirstOrDefault();
-                if (authur == 2)
-                {
-                    res = true;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return PartialView("_NavManagement", res);
-        }
-
-        public ActionResult _Copyright()
-        {
-            System_Configurations system_Configurations = new System_Configurations();
-
-            system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
-            return PartialView("_Copyright", system_Configurations);
-        }
-
-        public ActionResult _NavEForms()
-        {
-            try
-            {
-                int? res = null;
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
-                {
-                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
-
-                    int authorIndex = db.Users
-                        .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                        .FirstOrDefault();
-
-                    var val = db.UserDetails.Where(w => w.User_Id == userId).Select(s => s.Users.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-
-                    ViewBag.Author = val;
-                }
-
-                string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-                List<Guid> userIdList = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
-                res = db.EForms.Where(w => w.Status_Id == 1 && userIdList.Contains(w.User_Id)).ToList().Count();
-
-                return PartialView("_NavEForms", res);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public ActionResult deletelogo()
         {
             clsSwal swal = new clsSwal();
@@ -386,6 +380,12 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        [Authorize]
+        public ActionResult Index()
+        {
+            return View();
         }
     }
 }

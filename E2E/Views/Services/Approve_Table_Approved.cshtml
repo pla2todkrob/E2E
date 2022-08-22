@@ -12,7 +12,7 @@
             <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
     </thead>
     <tbody>
@@ -26,7 +26,7 @@
                 <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
                 <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
                 <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
-                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td>@Html.DisplayFor(i => item.Update)</td>
             </tr>
         }
     </tbody>

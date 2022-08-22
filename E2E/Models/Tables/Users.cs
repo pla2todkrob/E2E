@@ -41,8 +41,11 @@ namespace E2E.Models.Tables
 
         public DateTime? Update { get; set; }
 
-        [ Display(Name = "Code"), Required]
+        [Display(Name = "Code"), Required]
         public string User_Code { get; set; }
+
+        [Display(Name = "Cost center")]
+        public string User_CostCenter { get; set; }
 
         [Display(Name = "Email")]
         public string User_Email { get; set; }
@@ -52,9 +55,6 @@ namespace E2E.Models.Tables
 
         [Display(Name = "Point")]
         public int User_Point { get; set; }
-
-        [Display(Name = "Cost center")]
-        public string User_CostCenter { get; set; }
 
         public int YearSetPoint { get; set; }
     }

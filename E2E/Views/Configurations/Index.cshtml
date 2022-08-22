@@ -17,7 +17,7 @@
         });
 
         function reloadTable() {
-            callTable_NoSort('@Url.Action("Configurations_Table", "Configurations")', true, 0).then(function () {
+            callTable_NoSort('@Url.Action("Configurations_Table", "Configurations")', true, [0]).then(function () {
 
             });
         }
@@ -32,7 +32,5 @@
         </ol>
     </nav>
 }
-
-
 
 <div class="row" id="datalist"></div>

@@ -12,7 +12,7 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("Plants_Table", "Masters")', true, true, 1);
+            callTable('@Url.Action("Plants_Table", "Masters")', true, true, [1,4]);
         }
 
         $(document).on('submit', '#SaveForm', function (e) {

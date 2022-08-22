@@ -13,24 +13,52 @@ namespace E2E.Controllers
 {
     public class ManagementController : Controller
     {
-        private clsContext db = new clsContext();
         private clsManageManagement data = new clsManageManagement();
+        private clsContext db = new clsContext();
 
-        // GET: Management
-        public ActionResult Index()
+        public ActionResult Delete_DocumentControl_Create(Guid id)
         {
-            return RedirectToAction("DocumentControl");
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.Delete_Document(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ข้อมูลถูกใช้งานอยู่";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult DocumentControl()
         {
             return View();
-        }
-
-        public ActionResult DocumentControl_Table()
-        {
-            var sql = db.Master_Documents.ToList();
-            return View(sql);
         }
 
         public ActionResult DocumentControl_Create(Guid? id)
@@ -131,43 +159,126 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Delete_DocumentControl_Create(Guid id)
+        public ActionResult DocumentControl_Table()
         {
-            using (TransactionScope scope = new TransactionScope())
+            var sql = db.Master_Documents.ToList();
+            return View(sql);
+        }
+
+        public ActionResult Index()
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        public ActionResult WorkRoot()
+        {
+            return View();
+        }
+
+        public ActionResult WorkRoot_Form(Guid? id)
+        {
+            try
             {
-                clsSwal swal = new clsSwal();
-                try
+                clsWorkRoots clsWorkRoots = new clsWorkRoots();
+                bool isNew = true;
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                string deptName = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                    .FirstOrDefault();
+
+                List<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+
+                List<Guid> userIds = db.Users
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id.Value))
+                    .Select(s => s.User_Id)
+                    .ToList();
+
+                ViewBag.DocumentList = db.Master_Documents
+                    .Where(w => userIds.Contains(w.User_Id))
+                    .Select(s => new SelectListItem()
+                    {
+                        Text = s.Document_Name,
+                        Value = s.Document_Id.ToString()
+                    }).ToList();
+
+                List<string> secNames = db.Master_Sections
+                    .Where(w => deptIds.Contains(w.Department_Id.Value))
+                    .Select(s => s.Section_Name)
+                    .Distinct()
+                    .ToList();
+
+                List<SelectListItem> listItems = new List<SelectListItem>();
+                listItems.Add(new SelectListItem()
                 {
-                    if (data.Delete_Document(id))
-                    {
-                        scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.title = "Successful";
-                    }
-                    else
-                    {
-                        swal.icon = "warning";
-                        swal.text = "ข้อมูลถูกใช้งานอยู่";
-                        swal.title = "Warning";
-                    }
-                }
-                catch (Exception ex)
+                    Text = "Select section",
+                    Value = ""
+                });
+                foreach (string item in secNames)
                 {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
-                    if (ex.InnerException != null)
-                    {
-                        swal.text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
+                    listItems.Add(db.Master_Sections
+                        .Where(w => w.Section_Name == item)
+                        .Select(s => new SelectListItem()
                         {
-                            swal.text = ex.InnerException.InnerException.Message;
-                        }
-                    }
+                            Value = s.Section_Id.ToString(),
+                            Text = s.Section_Name
+                        }).FirstOrDefault());
                 }
 
-                return Json(swal, JsonRequestBehavior.AllowGet);
+                ViewBag.SectionList = listItems;
+
+                if (id.HasValue)
+                {
+                    isNew = false;
+                    clsWorkRoots.WorkRoots = db.WorkRoots.Find(id);
+                    clsWorkRoots.WorkRootDocuments = db.WorkRootDocuments
+                        .Where(w => w.WorkRoot_Id == id.Value)
+                        .ToList();
+                }
+
+                ViewBag.IsNew = isNew;
+
+                return View(clsWorkRoots);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult WorkRoot_Table()
+        {
+            try
+            {
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                string deptName = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                    .FirstOrDefault();
+
+                List<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+
+                List<Guid> userIds = db.Users
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id.Value))
+                    .Select(s => s.User_Id)
+                    .ToList();
+
+                List<WorkRoots> workRoots = new List<WorkRoots>();
+                workRoots = db.WorkRoots
+                    .Where(w => userIds.Contains(w.User_Id.Value))
+                    .ToList();
+
+                return View(workRoots);
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
