@@ -13,6 +13,7 @@ namespace E2E.Models
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsImage clsImag = new clsImage();
+        private clsMail mail = new clsMail();
 
         public bool EForm_Save(EForms model, HttpFileCollectionBase files)
         {
@@ -58,7 +59,6 @@ namespace E2E.Models
                 db.EForms.Add(eForms);
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
                     if (files[0].ContentLength != 0)
                     {
                         for (int i = 0; i < files.Count; i++)
@@ -102,6 +102,25 @@ namespace E2E.Models
                             }
                         }
                     }
+
+                    string deptName = db.Users.Find(eForms.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                    List<Guid> sendTo = db.Users
+                        .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
+                        .Select(s => s.User_Id)
+                        .ToList();
+                    sendTo.Add(eForms.User_Id);
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + eForms.EForm_Id;
+                    linkUrl = linkUrl.Replace("EForms_Create", "Approve_Forms");
+
+                    string subject = string.Format("[E2E][Require approve] {0} - {1}", "E-Forms", eForms.EForm_Title);
+                    string content = string.Format("<p><b>Description:</b> {0}", eForms.EForm_Description);
+                    content += "<br />";
+                    content += "<br />";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    res = mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
                 }
 
                 return res;
