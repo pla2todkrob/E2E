@@ -17,6 +17,7 @@ namespace E2E.Controllers
         private clsManageEForm data = new clsManageEForm();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+        private clsMail mail = new clsMail();
 
         // GET: EForms
         public ActionResult Index()
@@ -500,6 +501,7 @@ namespace E2E.Controllers
             {
                 clsSwal swal = new clsSwal();
                 EForms eForms = new EForms();
+
                 if (res == true)
                 {
                     eForms = db.EForms.Find(id);
@@ -512,6 +514,10 @@ namespace E2E.Controllers
                     swal.title = "Successful";
 
                     db.SaveChanges();
+
+                    string status = db.System_Statuses.Find(eForms.Status_Id).Status_Name.ToString();
+
+                    EmailForms(id, status);
 
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
@@ -528,6 +534,10 @@ namespace E2E.Controllers
 
                     db.SaveChanges();
 
+                    string status = db.System_Statuses.Find(eForms.Status_Id).Status_Name.ToString();
+
+                    EmailForms(id, status);
+
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
 
@@ -542,6 +552,32 @@ namespace E2E.Controllers
             {
                 throw;
             }
+        }
+
+        public void EmailForms(Guid id, string status)
+        {
+            EForms eForms = new EForms();
+            eForms = db.EForms.Find(id);
+
+            string deptName = db.Users.Find(eForms.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+            List<Guid> sendTo = db.Users
+                .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
+                .Select(s => s.User_Id)
+                .ToList();
+            sendTo.Add(eForms.User_Id);
+
+            var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
+            linkUrl += "/" + eForms.EForm_Id;
+            linkUrl = linkUrl.Replace("Approve_Forms", "EForms_Content");
+            linkUrl = linkUrl.Split('?').FirstOrDefault();
+
+            string subject = string.Format("[E2E][" + status + "] {0} - {1}", "E-Forms", eForms.EForm_Title);
+            string content = string.Format("<p><b>Description:</b> {0}", eForms.EForm_Description);
+            content += "<br />";
+            content += "<br />";
+            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+            content += "<p>Thank you for your consideration</p>";
+            mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
         }
 
         public List<SelectListItem> SelectListItems_Category_Name()
