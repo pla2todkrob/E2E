@@ -10,18 +10,24 @@ namespace E2E.Models
 {
     public class clsContext : DbContext
     {
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
+
         public clsContext() : base("strContext")
         {
         }
 
-        public DbSet<Master_Categories> Master_Categories { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
         public DbSet<EForms> EForms { get; set; }
-        public DbSet<Master_Documents> Master_Documents { get; set; }
-        public DbSet<Master_DocumentVersions> Master_DocumentVersions { get; set; }
+        public DbSet<Manuals> Manuals { get; set; }
+        public DbSet<Master_Categories> Master_Categories { get; set; }
         public DbSet<Master_Departments> Master_Departments { get; set; }
         public DbSet<Master_Divisions> Master_Divisions { get; set; }
+        public DbSet<Master_Documents> Master_Documents { get; set; }
+        public DbSet<Master_DocumentVersions> Master_DocumentVersions { get; set; }
         public DbSet<Master_Grades> Master_Grades { get; set; }
         public DbSet<Master_InquiryTopics> Master_InquiryTopics { get; set; }
         public DbSet<Master_LineWorks> Master_LineWorks { get; set; }
@@ -40,6 +46,8 @@ namespace E2E.Models
         public DbSet<System_Authorize> System_Authorizes { get; set; }
         public DbSet<System_Configurations> System_Configurations { get; set; }
         public DbSet<System_DueDateStatuses> System_DueDateStatuses { get; set; }
+        public DbSet<System_Language> System_Language { get; set; }
+        public DbSet<System_ManualType> System_ManualType { get; set; }
         public DbSet<System_Prefix_EN> System_Prefix_ENs { get; set; }
         public DbSet<System_Prefix_TH> System_Prefix_THs { get; set; }
         public DbSet<System_Priorities> System_Priorities { get; set; }
@@ -54,13 +62,7 @@ namespace E2E.Models
         public DbSet<UserDetails> UserDetails { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<UserUploadHistories> UserUploadHistories { get; set; }
-        public DbSet<Manuals> Manuals { get; set; }
-        public DbSet<System_ManualType> System_ManualType { get; set; }
-        public DbSet<System_Language> System_Language { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-        }
+        public DbSet<WorkRootDocuments> WorkRootDocuments { get; set; }
+        public DbSet<WorkRoots> WorkRoots { get; set; }
     }
 }

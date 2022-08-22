@@ -262,6 +262,8 @@
     <Compile Include="Models\Tables\Users.cs" />
     <Compile Include="Models\Tables\System_Roles.cs" />
     <Compile Include="Models\Tables\UserUploadHistories.cs" />
+    <Compile Include="Models\Tables\WorkRootDocuments.cs" />
+    <Compile Include="Models\Tables\WorkRoots.cs" />
     <Compile Include="Models\Views\clsDepartments.cs" />
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsDocuments.cs" />
@@ -283,6 +285,7 @@
     <Compile Include="Models\Views\clsSwal.cs" />
     <Compile Include="Models\Views\clsTopic.cs" />
     <Compile Include="Models\Views\clsUsers.cs" />
+    <Compile Include="Models\Views\clsWorkRoots.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -894,6 +897,9 @@
     <Content Include="Views\EForms\Approve_Table_Waiting.cshtml" />
     <Content Include="Views\EForms\Approve_Table_Approved.cshtml" />
     <Content Include="Views\EForms\Approve_Forms.cshtml" />
+    <Content Include="Views\Management\WorkRoot.cshtml" />
+    <Content Include="Views\Management\WorkRoot_Table.cshtml" />
+    <Content Include="Views\Management\WorkRoot_Form.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

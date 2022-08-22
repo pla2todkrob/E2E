@@ -12,32 +12,6 @@ namespace E2E.Models
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
 
-        public bool Document_Save(clsDocuments model, HttpFileCollectionBase files)
-        {
-            try
-            {
-                bool res = new bool();
-                string status = string.Empty;
-                Master_Documents master_Documents = new Master_Documents();
-                master_Documents = db.Master_Documents.Where(w => w.Document_Id == model.Master_Documents.Document_Id).FirstOrDefault();
-
-                if (master_Documents != null)
-                {
-                    res = Document_Update(model, files);
-                }
-                else
-                {
-                    res = Document_Insert(model, files);
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         protected bool Document_Insert(clsDocuments model, HttpFileCollectionBase files)
         {
             try
@@ -171,6 +145,32 @@ namespace E2E.Models
             }
 
             return res;
+        }
+
+        public bool Document_Save(clsDocuments model, HttpFileCollectionBase files)
+        {
+            try
+            {
+                bool res = new bool();
+                string status = string.Empty;
+                Master_Documents master_Documents = new Master_Documents();
+                master_Documents = db.Master_Documents.Where(w => w.Document_Id == model.Master_Documents.Document_Id).FirstOrDefault();
+
+                if (master_Documents != null)
+                {
+                    res = Document_Update(model, files);
+                }
+                else
+                {
+                    res = Document_Insert(model, files);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

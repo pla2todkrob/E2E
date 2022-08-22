@@ -75,7 +75,7 @@ function callSpin(active) {
         $(target).empty();
     }
 }
-async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 0, blockId = '#datalist') {
+async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = [], blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -87,18 +87,36 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                     width: '100%'
                 });
             });
+
+            var targetArr = [];
+            var targetObj = {};
+
+            $.each(dateCol, function (key, val) {
+                targetObj = {};
+                targetObj.targets = val;
+                targetObj.type = 'date';
+                targetArr.push(targetObj);
+            });
+
+            console.log(targetArr);
+
             $(blockId).find('table').each(function () {
                 if (hasDate && hasButton) {
+                    targetObj = {};
+                    targetObj.targets = 0;
+                    targetObj.orderable = false;
+                    targetArr.push(targetObj);
+
                     $(this).DataTable({
-                        "columnDefs": [{ "targets": 0, "orderable": false }, { "targets": dateCol, "type": "date" }],
-                        'order': [[dateCol, 'desc']],
+                        "columnDefs": targetArr,
+                        'order': [[dateCol[0], 'desc']],
                         "scrollX": true
                     });
                 }
                 else if (hasDate) {
                     $(this).DataTable({
-                        "columnDefs": [{ "targets": dateCol, "type": "date" }],
-                        'order': [[dateCol, 'desc']],
+                        "columnDefs": targetArr,
+                        'order': [[dateCol[0], 'desc']],
                         "scrollX": true
                     });
                 }
@@ -119,7 +137,7 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
     });
     return true;
 }
-async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
+async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
         async: true,
@@ -134,8 +152,19 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = 0, blockId =
             var table;
             $(blockId).find('table').each(function (i, v) {
                 if (hasDate) {
+
+                    var targetArr = [];
+                    var targetObj = {};
+
+                    $.each(dateCol, function (key, val) {
+                        targetObj = {};
+                        targetObj.targets = val;
+                        targetObj.type = 'date';
+                        targetArr.push(targetObj);
+                    });
+
                     table = $(this).DataTable({
-                        "columnDefs": [{ "targets": dateCol, "type": "date" }],
+                        "columnDefs": targetArr,
                         "ordering": false,
                         "scrollX": true
                     });
