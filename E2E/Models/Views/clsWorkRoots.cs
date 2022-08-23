@@ -14,6 +14,7 @@ namespace E2E.Models.Views
             WorkRootDocuments = new List<WorkRootDocuments>();
         }
 
+        public List<Guid?> Document_Id { get; set; }
         public List<WorkRootDocuments> WorkRootDocuments { get; set; }
         public WorkRoots WorkRoots { get; set; }
     }

@@ -197,21 +197,30 @@ namespace E2E.Controllers
                     .Select(s => s.User_Id)
                     .ToList();
 
+                List<SelectListItem> listItems = new List<SelectListItem>();
+                listItems.Add(new SelectListItem()
+                {
+                    Text = "Select documents",
+                    Value = ""
+                });
                 ViewBag.DocumentList = db.Master_Documents
-                    .Where(w => userIds.Contains(w.User_Id))
+                    .Where(w => userIds.Contains(w.User_Id) && w.Active)
                     .Select(s => new SelectListItem()
                     {
                         Text = s.Document_Name,
                         Value = s.Document_Id.ToString()
-                    }).ToList();
+                    })
+                    .OrderBy(o => o.Text)
+                    .ToList();
 
                 List<string> secNames = db.Master_Sections
-                    .Where(w => deptIds.Contains(w.Department_Id.Value))
+                    .Where(w => deptIds.Contains(w.Department_Id.Value) && w.Active)
                     .Select(s => s.Section_Name)
+                    .OrderBy(o => o)
                     .Distinct()
                     .ToList();
 
-                List<SelectListItem> listItems = new List<SelectListItem>();
+                listItems = new List<SelectListItem>();
                 listItems.Add(new SelectListItem()
                 {
                     Text = "Select section",
@@ -237,6 +246,10 @@ namespace E2E.Controllers
                     clsWorkRoots.WorkRootDocuments = db.WorkRootDocuments
                         .Where(w => w.WorkRoot_Id == id.Value)
                         .ToList();
+                    if (clsWorkRoots.WorkRootDocuments.Count > 0)
+                    {
+                        clsWorkRoots.Document_Id = clsWorkRoots.WorkRootDocuments.Select(s => s.Document_Id).ToList();
+                    }
                 }
 
                 ViewBag.IsNew = isNew;
@@ -247,6 +260,71 @@ namespace E2E.Controllers
             {
                 throw;
             }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult WorkRoot_Form(clsWorkRoots model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.WorkRoot_Save(model))
+                        {
+                            scope.Complete();
+
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        var inner = ex.InnerException;
+                        while (inner == null)
+                        {
+                            swal.text += "\n" + inner.Message;
+                            inner = inner.InnerException;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult WorkRoot_Table()

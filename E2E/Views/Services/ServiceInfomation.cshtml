@@ -141,7 +141,6 @@
             return false;
         }
 
-
         $(document).on('submit', '#TeamForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("_AddTeam", "Services")',this);
@@ -266,6 +265,10 @@
                         }
                     }
                 </dl>
+                @if (Model.Services.WorkRoot_Id.HasValue)
+                {
+
+                }
             </div>
             <div class="card-footer">
                 <div class="d-flex">

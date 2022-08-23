@@ -38,6 +38,11 @@
             <dd class="col-8">@Html.DisplayFor(m => m.Service_DueDate)</dd>
             <dt class="col-4">@Html.LabelFor(m => m.Service_EstimateTime)</dt>
             <dd class="col-8">@Html.TextBoxFor(m => m.Service_EstimateTime, new { @class = "form-control", required = "required" })</dd>
+            @if (ViewBag.WorkRootLis.Count() > 0)
+            {
+                <dt class="col-4">@Html.LabelFor(m => m.WorkRoot_Id)</dt>
+                <dd class="col-8">@Html.DropDownListFor(m => m.WorkRoot_Id, new SelectList(ViewBag.WorkRootLis, "Value", "Text"), "Select work root", new { @class = "form-control", required = "required" })</dd>
+            }
         </dl>
     </div>
     <div class="modal-footer">
