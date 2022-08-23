@@ -5,13 +5,13 @@
 
 @if (Model)
 {
-    @*<li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown_manage" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Managements
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdown_manage">
-                <a class="dropdown-item" href="@Url.Action("DocumentControl", "Management")">Document controls</a>
-                <a class="dropdown-item" href="#">Work roots</a>
-            </div>
-        </li>*@
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="dropdown_manage" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Managements
+        </a>
+        <div class="dropdown-menu" aria-labelledby="dropdown_manage">
+            <a class="dropdown-item" href="@Url.Action("DocumentControl", "Management")">Document controls</a>
+            <a class="dropdown-item" href="@Url.Action("WorkRoot", "Management")">Work roots</a>
+        </div>
+    </li>
 }

@@ -172,5 +172,129 @@ namespace E2E.Models
                 throw;
             }
         }
+
+        public bool WorkRoot_Insert(clsWorkRoots model)
+        {
+            try
+            {
+                bool res = new bool();
+                WorkRoots workRoots = new WorkRoots();
+                workRoots.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                workRoots.Section_Id = model.WorkRoots.Section_Id;
+                workRoots.WorkRoot_Name = model.WorkRoots.WorkRoot_Name;
+                db.Entry(workRoots).State = System.Data.Entity.EntityState.Added;
+                if (db.SaveChanges() > 0)
+                {
+                    if (model.Document_Id.Count > 0)
+                    {
+                        foreach (var item in model.Document_Id)
+                        {
+                            WorkRootDocuments documents = new WorkRootDocuments();
+                            documents.WorkRoot_Id = workRoots.WorkRoot_Id;
+                            documents.Document_Id = item;
+                            db.Entry(documents).State = System.Data.Entity.EntityState.Added;
+                        }
+
+                        if (db.SaveChanges() > 0)
+                        {
+                            res = true;
+                        }
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool WorkRoot_Save(clsWorkRoots model)
+        {
+            try
+            {
+                bool res = new bool();
+                WorkRoots workRoots = new WorkRoots();
+                workRoots = db.WorkRoots.Find(model.WorkRoots.WorkRoot_Id);
+
+                if (workRoots == null)
+                {
+                    res = WorkRoot_Insert(model);
+                }
+                else
+                {
+                    res = WorkRoot_Update(model);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool WorkRoot_Update(clsWorkRoots model)
+        {
+            try
+            {
+                bool res = new bool();
+                WorkRoots workRoots = new WorkRoots();
+                workRoots = db.WorkRoots.Find(model.WorkRoots.WorkRoot_Id);
+                workRoots.WorkRoot_Name = model.WorkRoots.WorkRoot_Name;
+                workRoots.Update = DateTime.Now;
+                db.Entry(workRoots).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    if (model.Document_Id.Count > 0)
+                    {
+                        List<WorkRootDocuments> workRootDocuments = new List<WorkRootDocuments>();
+                        workRootDocuments = db.WorkRootDocuments
+                            .Where(w => w.WorkRoot_Id == model.WorkRoots.WorkRoot_Id)
+                            .ToList();
+                        if (workRootDocuments.Count > 0)
+                        {
+                            foreach (var item in model.Document_Id)
+                            {
+                                var findHas = workRootDocuments
+                                    .Where(w => w.Document_Id == item.Value)
+                                    .FirstOrDefault();
+
+                                if (findHas == null)
+                                {
+                                    WorkRootDocuments documents = new WorkRootDocuments();
+                                    documents.WorkRoot_Id = model.WorkRoots.WorkRoot_Id;
+                                    documents.Document_Id = item;
+                                    db.Entry(documents).State = System.Data.Entity.EntityState.Added;
+                                }
+                            }
+
+                            foreach (var item in workRootDocuments)
+                            {
+                                var findKeep = model.Document_Id
+                                    .Where(w => w == item.Document_Id)
+                                    .FirstOrDefault();
+                                if (findKeep == null)
+                                {
+                                    WorkRootDocuments documents = new WorkRootDocuments();
+                                    documents = db.WorkRootDocuments.Find(item.Document_Id);
+                                    db.Entry(documents).State = System.Data.Entity.EntityState.Deleted;
+                                }
+                            }
+                        }
+
+                        if (db.SaveChanges() > 0)
+                        {
+                            res = true;
+                        }
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
