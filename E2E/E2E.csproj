@@ -900,6 +900,9 @@
     <Content Include="Views\Management\WorkRoot.cshtml" />
     <Content Include="Views\Management\WorkRoot_Table.cshtml" />
     <Content Include="Views\Management\WorkRoot_Form.cshtml" />
+    <Content Include="Views\Services\_DocumentList.cshtml" />
+    <Content Include="Views\Services\ServiceInfomation_View.cshtml" />
+    <Content Include="Views\Services\ServiceInfomation_Document.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -28,7 +28,7 @@
         </div>
         <div class="form-group">
             @Html.LabelFor(m => m.Document_Id)
-            @Html.DropDownListFor(m => m.Document_Id, new SelectList(ViewBag.DocumentList, "Value", "Text"), new { @class = "form-control", multiple = "multiple" })
+            @Html.DropDownListFor(m => m.Document_Id, new SelectList(ViewBag.DocumentList, "Value", "Text", "Selected"), new { @class = "form-control", multiple = "multiple" })
         </div>
     </div>
     <div class="modal-footer">

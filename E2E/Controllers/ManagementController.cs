@@ -198,12 +198,7 @@ namespace E2E.Controllers
                     .ToList();
 
                 List<SelectListItem> listItems = new List<SelectListItem>();
-                listItems.Add(new SelectListItem()
-                {
-                    Text = "Select documents",
-                    Value = ""
-                });
-                ViewBag.DocumentList = db.Master_Documents
+                listItems.AddRange(db.Master_Documents
                     .Where(w => userIds.Contains(w.User_Id) && w.Active)
                     .Select(s => new SelectListItem()
                     {
@@ -211,7 +206,26 @@ namespace E2E.Controllers
                         Value = s.Document_Id.ToString()
                     })
                     .OrderBy(o => o.Text)
-                    .ToList();
+                    .ToList());
+
+                if (id.HasValue)
+                {
+                    isNew = false;
+                    clsWorkRoots.WorkRoots = db.WorkRoots.Find(id);
+                    clsWorkRoots.WorkRootDocuments = db.WorkRootDocuments
+                        .Where(w => w.WorkRoot_Id == id.Value)
+                        .ToList();
+                    if (clsWorkRoots.WorkRootDocuments.Count > 0)
+                    {
+                        clsWorkRoots.Document_Id = clsWorkRoots.WorkRootDocuments.Select(s => s.Document_Id).ToList();
+                        listItems
+                            .Where(w => clsWorkRoots.Document_Id.Contains(Guid.Parse(w.Value)))
+                            .ToList()
+                            .ForEach(f => f.Selected = true);
+                    }
+                }
+
+                ViewBag.DocumentList = listItems;
 
                 List<string> secNames = db.Master_Sections
                     .Where(w => deptIds.Contains(w.Department_Id.Value) && w.Active)
@@ -226,6 +240,7 @@ namespace E2E.Controllers
                     Text = "Select section",
                     Value = ""
                 });
+
                 foreach (string item in secNames)
                 {
                     listItems.Add(db.Master_Sections
@@ -238,19 +253,6 @@ namespace E2E.Controllers
                 }
 
                 ViewBag.SectionList = listItems;
-
-                if (id.HasValue)
-                {
-                    isNew = false;
-                    clsWorkRoots.WorkRoots = db.WorkRoots.Find(id);
-                    clsWorkRoots.WorkRootDocuments = db.WorkRootDocuments
-                        .Where(w => w.WorkRoot_Id == id.Value)
-                        .ToList();
-                    if (clsWorkRoots.WorkRootDocuments.Count > 0)
-                    {
-                        clsWorkRoots.Document_Id = clsWorkRoots.WorkRootDocuments.Select(s => s.Document_Id).ToList();
-                    }
-                }
 
                 ViewBag.IsNew = isNew;
 

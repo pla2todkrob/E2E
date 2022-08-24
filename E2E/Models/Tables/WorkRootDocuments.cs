@@ -13,6 +13,7 @@ namespace E2E.Models.Tables
             WorkRootDocument_Id = Guid.NewGuid();
         }
 
+        [Display(Name = "Document control")]
         public Guid? Document_Id { get; set; }
 
         public virtual Master_Documents Master_Documents { get; set; }

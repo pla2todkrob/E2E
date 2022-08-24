@@ -124,6 +124,47 @@ namespace E2E.Models
                     .Where(w => w.Service_Id == id);
         }
 
+        public clsSwal CheckMissingDocument(Guid id)
+        {
+            clsSwal swal = new clsSwal();
+            try
+            {
+                List<ServiceDocuments> serviceDocuments = db.ServiceDocuments
+                    .Where(w => w.Service_Id == id && string.IsNullOrEmpty(w.ServiceDocument_Name) && w.Master_Documents.Required)
+                    .ToList();
+
+                if (serviceDocuments.Count > 0)
+                {
+                    swal.option = false;
+                    swal.icon = "warning";
+                    swal.title = "กรุอัพโหลดไฟล์ที่จำเป็น";
+                    foreach (var item in serviceDocuments)
+                    {
+                        swal.text += string.Format("- {0}\n", item.Master_Documents.Document_Name);
+                    }
+                }
+                else
+                {
+                    swal.option = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                swal.title = ex.TargetSite.Name;
+                swal.text = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    swal.text = ex.InnerException.Message;
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.InnerException.Message;
+                    }
+                }
+            }
+
+            return swal;
+        }
+
         public clsServices ClsServices_View(Guid id)
         {
             try
@@ -780,7 +821,7 @@ namespace E2E.Models
                         }
                         ServiceCommentFiles serviceCommentFiles = new ServiceCommentFiles();
                         serviceCommentFiles.ServiceCommentFile_Name = files[i].FileName;
-                        string dir = string.Format("Service/{0}/Comment/{1}/", model.Service_Id, DateTime.Today.ToString("yyMMdd"));
+                        string dir = string.Format("Service/{0}/Comment/{1}/", db.Services.Find(model.Service_Id).Service_Key, DateTime.Today.ToString("yyMMdd"));
                         serviceCommentFiles.ServiceCommentFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
                         serviceCommentFiles.ServiceComment_Seq = i;
@@ -975,7 +1016,7 @@ namespace E2E.Models
                         ServiceFiles serviceFiles = new ServiceFiles();
                         serviceFiles.Service_Id = model.Service_Id;
                         serviceFiles.ServiceFile_Name = files[i].FileName;
-                        string dir = string.Format("Service/{0}/", model.Service_Id);
+                        string dir = string.Format("Service/{0}/", model.Service_Key);
                         serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
@@ -1052,6 +1093,40 @@ namespace E2E.Models
                 else
                 {
                     res = Services_Insert(model, files, isForward);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Services_SaveDocumentControl(ServiceDocuments model, HttpFileCollectionBase files)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                bool res = new bool();
+                ServiceDocuments serviceDocuments = new ServiceDocuments();
+                serviceDocuments = db.ServiceDocuments.Find(model.ServiceDocument_Id);
+                serviceDocuments.ServiceDocument_Remark = model.ServiceDocument_Remark;
+                serviceDocuments.User_Id = userId;
+                serviceDocuments.Update = DateTime.Now;
+
+                HttpPostedFileBase fileBase = files[0];
+                if (fileBase.ContentLength > 0)
+                {
+                    serviceDocuments.ServiceDocument_Name = fileBase.FileName;
+                    string dir = string.Format("Service/{0}/DocumentControls/", db.Services.Find(model.Service_Id).Service_Key);
+                    serviceDocuments.ServiceDocument_Path = ftp.Ftp_UploadFileToString(dir, fileBase);
+                }
+
+                db.Entry(serviceDocuments).State = System.Data.Entity.EntityState.Modified;
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
                 }
 
                 return res;
@@ -1515,7 +1590,18 @@ namespace E2E.Models
                 services.Update = DateTime.Now;
                 services.Is_Commit = false;
                 services.Department_Id = null;
+                services.WorkRoot_Id = null;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+
+                List<ServiceDocuments> serviceDocuments = new List<ServiceDocuments>();
+                serviceDocuments = db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToList();
+                foreach (var item in serviceDocuments)
+                {
+                    if (ftp.Ftp_DeleteFile(item.ServiceDocument_Path))
+                    {
+                        db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+                    }
+                }
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
@@ -1673,7 +1759,7 @@ namespace E2E.Models
                         ServiceFiles serviceFiles = new ServiceFiles();
                         serviceFiles.Service_Id = model.Service_Id;
                         serviceFiles.ServiceFile_Name = files[i].FileName;
-                        string dir = string.Format("Service/{0}/", model.Service_Id);
+                        string dir = string.Format("Service/{0}/", model.Service_Key);
                         serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
