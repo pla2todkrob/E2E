@@ -61,6 +61,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Estimate time (days)")]
         public int Service_EstimateTime { get; set; }
         public Guid? WorkRoot_Id { get; set; }
+        public virtual WorkRoots WorkRoots { get; set; }
         public Services()
         {
             Service_Id = Guid.NewGuid();

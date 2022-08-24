@@ -25,6 +25,7 @@ namespace E2E.Models
                 master_Documents.Document_Name = model.Master_Documents.Document_Name;
                 master_Documents.Active = true;
                 master_Documents.User_Id = userId;
+                master_Documents.Required = model.Master_Documents.Required;
 
                 db.Master_Documents.Add(master_Documents);
 
@@ -86,6 +87,7 @@ namespace E2E.Models
                 master_Documents.Document_Name = model.Master_Documents.Document_Name;
                 master_Documents.Active = model.Master_Documents.Active;
                 master_Documents.Update = DateTime.Now;
+                master_Documents.Required = model.Master_Documents.Required;
 
                 if (files[0].ContentLength != 0)
                 {
@@ -130,13 +132,9 @@ namespace E2E.Models
         {
             bool res = new bool();
 
-            var chk = db.Master_DocumentVersions.Where(w => w.Document_Id == id).ToList();
+            var chk = db.Master_DocumentVersions.Where(w => w.Document_Id == id).Count();
 
-            if (chk.Count > 0)
-            {
-                return res;
-            }
-            else
+            if (chk == 0)
             {
                 var sql = db.Master_Documents.Find(id);
                 db.Master_Documents.Remove(sql);

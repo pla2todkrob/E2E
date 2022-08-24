@@ -229,7 +229,10 @@ function callModal(urlAjax, bigSize = false, callback = null) {
                     width: '100%'
                 });
             });
-            callback;
+            if (callback != null) {
+                callback();
+            }
+            
         }
     });
     $('#modalArea').modal('show');

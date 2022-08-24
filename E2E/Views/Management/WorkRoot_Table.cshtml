@@ -11,6 +11,9 @@
                 @Html.DisplayNameFor(m => m.Create)
             </th>
             <th>
+                @Html.DisplayNameFor(m => m.Master_Sections.Section_Name)
+            </th>
+            <th>
                 @Html.DisplayNameFor(m => m.WorkRoot_Name)
             </th>
             <th>
@@ -24,23 +27,26 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td class="fit">
-                    <button id="Edits" onclick="callModal('@Url.Action("WorkRoot_Form", "Management", new { id = Html.ValueFor(m => item.WorkRoot_Id) })',true)" class="btn btn-outline-warning"><i class="fa fa-pencil"></i></button>
-                </td>
-                <td class="fit">
-                    @Html.DisplayFor(i => item.Create, new { @class = "form-control" })
-                </td>
-                <td>
-                    @Html.DisplayFor(i => item.WorkRoot_Name)
-                </td>
-                <td class="fit">
-                    @Html.DisplayFor(i => item.Users.User_Code)
-                </td>
-                <td class="fit">
-                    @Html.DisplayFor(i => item.Update)
-                </td>
-            </tr>
+        <tr>
+            <td class="fit">
+                <button id="Edits" onclick="callModal('@Url.Action("WorkRoot_Form", "Management", new { id = Html.ValueFor(m => item.WorkRoot_Id) })',true)" class="btn btn-outline-warning"><i class="fa fa-pencil"></i></button>
+            </td>
+            <td class="fit">
+                @Html.DisplayFor(i => item.Create, new { @class = "form-control" })
+            </td>
+            <td class="fit">
+                @Html.DisplayFor(i => item.Master_Sections.Section_Name)
+            </td>
+            <td>
+                @Html.DisplayFor(i => item.WorkRoot_Name)
+            </td>
+            <td class="fit">
+                @Html.DisplayFor(i => item.Users.User_Code)
+            </td>
+            <td class="fit">
+                @Html.DisplayFor(i => item.Update)
+            </td>
+        </tr>
         }
     </tbody>
 </table>

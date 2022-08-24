@@ -76,12 +76,6 @@
 
         }
 
-        $(document).on('submit', '#CompleteForm', function (e) {
-            e.preventDefault();
-            callSubmitPage('@Url.Action("SetComplete", "Services")',this);
-            return false;
-        });
-
         function SaveCloseForm() {
             let arr = [];
 
@@ -156,6 +150,18 @@
         $(document).on('submit', '#SaveForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("Form_Forward", "Services")',this,'@Url.Action("Index", "Services")');
+            return false;
+        });
+
+        $(document).on('submit', '#CompleteForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("SetComplete", "Services")',this);
+            return false;
+        });
+
+        $(document).on('submit', '#SaveDocumentForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("ServiceInfomation_Document", "Services")',this);
             return false;
         });
     </script>
@@ -237,6 +243,11 @@
                         {
                             <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
                             <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Action_Name)</dd>
+                            if (Model.Services.WorkRoot_Id.HasValue)
+                            {
+                                <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.WorkRoots.WorkRoot_Name)</dt>
+                                <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Services.WorkRoots.WorkRoot_Name)</dd>
+                            }
                             <dt class="col-12 col-md-3">Team</dt>
                             <dd class="col-12 col-md-9">
                                 @if (Model.ClsServiceTeams.Count > 0)
@@ -267,7 +278,7 @@
                 </dl>
                 @if (Model.Services.WorkRoot_Id.HasValue)
                 {
-
+                    Html.RenderAction("_DocumentList", "Services", new { id = Model.Services.Service_Id });
                 }
             </div>
             <div class="card-footer">
@@ -288,7 +299,7 @@
                                 <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
                                 <div class="ml-auto">
                                     <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
-                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
+                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })',false)">Complete</button>
                                 </div>
 
                             }

@@ -230,6 +230,18 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult _DocumentList(Guid id)
+        {
+            try
+            {
+                return PartialView("_DocumentList", db.ServiceDocuments.Where(w => w.Service_Id == id).OrderBy(o => o.Master_Documents.Document_Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult _File(Guid id)
         {
             try
@@ -728,9 +740,16 @@ namespace E2E.Controllers
                 {
                     try
                     {
+                        swal = data.CheckMissingDocument(model.Ref_Service_Id.Value);
+                        if (swal.option == false)
+                        {
+                            return Json(swal, JsonRequestBehavior.AllowGet);
+                        }
+
                         if (data.Services_Save(model, Request.Files, true))
                         {
                             scope.Complete();
+                            swal.option = null;
                             swal.dangerMode = false;
                             swal.icon = "success";
                             swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
@@ -1165,7 +1184,97 @@ namespace E2E.Controllers
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
+
                 return View(data.ClsServices_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult ServiceInfomation_Document(Guid id)
+        {
+            try
+            {
+                return View(db.ServiceDocuments.Find(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ServiceInfomation_Document(ServiceDocuments model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Services_SaveDocumentControl(model, Request.Files))
+                        {
+                            scope.Complete();
+
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        var inner = ex.InnerException;
+                        while (inner == null)
+                        {
+                            swal.text += "\n" + inner.Message;
+                            inner = inner.InnerException;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult ServiceInfomation_View(Guid id)
+        {
+            try
+            {
+                return View(db.ServiceDocuments.Find(id));
             }
             catch (Exception)
             {
@@ -1387,6 +1496,12 @@ namespace E2E.Controllers
             {
                 try
                 {
+                    swal = data.CheckMissingDocument(model.Service_Id);
+                    if (swal.option == false)
+                    {
+                        return Json(swal, JsonRequestBehavior.AllowGet);
+                    }
+
                     if (data.Services_SetComplete(model))
                     {
                         scope.Complete();
