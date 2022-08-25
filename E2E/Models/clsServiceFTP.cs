@@ -14,6 +14,7 @@ namespace E2E.Models
 {
     public class clsServiceFTP
     {
+        private static string saveToPath = string.Empty;
         private string dir = ConfigurationManager.AppSettings["FTP_Dir"];
         private string pass = ConfigurationManager.AppSettings["FTP_Password"];
         private string url = ConfigurationManager.AppSettings["FTP_Url"];
@@ -146,11 +147,18 @@ namespace E2E.Models
             }
         }
 
-        public bool Ftp_DownloadFileToApp(string fileName)
+        public bool Ftp_DownloadFileToLocal(string fileName, string keyFolder)
         {
             try
             {
-                string saveToPath = string.Concat(webPath, "Download\\");
+                saveToPath = string.Concat(webPath, "Download\\");
+
+                if (!Directory.Exists(saveToPath))
+                {
+                    Directory.CreateDirectory(saveToPath);
+                }
+
+                saveToPath = string.Concat(saveToPath, keyFolder, "\\");
 
                 if (!Directory.Exists(saveToPath))
                 {
@@ -189,22 +197,90 @@ namespace E2E.Models
             }
         }
 
-        public void Ftp_DownloadFolder(string pathFolder)
+        public bool Ftp_DownloadFileToLocal(List<string> filesName, string keyFolder)
         {
             try
             {
+                saveToPath = string.Concat(webPath, "Download\\");
+
+                if (!Directory.Exists(saveToPath))
+                {
+                    Directory.CreateDirectory(saveToPath);
+                }
+
+                saveToPath = string.Concat(saveToPath, keyFolder, "\\");
+
+                if (!Directory.Exists(saveToPath))
+                {
+                    Directory.CreateDirectory(saveToPath);
+                }
+
+                foreach (var item in filesName)
+                {
+                    string pathFile = string.Concat(finalPath, item);
+                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(pathFile));
+                    request.Method = WebRequestMethods.Ftp.DownloadFile;
+                    request.Credentials = new NetworkCredential(user, pass);
+                    request.UseBinary = true;
+                    request.UsePassive = true;
+
+                    using (FtpWebResponse responseFile = (FtpWebResponse)request.GetResponse())
+                    {
+                        using (Stream streamFile = responseFile.GetResponseStream())
+                        {
+                            using (MemoryStream memoryStream = new MemoryStream())
+                            {
+                                streamFile.CopyTo(memoryStream);
+                                string saveToFile = string.Concat(saveToPath, item);
+                                using (Stream targetStream = File.Create(saveToFile))
+                                {
+                                    byte[] buffer = memoryStream.ToArray();
+                                    targetStream.Write(buffer, 0, buffer.Length);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void Ftp_DownloadFolder(string pathFolder, string zipName)
+        {
+            try
+            {
+                zipName = zipName.Replace(".zip", "");
+                List<string> files = new List<string>();
                 finalPath = GetFinallyPath(string.Concat(dir, pathFolder));
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
                 request.Credentials = new NetworkCredential(user, pass);
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                 {
-                    Stream stream = response.GetResponseStream();
-                    using (StreamReader streamReader = new StreamReader(stream))
+                    StreamReader streamReader = new StreamReader(response.GetResponseStream());
+                    string line = streamReader.ReadLine();
+                    while (!string.IsNullOrEmpty(line))
                     {
-                        while (!streamReader.EndOfStream)
+                        files.Add(line);
+                        line = streamReader.ReadLine();
+                    }
+                    streamReader.Close();
+                }
+
+                if (Ftp_DownloadFileToLocal(files, zipName))
+                {
+                    string zipPath = string.Format("{0}{1}.zip", saveToPath, zipName);
+                    ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
+                    if (Local_DownloadZip(zipPath))
+                    {
+                        if (Directory.Exists(saveToPath))
                         {
-                            Ftp_DownloadFileToApp(streamReader.ReadLine());
+                            Directory.Delete(saveToPath);
                         }
                     }
                 }
@@ -383,6 +459,31 @@ namespace E2E.Models
                         }
                     }
                 }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Local_DownloadZip(string zipPath)
+        {
+            try
+            {
+                bool res = new bool();
+                FileInfo fileInfo = new FileInfo(zipPath);
+                using (FileStream fileStream = fileInfo.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    byte[] fileBytes = new byte[fileStream.Length];
+                    HttpContext.Current.Response.Clear();
+                    HttpContext.Current.Response.Buffer = true;
+                    HttpContext.Current.Response.ContentType = MediaTypeNames.Application.Octet;
+                    HttpContext.Current.Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", Path.GetFileName(fileInfo.Name)));
+                    HttpContext.Current.Response.BinaryWrite(fileBytes);
+                    res = true;
+                }
+
                 return res;
             }
             catch (Exception)

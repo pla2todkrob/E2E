@@ -609,7 +609,7 @@ namespace E2E.Controllers
             {
                 string key = db.Services.Find(id).Service_Key;
                 string dir = string.Format("Service/{0}/DocumentControls/", key);
-                ftp.Ftp_DownloadFolder(dir);
+                ftp.Ftp_DownloadFolder(dir, key);
             }
             catch (Exception)
             {
