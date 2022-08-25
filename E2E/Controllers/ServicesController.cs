@@ -15,6 +15,7 @@ namespace E2E.Controllers
     {
         private clsManageService data = new clsManageService();
         private clsContext db = new clsContext();
+        private clsServiceFTP ftp = new clsServiceFTP();
 
         public ActionResult _AddTeam(Guid id)
         {
@@ -600,6 +601,20 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public void DownloadDocumentControl(Guid id)
+        {
+            try
+            {
+                string key = db.Services.Find(id).Service_Key;
+                string dir = string.Format("Service/{0}/DocumentControls/", key);
+                ftp.Ftp_DownloadFolder(dir);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Form(Guid? id)
