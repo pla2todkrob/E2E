@@ -8,6 +8,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -274,15 +276,17 @@ namespace E2E.Models
 
                 if (Ftp_DownloadFileToLocal(files, zipName))
                 {
-                    string zipPath = string.Format("{0}{1}.zip", saveToPath, zipName);
-                    ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
-                    if (Local_DownloadZip(zipPath))
+                    string[] splitPath = saveToPath.Split('\\');
+                    splitPath = splitPath.Take(splitPath.Length - 1).ToArray();
+                    string zipPath = saveToPath.TrimEnd('\\');
+                    zipPath = zipPath.Replace(splitPath.LastOrDefault(), string.Concat(zipName, ".zip"));
+                    if (File.Exists(zipPath))
                     {
-                        if (Directory.Exists(saveToPath))
-                        {
-                            Directory.Delete(saveToPath);
-                        }
+                        File.Delete(zipPath);
                     }
+                    ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
+                    Local_DownloadZip(zipPath);
+                    Directory.Delete(saveToPath, true);
                 }
             }
             catch (Exception)
@@ -467,24 +471,20 @@ namespace E2E.Models
             }
         }
 
-        public bool Local_DownloadZip(string zipPath)
+        public void Local_DownloadZip(string zipPath)
         {
             try
             {
-                bool res = new bool();
                 FileInfo fileInfo = new FileInfo(zipPath);
-                using (FileStream fileStream = fileInfo.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                {
-                    byte[] fileBytes = new byte[fileStream.Length];
-                    HttpContext.Current.Response.Clear();
-                    HttpContext.Current.Response.Buffer = true;
-                    HttpContext.Current.Response.ContentType = MediaTypeNames.Application.Octet;
-                    HttpContext.Current.Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", Path.GetFileName(fileInfo.Name)));
-                    HttpContext.Current.Response.BinaryWrite(fileBytes);
-                    res = true;
-                }
-
-                return res;
+                HttpContext.Current.Response.Clear();
+                HttpContext.Current.Response.Buffer = true;
+                HttpContext.Current.Response.ContentType = MediaTypeNames.Application.Octet;
+                HttpContext.Current.Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", fileInfo.Name));
+                HttpContext.Current.Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+                HttpContext.Current.Response.WriteFile(fileInfo.FullName);
+                HttpContext.Current.Response.Flush();
+                File.Delete(zipPath);
+                HttpContext.Current.Response.End();
             }
             catch (Exception)
             {

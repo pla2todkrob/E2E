@@ -28,7 +28,7 @@
                 <label for="FileDoc">Document</label>
                 <input type="file" class="form-control-file" name="FileDoc" id="FileDoc">
             </div>
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="form-group form-check">
                     @Html.CheckBoxFor(m => m.Master_Documents.Required, new { @class = "form-check-input" })
                     @Html.LabelFor(m => m.Master_Documents.Required, new { @class = "form-check-label" })
@@ -37,7 +37,7 @@
 
             @if (ViewBag.IsNew == false)
             {
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="form-group form-check">
                         @Html.CheckBoxFor(m => m.Master_Documents.Active, new { @class = "form-check-input" })
                         @Html.LabelFor(m => m.Master_Documents.Active, new { @class = "form-check-label" })
@@ -100,7 +100,7 @@
         @{
             if (ViewBag.IsNew == false)
             {
-                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_DocumentControl_Create","Management",new { id=Html.ValueFor(w=>w.Master_Documents.Document_Id)})')"><i class="fa fa-trash"></i></button>
+                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("DocumentControl_Delete","Management",new { id=Html.ValueFor(w=>w.Master_Documents.Document_Id)})')"><i class="fa fa-trash"></i></button>
             }
         }
         <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i></button>

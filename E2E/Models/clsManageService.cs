@@ -285,6 +285,7 @@ namespace E2E.Models
                             ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
                         }).FirstOrDefault();
                     clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
+                    clsServices.Create_Name = master.Users_GetInfomation(clsServices.Services.Create_User_Id);
 
                     UserDetails userDetails = new UserDetails();
                     userDetails = db.UserDetails

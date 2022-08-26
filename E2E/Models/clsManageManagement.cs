@@ -181,23 +181,20 @@ namespace E2E.Models
                 workRoots.Section_Id = model.WorkRoots.Section_Id;
                 workRoots.WorkRoot_Name = model.WorkRoots.WorkRoot_Name;
                 db.Entry(workRoots).State = System.Data.Entity.EntityState.Added;
+                if (model.Document_Id != null)
+                {
+                    foreach (var item in model.Document_Id)
+                    {
+                        WorkRootDocuments documents = new WorkRootDocuments();
+                        documents.WorkRoot_Id = workRoots.WorkRoot_Id;
+                        documents.Document_Id = item;
+                        db.Entry(documents).State = System.Data.Entity.EntityState.Added;
+                    }
+                }
+
                 if (db.SaveChanges() > 0)
                 {
-                    if (model.Document_Id.Count > 0)
-                    {
-                        foreach (var item in model.Document_Id)
-                        {
-                            WorkRootDocuments documents = new WorkRootDocuments();
-                            documents.WorkRoot_Id = workRoots.WorkRoot_Id;
-                            documents.Document_Id = item;
-                            db.Entry(documents).State = System.Data.Entity.EntityState.Added;
-                        }
-
-                        if (db.SaveChanges() > 0)
-                        {
-                            res = true;
-                        }
-                    }
+                    res = true;
                 }
                 return res;
             }
@@ -291,6 +288,34 @@ namespace E2E.Models
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+        public bool WorkRoot_Delete(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+
+                int inUseCount = db.Services
+                    .Where(w => w.WorkRoot_Id == id)
+                    .Count();
+
+                if (inUseCount == 0)
+                {
+                    WorkRoots workRoots = db.WorkRoots.Find(id);
+                    db.Entry(workRoots).State = System.Data.Entity.EntityState.Deleted;
+                    if (db.SaveChanges() > 0)
+                    {
+                        res = true;
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }

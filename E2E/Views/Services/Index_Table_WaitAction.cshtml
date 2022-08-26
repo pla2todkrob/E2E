@@ -2,6 +2,7 @@
 
 @{
     Layout = null;
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 }
 
 <table class="table table-bordered table-hover nowrap w-100">
@@ -25,6 +26,15 @@
             <td class="text-wrap">
                 <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
                 <a href="@Url.Action("Action","Services",new { id=item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+                @{
+                    if (item.Action_User_Id.HasValue)
+                    {
+                        if (Guid.Equals(item.Action_User_Id.Value, userId))
+                        {
+                            <span class="badge badge-danger">MY TASK</span>
+                        }
+                    }
+                }
             </td>
 
             <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>

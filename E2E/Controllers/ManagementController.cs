@@ -16,7 +16,7 @@ namespace E2E.Controllers
         private clsManageManagement data = new clsManageManagement();
         private clsContext db = new clsContext();
 
-        public ActionResult Delete_DocumentControl_Create(Guid id)
+        public ActionResult DocumentControl_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
             {
@@ -359,6 +359,45 @@ namespace E2E.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+        public ActionResult WorkRoot_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.WorkRoot_Delete(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ข้อมูลถูกใช้งานอยู่";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
     }

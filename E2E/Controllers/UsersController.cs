@@ -16,121 +16,26 @@ namespace E2E.Controllers
 {
     public class UsersController : Controller
     {
-        private clsContext db = new clsContext();
         private clsManageMaster data = new clsManageMaster();
+        private clsContext db = new clsContext();
 
-        // GET: Users
-        public ActionResult Index()
+        public ActionResult _ShowChangePassword()
         {
-            return View();
+            bool res = new bool();
+            var id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+            var Password = db.UserDetails.Where(w => w.User_Id == id).Select(s => s.Detail_Password).FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(Password))
+            {
+                res = true;
+            }
+
+            return PartialView("_ShowChangePassword", res);
         }
 
-        [AllowAnonymous]
-        public ActionResult Login()
+        public ActionResult _UploadHistory()
         {
-            try
-            {
-                ViewBag.ReturnUrl = Request.QueryString["ReturnUrl"];
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
-                {
-                    if (!string.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
-                    {
-                        Response.Redirect(Request.QueryString["ReturnUrl"]);
-                    }
-                    else
-                    {
-                        Response.Redirect(FormsAuthentication.DefaultUrl);
-                    }
-                }
-
-                return View(new clsLogin());
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Login(clsLogin model, string returnUrl)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    Users users = new Users();
-                    users = db.Users
-                        .Where(w => w.User_Code == model.Username.Trim() || w.User_Email == model.Username.Trim())
-                        .FirstOrDefault();
-                    if (users == null)
-                    {
-                        ModelState.AddModelError("Username", string.Format("Username {0} not found", model.Username));
-                        return View(model);
-                    }
-
-                    string password = db.UserDetails
-                        .Where(w => w.User_Id == users.User_Id)
-                        .Select(s => s.Detail_Password)
-                        .FirstOrDefault();
-                    if (string.IsNullOrEmpty(password))
-                    {
-                        if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
-                        {
-                            goto SetAuthen;
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("Password", "The password is incorrect.");
-                            return View(model);
-                        }
-                    }
-                    else
-                    {
-                        if (string.Equals(password, data.Users_Password(model.Password.Trim())))
-                        {
-                            goto SetAuthen;
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("Password", "The password is incorrect.");
-                            return View(model);
-                        }
-                    }
-
-                SetAuthen:
-                    int year = DateTime.Today.Year;
-                    if (!int.Equals(users.YearSetPoint, year))
-                    {
-                        clsDefaultSystem.Generate();
-                    }
-                    FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
-                    if (!string.IsNullOrEmpty(returnUrl))
-                    {
-                        return Redirect(returnUrl);
-                    }
-                    else
-                    {
-                        return Redirect(FormsAuthentication.DefaultUrl);
-                    }
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-            }
-            else
-            {
-            }
-
-            return View(model);
-        }
-
-        
-
-        public ActionResult Signout()
-        {
-            FormsAuthentication.SignOut();
-            return Redirect(FormsAuthentication.DefaultUrl);
+            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
         }
 
         public ActionResult _UserInfomation(string val)
@@ -245,22 +150,119 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult _ShowChangePassword()
+        // GET: Users
+        public ActionResult Index()
         {
-            bool res = new bool();
-            var id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
-            var Password = db.UserDetails.Where(w => w.User_Id == id).Select(s => s.Detail_Password).FirstOrDefault();
+            return View();
+        }
 
-            if (!string.IsNullOrEmpty(Password))
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+            try
             {
-                res = true;
+                ViewBag.ReturnUrl = Request.QueryString["ReturnUrl"];
+                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                {
+                    if (!string.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
+                    {
+                        return Redirect(Request.QueryString["ReturnUrl"]);
+                    }
+                    else
+                    {
+                        return Redirect(FormsAuthentication.DefaultUrl);
+                    }
+                }
+
+                return View(new clsLogin());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Login(clsLogin model, string returnUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    Users users = new Users();
+                    users = db.Users
+                        .Where(w => w.User_Code == model.Username.Trim() || w.User_Email == model.Username.Trim())
+                        .FirstOrDefault();
+                    if (users == null)
+                    {
+                        ModelState.AddModelError("Username", string.Format("Username {0} not found", model.Username));
+                        return View(model);
+                    }
+
+                    string password = db.UserDetails
+                        .Where(w => w.User_Id == users.User_Id)
+                        .Select(s => s.Detail_Password)
+                        .FirstOrDefault();
+                    if (string.IsNullOrEmpty(password))
+                    {
+                        if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
+                        {
+                            goto SetAuthen;
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("Password", "The password is incorrect.");
+                            return View(model);
+                        }
+                    }
+                    else
+                    {
+                        if (string.Equals(password, data.Users_Password(model.Password.Trim())))
+                        {
+                            goto SetAuthen;
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("Password", "The password is incorrect.");
+                            return View(model);
+                        }
+                    }
+
+                SetAuthen:
+                    Log_Login log_Login = new Log_Login();
+                    log_Login.User_Id = users.User_Id;
+                    db.Entry(log_Login).State = System.Data.Entity.EntityState.Added;
+                    if (db.SaveChanges() > 0)
+                    {
+                        int year = DateTime.Today.Year;
+                        if (!int.Equals(users.YearSetPoint, year))
+                        {
+                            clsDefaultSystem.Generate();
+                        }
+                        FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
+                        if (!string.IsNullOrEmpty(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            return Redirect(FormsAuthentication.DefaultUrl);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
 
-            return PartialView("_ShowChangePassword", res);
+            return View(model);
         }
-        public ActionResult _UploadHistory()
+
+        public ActionResult Signout()
         {
-            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
+            FormsAuthentication.SignOut();
+            return Redirect(FormsAuthentication.DefaultUrl);
         }
     }
 }
