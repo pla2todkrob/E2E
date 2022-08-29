@@ -20,14 +20,28 @@
                                     <dd class="col-8 col-md-9">@Html.DisplayFor(m => item.Services.Create)</dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Statuses.Status_Name)</dt>
                                     <dd class="col-8 col-md-9"><span class="@item.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => item.Services.System_Statuses.Status_Name)</span></dd>
+                                    @if (item.Services.Update.HasValue)
+                                    {
+                                        <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                                        <dd class="col-8 col-md-9">@Html.DisplayFor(m => item.Services.Update)</dd>
+                                    }
+
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Subject)</dt>
                                     <dd class="col-8 col-md-9">[<b>@Html.DisplayFor(m => item.Services.Service_Key)</b>]&nbsp;@Html.DisplayFor(m => item.Services.Service_Subject)</dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                                     <dd class="col-8 col-md-9"><span class="PreLine">@Html.DisplayFor(m => item.Services.Service_Description)</span></dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                                    <dd class="col-8 col-md-9"><b class="text-primary">@Html.DisplayFor(m => item.User_Name)</b></dd>
-                                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                                    <dd class="col-8 col-md-9"><b>@Html.DisplayFor(m => item.Services.Update)</b></dd>
+                                    <dd class="col-8 col-md-9">
+                                        <blockquote class="blockquote">
+                                            <small class="text-primary font-weight-bold">@Html.DisplayFor(m => item.User_Name)</small>
+                                            <em class="blockquote-footer small">
+                                                @Html.ValueFor(m => item.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name),&nbsp;
+                                                @Html.ValueFor(m => item.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
+                                                @Html.ValueFor(m => item.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                                            </em>
+                                        </blockquote>
+                                    </dd>
+                                    
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
                                     <dd class="col-8 col-md-9"><span class="@item.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => item.Services.System_Priorities.Priority_Name)</span></dd>
                                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>

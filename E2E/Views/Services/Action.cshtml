@@ -81,15 +81,22 @@
                             }
                         }
                     }
-
                 </div>
-                
 
                 <dl class="row">
                     <dt class="col-12 col-lg-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                     <dd class="col-12 col-lg-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
                     <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                    <dd class="col-8 col-lg-9"><b class="text-primary">@Html.DisplayFor(m => m.User_Name)</b></dd>
+                    <dd class="col-8 col-lg-9">
+                        <blockquote class="blockquote">
+                            <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
+                            <em class="blockquote-footer small">
+                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name),&nbsp;
+                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
+                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                            </em>
+                        </blockquote>
+                    </dd>
                     @if (Model.Services.Update.HasValue)
                     {
                         <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
@@ -121,7 +128,7 @@
                     {
                         <button class="btn btn-outline-danger mb-3" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
                     }
-                    
+
                     <div class="ml-auto">
 
                         @if (Model.Services.Action_User_Id.HasValue)
@@ -160,7 +167,6 @@
                             }
                         }
 
-
                         @if (Model.Services.Action_User_Id.HasValue)
                         {
                             if (Model.Services.Action_User_Id == userId)
@@ -176,7 +182,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     <div class="col-12 col-md-6 col-lg-5 d-flex align-items-stretch">
         <div class="card w-100" id="serviceComment">

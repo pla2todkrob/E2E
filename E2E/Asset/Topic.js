@@ -37,11 +37,8 @@
 function savegallery_T(urlAjax, urlLoad) {
     var arr = [];
     $('table#tableGal').find('tbody').each(function () {
-        console.log($(this));
         $(this).find('tr').each(function () {
-            console.log($(this));
             $(this).find('td#rowVal').each(function () {
-                console.log($(this));
                 var obj = {};
                 obj.TopicGallery_Id = $(this).find('#item_TopicGallery_Id').val();
                 obj.TopicGallery_Seq = $(this).find('#item_TopicGallery_Seq').val();
@@ -49,7 +46,6 @@ function savegallery_T(urlAjax, urlLoad) {
             });
         });
     });
-    console.log(arr);
     $.ajax({
         url: urlAjax,
         async: true,
@@ -64,7 +60,6 @@ function savegallery_T(urlAjax, urlLoad) {
                 button: res.button,
                 dangerMode: res.dangerMode
             }).then(function (e) {
-                console.log(e);
                 if (res.icon == 'success') {
                     reloadTable();
                     callFileCollection(urlLoad);
@@ -110,7 +105,6 @@ function deleteFiles(urlAjax, urlLoad) {
                             button: res.button,
                             dangerMode: res.dangerMode
                         }).then(function (e) {
-                            console.log(e);
                             if (res.icon == 'success') {
                                 reloadTable();
                                 callFileCollection(urlLoad);

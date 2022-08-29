@@ -53,7 +53,16 @@
                             <dt class="col-12 col-xl-4">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                             <dd class="col-12 col-xl-8"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
                             <dt class="col-4">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                            <dd class="col-8"><b class="text-primary">@Html.DisplayFor(m => m.User_Name)</b></dd>
+                            <dd class="col-8">
+                                <blockquote class="blockquote">
+                                    <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
+                                    <em class="blockquote-footer small">
+                                        @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name),&nbsp;
+                                        @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
+                                        @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                                    </em>
+                                </blockquote>
+                            </dd>
                             @if (Model.Services.Update.HasValue)
                             {
                                 <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
@@ -154,7 +163,6 @@
                             </div>
                         }
                     </div>
-
                 </div>
             </div>
         </div>
@@ -168,7 +176,6 @@
                 @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
             </div>
         </div>
-
     </div>
 </div>
 

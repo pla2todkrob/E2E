@@ -98,7 +98,6 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                 targetArr.push(targetObj);
             });
 
-            console.log(targetArr);
 
             $(blockId).find('table').each(function () {
                 if (hasDate && hasButton) {
@@ -290,7 +289,6 @@ function callSubmitModal(urlAjax, form) {
                         button: res.button,
                         dangerMode: res.dangerMode
                     }).then(function (e) {
-                        console.log(e);
                         if (res.icon == 'success') {
                             $('#modalArea').modal('hide');
                             reloadTable();

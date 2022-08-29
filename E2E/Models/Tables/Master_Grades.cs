@@ -18,7 +18,6 @@ namespace E2E.Models.Tables
 
         public bool Active { get; set; }
 
-
         public DateTime Create { get; set; }
 
         [Key]
@@ -30,8 +29,8 @@ namespace E2E.Models.Tables
         [Description("Position"), Display(Name = "Position")]
         public string Grade_Position { get; set; }
 
-        [Required,Display(Name ="Line work")]
-        public Guid? LineWork_Id { get; set; }
+        [Required, Display(Name = "Line work")]
+        public Guid LineWork_Id { get; set; }
 
         public virtual Master_LineWorks Master_LineWorks { get; set; }
         public DateTime? Update { get; set; }

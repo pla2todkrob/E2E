@@ -411,7 +411,7 @@ namespace E2E.Models
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 Guid departmentId = db.Users
                     .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Processes.Master_Sections.Department_Id.Value)
+                    .Select(s => s.Master_Processes.Master_Sections.Department_Id)
                     .FirstOrDefault();
 
                 List<Guid> userIdInTeam = ServiceTeams_IQ(id)
@@ -728,7 +728,7 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(userId, subject, content);
+                        res = mail.SendMail(services.User_Id, subject, content);
                     }
                 }
 
@@ -1669,7 +1669,7 @@ namespace E2E.Models
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 if (!deptId.HasValue)
                 {
-                    deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+                    deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
                 }
 
                 string deptName = db.Master_Departments.Find(deptId).Department_Name;

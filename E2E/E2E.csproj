@@ -919,6 +919,7 @@
     <Content Include="Views\Services\_DocumentList.cshtml" />
     <Content Include="Views\Services\ServiceInfomation_View.cshtml" />
     <Content Include="Views\Services\ServiceInfomation_Document.cshtml" />
+    <Content Include="Views\Masters\DeleteWrongData.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

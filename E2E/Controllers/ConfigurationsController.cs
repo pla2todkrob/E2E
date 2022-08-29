@@ -59,7 +59,7 @@ namespace E2E.Controllers
                 if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
                     Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
 
                     int authorIndex = db.Users
                         .Where(w => w.User_Id == userId)
@@ -93,7 +93,7 @@ namespace E2E.Controllers
                 if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
                     Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id.Value;
+                    Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
 
                     int authorIndex = db.Users
                         .Where(w => w.User_Id == userId)

@@ -9,24 +9,28 @@ namespace E2E.Models.Tables
 {
     public class Master_Sections
     {
-        [Key]
-        public Guid Section_Id { get; set; }
-
-        [Description("Section name"), Display(Name = "Section")]
-        public string Section_Name { get; set; }
-
-        [Display(Name = "Department")]
-        public Guid? Department_Id { get; set; }
-        public virtual Master_Departments Master_Departments { get; set; }
-        public bool Active { get; set; }
-        public DateTime Create { get; set; }
-        public DateTime? Update { get; set; }
-
         public Master_Sections()
         {
             Section_Id = Guid.NewGuid();
             Active = true;
             Create = DateTime.Now;
         }
+
+        public bool Active { get; set; }
+
+        public DateTime Create { get; set; }
+
+        [Display(Name = "Department")]
+        public Guid Department_Id { get; set; }
+
+        public virtual Master_Departments Master_Departments { get; set; }
+
+        [Key]
+        public Guid Section_Id { get; set; }
+
+        [Description("Section name"), Display(Name = "Section")]
+        public string Section_Name { get; set; }
+
+        public DateTime? Update { get; set; }
     }
 }

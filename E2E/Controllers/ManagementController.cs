@@ -16,46 +16,6 @@ namespace E2E.Controllers
         private clsManageManagement data = new clsManageManagement();
         private clsContext db = new clsContext();
 
-        public ActionResult DocumentControl_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                clsSwal swal = new clsSwal();
-                try
-                {
-                    if (data.Delete_Document(id))
-                    {
-                        scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.title = "Successful";
-                    }
-                    else
-                    {
-                        swal.icon = "warning";
-                        swal.text = "ข้อมูลถูกใช้งานอยู่";
-                        swal.title = "Warning";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
-                    if (ex.InnerException != null)
-                    {
-                        swal.text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.InnerException.Message;
-                        }
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
         public ActionResult DocumentControl()
         {
             return View();
@@ -159,6 +119,46 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult DocumentControl_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.Delete_Document(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ข้อมูลถูกใช้งานอยู่";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public ActionResult DocumentControl_Table()
         {
             var sql = db.Master_Documents.ToList();
@@ -173,6 +173,46 @@ namespace E2E.Controllers
         public ActionResult WorkRoot()
         {
             return View();
+        }
+
+        public ActionResult WorkRoot_Delete(Guid id)
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                clsSwal swal = new clsSwal();
+                try
+                {
+                    if (data.WorkRoot_Delete(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ข้อมูลถูกใช้งานอยู่";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult WorkRoot_Form(Guid? id)
@@ -193,7 +233,7 @@ namespace E2E.Controllers
                     .ToList();
 
                 List<Guid> userIds = db.Users
-                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id.Value))
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
                     .Select(s => s.User_Id)
                     .ToList();
 
@@ -228,7 +268,7 @@ namespace E2E.Controllers
                 ViewBag.DocumentList = listItems;
 
                 List<string> secNames = db.Master_Sections
-                    .Where(w => deptIds.Contains(w.Department_Id.Value) && w.Active)
+                    .Where(w => deptIds.Contains(w.Department_Id) && w.Active)
                     .Select(s => s.Section_Name)
                     .OrderBy(o => o)
                     .Distinct()
@@ -345,7 +385,7 @@ namespace E2E.Controllers
                     .ToList();
 
                 List<Guid> userIds = db.Users
-                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id.Value))
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
                     .Select(s => s.User_Id)
                     .ToList();
 
@@ -359,45 +399,6 @@ namespace E2E.Controllers
             catch (Exception)
             {
                 throw;
-            }
-        }
-        public ActionResult WorkRoot_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                clsSwal swal = new clsSwal();
-                try
-                {
-                    if (data.WorkRoot_Delete(id))
-                    {
-                        scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.title = "Successful";
-                    }
-                    else
-                    {
-                        swal.icon = "warning";
-                        swal.text = "ข้อมูลถูกใช้งานอยู่";
-                        swal.title = "Warning";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
-                    if (ex.InnerException != null)
-                    {
-                        swal.text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.InnerException.Message;
-                        }
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
     }

@@ -5,11 +5,8 @@
 function savegallery(urlAjax,urlLoad) {
     var arr = [];
     $('table#tableGal').find('tbody').each(function () {
-        console.log($(this));
         $(this).find('tr').each(function () {
-            console.log($(this));
             $(this).find('td#rowVal').each(function () {
-                console.log($(this));
                 var obj = {};
                 obj.EForm_Gallery_Id = $(this).find('#item_EForm_Gallery_Id').val();
                 obj.EForm_Gallery_Seq = $(this).find('#item_EForm_Gallery_Seq').val();
@@ -17,7 +14,6 @@ function savegallery(urlAjax,urlLoad) {
             });
         });
     });
-    console.log(arr);
     $.ajax({
         url: urlAjax,
         async: true,

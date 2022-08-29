@@ -46,7 +46,6 @@
                 contentType: false,
                 traditional: true,
                 success: function (res) {
-                    console.log(res.option.Service_Id);
                     if (res.icon != 'success') {
                         swal({
                             title: res.title,
@@ -208,16 +207,25 @@
                 <dl class="row">
                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Statuses.Status_Name)</dt>
                     <dd class="col-8 col-md-9"><span class="@Model.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => m.Services.System_Statuses.Status_Name)</span></dd>
-                    <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
-                    <dd class="col-12 col-md-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                    <dd class="col-8 col-md-9"><b class="text-primary">@Html.DisplayFor(m => m.User_Name)</b></dd>
                     @if (Model.Services.Update.HasValue)
                     {
                         <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
                         <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
                     }
+                    <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+                    <dd class="col-12 col-md-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
+                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
+                    <dd class="col-8 col-md-9">
+                        <blockquote class="blockquote">
+                            <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
+                            <em class="blockquote-footer small">
+                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name),&nbsp;
+                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
+                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                            </em>
+                        </blockquote>
 
+                    </dd>
                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
                     <dd class="col-8 col-md-9"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
@@ -258,7 +266,7 @@
                                             <li>
                                                 <div class="d-flex justify-content-between">
                                                     @item.User_Name
-                                                    @if (Model.Services.Status_Id == 2)
+                                                    @if (Model.Services.Status_Id == 2 && Model.Services.Action_User_Id.Value == userId)
                                                     {
                                                         <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
                                                     }

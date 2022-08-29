@@ -9,6 +9,19 @@ namespace E2E.Models.Tables
 {
     public class Master_Processes
     {
+        public Master_Processes()
+        {
+            Process_Id = Guid.NewGuid();
+            Active = true;
+            Create = DateTime.Now;
+        }
+
+        public bool Active { get; set; }
+
+        public DateTime Create { get; set; }
+
+        public virtual Master_Sections Master_Sections { get; set; }
+
         [Key]
         public Guid Process_Id { get; set; }
 
@@ -16,17 +29,8 @@ namespace E2E.Models.Tables
         public string Process_Name { get; set; }
 
         [Display(Name = "Section")]
-        public Guid? Section_Id { get; set; }
-        public virtual Master_Sections Master_Sections { get; set; }
-        public bool Active { get; set; }
-        public DateTime Create { get; set; }
-        public DateTime? Update { get; set; }
+        public Guid Section_Id { get; set; }
 
-        public Master_Processes()
-        {
-            Process_Id = Guid.NewGuid();
-            Active = true;
-            Create = DateTime.Now;
-        }
+        public DateTime? Update { get; set; }
     }
 }
