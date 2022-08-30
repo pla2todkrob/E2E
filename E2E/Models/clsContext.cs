@@ -1,6 +1,7 @@
 ﻿using E2E.Models.Tables;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace E2E.Models
             base.OnModelCreating(modelBuilder);
         }
 
-        public clsContext() : base("strContext")
+        public clsContext() : base(ConfigurationManager.AppSettings["DBCON"])
         {
         }
 

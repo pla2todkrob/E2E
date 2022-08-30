@@ -1,8 +1,8 @@
 ﻿//For publish
-//var baseUrl = '/E2E';
+var baseUrl = '/E2E';
 
 //For develop
-var baseUrl = '';
+/*var baseUrl = '';*/
 
 var chat;
 $(function () {
@@ -98,7 +98,6 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                 targetArr.push(targetObj);
             });
 
-
             $(blockId).find('table').each(function () {
                 if (hasDate && hasButton) {
                     targetObj = {};
@@ -151,7 +150,6 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
             var table;
             $(blockId).find('table').each(function (i, v) {
                 if (hasDate) {
-
                     var targetArr = [];
                     var targetObj = {};
 
@@ -231,7 +229,6 @@ function callModal(urlAjax, bigSize = false, callback = null) {
             if (callback != null) {
                 callback();
             }
-            
         }
     });
     $('#modalArea').modal('show');

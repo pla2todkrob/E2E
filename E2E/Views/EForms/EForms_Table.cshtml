@@ -20,7 +20,7 @@
                             @Html.ActionLink(item.EForm_Title, "EForms_Content", new { id = item.EForm_Id }) &nbsp;
 
                             @{
-                                if (string.Equals(item.User_Id.ToString(), HttpContext.Current.User.Identity.Name))
+                                if (string.Equals(item.User_Id.ToString(), HttpContext.Current.User.Identity.Name) || ViewBag.RoleId == 1)
                                 {
                                     <button onclick="callModalEForms('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })', '@Url.Action("_FileCollections", "EForms", new { id = item.EForm_Id })', true)" class="btn"><i class="fa fa-pencil"></i></button>
                                 }
@@ -53,7 +53,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </td>
             </tr>

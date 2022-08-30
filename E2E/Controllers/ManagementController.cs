@@ -161,7 +161,14 @@ namespace E2E.Controllers
 
         public ActionResult DocumentControl_Table()
         {
-            var sql = db.Master_Documents.ToList();
+            Guid Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+
+            string DeptName = db.Users.Where(w => w.User_Id == Id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
+            List<Guid> guids = new List<Guid>();
+            guids = db.Master_Departments.Where(w => w.Department_Name == DeptName).Select(s => s.Department_Id).ToList();
+            
+            var sql = db.Master_Documents.Where(w => guids.Contains(w.Users.Master_Processes.Master_Sections.Department_Id)).ToList();
+
             return View(sql);
         }
 
