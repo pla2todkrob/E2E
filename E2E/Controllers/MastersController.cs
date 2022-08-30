@@ -180,50 +180,18 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    List<Master_Processes> master_Processes = new List<Master_Processes>();
-                    master_Processes = db.Master_Processes
-                        .Where(w => w.Create >= date)
-                        .ToList();
-
-                    List<Guid> sectionIds = master_Processes.Select(s => s.Section_Id).Distinct().ToList();
-                    List<Master_Sections> master_Sections = new List<Master_Sections>();
-                    master_Sections = db.Master_Sections
-                        .Where(w => sectionIds.Contains(w.Section_Id))
-                        .ToList();
-
-                    List<Guid> departmentIds = master_Sections.Select(s => s.Department_Id).Distinct().ToList();
-                    List<Master_Departments> master_Departments = new List<Master_Departments>();
-                    master_Departments = db.Master_Departments
-                        .Where(w => departmentIds.Contains(w.Department_Id))
-                        .ToList();
-
-                    List<Guid> divisionIds = master_Departments.Select(s => s.Division_Id).Distinct().ToList();
-                    List<Master_Divisions> master_Divisions = new List<Master_Divisions>();
-                    master_Divisions = db.Master_Divisions
-                        .Where(w => divisionIds.Contains(w.Division_Id))
-                        .ToList();
-
-                    List<Guid> plantIds = master_Divisions.Select(s => s.Plant_Id).Distinct().ToList();
-                    List<Master_Plants> master_Plants = new List<Master_Plants>();
-                    master_Plants = db.Master_Plants
-                        .Where(w => plantIds.Contains(w.Plant_Id))
-                        .ToList();
-                    db.Master_Plants.RemoveRange(master_Plants);
-
-                    List<Master_Grades> master_Grades = new List<Master_Grades>();
-                    master_Grades = db.Master_Grades
-                        .Where(w => w.Create >= date)
-                        .ToList();
-
-                    List<Guid> lineWorkIds = master_Grades
-                        .Select(s => s.LineWork_Id)
-                        .Distinct()
-                        .ToList();
                     List<Master_LineWorks> master_LineWorks = new List<Master_LineWorks>();
                     master_LineWorks = db.Master_LineWorks
-                        .Where(w => lineWorkIds.Contains(w.LineWork_Id))
+                        .Where(w => w.Create >= date)
                         .ToList();
+
                     db.Master_LineWorks.RemoveRange(master_LineWorks);
+
+                    List<Master_Plants> master_Plants = new List<Master_Plants>();
+                    master_Plants = db.Master_Plants
+                        .Where(w => w.Create >= date)
+                        .ToList();
+                    db.Master_Plants.RemoveRange(master_Plants);
 
                     if (db.SaveChanges() > 0)
                     {

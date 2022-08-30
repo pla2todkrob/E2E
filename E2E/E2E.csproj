@@ -280,6 +280,7 @@
     <Compile Include="Models\Tables\UserUploadHistories.cs" />
     <Compile Include="Models\Tables\WorkRootDocuments.cs" />
     <Compile Include="Models\Tables\WorkRoots.cs" />
+    <Compile Include="Models\Views\clsChangeDueDates.cs" />
     <Compile Include="Models\Views\clsDepartments.cs" />
     <Compile Include="Models\Views\clsDivisions.cs" />
     <Compile Include="Models\Views\clsDocuments.cs" />

@@ -50,13 +50,18 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                string departmentName = db.Users
+                string deptName = db.Users
                     .Where(w => w.User_Id == id)
                     .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
 
+                List<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Master_Departments.Department_Name == departmentName);
+                    .Where(w => deptIds.Contains(w.Department_Id.Value));
 
                 return query;
             }
@@ -89,10 +94,13 @@ namespace E2E.Models
                         .Where(w => w.User_Id == id.Value)
                         .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                         .FirstOrDefault();
-                    if (!string.IsNullOrEmpty(deptName))
-                    {
-                        query = query.Where(w => (w.Master_Departments.Department_Name == deptName && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
-                    }
+
+                    List<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+
+                    query = query.Where(w => (deptIds.Contains(w.Department_Id.Value) && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
                 }
 
                 return query;
@@ -740,7 +748,7 @@ namespace E2E.Models
             }
         }
 
-        public List<ServiceChangeDueDate> ServiceChangeDues_List()
+        public List<clsChangeDueDates> ServiceChangeDues_List()
         {
             try
             {
@@ -751,6 +759,20 @@ namespace E2E.Models
                     .ToList();
                 return db.ServiceChangeDueDates
                     .Where(w => ids.Contains(w.Service_Id))
+                    .AsEnumerable()
+                    .Select(s => new clsChangeDueDates()
+                    {
+                        ChangeDueDate_Id = s.ChangeDueDate_Id,
+                        Service_Key = s.Services.Service_Key,
+                        Service_Subject = s.Services.Service_Subject,
+                        Create = s.Create,
+                        DueDateStatus_Class = s.System_DueDateStatuses.DueDateStatus_Class,
+                        DueDateStatus_Name = s.System_DueDateStatuses.DueDateStatus_Name,
+                        DueDate_New = s.DueDate_New,
+                        DueDate_Old = s.DueDate,
+                        Update = s.Update,
+                        User_Name = master.Users_GetInfomation(s.User_Id.Value)
+                    })
                     .ToList();
             }
             catch (Exception)
@@ -1460,9 +1482,11 @@ namespace E2E.Models
                         }
                     }
 
+                    string deptName = db.Master_Departments.Find(services.Department_Id).Department_Name;
+
                     serviceComments = new ServiceComments();
                     serviceComments.Service_Id = services.Service_Id;
-                    serviceComments.Comment_Content = string.Format("Return job to department {0}", services.Master_Departments.Department_Name);
+                    serviceComments.Comment_Content = string.Format("Return job to department {0}", deptName);
                     res = Services_Comment(serviceComments);
                 }
 

@@ -26,23 +26,22 @@
         @Html.HiddenFor(m => m.Service_Id)
         @Html.HiddenFor(m => m.Service_Key)
         <dl class="row">
-            <dt class="col-4">@Html.DisplayNameFor(m => m.Service_Subject)</dt>
-            <dd class="col-8">@Html.DisplayFor(m => m.Service_Subject)</dd>
-            <dt class="col-4">@Html.DisplayNameFor(m => m.Service_Description)</dt>
-            <dd class="col-8"><span class="PreLine">@Html.DisplayFor(m => m.Service_Description)</span></dd>
-            <dt class="col-4">@Html.DisplayNameFor(m => m.Users.User_Code)</dt>
-            <dd class="col-8">@Html.DisplayFor(m => m.Users.User_Code)</dd>
             <dt class="col-4">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</dt>
             <dd class="col-8"><span class="@Html.ValueFor(m => m.System_Priorities.Priority_Class)">@Html.DisplayFor(m => m.System_Priorities.Priority_Name)</span></dd>
             <dt class="col-4">@Html.DisplayNameFor(m => m.Service_DueDate)</dt>
             <dd class="col-8">@Html.DisplayFor(m => m.Service_DueDate)</dd>
+            <dt class="col-4">@Html.DisplayNameFor(m => m.Service_Subject)</dt>
+            <dd class="col-8">@Html.DisplayFor(m => m.Service_Subject)</dd>
+            <dt class="col-4">@Html.DisplayNameFor(m => m.Service_Description)</dt>
+            <dd class="col-8"><span class="PreLine">@Html.DisplayFor(m => m.Service_Description)</span></dd>
+
 
         </dl>
         <div class="form-group">
             @Html.LabelFor(m => m.Service_EstimateTime)
             @Html.TextBoxFor(m => m.Service_EstimateTime, new { @class = "form-control", required = "required" })
         </div>
-        @if (ViewBag.WorkRootList != null)
+        @if (ViewBag.WorkRootList.Count > 0)
         {
             <div class="form-group">
                 @Html.LabelFor(m => m.WorkRoot_Id)

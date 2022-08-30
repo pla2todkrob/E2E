@@ -16,7 +16,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Document control")]
         public Guid? Document_Id { get; set; }
 
-        public virtual Master_Documents Master_Documents { get; set; }
+        //public virtual Master_Documents Master_Documents { get; set; }
 
         public Guid WorkRoot_Id { get; set; }
 
