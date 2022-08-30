@@ -166,10 +166,30 @@ namespace E2E.Controllers
             string DeptName = db.Users.Where(w => w.User_Id == Id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
             List<Guid> guids = new List<Guid>();
             guids = db.Master_Departments.Where(w => w.Department_Name == DeptName).Select(s => s.Department_Id).ToList();
-            
+
             var sql = db.Master_Documents.Where(w => guids.Contains(w.Users.Master_Processes.Master_Sections.Department_Id)).ToList();
 
             return View(sql);
+        }
+
+        public void DownloadTemplate(Guid id)
+        {
+            try
+            {
+                Master_DocumentVersions master_DocumentVersions = new Master_DocumentVersions();
+                master_DocumentVersions = db.Master_DocumentVersions
+                    .Where(w => w.Document_Id == id)
+                    .OrderByDescending(o => o.DocumentVersion_Number)
+                    .FirstOrDefault();
+                if (master_DocumentVersions != null)
+                {
+                    new clsServiceFTP().Ftp_DownloadFile(master_DocumentVersions.DocumentVersion_Path);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Index()

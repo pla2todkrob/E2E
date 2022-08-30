@@ -29,7 +29,7 @@
         {
         <tr>
             <td class="fit">
-                <button id="Edits" onclick="callModal('@Url.Action("WorkRoot_Form", "Management", new { id = Html.ValueFor(m => item.WorkRoot_Id) })',true)" class="btn btn-outline-warning"><i class="fa fa-pencil"></i></button>
+                <button id="Edits" onclick="callModal('@Url.Action("WorkRoot_Form", "Management", new { id = Html.ValueFor(m => item.WorkRoot_Id) })')" class="btn btn-outline-warning"><i class="fa fa-pencil"></i></button>
             </td>
             <td class="fit">
                 @Html.DisplayFor(i => item.Create, new { @class = "form-control" })

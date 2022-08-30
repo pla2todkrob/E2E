@@ -125,8 +125,8 @@ namespace E2E.Models
         {
             try
             {
-                finalPath = GetFinallyPath(string.Concat(dir, pathFile));
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
+                pathFile = pathFile.Replace(urlDomain, url);
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(pathFile));
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
                 request.Credentials = new NetworkCredential(user, pass);
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())

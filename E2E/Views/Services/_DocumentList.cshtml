@@ -28,7 +28,13 @@
                                     <span class="text-danger">*</span>
                                 }
                             </td>
-                            <td>@Html.DisplayFor(m => item.ServiceDocument_Name)</td>
+                            <td>
+                                @Html.DisplayFor(m => item.ServiceDocument_Name)&nbsp;
+                                @if (Guid.Equals(item.Services.Action_User_Id, userId) && !string.IsNullOrEmpty(item.ServiceDocument_Name))
+                                {
+                                    <button type="button" class="btn" onclick="callModal('@Url.Action("ServiceInfomation_Document","Services",new { id=item.ServiceDocument_Id })')"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                                }
+                            </td>
                             <td class="text-center">
                                 @{
                                     if (!string.IsNullOrEmpty(item.ServiceDocument_Path))
@@ -43,6 +49,7 @@
                                         }
                                     }
 
+                                    
                                 }
                             </td>
                         </tr>

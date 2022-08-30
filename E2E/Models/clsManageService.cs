@@ -145,7 +145,7 @@ namespace E2E.Models
                 {
                     swal.option = false;
                     swal.icon = "warning";
-                    swal.title = "กรุอัพโหลดไฟล์ที่จำเป็น";
+                    swal.title = "กรุณาอัพโหลดไฟล์ที่จำเป็น";
                     foreach (var item in serviceDocuments)
                     {
                         swal.text += string.Format("- {0}\n", item.Master_Documents.Document_Name);

@@ -15,10 +15,10 @@ namespace E2E.Models.Tables
         }
 
         public DateTime Create { get; set; }
-        public Guid Document_Id { get; set; }
+        public Guid? Document_Id { get; set; }
+
         public virtual Master_Documents Master_Documents { get; set; }
-        public Guid? Service_Id { get; set; }
-        //public virtual Services Services { get; set; }
+        public Guid Service_Id { get; set; }
 
         [Key]
         public Guid ServiceDocument_Id { get; set; }
@@ -31,6 +31,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Remark")]
         public string ServiceDocument_Remark { get; set; }
 
+        public virtual Services Services { get; set; }
         public DateTime? Update { get; set; }
         public Guid? User_Id { get; set; }
         //public virtual Users Users { get; set; }

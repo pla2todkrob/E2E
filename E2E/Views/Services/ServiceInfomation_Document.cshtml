@@ -26,6 +26,9 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+        <div class="d-flex justify-content-between w-100">
+            <a href="@Url.Action("DownloadTemplate","Management",new { id=Model.Document_Id })" class="btn btn-outline-info">Template</a>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+        </div>
     </div>
 }
