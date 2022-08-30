@@ -30,6 +30,9 @@ namespace E2E.Controllers
         {
             try
             {
+                Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.RoleId = db.Users.Where(w => w.User_Id == UserId).Select(s => s.Role_Id).FirstOrDefault();
+
                 IQueryable<EForms> query = db.EForms.Where(w => w.EForm_Start <= DateTime.Today && w.Status_Id == 3 && (!w.EForm_End.HasValue || w.EForm_End >= DateTime.Today)).OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t => t.EForm_Start);
 
                 if (id.HasValue)
