@@ -1213,7 +1213,13 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(db.ServiceDocuments.Find(id));
+                ServiceDocuments serviceDocuments = new ServiceDocuments();
+                serviceDocuments = db.ServiceDocuments.Find(id);
+
+                ViewBag.HasTemplate = db.Master_DocumentVersions
+                    .Any(a => a.Document_Id == serviceDocuments.Document_Id);
+
+                return View(serviceDocuments);
             }
             catch (Exception)
             {
