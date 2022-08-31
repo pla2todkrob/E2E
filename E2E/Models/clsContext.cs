@@ -24,6 +24,8 @@ namespace E2E.Models
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
         public DbSet<EForms> EForms { get; set; }
         public DbSet<Log_Login> Log_Logins { get; set; }
+        public DbSet<Log_SendEmail> Log_SendEmails { get; set; }
+        public DbSet<Log_SendEmailTo> Log_SendEmailTos { get; set; }
         public DbSet<Manuals> Manuals { get; set; }
         public DbSet<Master_Categories> Master_Categories { get; set; }
         public DbSet<Master_Departments> Master_Departments { get; set; }

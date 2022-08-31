@@ -13,18 +13,95 @@ namespace E2E.Models
     public class clsMail
     {
         private clsContext db = new clsContext();
+
+        private bool SendMail(MailMessage model)
+        {
+            try
+            {
+                bool res = new bool();
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                              | SecurityProtocolType.Tls11
+                              | SecurityProtocolType.Tls12;
+
+                using (SmtpClient client = new SmtpClient())
+                {
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"], ConfigurationManager.AppSettings["Mail_Domain"]);
+                    client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"]); // You can use Port 25 for online, Port 587 is for local
+                    client.Host = ConfigurationManager.AppSettings["Mail_Host"];
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    client.EnableSsl = true;
+                    client.Send(model);
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public string Content { get; set; }
+        public List<Guid?> SendBCC { get; set; }
+        public List<Guid?> SendCC { get; set; }
         public Guid SendFrom { get; set; }
         public List<Guid> SendTo { get; set; }
-        public List<Guid?> SendCC { get; set; }
-        public List<Guid?> SendBCC { get; set; }
         public string Subject { get; set; }
-        public string Content { get; set; }
+
+        public bool ResendMail(Guid logId)
+        {
+            try
+            {
+                bool res = new bool();
+                Log_SendEmail log_SendEmail = new Log_SendEmail();
+                log_SendEmail = db.Log_SendEmails.Find(logId);
+
+                List<Guid> mailTo = new List<Guid>();
+                List<Guid?> mailCC = new List<Guid?>();
+                List<Guid?> mailBCC = new List<Guid?>();
+
+                List<Log_SendEmailTo> log_SendEmailTos = new List<Log_SendEmailTo>();
+                log_SendEmailTos = db.Log_SendEmailTos
+                    .Where(w => w.SendEmail_Id == logId)
+                    .ToList();
+                foreach (var item in log_SendEmailTos)
+                {
+                    switch (item.SendEmailTo_Type)
+                    {
+                        case "to":
+                            mailTo.Add(item.User_Id);
+                            break;
+
+                        case "cc":
+                            mailCC.Add(item.User_Id);
+                            break;
+
+                        case "bcc":
+                            mailBCC.Add(item.User_Id);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                res = SendMail(mailTo, log_SendEmail.SendEmail_Subject, log_SendEmail.SendEmail_Content, mailCC, mailBCC);
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public bool SendMail(List<Guid> sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null)
         {
             try
             {
-                bool res = new bool();
                 MailMessage msg = new MailMessage();
 
                 string dear = "Dear ";
@@ -113,40 +190,18 @@ namespace E2E.Models
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 
-                //ใช้ในกรณี ส่งเมลไม่ออกทั้งที่ Code ถูกต้องหมดทุกอย่าง
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                              | SecurityProtocolType.Tls11
-                              | SecurityProtocolType.Tls12;
-
-                SmtpClient client = new SmtpClient();
-                client.UseDefaultCredentials = false;
-                client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"]);
-                client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"]); // You can use Port 25 for online, Port 587 is for local
-                client.Host = ConfigurationManager.AppSettings["Mail_Host"];
-                client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                client.EnableSsl = true;
-                try
-                {
-                    client.Send(msg);
-                    res = true;
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-
-                return res;
+                return SendMail(msg);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
+
         public bool SendMail(Guid sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null)
         {
             try
             {
-                bool res = new bool();
                 MailMessage msg = new MailMessage();
 
                 string dear = "Dear ";
@@ -235,42 +290,21 @@ namespace E2E.Models
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 
-                //ใช้ในกรณี ส่งเมลไม่ออกทั้งที่ Code ถูกต้องหมดทุกอย่าง
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                              | SecurityProtocolType.Tls11
-                              | SecurityProtocolType.Tls12;
-
-                SmtpClient client = new SmtpClient();
-                client.UseDefaultCredentials = false;
-                client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"]);
-                client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"]); // You can use Port 25 for online, Port 587 is for local
-                client.Host = ConfigurationManager.AppSettings["Mail_Host"];
-                client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                client.EnableSsl = true;
-                try
-                {
-                    client.Send(msg);
-                    res = true;
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-
-                return res;
+                return SendMail(msg);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
+
         public class ReceiveData
         {
             public string Email { get; set; }
-            public string NameEN { get; set; }
-            public string NameTH { get; set; }
             public string FullNameEN { get; set; }
             public string FullNameTH { get; set; }
+            public string NameEN { get; set; }
+            public string NameTH { get; set; }
         }
     }
 }

@@ -17,6 +17,8 @@ namespace E2E.Controllers
         private clsManageService data = new clsManageService();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+        private clsMail mail = new clsMail();
+        private clsManageMaster master = new clsManageMaster();
 
         public ActionResult _AddTeam(Guid id)
         {
@@ -278,6 +280,7 @@ namespace E2E.Controllers
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
+
                 return View(data.ClsServices_View(id));
             }
             catch (Exception)
@@ -1191,6 +1194,53 @@ namespace E2E.Controllers
             }
         }
 
+        public JsonResult ResendEmail(Guid id, string method)
+        {
+            clsSwal swal = new clsSwal();
+            try
+            {
+                Log_SendEmail log_SendEmail = new Log_SendEmail();
+                log_SendEmail = db.Log_SendEmails
+                    .Where(w => w.SendEmail_MethodName == method && w.SendEmail_Ref_Id == id)
+                    .FirstOrDefault();
+                if (log_SendEmail != null)
+                {
+                    if (mail.ResendMail(log_SendEmail.SendEmail_Id))
+                    {
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ส่งอีเมลอีกครั้งเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ส่งอีเมลอีกครั้งไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                else
+                {
+                    swal.icon = "warning";
+                    swal.text = "ไม่พบประวัติการส่งอีเมล";
+                    swal.title = "Warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                swal.title = ex.TargetSite.Name;
+                swal.text = ex.Message;
+                var inner = ex.InnerException;
+                while (inner == null)
+                {
+                    swal.text += "\n" + inner.Message;
+                    inner = inner.InnerException;
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult ServiceInfomation(Guid id)
         {
             try
@@ -1360,6 +1410,122 @@ namespace E2E.Controllers
                         if (ex.InnerException.InnerException != null)
                         {
                             swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SetAssign(Guid id)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                List<Guid> depIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+
+                ViewBag.UserList = db.Users
+                    .Where(w => depIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
+                    .AsEnumerable()
+                    .Select(s => new SelectListItem()
+                    {
+                        Value = s.User_Id.ToString(),
+                        Text = master.Users_GetInfomation(s.User_Id)
+                    }).OrderBy(o => o.Text)
+                    .ToList();
+
+                clsServices clsServices = new clsServices();
+                clsServices.Service_Id = id;
+
+                return View(clsServices);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult SetAssign(clsServices model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Services_SetToUser(model.Service_Id, model.User_Id))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
                         }
                     }
                 }
@@ -1908,6 +2074,72 @@ namespace E2E.Controllers
                         swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
                         swal.title = "Successful";
                         swal.option = model.Service_Id;
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SetReturnAssign(Guid id)
+        {
+            ServiceComments serviceComments = new ServiceComments();
+            serviceComments.Service_Id = id;
+
+            return View(serviceComments);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult SetReturnAssign(ServiceComments model)
+        {
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.Services_SetReturnAssign(model))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.title = "Successful";
                     }
                     else
                     {

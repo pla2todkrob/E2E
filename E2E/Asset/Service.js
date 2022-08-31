@@ -194,3 +194,31 @@ function setCommitToDepartment(urlAjax, urlRedirect) {
 
     return false;
 }
+
+function resendEmail(urlAjax) {
+    swal({
+        title: "Are you sure?",
+        text: "An email will be sent to the creator of the request again.",
+        buttons: true,
+        icon: "warning"
+    })
+        .then((cf) => {
+            if (cf) {
+                $.ajax({
+                    url: urlAjax,
+                    async: true,
+                    success: function (res) {
+                        swal({
+                            title: res.title,
+                            text: res.text,
+                            icon: res.icon,
+                            button: res.button,
+                            dangerMode: res.dangerMode
+                        });
+                    }
+                });
+            }
+        });
+
+    return false;
+}
