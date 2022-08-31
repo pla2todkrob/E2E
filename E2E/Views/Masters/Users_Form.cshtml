@@ -75,7 +75,6 @@
                         @Html.DropDownListFor(m => m.Prefix_TH_Id, new SelectList(ViewBag.PrefixTHList, "Value", "Text"), new { @class = "form-control", required = "required" })
                     </div>
                 </div>
-                
             </div>
             <div class="col-md-9">
                 <div class="form-row">
@@ -108,13 +107,6 @@
                         @Html.TextBoxFor(m => m.Detail_EN_LastName, new { @class = "form-control", required = "required" })
                     </div>
                 </div>
-            </div>
-
-
-            
-            <div class="form-group col-md-6">
-                @Html.LabelFor(m => m.Detail_Tel)
-                @Html.TextBoxFor(m => m.Detail_Tel, new { @class = "form-control" })
             </div>
         </div>
 

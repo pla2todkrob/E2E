@@ -15,7 +15,7 @@ namespace E2E.Models.Tables
         }
 
         public Guid? Action_User_Id { get; set; }
-
+        public Guid? Assign_User_Id { get; set; }
         public DateTime Create { get; set; }
 
         public Guid Create_User_Id { get; set; }
@@ -38,6 +38,9 @@ namespace E2E.Models.Tables
 
         [Display(Name = "Service Reference")]
         public Guid? Ref_Service_Id { get; set; }
+
+        [Display(Name = "Contact number")]
+        public string Service_Contact { get; set; }
 
         [Display(Name = "Description")]
         public string Service_Description { get; set; }

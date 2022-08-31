@@ -489,11 +489,6 @@ namespace E2E.Models
                     userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 }
 
-                if (!string.IsNullOrEmpty(model.Detail_Tel))
-                {
-                    userDetails.Detail_Tel = model.Detail_Tel.Trim();
-                }
-
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
                 userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
                 userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
@@ -541,11 +536,6 @@ namespace E2E.Models
                 userDetails.Detail_EN_FirstName = model.Detail_EN_FirstName.Trim();
                 userDetails.Detail_EN_LastName = model.Detail_EN_LastName.Trim();
                 userDetails.Prefix_EN_Id = model.Prefix_EN_Id;
-
-                if (!string.IsNullOrEmpty(model.Detail_Tel))
-                {
-                    userDetails.Detail_Tel = model.Detail_Tel.Trim();
-                }
 
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
                 userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
