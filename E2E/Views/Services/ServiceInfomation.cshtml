@@ -208,7 +208,6 @@
                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Statuses.Status_Name)</dt>
                     <dd class="col-8 col-md-9">
                         <span class="@Model.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => m.Services.System_Statuses.Status_Name)</span>&nbsp;
-                        
                     </dd>
                     @if (Model.Services.Update.HasValue)
                     {
@@ -228,6 +227,8 @@
                             </em>
                         </blockquote>
                     </dd>
+                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Contact)</dt>
+                    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Service_Contact)</dd>
                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
                     <dd class="col-8 col-md-9"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
                     <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
@@ -314,7 +315,7 @@
 
                             if (Model.Services.Status_Id == 3)
                             {
-                                
+
                                 <button class="btn btn-outline-info" type="button" onclick="resendEmail('@Url.Action("ResendEmail","Services",new { id=Model.Services.Service_Id,method="Services_SetComplete" })')"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;Resend</button>
                             }
                         }

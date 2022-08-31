@@ -1534,6 +1534,42 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult SetAssignUserId()
+        {
+            try
+            {
+                List<Guid> servicesIds = db.Services
+                    .Where(w => !w.Assign_User_Id.HasValue && w.Is_Commit)
+                    .Select(s => s.Service_Id)
+                    .ToList();
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    foreach (var item in servicesIds)
+                    {
+                        Guid userId = db.ServiceComments
+                            .Where(w => w.Comment_Content.Contains("Assign") && w.Service_Id == item)
+                            .OrderByDescending(o => o.Create)
+                            .Select(s => s.User_Id.Value)
+                            .FirstOrDefault();
+
+                        Services services = db.Services.Find(item);
+                        services.Assign_User_Id = userId;
+                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                    }
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Complete();
+                    }
+                }
+
+                return Json(servicesIds);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult SetCancel(Guid id)
         {
             ServiceComments serviceComments = new ServiceComments();
