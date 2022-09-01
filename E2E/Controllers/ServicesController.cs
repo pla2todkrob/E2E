@@ -404,6 +404,24 @@ namespace E2E.Controllers
             return Json(res, JsonRequestBehavior.AllowGet);
         }
 
+        public bool Check_ReferenceClose_Job(Guid userId)
+        {
+            bool res = new bool();
+
+            Guid Id = Guid.Parse(HttpContext.User.Identity.Name);
+            if (Id != userId)
+            {
+                var ID_service = data.Service_CHK_CloseJob(userId);
+
+                if (ID_service != null)
+                {
+                    res = true;
+                }
+            }
+
+            return res;
+        }
+
         public ActionResult Commit(Guid id)
         {
             try
@@ -662,19 +680,28 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.Services_Save(model, Request.Files))
+                        if (!Check_ReferenceClose_Job(model.User_Id))
                         {
-                            scope.Complete();
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
-                            swal.option = model.Service_Id;
+                            if (data.Services_Save(model, Request.Files))
+                            {
+                                scope.Complete();
+                                swal.dangerMode = false;
+                                swal.icon = "success";
+                                swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                                swal.title = "Successful";
+                                swal.option = model.Service_Id;
+                            }
+                            else
+                            {
+                                swal.icon = "warning";
+                                swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                                swal.title = "Warning";
+                            }
                         }
                         else
                         {
                             swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ เนื่องจาก User ที่ท่านเลือกยังไม่ทำการ Close Job";
                             swal.title = "Warning";
                         }
                     }
