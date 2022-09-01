@@ -84,13 +84,13 @@
                 icon: "warning",
                 buttons: true,
             })
-                .then((willDelete) => {
-                    if (willDelete) {
+                .then((cf) => {
+                    if (cf) {
                         var id_service = $('#Services_Service_Id').val();
                         $('.score-group').find('.score').each(function () {
                             var obj = {};
                             obj.id = $(this).attr('id');
-                            obj.score = $('input[name=' + obj.id + ']:checked').val();
+                            obj.score = $(this).find('input[name=' + obj.id + ']:checked').val();
                             arr.push(obj);
                         });
 
@@ -328,6 +328,10 @@
                         }
                     }
                 </div>
+                @if (Model.Services.Status_Id == 4)
+                {
+                    Html.RenderAction("_SatisfactionResults", "Services", new { id = Model.Services.Service_Id });
+                }
             </div>
         </div>
     </div>

@@ -13,6 +13,7 @@ namespace E2E.Models.Tables
 
         public Guid Service_Id { get; set; }
         public virtual Services Services { get; set; }
+        [Display(Name ="Average")]
         public double Satisfaction_Average { get; set; }
         public DateTime Create { get; set; }
 

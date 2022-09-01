@@ -273,6 +273,18 @@ namespace E2E.Controllers
             }
         }
 
+        public ActionResult _SatisfactionResults(Guid id)
+        {
+            try
+            {
+                return PartialView("_SatisfactionResults", data.ClsSatisfaction_View(id));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult Action(Guid id)
         {
             try
@@ -283,8 +295,18 @@ namespace E2E.Controllers
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
+                clsServices clsServices = data.ClsServices_View(id);
 
-                return View(data.ClsServices_View(id));
+                if (clsServices.Services.Status_Id != 1)
+                {
+                    return RedirectToAction("Index");
+                }
+                else if (!clsServices.Services.Is_Commit)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                return View(clsServices);
             }
             catch (Exception)
             {
@@ -409,7 +431,19 @@ namespace E2E.Controllers
             try
             {
                 ViewBag.PlantList = new clsManageMaster().SelectListItems_Plant();
-                return View(data.ClsServices_View(id));
+
+                clsServices clsServices = data.ClsServices_View(id);
+
+                if (clsServices.Services.Status_Id != 1)
+                {
+                    return RedirectToAction("Index");
+                }
+                else if (clsServices.Services.Is_Commit)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                return View(clsServices);
             }
             catch (Exception)
             {
@@ -556,6 +590,39 @@ namespace E2E.Controllers
                     }
                 }
                 return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult DeleteDupSatisfaction()
+        {
+            try
+            {
+                List<Guid> serviceIds = db.Services
+                    .Where(w => w.Status_Id == 4)
+                    .Select(s => s.Service_Id)
+                    .ToList();
+                foreach (var item in serviceIds)
+                {
+                    if (db.Satisfactions.Where(w => w.Service_Id == item).Count() > 1)
+                    {
+                        Satisfactions satisfactions = new Satisfactions();
+                        satisfactions = db.Satisfactions
+                            .Where(w => w.Service_Id == item)
+                            .OrderByDescending(o => o.Create)
+                            .FirstOrDefault();
+                        db.Entry(satisfactions).State = System.Data.Entity.EntityState.Deleted;
+                        if (db.SaveChanges() > 0)
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
