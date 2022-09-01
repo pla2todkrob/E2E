@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -43,7 +44,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Service_AddTeam(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Service_AddTeam(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -184,7 +186,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Service_DeleteTeam(id))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Service_DeleteTeam(id, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -424,7 +427,8 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.Services_SetCommit(model.Services))
+                        MethodBase methodBase = MethodBase.GetCurrentMethod();
+                        if (data.Services_SetCommit(model.Services, methodBase.Name))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -1075,7 +1079,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.ServiceChangeDueDate_Request(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.ServiceChangeDueDate_Request(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -1367,7 +1372,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Services_SetApprove(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetApprove(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -1460,7 +1466,8 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        if (data.Services_SetToUser(model.Service_Id, model.User_Id))
+                        MethodBase methodBase = MethodBase.GetCurrentMethod();
+                        if (data.Services_SetToUser(model.Service_Id, model.User_Id, methodBase.Name))
                         {
                             scope.Complete();
                             swal.dangerMode = false;
@@ -1726,7 +1733,8 @@ namespace E2E.Controllers
                         return Json(swal, JsonRequestBehavior.AllowGet);
                     }
 
-                    if (data.Services_SetComplete(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetComplete(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -1971,7 +1979,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Services_SetRequired(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetRequired(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -2029,7 +2038,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Services_SetPending(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetPending(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -2102,7 +2112,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Services_SetReject(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetReject(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -2169,7 +2180,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Services_SetReturnAssign(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetReturnAssign(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;
@@ -2235,7 +2247,8 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    if (data.Services_SetReturnJob(model))
+                    MethodBase methodBase = MethodBase.GetCurrentMethod();
+                    if (data.Services_SetReturnJob(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.dangerMode = false;

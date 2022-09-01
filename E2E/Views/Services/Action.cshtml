@@ -137,14 +137,14 @@
                     <dt class="col-12">
                         @if (!Model.Services.Action_User_Id.HasValue && ViewBag.AuthorizeIndex < 3)
                         {
-                            <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetAssign","Services",new { id=Model.Services.Service_Id })')">Assign task</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetAssign","Services",new { id=Model.Services.Service_Id })')">Set assign</button>
                         }
 
                         @if (Model.Services.Action_User_Id.HasValue)
                         {
                             if (Guid.Equals(Model.Services.Action_User_Id.Value, userId))
                             {
-                                <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetReturnAssign","Services",new { id=Model.Services.Service_Id })')">Return assign</button>
+                                <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetReturnAssign","Services",new { id=Model.Services.Service_Id })')">Undo assign</button>
                             }
                         }
                     </dt>

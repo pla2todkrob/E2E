@@ -463,7 +463,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Service_AddTeam(clsServiceTeams model)
+        public bool Service_AddTeam(clsServiceTeams model, string methodName)
         {
             try
             {
@@ -486,7 +486,7 @@ namespace E2E.Models
 
                 var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                 linkUrl += "/" + model.Service_Id;
-                linkUrl = linkUrl.Replace("_AddTeam", "ServiceInfomation");
+                linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
                 Services services = new Services();
                 services = db.Services.Find(model.Service_Id);
@@ -542,7 +542,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Service_DeleteTeam(Guid id)
+        public bool Service_DeleteTeam(Guid id, string methodName)
         {
             try
             {
@@ -561,7 +561,7 @@ namespace E2E.Models
                     if (Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace("_DeleteTeam", "ServiceInfomation");
+                        linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
                         Services services = new Services();
                         services = db.Services.Find(serviceId);
@@ -709,7 +709,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model)
+        public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model, string methodName)
         {
             try
             {
@@ -730,7 +730,7 @@ namespace E2E.Models
                         services = db.Services.Find(model.Service_Id);
 
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace("RequestChangeDue_Form", "RequestChangeDue");
+                        linkUrl = linkUrl.Replace(methodName, "RequestChangeDue");
 
                         string subject = string.Format("[E2E][Request change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Description:</b> {0}", serviceComments.Comment_Content);
@@ -1213,7 +1213,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetApprove(ServiceComments model)
+        public bool Services_SetApprove(ServiceComments model, string methodName)
         {
             try
             {
@@ -1232,7 +1232,7 @@ namespace E2E.Models
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace("SetApproved", "Approve_Form");
+                        linkUrl = linkUrl.Replace(methodName, "Approve_Form");
 
                         string subject = string.Format("[E2E][Approval] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
@@ -1337,14 +1337,14 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetCommit(Services model)
+        public bool Services_SetCommit(Services model, string methodName)
         {
             try
             {
                 bool res = new bool();
                 if (model.Action_User_Id.HasValue)
                 {
-                    res = Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value);
+                    res = Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value, methodName);
                 }
                 else
                 {
@@ -1359,7 +1359,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetComplete(ServiceComments model)
+        public bool Services_SetComplete(ServiceComments model, string methodName)
         {
             try
             {
@@ -1393,7 +1393,7 @@ namespace E2E.Models
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace("SetComplete", "ServiceInfomation");
+                        linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
                         string subject = string.Format("[E2E][Require close job] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
@@ -1472,7 +1472,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetPending(ServiceComments model)
+        public bool Services_SetPending(ServiceComments model, string methodName)
         {
             try
             {
@@ -1499,7 +1499,7 @@ namespace E2E.Models
                             List<ServiceTeams> serviceTeams = db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToList();
                             foreach (var item in serviceTeams)
                             {
-                                Service_DeleteTeam(item.Team_Id);
+                                Service_DeleteTeam(item.Team_Id, methodName);
                             }
                         }
                     }
@@ -1520,7 +1520,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetReject(ServiceComments model)
+        public bool Services_SetReject(ServiceComments model, string methodName)
         {
             try
             {
@@ -1558,7 +1558,7 @@ namespace E2E.Models
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace("SetReject", "ServiceInfomation");
+                        linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
                         string subject = string.Format("[E2E][Reject] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
@@ -1577,7 +1577,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetRequired(ServiceComments model)
+        public bool Services_SetRequired(ServiceComments model, string methodName)
         {
             try
             {
@@ -1604,7 +1604,7 @@ namespace E2E.Models
 
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace("SetMustApprove", "Approve_Form");
+                        linkUrl = linkUrl.Replace(methodName, "Approve_Form");
 
                         string subject = string.Format("[E2E][Require approve] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
@@ -1626,7 +1626,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetReturnAssign(ServiceComments model)
+        public bool Services_SetReturnAssign(ServiceComments model, string methodName)
         {
             try
             {
@@ -1657,7 +1657,7 @@ namespace E2E.Models
                         {
                             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                             linkUrl += "/" + services.Service_Id;
-                            linkUrl = linkUrl.Replace("SetReturnAssign", "Action");
+                            linkUrl = linkUrl.Replace(methodName, "Action");
 
                             string subject = string.Format("[E2E][Return assignments] {0} - {1}", services.Service_Key, services.Service_Subject);
                             string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
@@ -1677,7 +1677,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetReturnJob(ServiceComments model)
+        public bool Services_SetReturnJob(ServiceComments model, string methodName)
         {
             try
             {
@@ -1720,7 +1720,7 @@ namespace E2E.Models
                         {
                             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                             linkUrl += "/" + services.Service_Id;
-                            linkUrl = linkUrl.Replace("SetReturnJob", "Commit");
+                            linkUrl = linkUrl.Replace(methodName, "Commit");
 
                             string subject = string.Format("[E2E][Return] {0} - {1}", services.Service_Key, services.Service_Subject);
                             string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
@@ -1809,7 +1809,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetToUser(Guid id, Guid deptId, Guid userId)
+        public bool Services_SetToUser(Guid id, Guid deptId, Guid userId, string methodName)
         {
             try
             {
@@ -1834,7 +1834,7 @@ namespace E2E.Models
                     if (Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace("Commit", "Action");
+                        linkUrl = linkUrl.Replace(methodName, "Action");
 
                         string subject = string.Format("[E2E][Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
@@ -1858,7 +1858,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetToUser(Guid id, Guid userId)
+        public bool Services_SetToUser(Guid id, Guid userId, string methodName)
         {
             try
             {
@@ -1879,7 +1879,7 @@ namespace E2E.Models
                     if (Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace("SetAssign", "Action");
+                        linkUrl = linkUrl.Replace(methodName, "Action");
                         linkUrl = string.Concat(linkUrl, "/", id);
 
                         string subject = string.Format("[E2E][Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
