@@ -174,6 +174,27 @@ namespace E2E.Models
             return swal;
         }
 
+        public clsSatisfaction ClsSatisfaction_View(Guid id)
+        {
+            try
+            {
+                clsSatisfaction clsSatisfaction = new clsSatisfaction();
+                clsSatisfaction = db.Satisfactions
+                    .Where(w => w.Service_Id == id)
+                    .GroupJoin(db.SatisfactionDetails.OrderBy(o => o.Master_InquiryTopics.InquiryTopic_Index), m => m.Satisfaction_Id, j => j.Satisfaction_Id, (m, gj) => new clsSatisfaction()
+                    {
+                        SatisfactionDetails = gj.ToList(),
+                        Satisfactions = m
+                    }).FirstOrDefault();
+
+                return clsSatisfaction;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public clsServices ClsServices_View(Guid id)
         {
             try
@@ -349,7 +370,7 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    res = Services_SetClose(id);
+                    res = Services_SetClose(id, score);
                 }
 
                 return res;
@@ -1292,7 +1313,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetClose(Guid id)
+        public bool Services_SetClose(Guid id, List<clsEstimate> score)
         {
             try
             {
@@ -1309,23 +1330,23 @@ namespace E2E.Models
                         db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                         if (db.SaveChanges() > 0)
                         {
-                            if (Services_SetSatisfaction(nextId.Value))
+                            ServiceComments serviceComments = new ServiceComments();
+                            serviceComments.Service_Id = nextId.Value;
+                            serviceComments.Comment_Content = "Close job";
+                            if (Services_Comment(serviceComments))
                             {
-                                ServiceComments serviceComments = new ServiceComments();
-                                serviceComments.Service_Id = nextId.Value;
-                                serviceComments.Comment_Content = "Close job";
-                                res = Services_Comment(serviceComments);
+                                if (services.Ref_Service_Id.HasValue)
+                                {
+                                    nextId = services.Ref_Service_Id.Value;
+                                    res = SaveEstimate(nextId.Value, score);
+                                }
+                                else
+                                {
+                                    nextId = null;
+                                    res = true;
+                                }
                             }
                         }
-                    }
-
-                    if (services.Ref_Service_Id.HasValue)
-                    {
-                        nextId = services.Ref_Service_Id.Value;
-                    }
-                    else
-                    {
-                        nextId = null;
                     }
                 }
 
@@ -1730,39 +1751,6 @@ namespace E2E.Models
                             res = mail.SendMail(services.Assign_User_Id.Value, subject, content);
                         }
                     }
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Services_SetSatisfaction(Guid id)
-        {
-            try
-            {
-                bool res = new bool();
-                Satisfactions satisfactions = new Satisfactions();
-                satisfactions.Service_Id = id;
-                List<Master_InquiryTopics> master_InquiryTopics = db.Master_InquiryTopics.OrderBy(o => o.InquiryTopic_Index).ToList();
-                List<SatisfactionDetails> dataList = new List<SatisfactionDetails>();
-                foreach (var item in master_InquiryTopics)
-                {
-                    SatisfactionDetails satisfactionDetails = new SatisfactionDetails();
-                    satisfactionDetails.Satisfaction_Id = satisfactions.Satisfaction_Id;
-                    satisfactionDetails.InquiryTopic_Id = item.InquiryTopic_Id;
-                    satisfactionDetails.Point = 5;
-                    dataList.Add(satisfactionDetails);
-                }
-                satisfactions.Satisfaction_Average = dataList.Sum(s => s.Point) / master_InquiryTopics.Count();
-                db.Entry(satisfactions).State = System.Data.Entity.EntityState.Added;
-                db.SatisfactionDetails.AddRange(dataList);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
                 }
 
                 return res;

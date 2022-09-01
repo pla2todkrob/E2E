@@ -296,6 +296,7 @@
     <Compile Include="Models\Views\clsEstimate.cs" />
     <Compile Include="Models\Views\clsPassword.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
+    <Compile Include="Models\Views\clsSatisfaction.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
     <Compile Include="Models\Views\clsServiceComments.cs" />
@@ -925,6 +926,7 @@
     <Content Include="Views\Masters\DeleteWrongData.cshtml" />
     <Content Include="Views\Services\SetAssign.cshtml" />
     <Content Include="Views\Services\SetReturnAssign.cshtml" />
+    <Content Include="Views\Services\_SatisfactionResults.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
