@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Transactions;
-using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -15,6 +14,7 @@ namespace E2E.Controllers
     {
         private clsManageManagement data = new clsManageManagement();
         private clsContext db = new clsContext();
+        private clsManageMaster master = new clsManageMaster();
 
         public ActionResult DocumentControl()
         {
@@ -29,7 +29,10 @@ namespace E2E.Controllers
             {
                 ViewBag.IsNew = false;
                 clsDocuments.Master_Documents = db.Master_Documents.Find(id);
-                clsDocuments.Master_DocumentVersions = db.Master_DocumentVersions.Where(w => w.Document_Id == id).OrderByDescending(o => o.DocumentVersion_Number).ToList();
+                clsDocuments.Master_DocumentVersions = db.Master_DocumentVersions
+                    .Where(w => w.Document_Id == id)
+                    .OrderByDescending(o => o.DocumentVersion_Number)
+                    .ToList();
             }
             return View(clsDocuments);
         }

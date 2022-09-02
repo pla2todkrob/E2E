@@ -13,17 +13,17 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <a href="#" class="text-danger" onclick="deleteFile('@Url.Action("DeleteFile","Services",new { id=Html.ValueFor(m => item.ServiceFile_Id) })','@Url.Action("_File","Services",new { id=item.Service_Id })')"><i class="fa fa-trash"></i></a>
-                            @Html.DisplayFor(m => item.ServiceFile_Name)
-                        </div>
-                        <a href="@Html.ValueFor(m => item.ServiceFile_Path)" target="_blank"><i class="fa fa-download"></i></a>
+        <tr>
+            <td>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a href="#" class="text-danger" onclick="deleteFile('@Url.Action("DeleteFile","Services",new { id=Html.ValueFor(m => item.ServiceFile_Id) })','@Url.Action("_File","Services",new { id=item.Service_Id })')"><i class="fa fa-trash"></i></a>
+                        @Html.DisplayFor(m => item.ServiceFile_Name)
                     </div>
-                </td>
-            </tr>
+                    <a href="@Html.ValueFor(m => item.ServiceFile_Path)" target="_blank"><i class="fa fa-download"></i></a>
+                </div>
+            </td>
+        </tr>
         }
     </tbody>
 </table>

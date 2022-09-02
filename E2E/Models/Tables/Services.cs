@@ -32,6 +32,7 @@ namespace E2E.Models.Tables
         public bool Is_FreePoint { get; set; }
 
         public bool Is_MustBeApproved { get; set; }
+        public bool Is_OverDue { get; set; }
 
         [Display(Name = "Priority")]
         public int Priority_Id { get; set; }
@@ -48,7 +49,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Due date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? Service_DueDate { get; set; }
 
-        [Display(Name = "Estimate time (days)")]
+        [Display(Name = "Estimate days")]
         public int Service_EstimateTime { get; set; }
 
         public int Service_FileCount { get; set; }

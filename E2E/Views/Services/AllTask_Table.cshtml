@@ -18,17 +18,17 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>@Html.DisplayFor(i => item.Update)</td>
-                <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
-                <td class="text-wrap">
-                    <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
-                    <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                </td>
-                <td>@Html.DisplayFor(i => item.Service_EstimateTime)</td>
-                <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
-                <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
-            </tr>
+        <tr>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+            <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
+            <td class="text-wrap">
+                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+                <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+            </td>
+            <td class="text-right">@Html.DisplayFor(i => item.Service_EstimateTime)</td>
+            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+            <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
+        </tr>
         }
     </tbody>
 </table>

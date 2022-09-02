@@ -6,82 +6,82 @@
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "SaveForm", enctype = "multipart/form-data" }))
 {
-    @Html.AntiForgeryToken()
-    <div class="modal-header">
-        @{
+@Html.AntiForgeryToken()
+<div class="modal-header">
+    @{
             if (!string.IsNullOrEmpty(Model.Service_Key))
             {
-                <h5 class="modal-title">@Model.Service_Key</h5>
+        <h5 class="modal-title">@Model.Service_Key</h5>
             }
             else
             {
-                <h5 class="modal-title">Form</h5>
+        <h5 class="modal-title">Form</h5>
             }
-        }
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="modal-body">
-        @Html.HiddenFor(m => m.Service_Id)
-        @Html.HiddenFor(m => m.Service_Key)
-        <div class="form-row">
-            <div class="form-group col-12">
-                @Html.LabelFor(m => m.Service_Subject)
-                @Html.TextBoxFor(m => m.Service_Subject, new { @class = "form-control", required = "required" })
-            </div>
-            <div class="form-group col-lg-6">
-                @Html.LabelFor(m => m.Service_Description)
-                @Html.TextAreaFor(m => m.Service_Description, new { @class = "form-control", required = "required", rows = "8" })
-            </div>
-            <div class="col-lg-6">
-                <div class="form-row">
-                    <div class="form-group col-12">
-                        @Html.LabelFor(m => m.User_Id)
-                        @Html.DropDownListFor(m => m.User_Id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
-                    </div>
-                    <div class="form-group col-12">
-                        @Html.LabelFor(m => m.Service_Contact)
-                        @Html.TextBoxFor(m => m.Service_Contact, new { @class = "form-control", required = "required" })
-                    </div>
-                    <div class="form-group col-12">
-                        @Html.LabelFor(m => m.Ref_Service_Id)
-                        @Html.DropDownListFor(m => m.Ref_Service_Id, new SelectList(ViewBag.RefServiceList, "Value", "Text"), new { @class = "form-control" })
-                    </div>
-                    <div class="form-group col-md-6">
-                        @Html.LabelFor(m => m.Priority_Id)
-                        @Html.DropDownListFor(m => m.Priority_Id, new SelectList(ViewBag.PriorityList, "Value", "Text"), "Select Priority", new { @class = "form-control", required = "required" })
-                    </div>
-                    <div class="form-group col-md-6">
-                        @Html.LabelFor(m => m.Service_DueDate)
-                        @Html.TextBoxFor(m => m.Service_DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", required = "required", type = "date" })
-                    </div>
+    }
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    @Html.HiddenFor(m => m.Service_Id)
+    @Html.HiddenFor(m => m.Service_Key)
+    <div class="form-row">
+        <div class="form-group col-12">
+            @Html.LabelFor(m => m.Service_Subject)
+            @Html.TextBoxFor(m => m.Service_Subject, new { @class = "form-control", required = "required" })
+        </div>
+        <div class="form-group col-lg-6">
+            @Html.LabelFor(m => m.Service_Description)
+            @Html.TextAreaFor(m => m.Service_Description, new { @class = "form-control", required = "required", rows = "8" })
+        </div>
+        <div class="col-lg-6">
+            <div class="form-row">
+                <div class="form-group col-12">
+                    @Html.LabelFor(m => m.User_Id)
+                    @Html.DropDownListFor(m => m.User_Id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
+                </div>
+                <div class="form-group col-12">
+                    @Html.LabelFor(m => m.Service_Contact)
+                    @Html.TextBoxFor(m => m.Service_Contact, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="form-group col-12">
+                    @Html.LabelFor(m => m.Ref_Service_Id)
+                    @Html.DropDownListFor(m => m.Ref_Service_Id, new SelectList(ViewBag.RefServiceList, "Value", "Text"), new { @class = "form-control" })
+                </div>
+                <div class="form-group col-md-6">
+                    @Html.LabelFor(m => m.Priority_Id)
+                    @Html.DropDownListFor(m => m.Priority_Id, new SelectList(ViewBag.PriorityList, "Value", "Text"), "Select Priority", new { @class = "form-control", required = "required" })
+                </div>
+                <div class="form-group col-md-6">
+                    @Html.LabelFor(m => m.Service_DueDate)
+                    @Html.TextBoxFor(m => m.Service_DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", required = "required", type = "date" })
                 </div>
             </div>
-            <div class="form-group">
-                <label for="fileUpload">Attach file</label>
-                <input type="file" name="fileUpload" id="fileUpload" class="form-control-file" multiple />
-            </div>
-            @{
+        </div>
+        <div class="form-group">
+            <label for="fileUpload">Attach file</label>
+            <input type="file" name="fileUpload" id="fileUpload" class="form-control-file" multiple />
+        </div>
+        @{
                 if (!ViewBag.IsNew)
                 {
                     if (Model.Service_FileCount > 0)
                     {
-                        <div class="col-12" id="fileTable">
-                            @{ Html.RenderAction("_File", "Services", new { id = Model.Service_Id }); }
-                        </div>
+            <div class="col-12" id="fileTable">
+                @{ Html.RenderAction("_File", "Services", new { id = Model.Service_Id }); }
+            </div>
                     }
                 }
-            }
-        </div>
+        }
     </div>
-    <div class="modal-footer">
-        @if (!ViewBag.IsNew)
+</div>
+<div class="modal-footer">
+    @if (!ViewBag.IsNew)
         {
-            <button type="button" class="btn btn-outline-danger mr-auto"><i class="fa fa-trash" aria-hidden="true"></i></button>
+    <button type="button" class="btn btn-outline-danger mr-auto"><i class="fa fa-trash" aria-hidden="true"></i></button>
         }
 
-        <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
-    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+</div>
 
 }

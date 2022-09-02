@@ -43,15 +43,15 @@
 
     @Scripts.Render("~/bundles/jquery")
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    
+
     @Scripts.Render("~/bundles/js")
     @RenderSection("scripts", required: false)
-        <script>
+    <script>
         $(document).on('submit', '#SaveChangePassword', function (e) {
             e.preventDefault();
             callSubmitModal('@Url.Action("ChangePassword", "Users")',this);
             return false;
         });
-        </script>
+    </script>
 </body>
 </html>

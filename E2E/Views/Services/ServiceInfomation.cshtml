@@ -196,7 +196,7 @@
                             {
                                 if (Model.Services.Action_User_Id.Equals(userId))
                                 {
-                                    <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                    <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
                                 }
                             }
                         }
@@ -211,8 +211,8 @@
                     </dd>
                     @if (Model.Services.Update.HasValue)
                     {
-                        <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                        <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
+                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
                     }
                     <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
                     <dd class="col-12 col-md-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
@@ -239,9 +239,9 @@
                         <ul class="list-unstyled">
                             @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
                             {
-                                <li>
-                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                                </li>
+                            <li>
+                                <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                            </li>
 
                             }
                         </ul>
@@ -250,38 +250,38 @@
 
                         if (Model.Services.Action_User_Id.HasValue)
                         {
-                            <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
-                            <dd class="col-12 col-md-9"><b class="text-info">@Html.DisplayFor(m => m.Action_Name)</b></dd>
+                        <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
+                        <dd class="col-12 col-md-9"><b class="text-info">@Html.DisplayFor(m => m.Action_Name)</b></dd>
                             if (Model.Services.WorkRoot_Id.HasValue)
                             {
-                                <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.WorkRoots.WorkRoot_Name)</dt>
-                                <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Services.WorkRoots.WorkRoot_Name)</dd>
+                        <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.WorkRoots.WorkRoot_Name)</dt>
+                        <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Services.WorkRoots.WorkRoot_Name)</dd>
                             }
-                            <dt class="col-12 col-md-3">Team</dt>
-                            <dd class="col-12 col-md-9">
-                                @if (Model.ClsServiceTeams.Count > 0)
+                        <dt class="col-12 col-md-3">Team</dt>
+                        <dd class="col-12 col-md-9">
+                            @if (Model.ClsServiceTeams.Count > 0)
                                 {
-                                    <ul>
-                                        @foreach (var item in Model.ClsServiceTeams)
+                            <ul>
+                                @foreach (var item in Model.ClsServiceTeams)
                                         {
-                                            <li>
-                                                <div class="d-flex justify-content-between">
-                                                    @item.User_Name
-                                                    @if (Model.Services.Status_Id == 2 && Model.Services.Action_User_Id.Value == userId)
+                                <li>
+                                    <div class="d-flex justify-content-between">
+                                        @item.User_Name
+                                        @if (Model.Services.Status_Id == 2 && Model.Services.Action_User_Id.Value == userId)
                                                     {
-                                                        <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
+                                        <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
                                                     }
-                                                </div>
-                                            </li>
+                                    </div>
+                                </li>
                                         }
-                                    </ul>
+                            </ul>
 
                                 }
-                                @if (Model.Services.Action_User_Id.Value == userId && Model.Services.Status_Id == 2)
+                            @if (Model.Services.Action_User_Id.Value == userId && Model.Services.Status_Id == 2)
                                 {
                                     Html.RenderAction("_AddTeam", "Services", new { id = Model.Services.Service_Id });
                                 }
-                            </dd>
+                        </dd>
                         }
                     }
                 </dl>
@@ -297,7 +297,7 @@
                         {
                             if (Model.Services.Status_Id < 3)
                             {
-                                <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
+                        <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
                             }
 
                         }
@@ -305,25 +305,25 @@
                         {
                             if (Model.Services.Status_Id == 2)
                             {
-                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
-                                <div class="ml-auto">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
-                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })',false)">Complete</button>
-                                </div>
+                        <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
+                        <div class="ml-auto">
+                            <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
+                            <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })',false)">Complete</button>
+                        </div>
 
                             }
 
                             if (Model.Services.Status_Id == 3)
                             {
 
-                                <button class="btn btn-outline-info" type="button" onclick="resendEmail('@Url.Action("ResendEmail","Services",new { id=Model.Services.Service_Id,method="Services_SetComplete" })')"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;Resend</button>
+                        <button class="btn btn-outline-info" type="button" onclick="resendEmail('@Url.Action("ResendEmail","Services",new { id=Model.Services.Service_Id,method="Services_SetComplete" })')"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;Resend</button>
                             }
                         }
                         if (Model.Services.User_Id == userId)
                         {
                             if (Model.Services.Status_Id == 3)
                             {
-                                <button type="button" class="btn btn-outline-success ml-auto" onclick="callModalPoint('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
+                        <button type="button" class="btn btn-outline-success ml-auto" onclick="callModalPoint('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
                             }
                         }
                     }
@@ -343,7 +343,7 @@
             <div class="card-body overflow-auto" id="commentHis"></div>
             @if (Model.Services.Status_Id < 4)
             {
-                <div class="card-footer" id="commentNew"></div>
+            <div class="card-footer" id="commentNew"></div>
             }
         </div>
     </div>

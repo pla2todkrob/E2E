@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Transactions;
-using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -18,10 +17,40 @@ namespace E2E.Controllers
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
 
-        // GET: Topics
-        public ActionResult Index()
+        public ActionResult _FileCollection(Guid id)
         {
-            return RedirectToAction("Boards");
+            clsTopic clsTopic = new clsTopic();
+
+            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+
+            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+
+            return View(clsTopic);
+        }
+
+        [AllowAnonymous]
+        public ActionResult _Newtopic()
+        {
+            DateTime Todate = DateTime.Today;
+            int Count = db.Topics.Where(w => w.Create >= Todate).Count();
+
+            return PartialView("_Newtopic", Count);
+        }
+
+        public ActionResult _SortTopicAnnounce()
+        {
+            DateTime Todate = DateTime.Today;
+            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin == true).Count();
+
+            return PartialView("_SortTopicAnnounce", Count);
+        }
+
+        public ActionResult _SortTopicNew()
+        {
+            DateTime Todate = DateTime.Today;
+            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin != true).Count();
+
+            return PartialView("_SortTopicNew", Count);
         }
 
         public ActionResult Boards()
@@ -31,87 +60,102 @@ namespace E2E.Controllers
             return View();
         }
 
-        public List<SelectListItem> SelectListItems_Category_Name()
+        public ActionResult Boards_Comment(Guid id, Guid? comment_id)
         {
-            IQueryable<Master_Categories> query = db.Master_Categories;
-
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "All topics", Value = "" });
-            item.AddRange(query
-                .Select(s => new SelectListItem()
-                {
-                    Value = s.Category_Id.ToString(),
-                    Text = s.Category_Name
-                }).OrderBy(o => o.Text).ToList());
-
-            return item;
-        }
-
-        public List<SelectListItem> SelectListItems_Create_Category_Name()
-        {
-            IQueryable<Master_Categories> query = db.Master_Categories.Where(w => w.Active);
-
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select category", Value = "" });
-            item.AddRange(query
-                .Select(s => new SelectListItem()
-                {
-                    Value = s.Category_Id.ToString(),
-                    Text = s.Category_Name
-                }).OrderBy(o => o.Text).ToList());
-
-            return item;
-        }
-
-        public ActionResult Boards_Table(int? res, Guid? category = null)
-        {
-            try
+            TopicComments topicComments = new TopicComments();
+            topicComments.Topic_Id = id;
+            if (comment_id.HasValue)
             {
-                bool val = new bool();
+                topicComments = db.TopicComments.Find(comment_id);
+                ViewBag.isNew = false;
+                return View(topicComments);
+            }
+            ViewBag.isNew = true;
+            return View(topicComments);
+        }
 
-                if (res == 1)
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Comment(TopicComments model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
                 {
-                    val = true;
-                }
-
-                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.Usercode = db.Users
-                    .Where(w => w.User_Id == id)
-                    .Select(s => s.User_Code)
-                    .FirstOrDefault();
-
-                IQueryable<Topics> query = db.Topics.OrderByDescending(o => o.Create).ThenByDescending(t => t.Update);
-
-                if (val)
-                {
-                    query = query.Where(w => w.Topic_Pin == val);
-                    foreach (var item in query.Where(w => w.Topic_Pin_EndDate < DateTime.Today).ToList())
+                    try
                     {
-                        item.Topic_Pin = false;
-                        item.Topic_Pin_EndDate = null;
-                        db.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
+                        if (data.Board_Comment_Save(model))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
                     }
-                    query = query.Where(w => w.Topic_Pin_EndDate >= DateTime.Today);
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
                 }
-
-                if (res == 3)//top rate
-                {
-                    query = query.OrderByDescending(o => o.Count_View).Take(10);
-                }
-
-                if (category != null)
-                {
-                    var categorys = db.Master_Categories.Where(w => w.Category_Id == category).FirstOrDefault();
-                    query = query.Where(w => w.Category_Id == categorys.Category_Id);
-                }
-
-                return View(query.ToList());
             }
-            catch (Exception)
+            else
             {
-                throw;
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
             }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Boards_Create(Guid? id)
@@ -219,6 +263,288 @@ namespace E2E.Controllers
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Boards_Form(Guid? id)
+        {
+            clsTopic clsTopic = new clsTopic();
+
+            if (id.HasValue)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    if (data.UpdateView(id))
+                    {
+                        scope.Complete();
+                    }
+                }
+
+                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id.Value).FirstOrDefault();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).ToList();
+                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).ToList();
+                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
+            }
+
+            return View(clsTopic);
+        }
+
+        public ActionResult Boards_Reply(Guid comment_id, Guid? id)
+        {
+            Session["Boards_Reply"] = "I";
+            TopicComments topicComments = new TopicComments();
+            topicComments.TopicComment_Id = comment_id;
+            if (id.HasValue)
+            {
+                topicComments = db.TopicComments.Find(comment_id);
+                Session["Boards_Reply"] = "U";
+                ViewBag.isNew = false;
+                return View(topicComments);
+            }
+            ViewBag.isNew = true;
+            return View(topicComments);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Reply(TopicComments model)
+        {
+            string Boards_Reply = Session["Boards_Reply"].ToString();
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Board_Reply_Save(model, Boards_Reply))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Boards_Section(Guid topicId, Guid? id)
+        {
+            try
+            {
+                TopicSections topicSections = new TopicSections();
+                topicSections.Topic_Id = topicId;
+
+                ViewBag.IsNew = true;
+
+                if (id.HasValue)
+                {
+                    ViewBag.IsNew = false;
+                    topicSections = db.TopicSections.Find(id);
+                }
+                return View(topicSections);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_Section(TopicSections model)
+        {
+            clsSwal swal = new clsSwal();
+            if (ModelState.IsValid)
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    try
+                    {
+                        if (data.Boards_Section_Save(model, Request.Files))
+                        {
+                            scope.Complete();
+                            swal.dangerMode = false;
+                            swal.icon = "success";
+                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.title = "Successful";
+                        }
+                        else
+                        {
+                            swal.icon = "warning";
+                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.title = "Warning";
+                        }
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        foreach (var item in ex.EntityValidationErrors)
+                        {
+                            foreach (var item2 in item.ValidationErrors)
+                            {
+                                if (string.IsNullOrEmpty(swal.text))
+                                {
+                                    swal.text = item2.ErrorMessage;
+                                }
+                                else
+                                {
+                                    swal.text += "\n" + item2.ErrorMessage;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        swal.title = ex.TargetSite.Name;
+                        swal.text = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.Message;
+                            if (ex.InnerException.InnerException != null)
+                            {
+                                swal.text = ex.InnerException.InnerException.Message;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Boards_Table(int? res, Guid? category = null)
+        {
+            try
+            {
+                bool val = new bool();
+
+                if (res == 1)
+                {
+                    val = true;
+                }
+
+                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.Usercode = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.User_Code)
+                    .FirstOrDefault();
+
+                IQueryable<Topics> query = db.Topics.OrderByDescending(o => o.Create).ThenByDescending(t => t.Update);
+
+                if (val)
+                {
+                    query = query.Where(w => w.Topic_Pin == val);
+                    foreach (var item in query.Where(w => w.Topic_Pin_EndDate < DateTime.Today).ToList())
+                    {
+                        item.Topic_Pin = false;
+                        item.Topic_Pin_EndDate = null;
+                        db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                    query = query.Where(w => w.Topic_Pin_EndDate >= DateTime.Today);
+                }
+
+                if (res == 3)//top rate
+                {
+                    query = query.OrderByDescending(o => o.Count_View).Take(10);
+                }
+
+                if (category != null)
+                {
+                    var categorys = db.Master_Categories.Where(w => w.Category_Id == category).FirstOrDefault();
+                    query = query.Where(w => w.Category_Id == categorys.Category_Id);
+                }
+
+                return View(query.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult Delete_Boards_Create(Guid id)
@@ -342,335 +668,6 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Boards_Form(Guid? id)
-        {
-            clsTopic clsTopic = new clsTopic();
-
-            if (id.HasValue)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    if (data.UpdateView(id))
-                    {
-                        scope.Complete();
-                    }
-                }
-
-                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id.Value).FirstOrDefault();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).ToList();
-                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
-                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).ToList();
-                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
-            }
-
-            return View(clsTopic);
-        }
-
-        public ActionResult Boards_Section(Guid topicId, Guid? id)
-        {
-            try
-            {
-                TopicSections topicSections = new TopicSections();
-                topicSections.Topic_Id = topicId;
-
-                ViewBag.IsNew = true;
-
-                if (id.HasValue)
-                {
-                    ViewBag.IsNew = false;
-                    topicSections = db.TopicSections.Find(id);
-                }
-                return View(topicSections);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Section(TopicSections model)
-        {
-            clsSwal swal = new clsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Boards_Section_Save(model, Request.Files))
-                        {
-                            scope.Complete();
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
-                        }
-                        else
-                        {
-                            swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.title = "Warning";
-                        }
-                    }
-                    catch (DbEntityValidationException ex)
-                    {
-                        swal.title = ex.TargetSite.Name;
-                        foreach (var item in ex.EntityValidationErrors)
-                        {
-                            foreach (var item2 in item.ValidationErrors)
-                            {
-                                if (string.IsNullOrEmpty(swal.text))
-                                {
-                                    swal.text = item2.ErrorMessage;
-                                }
-                                else
-                                {
-                                    swal.text += "\n" + item2.ErrorMessage;
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
-                        if (ex.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.Message;
-                            if (ex.InnerException.InnerException != null)
-                            {
-                                swal.text = ex.InnerException.InnerException.Message;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.text))
-                        {
-                            swal.text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult Boards_Comment(Guid id, Guid? comment_id)
-        {
-            TopicComments topicComments = new TopicComments();
-            topicComments.Topic_Id = id;
-            if (comment_id.HasValue)
-            {
-                topicComments = db.TopicComments.Find(comment_id);
-                ViewBag.isNew = false;
-                return View(topicComments);
-            }
-            ViewBag.isNew = true;
-            return View(topicComments);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Comment(TopicComments model)
-        {
-            clsSwal swal = new clsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Board_Comment_Save(model))
-                        {
-                            scope.Complete();
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
-                        }
-                        else
-                        {
-                            swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.title = "Warning";
-                        }
-                    }
-                    catch (DbEntityValidationException ex)
-                    {
-                        swal.title = ex.TargetSite.Name;
-                        foreach (var item in ex.EntityValidationErrors)
-                        {
-                            foreach (var item2 in item.ValidationErrors)
-                            {
-                                if (string.IsNullOrEmpty(swal.text))
-                                {
-                                    swal.text = item2.ErrorMessage;
-                                }
-                                else
-                                {
-                                    swal.text += "\n" + item2.ErrorMessage;
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
-                        if (ex.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.Message;
-                            if (ex.InnerException.InnerException != null)
-                            {
-                                swal.text = ex.InnerException.InnerException.Message;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.text))
-                        {
-                            swal.text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult Boards_Reply(Guid comment_id, Guid? id)
-        {
-            Session["Boards_Reply"] = "I";
-            TopicComments topicComments = new TopicComments();
-            topicComments.TopicComment_Id = comment_id;
-            if (id.HasValue)
-            {
-                topicComments = db.TopicComments.Find(comment_id);
-                Session["Boards_Reply"] = "U";
-                ViewBag.isNew = false;
-                return View(topicComments);
-            }
-            ViewBag.isNew = true;
-            return View(topicComments);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Reply(TopicComments model)
-        {
-            string Boards_Reply = Session["Boards_Reply"].ToString();
-            clsSwal swal = new clsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Board_Reply_Save(model, Boards_Reply))
-                        {
-                            scope.Complete();
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
-                        }
-                        else
-                        {
-                            swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.title = "Warning";
-                        }
-                    }
-                    catch (DbEntityValidationException ex)
-                    {
-                        swal.title = ex.TargetSite.Name;
-                        foreach (var item in ex.EntityValidationErrors)
-                        {
-                            foreach (var item2 in item.ValidationErrors)
-                            {
-                                if (string.IsNullOrEmpty(swal.text))
-                                {
-                                    swal.text = item2.ErrorMessage;
-                                }
-                                else
-                                {
-                                    swal.text += "\n" + item2.ErrorMessage;
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
-                        if (ex.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.Message;
-                            if (ex.InnerException.InnerException != null)
-                            {
-                                swal.text = ex.InnerException.InnerException.Message;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.text))
-                        {
-                            swal.text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult Delete_Reply(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -709,58 +706,6 @@ namespace E2E.Controllers
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
-        }
-
-        public ActionResult DeleteGallery(Guid id)
-        {
-            clsSwal swal = new clsSwal();
-            using (TransactionScope scope = new TransactionScope())
-            {
-                try
-                {
-                    if (data.DeleteGallery(id))
-                    {
-                        scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ลบไฟล์สำเร็จ";
-                        swal.title = "Successful";
-                    }
-                }
-                catch (DbEntityValidationException ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    foreach (var item in ex.EntityValidationErrors)
-                    {
-                        foreach (var item2 in item.ValidationErrors)
-                        {
-                            if (string.IsNullOrEmpty(swal.text))
-                            {
-                                swal.text = item2.ErrorMessage;
-                            }
-                            else
-                            {
-                                swal.text += "\n" + item2.ErrorMessage;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
-                    if (ex.InnerException != null)
-                    {
-                        swal.text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.InnerException.Message;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult DeleteFiles(Guid id)
@@ -815,15 +760,62 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult _FileCollection(Guid id)
+        public ActionResult DeleteGallery(Guid id)
         {
-            clsTopic clsTopic = new clsTopic();
+            clsSwal swal = new clsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    if (data.DeleteGallery(id))
+                    {
+                        scope.Complete();
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ลบไฟล์สำเร็จ";
+                        swal.title = "Successful";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
 
-            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
 
-            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
-
-            return View(clsTopic);
+        // GET: Topics
+        public ActionResult Index()
+        {
+            return RedirectToAction("Boards");
         }
 
         public ActionResult ReloadModel(Guid id)
@@ -924,29 +916,36 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        [AllowAnonymous]
-        public ActionResult _Newtopic()
+        public List<SelectListItem> SelectListItems_Category_Name()
         {
-            DateTime Todate = DateTime.Today;
-            int Count = db.Topics.Where(w => w.Create >= Todate).Count();
+            IQueryable<Master_Categories> query = db.Master_Categories;
 
-            return PartialView("_Newtopic", Count);
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "All topics", Value = "" });
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Category_Id.ToString(),
+                    Text = s.Category_Name
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
         }
 
-        public ActionResult _SortTopicAnnounce()
+        public List<SelectListItem> SelectListItems_Create_Category_Name()
         {
-            DateTime Todate = DateTime.Today;
-            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin == true).Count();
+            IQueryable<Master_Categories> query = db.Master_Categories.Where(w => w.Active);
 
-            return PartialView("_SortTopicAnnounce", Count);
-        }
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select category", Value = "" });
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Category_Id.ToString(),
+                    Text = s.Category_Name
+                }).OrderBy(o => o.Text).ToList());
 
-        public ActionResult _SortTopicNew()
-        {
-            DateTime Todate = DateTime.Today;
-            int Count = db.Topics.Where(w => w.Create >= Todate & w.Topic_Pin != true).Count();
-
-            return PartialView("_SortTopicNew", Count);
+            return item;
         }
     }
 }

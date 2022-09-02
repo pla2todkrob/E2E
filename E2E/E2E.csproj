@@ -296,6 +296,7 @@
     <Compile Include="Models\Views\clsEstimate.cs" />
     <Compile Include="Models\Views\clsPassword.cs" />
     <Compile Include="Models\Views\clsProcesses.cs" />
+    <Compile Include="Models\Views\clsReportKPI.cs" />
     <Compile Include="Models\Views\clsSatisfaction.cs" />
     <Compile Include="Models\Views\clsSaveResult.cs" />
     <Compile Include="Models\Views\clsSections.cs" />
@@ -927,6 +928,9 @@
     <Content Include="Views\Services\SetAssign.cshtml" />
     <Content Include="Views\Services\SetReturnAssign.cshtml" />
     <Content Include="Views\Services\_SatisfactionResults.cshtml" />
+    <Content Include="Views\Services\Report_KPI.cshtml" />
+    <Content Include="Views\Services\Report_KPI_Filter.cshtml" />
+    <Content Include="Views\Services\Report_KPI_Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

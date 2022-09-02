@@ -9,7 +9,7 @@ namespace E2E.Models.Views
     public class clsDocuments
     {
         public Master_Documents Master_Documents { get; set; }
-        public IEnumerable<Master_DocumentVersions> Master_DocumentVersions { get; set; }
+        public List<Master_DocumentVersions> Master_DocumentVersions { get; set; }
 
         public clsDocuments()
         {

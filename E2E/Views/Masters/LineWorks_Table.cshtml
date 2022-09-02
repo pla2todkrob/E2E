@@ -18,23 +18,23 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("LineWorks_Form","Masters",new { id = Html.ValueFor(m => item.LineWork_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                </td>
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td>@Html.DisplayFor(i => item.LineWork_Name)</td>
-                <td>
-                    @{
+        <tr>
+            <td>
+                <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("LineWorks_Form","Masters",new { id = Html.ValueFor(m => item.LineWork_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+            </td>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>@Html.DisplayFor(i => item.LineWork_Name)</td>
+            <td>
+                @{
                         if (item.System_Authorize != null)
                         {
-                            @Html.DisplayFor(i => item.System_Authorize.Authorize_Name)
+                    @Html.DisplayFor(i => item.System_Authorize.Authorize_Name)
                         }
-                    }
-                </td>
-                <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
-                <td>@Html.DisplayFor(i => item.Update)</td>
-            </tr>
+                }
+            </td>
+            <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
         }
     </tbody>
 </table>

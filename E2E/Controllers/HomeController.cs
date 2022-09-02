@@ -4,7 +4,6 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -18,7 +17,7 @@ namespace E2E.Controllers
         {
             clsHome clsHome = new clsHome();
             clsHome.Topics = db.Topics.Where(w => w.Topic_Pin).OrderBy(o => o.Create).ToList();
-            clsHome.Topics.AddRange(db.Topics.Where(w => !w.Topic_Pin).Take(10).OrderByDescending(o=>o.Create).ToList());
+            clsHome.Topics.AddRange(db.Topics.Where(w => !w.Topic_Pin).Take(10).OrderByDescending(o => o.Create).ToList());
             clsHome.EForms = db.EForms.Take(10).OrderByDescending(o => o.Create).ToList();
             return View(clsHome);
         }
@@ -40,7 +39,6 @@ namespace E2E.Controllers
                         system_Manuals.Add(CHK);
                     }
                 }
-
             }
 
             return View(system_Manuals);

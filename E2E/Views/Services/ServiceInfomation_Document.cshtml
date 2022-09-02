@@ -6,33 +6,33 @@
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "SaveDocumentForm", enctype = "multipart/form-data" }))
 {
-    @Html.AntiForgeryToken()
-    <div class="modal-header">
-        <h5 class="modal-title">@Html.DisplayFor(m => m.Master_Documents.Document_Name)</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+@Html.AntiForgeryToken()
+<div class="modal-header">
+    <h5 class="modal-title">@Html.DisplayFor(m => m.Master_Documents.Document_Name)</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    @Html.HiddenFor(m => m.ServiceDocument_Id)
+    @Html.HiddenFor(m => m.Service_Id)
+    <div class="form-group">
+        @Html.LabelFor(m => m.ServiceDocument_Name)
+        @Html.TextBoxFor(m => m.ServiceDocument_Name, new { @class = "form-control-file", required = "required", type = "file" })
     </div>
-    <div class="modal-body">
-        @Html.HiddenFor(m => m.ServiceDocument_Id)
-        @Html.HiddenFor(m => m.Service_Id)
-        <div class="form-group">
-            @Html.LabelFor(m => m.ServiceDocument_Name)
-            @Html.TextBoxFor(m => m.ServiceDocument_Name, new { @class = "form-control-file", required = "required", type = "file" })
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(m => m.ServiceDocument_Remark)
-            @Html.TextAreaFor(m => m.ServiceDocument_Remark, new { @class = "form-control", rows = "8" })
-        </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ServiceDocument_Remark)
+        @Html.TextAreaFor(m => m.ServiceDocument_Remark, new { @class = "form-control", rows = "8" })
     </div>
-    <div class="modal-footer">
-        <div class="d-flex w-100">
-            @if (ViewBag.HasTemplate)
+</div>
+<div class="modal-footer">
+    <div class="d-flex w-100">
+        @if (ViewBag.HasTemplate)
             {
-                <a href="@Url.Action("DownloadTemplate","Management",new { id=Model.Document_Id })" class="btn btn-outline-info">Template</a>
+        <a href="@Url.Action("DownloadTemplate","Management",new { id=Model.Document_Id })" class="btn btn-outline-info">Template</a>
             }
 
-            <button type="submit" class="btn btn-primary ml-auto"><i class="fa fa-check" aria-hidden="true"></i></button>
-        </div>
+        <button type="submit" class="btn btn-primary ml-auto"><i class="fa fa-check" aria-hidden="true"></i></button>
     </div>
+</div>
 }

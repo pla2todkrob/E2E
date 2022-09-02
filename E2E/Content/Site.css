@@ -25,7 +25,7 @@ img#img-table {
 }
 
 .logo {
-    max-height: calc(4rem - .3125rem - .3125rem);
+    max-height: calc(3rem - .3125rem - .3125rem);
 }
 
 .section_video {

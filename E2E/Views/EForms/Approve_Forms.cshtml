@@ -34,12 +34,12 @@
 
 @if (Model.EForms.Status_Id == 1)
 {
-    <div class="d-flex mb-3">
-        <div class="ml-auto">
-            <input type="button" name="Cancel" id="Cancel" class="btn btn-warning" value="Cancel" onclick="setDangerByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = false } )', '@Url.Action("Approve", "EForms")')" />
-            <input type="button" name="Approve" id="Approve" class="btn btn-success" value="Approve" onclick="setSuccessByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = true } )', '@Url.Action("Approve", "EForms")')" />
-        </div>
+<div class="d-flex mb-3">
+    <div class="ml-auto">
+        <input type="button" name="Cancel" id="Cancel" class="btn btn-warning" value="Cancel" onclick="setDangerByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = false } )', '@Url.Action("Approve", "EForms")')" />
+        <input type="button" name="Approve" id="Approve" class="btn btn-success" value="Approve" onclick="setSuccessByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = true } )', '@Url.Action("Approve", "EForms")')" />
     </div>
+</div>
 }
 
 <div class="card">
@@ -57,34 +57,34 @@
 
         @if (Model.EForm_Galleries.Count > 0)
         {
-            <hr />
-            <h5>Galleries</h5>
-            <div id="mygallery" class="justified-gallery">
-                @foreach (var img in Model.EForm_Galleries)
+        <hr />
+        <h5>Galleries</h5>
+        <div id="mygallery" class="justified-gallery">
+            @foreach (var img in Model.EForm_Galleries)
                 {
 
-                    <a href="@img.EForm_Gallery_Original" target="_blank">
-                        <img alt="@img.EForm_Gallery_Name" src="@img.EForm_Gallery_Original" />
-                    </a>
-                    <!-- other images... -->
+            <a href="@img.EForm_Gallery_Original" target="_blank">
+                <img alt="@img.EForm_Gallery_Name" src="@img.EForm_Gallery_Original" />
+            </a>
+ <!-- other images... -->
 
                 }
-            </div>
+        </div>
         }
 
         @if (Model.EForm_Files.Count > 0)
         {
-            <hr />
-            <h5>Files</h5>
-            <ul>
-                @foreach (var files in Model.EForm_Files)
+        <hr />
+        <h5>Files</h5>
+        <ul>
+            @foreach (var files in Model.EForm_Files)
                 {
-                    <li>
-                        <a href="@files.EForm_File_Path" target="_blank">@files.EForm_File_Name</a>
-                    </li>
+            <li>
+                <a href="@files.EForm_File_Path" target="_blank">@files.EForm_File_Name</a>
+            </li>
 
                 }
-            </ul>
+        </ul>
         }
     </div>
 

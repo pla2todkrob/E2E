@@ -17,15 +17,15 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td>
-                    <a href="@Url.Action("Approve_Forms","EForms",new { id = item.EForm_Id })"> @Html.DisplayFor(i => item.EForm_Title)</a>
-                </td>
-                <td>  @Html.DisplayFor(i => item.EForm_Description)</td>
-                <td>  @Html.DisplayFor(i => item.EForm_Start)</td>
-                <td>  @Html.DisplayFor(i => item.EForm_End)</td>
-            </tr>
+        <tr>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>
+                <a href="@Url.Action("Approve_Forms","EForms",new { id = item.EForm_Id })"> @Html.DisplayFor(i => item.EForm_Title)</a>
+            </td>
+            <td>  @Html.DisplayFor(i => item.EForm_Description)</td>
+            <td>  @Html.DisplayFor(i => item.EForm_Start)</td>
+            <td>  @Html.DisplayFor(i => item.EForm_End)</td>
+        </tr>
         }
     </tbody>
 </table>

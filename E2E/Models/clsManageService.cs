@@ -174,6 +174,153 @@ namespace E2E.Models
             return swal;
         }
 
+        public clsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
+        {
+            try
+            {
+                clsReportKPI res = new clsReportKPI();
+
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                List<Guid> userIds = new List<Guid>();
+
+                List<Guid> serviceIds = new List<Guid>();
+                IQueryable<Services> query = db.Services.OrderBy(o => o.Create).ThenBy(t => t.Update);
+
+                res.Authorize_Id = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+
+                if (res.Authorize_Id == 3)
+                {
+                    query = query.Where(w => w.Action_User_Id == userId);
+                }
+                else
+                {
+                    string deptName = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                        .FirstOrDefault();
+                    List<Guid> deptIds = db.Master_Departments
+                        .Where(w => w.Department_Name == deptName)
+                        .Select(s => s.Department_Id)
+                        .ToList();
+                    userIds = db.Users
+                        .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
+                        .OrderBy(o => o.User_Code)
+                        .Select(s => s.User_Id)
+                        .ToList();
+
+                    query = query.Where(w => userIds.Contains(w.Action_User_Id.Value));
+                }
+
+                if (filter != null)
+                {
+                    if (filter.User_Id.Count > 0)
+                    {
+                        query = query.Where(w => filter.User_Id.Contains(w.Action_User_Id));
+                    }
+
+                    if (filter.Date_From.HasValue)
+                    {
+                        query = query.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    if (filter.Date_To.HasValue)
+                    {
+                        filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+                        query = query.Where(w => w.Create <= filter.Date_To);
+                    }
+                }
+
+                if (res.Authorize_Id != 3)
+                {
+                    serviceIds = new List<Guid>();
+                    serviceIds = query
+                            .Select(s => s.Service_Id)
+                            .ToList();
+                    if (serviceIds.Count > 0)
+                    {
+                        res.ReportKPI_Overview.Average_Score = db.Satisfactions
+                    .Where(w => serviceIds.Contains(w.Service_Id))
+                    .Average(a => a.Satisfaction_Average);
+                        res.ReportKPI_Overview.Close_Count = query.Where(w => w.Status_Id == 4).Count();
+                        res.ReportKPI_Overview.Complete_Count = query.Where(w => w.Status_Id == 3).Count();
+                        res.ReportKPI_Overview.Inprogress_Count = query.Where(w => w.Status_Id == 2).Count();
+                        res.ReportKPI_Overview.OverDue_Count = query.Where(w => w.Is_OverDue).Count();
+                        res.ReportKPI_Overview.Pending_Count = query.Where(w => w.Status_Id == 1).Count();
+                        res.ReportKPI_Overview.Total = query.Count();
+                    }
+
+                    foreach (var item in userIds)
+                    {
+                        serviceIds = new List<Guid>();
+                        serviceIds = query
+                            .Where(w => w.Action_User_Id == item)
+                            .Select(s => s.Service_Id)
+                            .ToList();
+
+                        ReportKPI_User reportKPI_User = new ReportKPI_User();
+
+                        if (serviceIds.Count > 0)
+                        {
+                            int countSatisfaction = db.Satisfactions
+                        .Where(w => serviceIds.Contains(w.Service_Id))
+                        .Count();
+                            if (countSatisfaction > 0)
+                            {
+                                reportKPI_User.Average_Score = db.Satisfactions
+                        .Where(w => serviceIds.Contains(w.Service_Id))
+                        .Average(a => a.Satisfaction_Average);
+                            }
+
+                            reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && w.Action_User_Id == item).Count();
+                            reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && w.Action_User_Id == item).Count();
+                            reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && w.Action_User_Id == item).Count();
+                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && w.Action_User_Id == item).Count();
+                            reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && w.Action_User_Id == item).Count();
+                            reportKPI_User.Total = query.Where(w => w.Action_User_Id == item).Count();
+                        }
+
+                        reportKPI_User.User_Id = item;
+                        reportKPI_User.User_Name = master.Users_GetInfomation(item);
+                        res.ReportKPI_Users.Add(reportKPI_User);
+                    }
+                }
+                else
+                {
+                    serviceIds = query
+                        .Select(s => s.Service_Id)
+                        .ToList();
+
+                    ReportKPI_User reportKPI_User = new ReportKPI_User();
+
+                    if (serviceIds.Count > 0)
+                    {
+                        reportKPI_User.Average_Score = db.Satisfactions
+                    .Where(w => serviceIds.Contains(w.Service_Id))
+                    .Average(a => a.Satisfaction_Average);
+                        reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4).Count();
+                        reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3).Count();
+                        reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2).Count();
+                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue).Count();
+                        reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1).Count();
+                        reportKPI_User.Total = query.Count();
+                    }
+
+                    reportKPI_User.User_Id = userId;
+                    reportKPI_User.User_Name = master.Users_GetInfomation(userId);
+                    res.ReportKPI_Users.Add(reportKPI_User);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public clsSatisfaction ClsSatisfaction_View(Guid id)
         {
             try
@@ -477,6 +624,39 @@ namespace E2E.Models
                     Value = s.User_Id.ToString(),
                     Text = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "][" + s.Users.User_Point + "]"
                 }).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<SelectListItem> SelectListItems_UsersDepartment()
+        {
+            try
+            {
+                List<SelectListItem> listItems = new List<SelectListItem>();
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                string deptName = db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                        .FirstOrDefault();
+                List<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+                listItems = db.Users
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
+                    .OrderBy(o => o.User_Code)
+                    .AsEnumerable()
+                    .Select(s => new SelectListItem()
+                    {
+                        Text = master.Users_GetInfomation(s.User_Id),
+                        Value = s.User_Id.ToString()
+                    })
+                    .ToList();
+
+                return listItems;
             }
             catch (Exception)
             {

@@ -16,7 +16,7 @@ namespace E2E.Controllers
     {
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
-        private clsManageMaster obj = new clsManageMaster();
+        private clsManageMaster master = new clsManageMaster();
 
         public ActionResult _Copyright()
         {
@@ -201,6 +201,7 @@ namespace E2E.Controllers
         public ActionResult Configurations_Table()
         {
             var system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).ToList();
+            system_Configurations.ForEach(f => f.Users.User_Code = master.Users_GetInfomation(f.User_Id));
             return View(system_Configurations);
         }
 

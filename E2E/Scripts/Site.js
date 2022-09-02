@@ -75,10 +75,56 @@ function callSpin(active) {
         $(target).empty();
     }
 }
+
+function getQueryString() {
+    try {
+        var pairs = window.location.search.substring(1).split("&"),
+            obj = {},
+            pair,
+            i;
+
+        for (i in pairs) {
+            if (pairs[i] === "") continue;
+
+            pair = pairs[i].split("=");
+            obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        }
+
+        return JSON.stringify(obj);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function getQueryStringName(param) {
+    try {
+        var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+
+        for (var i = 0; i < url.length; i++) {
+            var urlparam = url[i].split('=');
+            if (urlparam[0] == param) {
+                return urlparam[1];
+            }
+        }
+
+        return 'empty';
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function clearQueryString() {
+    history.pushState({}, null, location.href.split('?')[0]);
+    location.reload();
+}
+
 async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = [], blockId = '#datalist') {
     $.ajax({
         url: urlAjax,
         async: true,
+        data: {
+            filter: getQueryString()
+        },
         success: function (res) {
             $(blockId).html(res);
             $(blockId).find('select').each(function () {
@@ -139,6 +185,9 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
     $.ajax({
         url: urlAjax,
         async: true,
+        data: {
+            filter: getQueryString()
+        },
         success: function (res) {
             $(blockId).html(res);
             $(blockId).find('select').each(function () {
@@ -191,6 +240,32 @@ async function callTable_Manuals(urlAjax, hasDate = false, dateCol = 0, blockId 
         }
     });
     return true;
+}
+
+async function callFilter(urlAjax, blockId = '#filter') {
+    try {
+        $.ajax({
+            url: urlAjax,
+            async: true,
+            cache: false,
+            data: {
+                filter: getQueryString()
+            },
+            success: function (res) {
+                $(blockId).html(res).fadeIn(500);
+                $(blockId).find('select').each(function () {
+                    $(this).select2({
+                        width: '100%',
+                        theme: 'bootstrap4'
+                    });
+                });
+            }
+        });
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
 }
 
 function setTable_File(tableId, bOrder = false, bSearch = false) {

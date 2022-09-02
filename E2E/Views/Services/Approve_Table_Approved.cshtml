@@ -11,23 +11,24 @@
             <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>
+            @*<th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>*@
             <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td>
-                    <b>[@Html.DisplayFor(i => item.Service_Key)]&nbsp;</b><a href="@Url.Action("Approve_Form","Services",new { id=item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                </td>
-                <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
-                <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
-                <td>@Html.DisplayFor(i => item.Users.User_Code)</td>
-                <td>@Html.DisplayFor(i => item.Update)</td>
-            </tr>
+        <tr>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>
+                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]&nbsp;</small><br />
+                <a href="@Url.Action("Approve_Form","Services",new { id=item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+            </td>
+            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+            <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
+            @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
         }
     </tbody>
 </table>

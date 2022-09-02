@@ -14,8 +14,9 @@ namespace E2E.Controllers
 {
     public class ManualsController : Controller
     {
-        private clsServiceFTP ftp = new clsServiceFTP();
         private clsContext db = new clsContext();
+        private clsServiceFTP ftp = new clsServiceFTP();
+
         // GET: Manuals
         public ActionResult Index()
         {
@@ -28,7 +29,7 @@ namespace E2E.Controllers
 
             ViewBag.Manual_TypeName = SelectListItems_Manual_TypeName();
 
-           var system_Manuals = db.Manuals.OrderByDescending(o => o.Create).ToList();
+            var system_Manuals = db.Manuals.OrderByDescending(o => o.Create).ToList();
             return View(system_Manuals);
         }
 
@@ -59,13 +60,10 @@ namespace E2E.Controllers
                             system_Manuals.Manual_Name = FileName;
                         }
 
-                       
                         system_Manuals.Language_Id = model.Language_Id;
                         system_Manuals.Manual_Type_Id = model.Manual_Type_Id;
                         system_Manuals.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
-                        system_Manuals.Ver = db.Manuals.Where(w=>w.Language_Id == model.Language_Id & w.Manual_Type_Id == model.Manual_Type_Id).Count() +1;
-
-
+                        system_Manuals.Ver = db.Manuals.Where(w => w.Language_Id == model.Language_Id & w.Manual_Type_Id == model.Manual_Type_Id).Count() + 1;
 
                         db.Manuals.Add(system_Manuals);
                         if (db.SaveChanges() > 0)
@@ -73,12 +71,8 @@ namespace E2E.Controllers
                             res = true;
                         }
 
-
-
-
                         if (res)
                         {
-
                             scope.Complete();
 
                             swal.dangerMode = false;
@@ -151,26 +145,10 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-        public List<SelectListItem> SelectListItems_Manual_TypeName()
-        {
-            IQueryable<System_ManualType> query = db.System_ManualType;
 
-
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Type", Value = "" });
-            item.AddRange(query
-                .Select(s => new SelectListItem()
-                {
-                    Value = s.Manual_Type_Id.ToString(),
-                    Text = s.Manual_TypeName
-                }).OrderBy(o => o.Text).ToList());
-
-            return item;
-        }
         public List<SelectListItem> SelectListItems_Language_Name()
         {
             IQueryable<System_Language> query = db.System_Language;
-          
 
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select Language", Value = "" });
@@ -179,6 +157,22 @@ namespace E2E.Controllers
                 {
                     Value = s.Language_Id.ToString(),
                     Text = s.Language_Name
+                }).OrderBy(o => o.Text).ToList());
+
+            return item;
+        }
+
+        public List<SelectListItem> SelectListItems_Manual_TypeName()
+        {
+            IQueryable<System_ManualType> query = db.System_ManualType;
+
+            List<SelectListItem> item = new List<SelectListItem>();
+            item.Add(new SelectListItem() { Text = "Select Type", Value = "" });
+            item.AddRange(query
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.Manual_Type_Id.ToString(),
+                    Text = s.Manual_TypeName
                 }).OrderBy(o => o.Text).ToList());
 
             return item;

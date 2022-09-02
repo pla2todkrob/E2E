@@ -1,14 +1,13 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Transactions;
-using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -1034,6 +1033,65 @@ namespace E2E.Controllers
             try
             {
                 return View(data.Services_GetMyTask());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI()
+        {
+            try
+            {
+                return View();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI_Filter(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = new ReportKPI_Filter();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
+                }
+
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.AuthorizeId = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+
+                ViewBag.UserList = data.SelectListItems_UsersDepartment();
+
+                return View(_Filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI_Table(string filter)
+        {
+            try
+            {
+                clsReportKPI clsReportKPI = new clsReportKPI();
+                ReportKPI_Filter _Filter = new ReportKPI_Filter();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
+                }
+
+                clsReportKPI = data.ClsReportKPI_ViewList(_Filter);
+
+                return View(clsReportKPI);
             }
             catch (Exception)
             {

@@ -6,20 +6,20 @@
         {
             if (!string.IsNullOrEmpty(Model.Configuration_Brand))
             {
-                <img id="logo" src="@Model.Configuration_Brand" class="logo" alt="@Path.GetFileName(Model.Configuration_Brand)" />
+        <img id="logo" src="@Model.Configuration_Brand" class="logo" alt="@Path.GetFileName(Model.Configuration_Brand)" />
             }
             else if (!string.IsNullOrEmpty(Model.SystemName))
             {
-                @Html.DisplayFor(m => m.SystemName)
+        @Html.DisplayFor(m => m.SystemName)
             }
             else
             {
-                <h2>E2E</h2>
+        <h2>E2E</h2>
             }
         }
         else
         {
-            <h2>E2E</h2>
+        <h2>E2E</h2>
         }
     }
 </a>
