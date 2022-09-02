@@ -171,6 +171,34 @@ namespace E2E.Models
             }
         }
 
+        public bool WorkRoot_Delete(Guid id)
+        {
+            try
+            {
+                bool res = new bool();
+
+                int inUseCount = db.Services
+                    .Where(w => w.WorkRoot_Id == id)
+                    .Count();
+
+                if (inUseCount == 0)
+                {
+                    WorkRoots workRoots = db.WorkRoots.Find(id);
+                    db.Entry(workRoots).State = System.Data.Entity.EntityState.Deleted;
+                    if (db.SaveChanges() > 0)
+                    {
+                        res = true;
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public bool WorkRoot_Insert(clsWorkRoots model)
         {
             try
@@ -239,83 +267,67 @@ namespace E2E.Models
                 workRoots.WorkRoot_Name = model.WorkRoots.WorkRoot_Name;
                 workRoots.Update = DateTime.Now;
                 db.Entry(workRoots).State = System.Data.Entity.EntityState.Modified;
-                if (db.SaveChanges() > 0)
+                List<WorkRootDocuments> workRootDocuments = new List<WorkRootDocuments>();
+                workRootDocuments = db.WorkRootDocuments
+                    .Where(w => w.WorkRoot_Id == model.WorkRoots.WorkRoot_Id)
+                    .ToList();
+                if (workRootDocuments.Count > 0)
                 {
                     if (model.Document_Id.Count > 0)
                     {
-                        List<WorkRootDocuments> workRootDocuments = new List<WorkRootDocuments>();
-                        workRootDocuments = db.WorkRootDocuments
-                            .Where(w => w.WorkRoot_Id == model.WorkRoots.WorkRoot_Id)
-                            .ToList();
-                        if (workRootDocuments.Count > 0)
+                        foreach (var item in model.Document_Id)
                         {
-                            foreach (var item in model.Document_Id)
-                            {
-                                var findHas = workRootDocuments
-                                    .Where(w => w.Document_Id == item.Value)
-                                    .FirstOrDefault();
+                            var findHas = workRootDocuments
+                                .Where(w => w.Document_Id == item.Value)
+                                .FirstOrDefault();
 
-                                if (findHas == null)
-                                {
-                                    WorkRootDocuments documents = new WorkRootDocuments();
-                                    documents.WorkRoot_Id = model.WorkRoots.WorkRoot_Id;
-                                    documents.Document_Id = item;
-                                    db.Entry(documents).State = System.Data.Entity.EntityState.Added;
-                                }
-                            }
-
-                            foreach (var item in workRootDocuments)
+                            if (findHas == null)
                             {
-                                var findKeep = model.Document_Id
-                                    .Where(w => w == item.Document_Id)
-                                    .FirstOrDefault();
-                                if (findKeep == null)
-                                {
-                                    WorkRootDocuments documents = new WorkRootDocuments();
-                                    documents = db.WorkRootDocuments.Find(item.Document_Id);
-                                    db.Entry(documents).State = System.Data.Entity.EntityState.Deleted;
-                                }
+                                WorkRootDocuments documents = new WorkRootDocuments();
+                                documents.WorkRoot_Id = model.WorkRoots.WorkRoot_Id;
+                                documents.Document_Id = item;
+                                db.Entry(documents).State = System.Data.Entity.EntityState.Added;
                             }
                         }
 
-                        if (db.SaveChanges() > 0)
+                        foreach (var item in workRootDocuments)
                         {
-                            res = true;
+                            var findKeep = model.Document_Id
+                                .Where(w => w == item.Document_Id)
+                                .FirstOrDefault();
+                            if (findKeep == null)
+                            {
+                                WorkRootDocuments documents = new WorkRootDocuments();
+                                documents = db.WorkRootDocuments.Find(item.Document_Id);
+                                db.Entry(documents).State = System.Data.Entity.EntityState.Deleted;
+                            }
                         }
                     }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        public bool WorkRoot_Delete(Guid id)
-        {
-            try
-            {
-                bool res = new bool();
-
-                int inUseCount = db.Services
-                    .Where(w => w.WorkRoot_Id == id)
-                    .Count();
-
-                if (inUseCount == 0)
-                {
-                    WorkRoots workRoots = db.WorkRoots.Find(id);
-                    db.Entry(workRoots).State = System.Data.Entity.EntityState.Deleted;
-                    if (db.SaveChanges() > 0)
+                    else
                     {
-                        res = true;
+                        db.WorkRootDocuments.RemoveRange(workRootDocuments);
                     }
+                }
+                else
+                {
+                    foreach (var item in model.Document_Id)
+                    {
+                        WorkRootDocuments documents = new WorkRootDocuments();
+                        documents.WorkRoot_Id = model.WorkRoots.WorkRoot_Id;
+                        documents.Document_Id = item;
+                        db.Entry(documents).State = System.Data.Entity.EntityState.Added;
+                    }
+                }
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
                 }
 
                 return res;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
