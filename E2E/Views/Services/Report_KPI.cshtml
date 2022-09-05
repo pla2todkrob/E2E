@@ -19,6 +19,35 @@
 
         });
 
+        function callSatisfactionModal(id) {
+            $.ajax({
+                url: '@Url.Action("Report_KPI_View", "Services")',
+                data: {
+                    id: id,
+                    filter:getQueryString()
+                },
+                async: true,
+                success: function (res) {
+                    $('#modalContent').parent().addClass('modal-lg');
+
+                    $('#modalContent').html(res);
+                    $('#modalContent').find('select').each(function () {
+                        $(this).select2({
+                            theme: 'bootstrap4',
+                            width: '100%'
+                        });
+                    });
+                    $('#modalContent').find('table').each(function () {
+                        $(this).DataTable({
+                            "columnDefs": { targets: [0, 1], type: 'date' }
+                        });
+                    });
+                    $('#modalArea').modal('show');
+                }
+            });
+            return false;
+        }
+
         function reloadTable() {
             callFilter('@Url.Action("Report_KPI_Filter", "Services")').then(function () {
                 callTable('@Url.Action("Report_KPI_Table", "Services")');
@@ -28,13 +57,7 @@
     </script>
 }
 
-<div class="d-flex mb-3">
-    <div class="ml-auto" id="filter">
-    </div>
+<div class="mb-3 d-flex">
+    <div class="ml-auto" id="filter"></div>
 </div>
-
-<div class="card shadow">
-    <div class="card-body">
-        <div class="row" id="datalist"></div>
-    </div>
-</div>
+<div id="datalist"></div>

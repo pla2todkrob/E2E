@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Views
 {
@@ -21,11 +19,6 @@ namespace E2E.Models.Views
 
     public class ReportKPI_Filter
     {
-        public ReportKPI_Filter()
-        {
-            User_Id = new List<Guid?>();
-        }
-
         [Display(Name = "From")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
         public DateTime? Date_From { get; set; }
@@ -33,32 +26,60 @@ namespace E2E.Models.Views
         [Display(Name = "To")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
         public DateTime? Date_To { get; set; }
-
-        [Display(Name = "Users")]
-        public List<Guid?> User_Id { get; set; }
     }
 
     public class ReportKPI_Overview
     {
+        [Display(Name = "Average")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
         public double? Average_Score { get; set; }
+
+        [Display(Name = "Close")]
         public int Close_Count { get; set; }
+
+        [Display(Name = "Complete")]
         public int Complete_Count { get; set; }
+
+        [Display(Name = "In progress")]
         public int Inprogress_Count { get; set; }
+
+        [Display(Name = "Over due")]
         public int OverDue_Count { get; set; }
+
+        [Display(Name = "Pending")]
         public int Pending_Count { get; set; }
+
+        [Display(Name = "Total")]
         public int Total { get; set; }
     }
 
     public class ReportKPI_User
     {
+        [Display(Name = "Average")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
         public double? Average_Score { get; set; }
+
+        [Display(Name = "Close")]
         public int Close_Count { get; set; }
+
+        [Display(Name = "Complete")]
         public int Complete_Count { get; set; }
+
+        [Display(Name = "In progress")]
         public int Inprogress_Count { get; set; }
+
+        [Display(Name = "Over due")]
         public int OverDue_Count { get; set; }
+
+        [Display(Name = "Pending")]
         public int Pending_Count { get; set; }
+
+        [Display(Name = "Total")]
         public int Total { get; set; }
+
         public Guid User_Id { get; set; }
+
+        [Display(Name = "User")]
         public string User_Name { get; set; }
     }
 }

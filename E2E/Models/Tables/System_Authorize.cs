@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
@@ -10,9 +7,9 @@ namespace E2E.Models.Tables
     {
         [Key]
         public int Authorize_Id { get; set; }
+
         [Display(Name = "Authorize")]
         public string Authorize_Name { get; set; }
-
 
         public static List<System_Authorize> DefaultList()
         {

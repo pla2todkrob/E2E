@@ -43,7 +43,12 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
+            string txtColor = "";
+            if (item.Is_OverDue)
+            {
+                txtColor = "text-danger";
+            }
+        <tr class="@txtColor">
             <td>@Html.DisplayFor(i => item.Create)</td>
             <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
             <td>

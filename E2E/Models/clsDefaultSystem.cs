@@ -2,13 +2,96 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace E2E.Models
 {
     public static class clsDefaultSystem
     {
         private static clsContext db = new clsContext();
+
+        private static void Authorize_Save()
+        {
+            foreach (var item in System_Authorize.DefaultList())
+            {
+                if (db.System_Authorizes.Where(w => w.Authorize_Name == item.Authorize_Name).Count() == 0)
+                {
+                    db.System_Authorizes.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void DueDateStatus_Save()
+        {
+            foreach (var item in System_DueDateStatuses.DefaultList())
+            {
+                if (db.System_DueDateStatuses.Where(w => w.DueDateStatus_Name == item.DueDateStatus_Name).Count() == 0)
+                {
+                    db.System_DueDateStatuses.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Language_Save()
+        {
+            foreach (var item in System_Language.DefaultList())
+            {
+                if (db.System_Language.Where(w => w.Language_Name == item.Language_Name).Count() == 0)
+                {
+                    db.System_Language.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void ManualType_Save()
+        {
+            foreach (var item in System_ManualType.DefaultList())
+            {
+                if (db.System_ManualType.Where(w => w.Manual_TypeName == item.Manual_TypeName).Count() == 0)
+                {
+                    db.System_ManualType.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Priority_Save()
+        {
+            foreach (var item in System_Priorities.DefaultList())
+            {
+                if (db.System_Priorities.Where(w => w.Priority_Name == item.Priority_Name).Count() == 0)
+                {
+                    db.System_Priorities.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Role_Save()
+        {
+            foreach (var item in System_Roles.DefaultList())
+            {
+                if (db.System_Roles.Where(w => w.Role_Name == item.Role_Name).Count() == 0)
+                {
+                    db.System_Roles.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private static void Status_Save()
+        {
+            foreach (var item in System_Statuses.DefaultList())
+            {
+                if (db.System_Statuses.Where(w => w.Status_Name == item.Status_Name).Count() == 0)
+                {
+                    db.System_Statuses.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
 
         public static void Generate()
         {
@@ -180,90 +263,6 @@ namespace E2E.Models
                             }
                         }
                     }
-                }
-            }
-        }
-
-        private static void Authorize_Save()
-        {
-            foreach (var item in System_Authorize.DefaultList())
-            {
-                if (db.System_Authorizes.Where(w => w.Authorize_Name == item.Authorize_Name).Count() == 0)
-                {
-                    db.System_Authorizes.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private static void Language_Save()
-        {
-            foreach (var item in System_Language.DefaultList())
-            {
-                if (db.System_Language.Where(w => w.Language_Name == item.Language_Name).Count() == 0)
-                {
-                    db.System_Language.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private static void ManualType_Save()
-        {
-            foreach (var item in System_ManualType.DefaultList())
-            {
-                if (db.System_ManualType.Where(w => w.Manual_TypeName == item.Manual_TypeName).Count() == 0)
-                {
-                    db.System_ManualType.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private static void Role_Save()
-        {
-            foreach (var item in System_Roles.DefaultList())
-            {
-                if (db.System_Roles.Where(w => w.Role_Name == item.Role_Name).Count() == 0)
-                {
-                    db.System_Roles.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private static void Status_Save()
-        {
-            foreach (var item in System_Statuses.DefaultList())
-            {
-                if (db.System_Statuses.Where(w => w.Status_Name == item.Status_Name).Count() == 0)
-                {
-                    db.System_Statuses.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private static void DueDateStatus_Save()
-        {
-            foreach (var item in System_DueDateStatuses.DefaultList())
-            {
-                if (db.System_DueDateStatuses.Where(w => w.DueDateStatus_Name == item.DueDateStatus_Name).Count() == 0)
-                {
-                    db.System_DueDateStatuses.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private static void Priority_Save()
-        {
-            foreach (var item in System_Priorities.DefaultList())
-            {
-                if (db.System_Priorities.Where(w => w.Priority_Name == item.Priority_Name).Count() == 0)
-                {
-                    db.System_Priorities.Add(item);
-                    db.SaveChanges();
                 }
             }
         }

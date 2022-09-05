@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
     public class System_DueDateStatuses
     {
+        public string DueDateStatus_Class { get; set; }
+
         [Key]
         public int DueDateStatus_Id { get; set; }
-        [Display(Name ="Status")]
+
+        [Display(Name = "Status")]
         public string DueDateStatus_Name { get; set; }
-        public string DueDateStatus_Class { get; set; }
+
         public static List<System_DueDateStatuses> DefaultList()
         {
             List<System_DueDateStatuses> list = new List<System_DueDateStatuses>();
@@ -23,6 +23,5 @@ namespace E2E.Models.Tables
 
             return list;
         }
-
     }
 }

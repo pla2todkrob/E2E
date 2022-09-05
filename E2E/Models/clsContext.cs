@@ -1,11 +1,6 @@
 ﻿using E2E.Models.Tables;
-using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models
 {

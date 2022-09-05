@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Tables
 {
@@ -10,7 +6,7 @@ namespace E2E.Models.Tables
     {
         [Key]
         public int Prefix_TH_Id { get; set; }
-        public string Prefix_TH_Name { get; set; }
 
+        public string Prefix_TH_Name { get; set; }
     }
 }

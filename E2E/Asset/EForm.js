@@ -2,7 +2,7 @@
     $('#fileCollections').load(urlLoad);
 }
 
-function savegallery(urlAjax,urlLoad) {
+function savegallery(urlAjax, urlLoad) {
     var arr = [];
     $('table#tableGal').find('tbody').each(function () {
         $(this).find('tr').each(function () {
@@ -33,7 +33,6 @@ function savegallery(urlAjax,urlLoad) {
                     callFileCollections(urlLoad);
                 }
             });
-            
         }
     });
 }
@@ -64,7 +63,6 @@ function deleteFileEF(urlAjax, urlLoad) {
                                 callFileCollections(urlLoad);
                             }
                         });
-                        
                     }
                 });
                 return false;

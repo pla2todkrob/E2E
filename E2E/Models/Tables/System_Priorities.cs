@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
     public class System_Priorities
     {
+        public string Priority_Class { get; set; }
+
+        public int Priority_DateRange { get; set; }
+
         [Key]
         public int Priority_Id { get; set; }
 
         [Display(Name = "Priority")]
         public string Priority_Name { get; set; }
 
-        public string Priority_Class { get; set; }
         public int Priority_Point { get; set; }
-        public int Priority_DateRange { get; set; }
 
         public static List<System_Priorities> DefaultList()
         {

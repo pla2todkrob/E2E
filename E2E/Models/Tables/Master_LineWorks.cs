@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
@@ -18,11 +15,10 @@ namespace E2E.Models.Tables
 
         public bool Active { get; set; }
 
+        [Display(Name = "Authorize")]
+        public int Authorize_Id { get; set; }
 
         public DateTime Create { get; set; }
-        [Display(Name ="Authorize")]
-        public int Authorize_Id { get; set; }
-        public virtual System_Authorize System_Authorize { get; set; }
 
         [Key]
         public Guid LineWork_Id { get; set; }
@@ -30,6 +26,7 @@ namespace E2E.Models.Tables
         [Description("Line of work"), Display(Name = "Line of work"), Required]
         public string LineWork_Name { get; set; }
 
+        public virtual System_Authorize System_Authorize { get; set; }
         public DateTime? Update { get; set; }
     }
 }

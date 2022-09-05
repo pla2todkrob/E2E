@@ -1,15 +1,10 @@
 ﻿using E2E.Models.Tables;
 using E2E.Models.Views;
-using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Reflection;
-using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 
@@ -216,11 +211,6 @@ namespace E2E.Models
 
                 if (filter != null)
                 {
-                    if (filter.User_Id.Count > 0)
-                    {
-                        query = query.Where(w => filter.User_Id.Contains(w.Action_User_Id));
-                    }
-
                     if (filter.Date_From.HasValue)
                     {
                         query = query.Where(w => w.Create >= filter.Date_From);
@@ -235,23 +225,6 @@ namespace E2E.Models
 
                 if (res.Authorize_Id != 3)
                 {
-                    serviceIds = new List<Guid>();
-                    serviceIds = query
-                            .Select(s => s.Service_Id)
-                            .ToList();
-                    if (serviceIds.Count > 0)
-                    {
-                        res.ReportKPI_Overview.Average_Score = db.Satisfactions
-                    .Where(w => serviceIds.Contains(w.Service_Id))
-                    .Average(a => a.Satisfaction_Average);
-                        res.ReportKPI_Overview.Close_Count = query.Where(w => w.Status_Id == 4).Count();
-                        res.ReportKPI_Overview.Complete_Count = query.Where(w => w.Status_Id == 3).Count();
-                        res.ReportKPI_Overview.Inprogress_Count = query.Where(w => w.Status_Id == 2).Count();
-                        res.ReportKPI_Overview.OverDue_Count = query.Where(w => w.Is_OverDue).Count();
-                        res.ReportKPI_Overview.Pending_Count = query.Where(w => w.Status_Id == 1).Count();
-                        res.ReportKPI_Overview.Total = query.Count();
-                    }
-
                     foreach (var item in userIds)
                     {
                         serviceIds = new List<Guid>();
@@ -312,6 +285,17 @@ namespace E2E.Models
                     reportKPI_User.User_Name = master.Users_GetInfomation(userId);
                     res.ReportKPI_Users.Add(reportKPI_User);
                 }
+
+                res.ReportKPI_Overview.Average_Score = res.ReportKPI_Users
+                    .Where(w => w.Average_Score.HasValue)
+                    .Average(a => a.Average_Score);
+
+                res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
+                res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
+                res.ReportKPI_Overview.Inprogress_Count = res.ReportKPI_Users.Select(s => s.Inprogress_Count).Sum();
+                res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
+                res.ReportKPI_Overview.Pending_Count = res.ReportKPI_Users.Select(s => s.Pending_Count).Sum();
+                res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
 
                 return res;
             }
@@ -485,6 +469,36 @@ namespace E2E.Models
                 }
 
                 return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<Satisfactions> Satisfactions_ViewList(Guid id, ReportKPI_Filter filter)
+        {
+            try
+            {
+                IQueryable<Satisfactions> query = db.Satisfactions
+                    .Where(w => w.Services.Action_User_Id == id)
+                    .OrderBy(o => o.Create);
+
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        query = query.Where(w => w.Services.Create >= filter.Date_From);
+                    }
+
+                    if (filter.Date_To.HasValue)
+                    {
+                        filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+                        query = query.Where(w => w.Services.Create <= filter.Date_To);
+                    }
+                }
+
+                return query.ToList();
             }
             catch (Exception)
             {
@@ -1574,6 +1588,10 @@ namespace E2E.Models
                     .FirstOrDefault();
 
                 services.Update = DateTime.Now;
+                if (services.Update.Value.Date > services.Service_DueDate)
+                {
+                    services.Is_OverDue = true;
+                }
                 services.Status_Id = system_Statuses.Status_Id;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)

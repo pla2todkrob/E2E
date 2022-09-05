@@ -10,36 +10,10 @@ namespace E2E.Models
 {
     public class clsManageEForm
     {
+        private clsImage clsImag = new clsImage();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
-        private clsImage clsImag = new clsImage();
         private clsMail mail = new clsMail();
-
-        public bool EForm_Save(EForms model, HttpFileCollectionBase files)
-        {
-            try
-            {
-                bool res = new bool();
-                string status = string.Empty;
-                EForms eForms = new EForms();
-                eForms = db.EForms.Where(w => w.EForm_Id == model.EForm_Id).FirstOrDefault();
-
-                if (eForms != null)
-                {
-                    res = EForm_Update(model, files);
-                }
-                else
-                {
-                    res = EForm_Insert(model, files);
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
         {
@@ -206,145 +180,20 @@ namespace E2E.Models
             }
         }
 
-        public bool IsRecognisedImageFile(string fileName)
-        {
-            string targetExtension = System.IO.Path.GetExtension(fileName);
-            if (String.IsNullOrEmpty(targetExtension))
-                return false;
-            else
-                targetExtension = "*" + targetExtension.ToLowerInvariant();
-
-            List<string> recognisedImageExtensions = new List<string>();
-
-            foreach (System.Drawing.Imaging.ImageCodecInfo imageCodec in System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders())
-                recognisedImageExtensions.AddRange(imageCodec.FilenameExtension.ToLowerInvariant().Split(";".ToCharArray()));
-
-            foreach (string extension in recognisedImageExtensions)
-            {
-                if (extension.Equals(targetExtension))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void Galleries_Save(EForms model, clsImage clsImage, string file)
-        {
-            try
-            {
-                bool res = new bool();
-                res = Galleries_Insert(model, clsImage, file);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Galleries_Insert(EForms model, clsImage clsImage, string file)
+        protected bool Galleries_SaveSeq_Update(EForm_Galleries model)
         {
             try
             {
                 bool res = new bool();
                 EForm_Galleries eForm_Galleries = new EForm_Galleries();
-                var Count = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_Gallery_Seq).FirstOrDefault();
+                eForm_Galleries = db.EForm_Galleries
+                    .Where(w => w.EForm_Gallery_Id == model.EForm_Gallery_Id)
+                    .FirstOrDefault();
 
-                eForm_Galleries.EForm_Id = model.EForm_Id;
-                eForm_Galleries.EForm_Gallery_Original = clsImage.OriginalPath;
-                eForm_Galleries.EForm_Gallery_Thumbnail = clsImage.ThumbnailPath;
-                eForm_Galleries.EForm_Gallery_Name = file;
-                eForm_Galleries.EForm_Gallery_Extension = Path.GetExtension(file);
+                eForm_Galleries.EForm_Gallery_Seq = model.EForm_Gallery_Seq;
 
-                if (Count == null)
-                {
-                    eForm_Galleries.EForm_Gallery_Seq = 1;
-                }
-                else
-                {
-                    eForm_Galleries.EForm_Gallery_Seq = Count.EForm_Gallery_Seq++;
-                }
-
-                db.EForm_Galleries.Add(eForm_Galleries);
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public void File_Save(EForms model, string filepath, string file)
-        {
-            try
-            {
-                File_Insert(model, filepath, file);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool File_Insert(EForms model, string filepath, string file)
-        {
-            try
-            {
-                bool res = new bool();
-                EForm_Files eForm_Files = new EForm_Files();
-                var Count = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_File_Seq).FirstOrDefault();
-
-                eForm_Files.EForm_Id = model.EForm_Id;
-                eForm_Files.EForm_File_Path = filepath;
-                eForm_Files.EForm_File_Name = file;
-                eForm_Files.EForm_File_Extension = Path.GetExtension(file);
-
-                if (Count == null)
-                {
-                    eForm_Files.EForm_File_Seq = 1;
-                }
-                else
-                {
-                    eForm_Files.EForm_File_Seq = Count.EForm_File_Seq++;
-                }
-
-                db.EForm_Files.Add(eForm_Files);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool EForm_Delete(Guid id, List<string> File_ = null)
-        {
-            try
-            {
-                bool res = new bool();
-                EForms eForms = new EForms();
-                eForms = db.EForms.Where(w => w.EForm_Id == id).FirstOrDefault();
-
-                db.EForms.Remove(eForms);
-                if (db.SaveChanges() > 0)
-                {
-                    if (File_.Count > 0)
-                    {
-                        foreach (var item in File_)
-                        {
-                            ftp.Ftp_DeleteFile(item);
-                        }
-                    }
                     res = true;
                 }
 
@@ -396,6 +245,34 @@ namespace E2E.Models
             }
         }
 
+        public bool DeleteFile(Guid id, bool status = true)
+        {
+            try
+            {
+                bool res = new bool();
+
+                var Files = db.EForm_Files.Where(w => w.EForm_File_Id == id).FirstOrDefault();
+
+                db.EForm_Files.Remove(Files);
+
+                if (db.SaveChanges() > 0)
+                {
+                    if (status)
+                    {
+                        ftp.Ftp_DeleteFile(Files.EForm_File_Path);
+                    }
+
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public bool DeleteGallery(Guid id, bool status = true)
         {
             try
@@ -424,27 +301,170 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteFile(Guid id, bool status = true)
+        public bool EForm_Delete(Guid id, List<string> File_ = null)
         {
             try
             {
                 bool res = new bool();
+                EForms eForms = new EForms();
+                eForms = db.EForms.Where(w => w.EForm_Id == id).FirstOrDefault();
 
-                var Files = db.EForm_Files.Where(w => w.EForm_File_Id == id).FirstOrDefault();
-
-                db.EForm_Files.Remove(Files);
-
+                db.EForms.Remove(eForms);
                 if (db.SaveChanges() > 0)
                 {
-                    if (status)
+                    if (File_.Count > 0)
                     {
-                        ftp.Ftp_DeleteFile(Files.EForm_File_Path);
+                        foreach (var item in File_)
+                        {
+                            ftp.Ftp_DeleteFile(item);
+                        }
                     }
-
                     res = true;
                 }
 
                 return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<EForms> EForm_GetRequiredApprove(int val)
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                List<Guid> userIdList = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
+                var sql = db.EForms.Where(w => w.Status_Id == val && userIdList.Contains(w.User_Id)).ToList();
+
+                return sql;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool EForm_Save(EForms model, HttpFileCollectionBase files)
+        {
+            try
+            {
+                bool res = new bool();
+                string status = string.Empty;
+                EForms eForms = new EForms();
+                eForms = db.EForms.Where(w => w.EForm_Id == model.EForm_Id).FirstOrDefault();
+
+                if (eForms != null)
+                {
+                    res = EForm_Update(model, files);
+                }
+                else
+                {
+                    res = EForm_Insert(model, files);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool File_Insert(EForms model, string filepath, string file)
+        {
+            try
+            {
+                bool res = new bool();
+                EForm_Files eForm_Files = new EForm_Files();
+                var Count = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_File_Seq).FirstOrDefault();
+
+                eForm_Files.EForm_Id = model.EForm_Id;
+                eForm_Files.EForm_File_Path = filepath;
+                eForm_Files.EForm_File_Name = file;
+                eForm_Files.EForm_File_Extension = Path.GetExtension(file);
+
+                if (Count == null)
+                {
+                    eForm_Files.EForm_File_Seq = 1;
+                }
+                else
+                {
+                    eForm_Files.EForm_File_Seq = Count.EForm_File_Seq++;
+                }
+
+                db.EForm_Files.Add(eForm_Files);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void File_Save(EForms model, string filepath, string file)
+        {
+            try
+            {
+                File_Insert(model, filepath, file);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Galleries_Insert(EForms model, clsImage clsImage, string file)
+        {
+            try
+            {
+                bool res = new bool();
+                EForm_Galleries eForm_Galleries = new EForm_Galleries();
+                var Count = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id).OrderByDescending(o => o.EForm_Gallery_Seq).FirstOrDefault();
+
+                eForm_Galleries.EForm_Id = model.EForm_Id;
+                eForm_Galleries.EForm_Gallery_Original = clsImage.OriginalPath;
+                eForm_Galleries.EForm_Gallery_Thumbnail = clsImage.ThumbnailPath;
+                eForm_Galleries.EForm_Gallery_Name = file;
+                eForm_Galleries.EForm_Gallery_Extension = Path.GetExtension(file);
+
+                if (Count == null)
+                {
+                    eForm_Galleries.EForm_Gallery_Seq = 1;
+                }
+                else
+                {
+                    eForm_Galleries.EForm_Gallery_Seq = Count.EForm_Gallery_Seq++;
+                }
+
+                db.EForm_Galleries.Add(eForm_Galleries);
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void Galleries_Save(EForms model, clsImage clsImage, string file)
+        {
+            try
+            {
+                bool res = new bool();
+                res = Galleries_Insert(model, clsImage, file);
             }
             catch (Exception)
             {
@@ -476,47 +496,27 @@ namespace E2E.Models
             }
         }
 
-        protected bool Galleries_SaveSeq_Update(EForm_Galleries model)
+        public bool IsRecognisedImageFile(string fileName)
         {
-            try
+            string targetExtension = System.IO.Path.GetExtension(fileName);
+            if (String.IsNullOrEmpty(targetExtension))
+                return false;
+            else
+                targetExtension = "*" + targetExtension.ToLowerInvariant();
+
+            List<string> recognisedImageExtensions = new List<string>();
+
+            foreach (System.Drawing.Imaging.ImageCodecInfo imageCodec in System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders())
+                recognisedImageExtensions.AddRange(imageCodec.FilenameExtension.ToLowerInvariant().Split(";".ToCharArray()));
+
+            foreach (string extension in recognisedImageExtensions)
             {
-                bool res = new bool();
-                EForm_Galleries eForm_Galleries = new EForm_Galleries();
-                eForm_Galleries = db.EForm_Galleries
-                    .Where(w => w.EForm_Gallery_Id == model.EForm_Gallery_Id)
-                    .FirstOrDefault();
-
-                eForm_Galleries.EForm_Gallery_Seq = model.EForm_Gallery_Seq;
-
-                if (db.SaveChanges() > 0)
+                if (extension.Equals(targetExtension))
                 {
-                    res = true;
+                    return true;
                 }
-
-                return res;
             }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public List<EForms> EForm_GetRequiredApprove(int val)
-        {
-            try
-            {
-                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-                List<Guid> userIdList = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
-                var sql = db.EForms.Where(w => w.Status_Id == val && userIdList.Contains(w.User_Id)).ToList();
-
-                return sql;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return false;
         }
     }
 }

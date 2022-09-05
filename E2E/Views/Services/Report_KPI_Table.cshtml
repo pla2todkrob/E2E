@@ -4,60 +4,74 @@
 
 @if (Model.Authorize_Id != 3)
 {
-    <h5>Overview</h5>
-    <table class="display table table-bordered table-hover nowrap w-100 mb-5">
-        <thead>
-            <tr>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Total)</th>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Pending_Count)</th>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Inprogress_Count)</th>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Complete_Count)</th>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OverDue_Count)</th>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Close_Count)</th>
-                <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Average_Score)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Total)</td>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Pending_Count)</td>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Inprogress_Count)</td>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Complete_Count)</td>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OverDue_Count)</td>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Close_Count)</td>
-                <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Average_Score)</td>
-            </tr>
-        </tbody>
-    </table>
-}
+<div class="card shadow mb-5">
+    <div class="card-header">
+        <h5 class="card-title">Overview</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <table class="display table table-bordered table-hover nowrap w-100 mb-5">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Total)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Pending_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Inprogress_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Complete_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OverDue_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Close_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Average_Score)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Total)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Pending_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Inprogress_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Complete_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OverDue_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Close_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Average_Score)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<h5>Individual</h5>
-<table class="display table table-bordered table-hover nowrap w-100">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().User_Name)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Total)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Pending_Count)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Inprogress_Count)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Complete_Count)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().OverDue_Count)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Close_Count)</th>
-            <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Average_Score)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.ReportKPI_Users)
-        {
-            <tr>
-                <td class="fit">@Html.DisplayFor(m => item.User_Name)</td>
-                <td>@Html.DisplayFor(m => item.Total)</td>
-                <td>@Html.DisplayFor(m => item.Pending_Count)</td>
-                <td>@Html.DisplayFor(m => item.Inprogress_Count)</td>
-                <td>@Html.DisplayFor(m => item.Complete_Count)</td>
-                <td>@Html.DisplayFor(m => item.OverDue_Count)</td>
-                <td>@Html.DisplayFor(m => item.Close_Count)</td>
-                <td>@Html.DisplayFor(m => item.Average_Score)</td>
-            </tr>
-        }
-    </tbody>
-</table>
+}
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="card-title">Individual</h5>
+    </div>
+    <div class="card-body">
+        <table class="display table table-bordered table-hover nowrap w-100">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().User_Name)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Total)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Pending_Count)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Inprogress_Count)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Complete_Count)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().OverDue_Count)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Close_Count)</th>
+                    <th>@Html.DisplayNameFor(m => m.ReportKPI_Users.FirstOrDefault().Average_Score)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ReportKPI_Users)
+                {
+                <tr>
+                    <td class="fit"><a href="#" onclick="callSatisfactionModal('@item.User_Id')">@Html.DisplayFor(m => item.User_Name)</a></td>
+                    <td>@Html.DisplayFor(m => item.Total)</td>
+                    <td>@Html.DisplayFor(m => item.Pending_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Inprogress_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Complete_Count)</td>
+                    <td>@Html.DisplayFor(m => item.OverDue_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Close_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Average_Score)</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

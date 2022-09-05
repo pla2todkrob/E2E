@@ -1082,16 +1082,31 @@ namespace E2E.Controllers
         {
             try
             {
-                clsReportKPI clsReportKPI = new clsReportKPI();
                 ReportKPI_Filter _Filter = new ReportKPI_Filter();
                 if (!string.IsNullOrEmpty(filter))
                 {
                     _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
                 }
 
-                clsReportKPI = data.ClsReportKPI_ViewList(_Filter);
+                return View(data.ClsReportKPI_ViewList(_Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                return View(clsReportKPI);
+        public ActionResult Report_KPI_View(Guid id, string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = new ReportKPI_Filter();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
+                }
+
+                return View(data.Satisfactions_ViewList(id, _Filter));
             }
             catch (Exception)
             {
@@ -1693,7 +1708,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult SetAssignUserId()
+        public void SetAssignUserId()
         {
             try
             {
@@ -1720,8 +1735,6 @@ namespace E2E.Controllers
                         scope.Complete();
                     }
                 }
-
-                return Json(servicesIds);
             }
             catch (Exception)
             {
@@ -2180,6 +2193,40 @@ namespace E2E.Controllers
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public void SetOverDue()
+        {
+            try
+            {
+                int[] statusId = { 3, 4 };
+                string msg = "Complete task";
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    foreach (var item in db.Services.Where(w => statusId.Contains(w.Status_Id)))
+                    {
+                        DateTime completeDate = db.ServiceComments
+                            .Where(w => w.Service_Id == item.Service_Id && w.Comment_Content.StartsWith(msg))
+                            .Select(s => s.Create)
+                            .FirstOrDefault();
+
+                        if (completeDate.Date > item.Service_DueDate)
+                        {
+                            item.Is_OverDue = true;
+                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        }
+                    }
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Complete();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost, ValidateAntiForgeryToken]
