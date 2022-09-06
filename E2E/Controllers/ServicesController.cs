@@ -1078,6 +1078,24 @@ namespace E2E.Controllers
             }
         }
 
+        public ActionResult Report_KPI_JoinTeam(Guid id, string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = new ReportKPI_Filter();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
+                }
+
+                return View(data.Services_ViewJoinTeamList(id, _Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult Report_KPI_Table(string filter)
         {
             try
@@ -1106,7 +1124,7 @@ namespace E2E.Controllers
                     _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
                 }
 
-                return View(data.Satisfactions_ViewList(id, _Filter));
+                return View(data.ReportKPI_User_Views(id, _Filter));
             }
             catch (Exception)
             {

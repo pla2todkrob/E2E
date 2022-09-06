@@ -19,11 +19,11 @@ namespace E2E.Models.Views
 
     public class ReportKPI_Filter
     {
-        [Display(Name = "From")]
+        [Display(Name = "From"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
         public DateTime? Date_From { get; set; }
 
-        [Display(Name = "To")]
+        [Display(Name = "To"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
         public DateTime? Date_To { get; set; }
     }
@@ -68,11 +68,17 @@ namespace E2E.Models.Views
         [Display(Name = "In progress")]
         public int Inprogress_Count { get; set; }
 
+        [Display(Name = "Join team")]
+        public int JoinTeam_Count { get; set; }
+
         [Display(Name = "Over due")]
         public int OverDue_Count { get; set; }
 
         [Display(Name = "Pending")]
         public int Pending_Count { get; set; }
+
+        [Display(Name = "Point")]
+        public int SuccessPoint { get; set; }
 
         [Display(Name = "Total")]
         public int Total { get; set; }
@@ -81,5 +87,23 @@ namespace E2E.Models.Views
 
         [Display(Name = "User")]
         public string User_Name { get; set; }
+    }
+
+    public class ReportKPI_User_Views
+    {
+        public DateTime Create { get; set; }
+
+        [Display(Name = "Point")]
+        public int Priority_Point { get; set; }
+
+        [Display(Name = "Average")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
+        public double? Satisfaction_Average { get; set; }
+
+        public Guid Service_Id { get; set; }
+        public string Service_Key { get; set; }
+
+        [Display(Name = "Subject")]
+        public string Service_Subject { get; set; }
     }
 }

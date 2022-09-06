@@ -37,7 +37,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 @{ Html.RenderAction("_Profile", "Configurations"); }
             </a>
-            <div class="dropdown-menu" aria-labelledby="dropdown_profile">
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_profile">
                 <a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
                 <a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
                 <a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">Request change due date</a>

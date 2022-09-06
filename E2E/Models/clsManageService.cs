@@ -186,28 +186,23 @@ namespace E2E.Models
                     .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                     .FirstOrDefault();
 
-                if (res.Authorize_Id == 3)
-                {
-                    query = query.Where(w => w.Action_User_Id == userId);
-                }
-                else
-                {
-                    string deptName = db.Users
+                int[] finishIds = { 3, 4 };
+
+                string deptName = db.Users
                         .Where(w => w.User_Id == userId)
                         .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                         .FirstOrDefault();
-                    List<Guid> deptIds = db.Master_Departments
-                        .Where(w => w.Department_Name == deptName)
-                        .Select(s => s.Department_Id)
-                        .ToList();
-                    userIds = db.Users
-                        .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
-                        .OrderBy(o => o.User_Code)
-                        .Select(s => s.User_Id)
-                        .ToList();
+                List<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id)
+                    .ToList();
+                userIds = db.Users
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
+                    .OrderBy(o => o.User_Code)
+                    .Select(s => s.User_Id)
+                    .ToList();
 
-                    query = query.Where(w => userIds.Contains(w.Action_User_Id.Value));
-                }
+                query = query.Where(w => userIds.Contains(w.Action_User_Id.Value));
 
                 if (filter != null)
                 {
@@ -245,15 +240,29 @@ namespace E2E.Models
                                 reportKPI_User.Average_Score = db.Satisfactions
                         .Where(w => serviceIds.Contains(w.Service_Id))
                         .Average(a => a.Satisfaction_Average);
+
+                                reportKPI_User.SuccessPoint = query
+                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
+                        .Sum(s => s.System_Priorities.Priority_Point);
                             }
 
                             reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && w.Action_User_Id == item).Count();
                             reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && w.Action_User_Id == item).Count();
                             reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && w.Action_User_Id == item).Count();
-                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && w.Action_User_Id == item).Count();
                             reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && w.Action_User_Id == item).Count();
                             reportKPI_User.Total = query.Where(w => w.Action_User_Id == item).Count();
+                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && w.Action_User_Id == item).Count();
                         }
+
+                        serviceIds = new List<Guid>();
+                        serviceIds = query
+                        .Where(w => w.Action_User_Id != item)
+                        .Select(s => s.Service_Id)
+                        .ToList();
+
+                        reportKPI_User.JoinTeam_Count = db.ServiceTeams
+                            .Where(w => serviceIds.Contains(w.Service_Id) && w.User_Id == item)
+                            .Count();
 
                         reportKPI_User.User_Id = item;
                         reportKPI_User.User_Name = master.Users_GetInfomation(item);
@@ -263,6 +272,7 @@ namespace E2E.Models
                 else
                 {
                     serviceIds = query
+                        .Where(w => w.Action_User_Id == userId)
                         .Select(s => s.Service_Id)
                         .ToList();
 
@@ -273,13 +283,28 @@ namespace E2E.Models
                         reportKPI_User.Average_Score = db.Satisfactions
                     .Where(w => serviceIds.Contains(w.Service_Id))
                     .Average(a => a.Satisfaction_Average);
+
+                        reportKPI_User.SuccessPoint = query
+                            .Where(w => finishIds.Contains(w.Status_Id))
+                        .Sum(s => s.System_Priorities.Priority_Point);
+
                         reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4).Count();
                         reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3).Count();
                         reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2).Count();
-                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue).Count();
                         reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1).Count();
                         reportKPI_User.Total = query.Count();
+                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue).Count();
                     }
+
+                    serviceIds = new List<Guid>();
+                    serviceIds = query
+                        .Where(w => w.Action_User_Id != userId)
+                        .Select(s => s.Service_Id)
+                        .ToList();
+
+                    reportKPI_User.JoinTeam_Count = db.ServiceTeams
+                        .Where(w => serviceIds.Contains(w.Service_Id) && w.User_Id == userId)
+                        .Count();
 
                     reportKPI_User.User_Id = userId;
                     reportKPI_User.User_Name = master.Users_GetInfomation(userId);
@@ -293,9 +318,9 @@ namespace E2E.Models
                 res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
                 res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
                 res.ReportKPI_Overview.Inprogress_Count = res.ReportKPI_Users.Select(s => s.Inprogress_Count).Sum();
-                res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
                 res.ReportKPI_Overview.Pending_Count = res.ReportKPI_Users.Select(s => s.Pending_Count).Sum();
                 res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
+                res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
 
                 return res;
             }
@@ -476,25 +501,38 @@ namespace E2E.Models
             }
         }
 
-        public List<Satisfactions> Satisfactions_ViewList(Guid id, ReportKPI_Filter filter)
+        public List<ReportKPI_User_Views> ReportKPI_User_Views(Guid id, ReportKPI_Filter filter)
         {
             try
             {
-                IQueryable<Satisfactions> query = db.Satisfactions
-                    .Where(w => w.Services.Action_User_Id == id)
-                    .OrderBy(o => o.Create);
+                int[] statusIds = { 3, 4 };
+                IQueryable<ReportKPI_User_Views> query = db.Services
+                    .Where(w => w.Action_User_Id == id && statusIds.Contains(w.Status_Id))
+                    .GroupJoin(db.Satisfactions, ser => ser.Service_Id, sat => sat.Service_Id, (ser, g) => new
+                    {
+                        ser = ser,
+                        g = g
+                    }).SelectMany(tmp => tmp.g.DefaultIfEmpty(), (tmp, sat) => new ReportKPI_User_Views()
+                    {
+                        Service_Id = tmp.ser.Service_Id,
+                        Create = tmp.ser.Create,
+                        Service_Subject = tmp.ser.Service_Subject,
+                        Service_Key = tmp.ser.Service_Key,
+                        Priority_Point = tmp.ser.System_Priorities.Priority_Point,
+                        Satisfaction_Average = sat.Satisfaction_Average
+                    }).OrderBy(o => o.Create);
 
                 if (filter != null)
                 {
                     if (filter.Date_From.HasValue)
                     {
-                        query = query.Where(w => w.Services.Create >= filter.Date_From);
+                        query = query.Where(w => w.Create >= filter.Date_From);
                     }
 
                     if (filter.Date_To.HasValue)
                     {
                         filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
-                        query = query.Where(w => w.Services.Create <= filter.Date_To);
+                        query = query.Where(w => w.Create <= filter.Date_To);
                     }
                 }
 
@@ -1703,9 +1741,32 @@ namespace E2E.Models
                 services.Action_User_Id = null;
                 services.Status_Id = 1;
                 services.Service_EstimateTime = 0;
+                services.WorkRoot_Id = null;
                 db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
+                    List<ServiceDocuments> serviceDocuments = new List<ServiceDocuments>();
+                    serviceDocuments = db.ServiceDocuments
+                        .Where(w => w.Service_Id == model.Service_Id)
+                        .ToList();
+                    foreach (var item in serviceDocuments)
+                    {
+                        db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+                        if (db.SaveChanges() > 0)
+                        {
+                            if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
+                            {
+                                if (ftp.Ftp_DeleteFile(item.ServiceDocument_Path))
+                                {
+                                    continue;
+                                }
+                            }
+                            
+                            
+                        }
+                        
+                    }
+
                     ServiceComments serviceComments = new ServiceComments();
                     if (!string.IsNullOrEmpty(model.Comment_Content))
                     {
@@ -2131,6 +2192,36 @@ namespace E2E.Models
             try
             {
                 return db.Services.Find(id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<Services> Services_ViewJoinTeamList(Guid id, ReportKPI_Filter filter)
+        {
+            try
+            {
+                IQueryable<Services> query = db.ServiceTeams
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Services);
+
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        query = query.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    if (filter.Date_To.HasValue)
+                    {
+                        filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+                        query = query.Where(w => w.Create <= filter.Date_To);
+                    }
+                }
+
+                return query.ToList();
             }
             catch (Exception)
             {

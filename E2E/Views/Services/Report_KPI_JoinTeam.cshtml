@@ -1,11 +1,11 @@
-﻿@model IEnumerable<E2E.Models.Views.ReportKPI_User_Views>
+﻿@model IEnumerable<E2E.Models.Tables.Services>
 
 @{
     Layout = null;
 }
 
 <div class="modal-header">
-    <h5 class="modal-title">Total finished: @Model.Count() tasks.</h5>
+    <h5 class="modal-title">Total join team: @Model.Count() tasks.</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -17,8 +17,7 @@
                 <tr>
                     <th>@Html.DisplayNameFor(m => m.Create)</th>
                     <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
-                    <th>@Html.DisplayNameFor(m => m.Priority_Point)</th>
-                    <th>@Html.DisplayNameFor(m => m.Satisfaction_Average)</th>
+                    <th>@Html.DisplayNameFor(m => m.System_Statuses.Status_Name)</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,8 +29,7 @@
                             <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small>&nbsp;
                             <a href="@Url.Action("ServiceInfomation","Services",new { id=item.Service_Id })" title="@Html.DisplayFor(m => item.Service_Subject)" target="_blank">@Html.DisplayFor(m => item.Service_Subject)</a>
                         </td>
-                        <td class="fit text-center">@Html.DisplayFor(m => item.Priority_Point)</td>
-                        <td class="fit text-center">@Html.DisplayFor(m => item.Satisfaction_Average)</td>
+                        <td class="fit text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(m => item.System_Statuses.Status_Name)</span></td>
                     </tr>
                 }
             </tbody>

@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Report KPI";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
 }
 
 @section breadcrumb{
@@ -28,7 +29,36 @@
                 },
                 async: true,
                 success: function (res) {
-                    $('#modalContent').parent().addClass('modal-lg');
+                    $('#modalContent').parent().addClass('modal-xl');
+
+                    $('#modalContent').html(res);
+                    $('#modalContent').find('select').each(function () {
+                        $(this).select2({
+                            theme: 'bootstrap4',
+                            width: '100%'
+                        });
+                    });
+                    $('#modalContent').find('table').each(function () {
+                        $(this).DataTable({
+                            "columnDefs": { targets: [0, 1], type: 'date' }
+                        });
+                    });
+                    $('#modalArea').modal('show');
+                }
+            });
+            return false;
+        }
+
+        function callJoinTeamModal(id) {
+            $.ajax({
+                url: '@Url.Action("Report_KPI_JoinTeam", "Services")',
+                data: {
+                    id: id,
+                    filter:getQueryString()
+                },
+                async: true,
+                success: function (res) {
+                    $('#modalContent').parent().addClass('modal-xl');
 
                     $('#modalContent').html(res);
                     $('#modalContent').find('select').each(function () {
