@@ -15,7 +15,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-xl navbar-light bg-light sticky-top">
-        <div class="container-sm container-fluid">
+        <div class="container-fluid">
             @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_top" aria-controls="navbar_top" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -25,7 +25,7 @@
     </nav>
     <div id="objSpin"></div>
 
-    <div class="container-sm container-fluid bg-white py-3">
+    <div class="container-fluid bg-white py-3">
         @RenderSection("breadcrumb", required: false)
         @RenderBody()
     </div>

@@ -932,6 +932,8 @@
     <Content Include="Views\Services\Report_KPI_Filter.cshtml" />
     <Content Include="Views\Services\Report_KPI_Table.cshtml" />
     <Content Include="Views\Services\Report_KPI_View.cshtml" />
+    <Content Include="Views\Shared\_LayoutFluid.cshtml" />
+    <Content Include="Views\Services\Report_KPI_JoinTeam.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

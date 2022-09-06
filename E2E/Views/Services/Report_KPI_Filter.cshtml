@@ -4,15 +4,15 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("Index", "Services", FormMethod.Get, new { @class = "form-inline" }))
+@using (Html.BeginForm("Report_KPI", "Services", FormMethod.Get, new { @class = "form-inline" }))
 {
-<div class="form-group">
-    @Html.LabelFor(m => m.Date_From,new { @class="mr-1" })
-    @Html.EditorFor(m => m.Date_From, new { htmlAttributes = new { @class = "form-control", type = "date" } })
-</div>
-<div class="form-group mx-2">
-    @Html.LabelFor(m => m.Date_To, new { @class = "mr-1" })
-    @Html.EditorFor(m => m.Date_To, new { htmlAttributes = new { @class = "form-control", type = "date" } })
-</div>
-<button type="submit" class="btn btn-primary">SEARCH</button>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Date_From, new { @class = "mr-1" })
+        @Html.TextBoxFor(m => m.Date_From, "{0:d}", new { @class = "form-control", type = "date" })
+    </div>
+    <div class="form-group mx-2">
+        @Html.LabelFor(m => m.Date_To, new { @class = "mr-1" })
+        @Html.TextBoxFor(m => m.Date_To, "{0:d}", new { @class = "form-control", type = "date" })
+    </div>
+    <button type="submit" class="btn btn-primary">SEARCH</button>
 }
