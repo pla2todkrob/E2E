@@ -4,15 +4,18 @@
     Layout = null;
 }
 
+
 @using (Html.BeginForm("Report_KPI", "Services", FormMethod.Get, new { @class = "form-inline" }))
 {
     <div class="form-group">
         @Html.LabelFor(m => m.Date_From, new { @class = "mr-1" })
-        @Html.TextBoxFor(m => m.Date_From, "{0:d}", new { @class = "form-control", type = "date" })
+        @Html.TextBoxFor(m => m.Date_From, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
     </div>
     <div class="form-group mx-2">
         @Html.LabelFor(m => m.Date_To, new { @class = "mr-1" })
-        @Html.TextBoxFor(m => m.Date_To, "{0:d}", new { @class = "form-control", type = "date" })
+        @Html.TextBoxFor(m => m.Date_To, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
     </div>
     <button type="submit" class="btn btn-primary">SEARCH</button>
+    <input type="button" class="btn btn-danger ml-1" value="CLEAR" onclick="location.href='@Url.Action("Report_KPI", "Services")'" />
+
 }
