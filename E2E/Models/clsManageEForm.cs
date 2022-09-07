@@ -82,7 +82,6 @@ namespace E2E.Models
                         .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
                         .Select(s => s.User_Id)
                         .ToList();
-                    sendTo.Add(eForms.User_Id);
 
                     var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                     linkUrl += "/" + eForms.EForm_Id;
