@@ -1,5 +1,5 @@
 ﻿//For publish
-//var baseUrl = '/E2E';
+/*var baseUrl = '/E2E';*/
 
 //For develop
 var baseUrl = '';
