@@ -35,14 +35,12 @@ namespace E2E.Controllers
 
             if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
             {
-                res.ChangeDue = data.ServiceChangeDues_List().Count;
+                res.ChangeDue = data.ServiceChangeDues_ListCount().Count;
                 Guid id = Guid.Parse(HttpContext.User.Identity.Name);
                 res.Admin = db.Users
                     .Where(w => w.User_Id == id)
                     .Select(s => s.Role_Id)
                     .FirstOrDefault();
-
-                ViewBag.sql = data.ServiceChangeDues_List().Count;
             }
 
             return PartialView("_Navbar", res);
