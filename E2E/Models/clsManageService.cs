@@ -240,18 +240,18 @@ namespace E2E.Models
                                 reportKPI_User.Average_Score = db.Satisfactions
                         .Where(w => serviceIds.Contains(w.Service_Id))
                         .Average(a => a.Satisfaction_Average);
-
-                                reportKPI_User.SuccessPoint = query
-                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
-                        .Sum(s => s.System_Priorities.Priority_Point);
                             }
 
-                            reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && w.Action_User_Id == item).Count();
-                            reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && w.Action_User_Id == item).Count();
-                            reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && w.Action_User_Id == item).Count();
-                            reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && w.Action_User_Id == item).Count();
-                            reportKPI_User.Total = query.Where(w => w.Action_User_Id == item).Count();
-                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && w.Action_User_Id == item).Count();
+                            reportKPI_User.SuccessPoint = query
+                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
+                        .Sum(s => s.System_Priorities.Priority_Point);
+
+                            reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
+                            reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && serviceIds.Contains(w.Service_Id)).Count();
+                            reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && serviceIds.Contains(w.Service_Id)).Count();
+                            reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && serviceIds.Contains(w.Service_Id)).Count();
+                            reportKPI_User.Total = query.Where(w => serviceIds.Contains(w.Service_Id)).Count();
+                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && serviceIds.Contains(w.Service_Id)).Count();
                         }
 
                         serviceIds = new List<Guid>();
@@ -280,20 +280,27 @@ namespace E2E.Models
 
                     if (serviceIds.Count > 0)
                     {
-                        reportKPI_User.Average_Score = db.Satisfactions
-                    .Where(w => serviceIds.Contains(w.Service_Id))
-                    .Average(a => a.Satisfaction_Average);
+                        int countSatisfaction = db.Satisfactions
+                        .Where(w => serviceIds.Contains(w.Service_Id))
+                        .Count();
+
+                        if (countSatisfaction > 0)
+                        {
+                            reportKPI_User.Average_Score = db.Satisfactions
+                                .Where(w => serviceIds.Contains(w.Service_Id))
+                                .Average(a => a.Satisfaction_Average);
+                        }
 
                         reportKPI_User.SuccessPoint = query
-                            .Where(w => finishIds.Contains(w.Status_Id))
+                            .Where(w => finishIds.Contains(w.Status_Id) && serviceIds.Contains(w.Service_Id))
                         .Sum(s => s.System_Priorities.Priority_Point);
 
-                        reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4).Count();
-                        reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3).Count();
-                        reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2).Count();
-                        reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1).Count();
-                        reportKPI_User.Total = query.Count();
-                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue).Count();
+                        reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
+                        reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && serviceIds.Contains(w.Service_Id)).Count();
+                        reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && serviceIds.Contains(w.Service_Id)).Count();
+                        reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && serviceIds.Contains(w.Service_Id)).Count();
+                        reportKPI_User.Total = query.Where(w => serviceIds.Contains(w.Service_Id)).Count();
+                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && serviceIds.Contains(w.Service_Id)).Count();
                     }
 
                     serviceIds = new List<Guid>();
@@ -519,7 +526,9 @@ namespace E2E.Models
                         Service_Subject = tmp.ser.Service_Subject,
                         Service_Key = tmp.ser.Service_Key,
                         Priority_Point = tmp.ser.System_Priorities.Priority_Point,
-                        Satisfaction_Average = sat.Satisfaction_Average
+                        Satisfaction_Average = sat.Satisfaction_Average,
+                        Status_Name = tmp.ser.System_Statuses.Status_Name,
+                        Status_Class = tmp.ser.System_Statuses.Status_Class
                     }).OrderBy(o => o.Create);
 
                 if (filter != null)
@@ -977,7 +986,7 @@ namespace E2E.Models
 
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = model.Service_Id;
-                    serviceComments.Comment_Content = string.Format("{0}{1}{2}Remark: {3}", Comment,Environment.NewLine, Environment.NewLine,model.Remark);
+                    serviceComments.Comment_Content = string.Format("{0}{1}{2}Remark: {3}", Comment, Environment.NewLine, Environment.NewLine, model.Remark);
                     serviceComments.User_Id = userId;
                     if (Services_Comment(serviceComments))
                     {
@@ -990,7 +999,7 @@ namespace E2E.Models
                         string subject = string.Format("[E2E][Request change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Description:</b> {0}</p>", Comment);
                         content += string.Format("<p><b>Remark:</b> {0}</p>", model.Remark);
-                      
+
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
                         res = mail.SendMail(services.User_Id, subject, content);
