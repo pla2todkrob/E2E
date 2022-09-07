@@ -17,6 +17,7 @@ namespace E2E.Controllers
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
+        private clsManageService data = new clsManageService();
 
         public ActionResult _Copyright()
         {
@@ -28,14 +29,21 @@ namespace E2E.Controllers
 
         public ActionResult _Navbar()
         {
-            int? res = null;
+            clsCountNavbar res = new clsCountNavbar();
+
+            res.Admin = null;
+
+            res.ChangeDue = data.ServiceChangeDues_List().Count;
+
             if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
             {
                 Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-                res = db.Users
+                res.Admin = db.Users
                     .Where(w => w.User_Id == id)
                     .Select(s => s.Role_Id)
                     .FirstOrDefault();
+
+                ViewBag.sql = data.ServiceChangeDues_List().Count;
             }
 
             return PartialView("_Navbar", res);

@@ -1,4 +1,4 @@
-﻿@model int?
+﻿@model E2E.Models.Views.clsCountNavbar
 
 @{
     Layout = null;
@@ -24,34 +24,46 @@
             @*<a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>*@
         </li>
 
-        @if (Model.HasValue)
+        @if (Model.Admin.HasValue)
         {
-            if (Model.Value == 1)
+            if (Model.Admin == 1)
             {
                 Html.RenderPartial("_NavbarAdmin");
             }
 
             Html.RenderAction("_NavManagement", "Configurations");
 
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                @{ Html.RenderAction("_Profile", "Configurations"); }
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_profile">
-                <a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
-                <a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
-                <a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">Request change due date</a>
-                <div class="dropdown-divider"></div>
-                @{ Html.RenderAction("_ShowChangePassword", "Users"); }
-                <a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
-            </div>
-        </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    @{ Html.RenderAction("_Profile", "Configurations"); }
+
+                    @if (Model.ChangeDue.HasValue)
+                    {
+                        <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
+                    }
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_profile">
+                    <a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
+                    <a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
+                    <a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">
+
+                        <span>Request change due date</span>
+                        @if (Model.ChangeDue.HasValue)
+                        {
+                            <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
+                        }
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    @{ Html.RenderAction("_ShowChangePassword", "Users"); }
+                    <a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
+                </div>
+            </li>
         }
         else
         {
-        <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Login","Users")">Login</a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("Login","Users")">Login</a>
+            </li>
         }
     </ul>
 </div>

@@ -1040,11 +1040,11 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Report_KPI()
+        public ActionResult Report_KPI(ReportKPI_Filter model)
         {
             try
             {
-                return View();
+                return View(model);
             }
             catch (Exception)
             {
@@ -1376,7 +1376,9 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.ServiceChangeDues_List());
+                var sql = data.ServiceChangeDues_List();
+
+                return View(sql);
             }
             catch (Exception)
             {

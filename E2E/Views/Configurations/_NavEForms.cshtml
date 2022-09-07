@@ -5,21 +5,28 @@
 }
 <a class="nav-link dropdown-toggle" href="#" id="dropdown_naveforms" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span>E-Forms</span>
+    @if (ViewBag.Author == 2)
+    {
+        if (Model.Value > 0)
+        {
+            <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
+        }
+    }
 </a>
 <div class="dropdown-menu" aria-labelledby="dropdown_naveforms">
     <a class="dropdown-item" href="@Url.Action("Index","EForms")">Public</a>
     <a class="dropdown-item" href="@Url.Action("EForms_MyForms","EForms")">My forms</a>
     @if (ViewBag.Author == 2)
     {
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="@Url.Action("Approve","EForms")">
-        <div class="d-flex justify-content-between align-items-center">
-            <span>Approve</span>
-            @if (Model.Value > 0)
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="@Url.Action("Approve","EForms")">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Approve</span>
+                @if (Model.Value > 0)
                 {
-            <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
+                    <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
                 }
-        </div>
-    </a>
+            </div>
+        </a>
     }
 </div>
