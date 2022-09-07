@@ -457,12 +457,7 @@ namespace E2E.Controllers
             eForms = db.EForms.Find(id);
 
             string deptName = db.Users.Find(eForms.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-            List<Guid> sendTo = db.Users
-                .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
-                .Select(s => s.User_Id)
-                .ToList();
-            sendTo.Add(eForms.User_Id);
-
+            Guid sendTo = eForms.User_Id;
             var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
             linkUrl += "/" + eForms.EForm_Id;
             linkUrl = linkUrl.Replace("Approve_Forms", "EForms_Content");
