@@ -977,7 +977,7 @@ namespace E2E.Models
 
                     ServiceComments serviceComments = new ServiceComments();
                     serviceComments.Service_Id = model.Service_Id;
-                    serviceComments.Comment_Content = string.Format("{0}{1}{2}Remark: {3}", Comment,Environment.NewLine, Environment.NewLine,model.Remark);
+                    serviceComments.Comment_Content = string.Format("{0}{1}{2}Remark: {3}", Comment, Environment.NewLine, Environment.NewLine, model.Remark);
                     serviceComments.User_Id = userId;
                     if (Services_Comment(serviceComments))
                     {
@@ -990,7 +990,7 @@ namespace E2E.Models
                         string subject = string.Format("[E2E][Request change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Description:</b> {0}</p>", Comment);
                         content += string.Format("<p><b>Remark:</b> {0}</p>", model.Remark);
-                      
+
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
                         res = mail.SendMail(services.User_Id, subject, content);
@@ -1016,6 +1016,40 @@ namespace E2E.Models
                     .ToList();
                 return db.ServiceChangeDueDates
                     .Where(w => ids.Contains(w.Service_Id))
+                    .AsEnumerable()
+                    .Select(s => new clsChangeDueDates()
+                    {
+                        ChangeDueDate_Id = s.ChangeDueDate_Id,
+                        Service_Key = s.Services.Service_Key,
+                        Service_Subject = s.Services.Service_Subject,
+                        Create = s.Create,
+                        DueDateStatus_Class = s.System_DueDateStatuses.DueDateStatus_Class,
+                        DueDateStatus_Name = s.System_DueDateStatuses.DueDateStatus_Name,
+                        DueDate_New = s.DueDate_New,
+                        DueDate_Old = s.DueDate,
+                        Update = s.Update,
+                        User_Name = master.Users_GetInfomation(s.User_Id.Value),
+                        Remark = s.Remark
+                    })
+                    .ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<clsChangeDueDates> ServiceChangeDues_ListCount()
+        {
+            try
+            {
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                List<Guid> ids = Services_GetAllRequest_IQ()
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Service_Id)
+                    .ToList();
+                return db.ServiceChangeDueDates
+                    .Where(w => ids.Contains(w.Service_Id) && w.DueDateStatus_Id == 1)
                     .AsEnumerable()
                     .Select(s => new clsChangeDueDates()
                     {
