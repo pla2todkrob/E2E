@@ -30,5 +30,6 @@ namespace E2E.Models.Tables
         public virtual System_DueDateStatuses System_DueDateStatuses { get; set; }
         public DateTime? Update { get; set; }
         public Guid? User_Id { get; set; }
+        public string Remark { get; set; }
     }
 }
