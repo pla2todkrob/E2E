@@ -16,21 +16,23 @@
             <thead>
                 <tr>
                     <th>@Html.DisplayNameFor(m => m.Create)</th>
-                    <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
                     <th>@Html.DisplayNameFor(m => m.System_Statuses.Status_Name)</th>
+                    <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
+
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
-                    <tr>
-                        <td class="fit">@Html.DisplayFor(m => item.Create)</td>
-                        <td>
-                            <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small>&nbsp;
-                            <a href="@Url.Action("ServiceInfomation","Services",new { id=item.Service_Id })" title="@Html.DisplayFor(m => item.Service_Subject)" target="_blank">@Html.DisplayFor(m => item.Service_Subject)</a>
-                        </td>
-                        <td class="fit text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(m => item.System_Statuses.Status_Name)</span></td>
-                    </tr>
+                <tr>
+                    <td class="fit">@Html.DisplayFor(m => item.Create)</td>
+                    <td class="fit text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(m => item.System_Statuses.Status_Name)</span></td>
+                    <td>
+                        <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small>&nbsp;
+                        <a href="@Url.Action("ServiceInfomation","Services",new { id=item.Service_Id })" title="@Html.DisplayFor(m => item.Service_Subject)" target="_blank">@Html.DisplayFor(m => item.Service_Subject)</a>
+                    </td>
+
+                </tr>
                 }
             </tbody>
         </table>

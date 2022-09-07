@@ -16,6 +16,7 @@
             <thead>
                 <tr>
                     <th>@Html.DisplayNameFor(m => m.Create)</th>
+                    <th>@Html.DisplayNameFor(m => m.Status_Name)</th>
                     <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
                     <th>@Html.DisplayNameFor(m => m.Priority_Point)</th>
                     <th>@Html.DisplayNameFor(m => m.Satisfaction_Average)</th>
@@ -24,15 +25,16 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    <tr>
-                        <td class="fit">@Html.DisplayFor(m => item.Create)</td>
-                        <td>
-                            <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small>&nbsp;
-                            <a href="@Url.Action("ServiceInfomation","Services",new { id=item.Service_Id })" title="@Html.DisplayFor(m => item.Service_Subject)" target="_blank">@Html.DisplayFor(m => item.Service_Subject)</a>
-                        </td>
-                        <td class="fit text-center">@Html.DisplayFor(m => item.Priority_Point)</td>
-                        <td class="fit text-center">@Html.DisplayFor(m => item.Satisfaction_Average)</td>
-                    </tr>
+                <tr>
+                    <td class="fit">@Html.DisplayFor(m => item.Create)</td>
+                    <td class="fit text-center"><span class="@item.Status_Class">@Html.DisplayFor(m => item.Status_Name)</span></td>
+                    <td>
+                        <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small>&nbsp;
+                        <a href="@Url.Action("ServiceInfomation","Services",new { id=item.Service_Id })" title="@Html.DisplayFor(m => item.Service_Subject)" target="_blank">@Html.DisplayFor(m => item.Service_Subject)</a>
+                    </td>
+                    <td class="fit text-center">@Html.DisplayFor(m => item.Priority_Point)</td>
+                    <td class="fit text-center">@Html.DisplayFor(m => item.Satisfaction_Average)</td>
+                </tr>
                 }
             </tbody>
         </table>
