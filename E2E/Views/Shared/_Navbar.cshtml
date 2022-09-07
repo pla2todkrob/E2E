@@ -37,7 +37,7 @@
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     @{ Html.RenderAction("_Profile", "Configurations"); }
 
-                    @if (Model.ChangeDue.HasValue)
+                    @if (Model.ChangeDue.Value > 0)
                     {
                         <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
                     }
@@ -48,7 +48,7 @@
                     <a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">
 
                         <span>Request change due date</span>
-                        @if (Model.ChangeDue.HasValue)
+                        @if (Model.ChangeDue.Value > 0)
                         {
                             <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
                         }

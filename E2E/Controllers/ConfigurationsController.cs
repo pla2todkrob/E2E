@@ -33,10 +33,9 @@ namespace E2E.Controllers
 
             res.Admin = null;
 
-            res.ChangeDue = data.ServiceChangeDues_List().Count;
-
             if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
             {
+                res.ChangeDue = data.ServiceChangeDues_List().Count;
                 Guid id = Guid.Parse(HttpContext.User.Identity.Name);
                 res.Admin = db.Users
                     .Where(w => w.User_Id == id)
