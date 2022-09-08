@@ -242,9 +242,13 @@ namespace E2E.Models
                         .Average(a => a.Satisfaction_Average);
                             }
 
-                            reportKPI_User.SuccessPoint = query
-                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
-                        .Sum(s => s.System_Priorities.Priority_Point);
+                            var Finish = query
+                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id)).ToList();
+
+                            if (Finish.Count > 0)
+                            {
+                                reportKPI_User.SuccessPoint = Finish.Sum(s => s.System_Priorities.Priority_Point);
+                            }
 
                             reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
                             reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && serviceIds.Contains(w.Service_Id)).Count();
@@ -890,6 +894,22 @@ namespace E2E.Models
                             serviceComments.Service_Id = serviceChangeDueDate.Service_Id;
                             serviceComments.User_Id = userId;
                             res = Services_Comment(serviceComments);
+
+                            var Sendto = db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefault();
+
+                            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+
+                            string[] cut = linkUrl.Split('/');
+
+                            linkUrl = linkUrl.Replace("RequestChangeDue_Accept/" + cut[5], "Action");
+                            linkUrl += "/" + serviceComments.Service_Id;
+
+                            string subject = string.Format("[E2E][Accept Request change due] {0} - {1}", services.Service_Key, services.Service_Subject);
+                            string content = string.Format("<p><b>Comment: </b> {0}<br />", serviceComments.Comment_Content);
+                            content += "</p>";
+                            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                            content += "<p>Thank you for your consideration</p>";
+                            res = mail.SendMail(Sendto.User_Id.Value, subject, content);
                         }
                     }
                 }
@@ -961,6 +981,22 @@ namespace E2E.Models
                     serviceComments.Service_Id = serviceChangeDueDate.Service_Id;
                     serviceComments.User_Id = userId;
                     res = Services_Comment(serviceComments);
+
+                    var Sendto = db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefault();
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+
+                    string[] cut = linkUrl.Split('/');
+
+                    linkUrl = linkUrl.Replace("RequestChangeDue_Reject/" + cut[5], "Action");
+                    linkUrl += "/" + serviceComments.Service_Id;
+
+                    string subject = string.Format("[E2E][Reject Request change due] {0} - {1}", Sendto.Services.Service_Key, Sendto.Services.Service_Subject);
+                    string content = string.Format("<p><b>Comment: </b> {0}<br />", "Reject due date change request");
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    res = mail.SendMail(Sendto.User_Id.Value, subject, content);
                 }
 
                 return res;
