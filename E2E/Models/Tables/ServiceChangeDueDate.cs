@@ -25,11 +25,11 @@ namespace E2E.Models.Tables
         public DateTime? DueDate_New { get; set; }
 
         public int DueDateStatus_Id { get; set; }
+        public string Remark { get; set; }
         public Guid Service_Id { get; set; }
         public virtual Services Services { get; set; }
         public virtual System_DueDateStatuses System_DueDateStatuses { get; set; }
         public DateTime? Update { get; set; }
         public Guid? User_Id { get; set; }
-        public string Remark { get; set; }
     }
 }

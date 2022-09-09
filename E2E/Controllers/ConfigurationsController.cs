@@ -14,10 +14,10 @@ namespace E2E.Controllers
     [AllowAnonymous]
     public class ConfigurationsController : Controller
     {
+        private clsManageService data = new clsManageService();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
-        private clsManageService data = new clsManageService();
 
         public ActionResult _Copyright()
         {

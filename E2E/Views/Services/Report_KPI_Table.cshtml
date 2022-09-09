@@ -4,39 +4,39 @@
 
 @if (Model.Authorize_Id != 3)
 {
-    <div class="card shadow mb-5">
-        <div class="card-header">
-            <h5 class="card-title">Overview</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <table class="display table table-bordered table-hover nowrap w-100 mb-5">
-                    <thead>
-                        <tr>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Total)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Close_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Complete_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Inprogress_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Pending_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OverDue_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Average_Score)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Total)</td>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Close_Count)</td>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Complete_Count)</td>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Inprogress_Count)</td>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Pending_Count)</td>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OverDue_Count)</td>
-                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Average_Score)</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<div class="card shadow mb-5">
+    <div class="card-header">
+        <h5 class="card-title">Overview</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <table class="display table table-bordered table-hover nowrap w-100 mb-5">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Total)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Close_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Complete_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Inprogress_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Pending_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OverDue_Count)</th>
+                        <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Average_Score)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Total)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Close_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Complete_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Inprogress_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Pending_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OverDue_Count)</td>
+                        <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Average_Score)</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
 }
 <div class="card shadow">
@@ -62,18 +62,18 @@
             <tbody>
                 @foreach (var item in Model.ReportKPI_Users)
                 {
-                    <tr>
-                        <td class="fit"><span class="btn btn-link" onclick="callSatisfactionModal('@item.User_Id')">@Html.DisplayFor(m => item.User_Name)</span></td>
-                        <td>@Html.DisplayFor(m => item.SuccessPoint)</td>
-                        <td>@Html.DisplayFor(m => item.Total)</td>
-                        <td>@Html.DisplayFor(m => item.Close_Count)</td>
-                        <td>@Html.DisplayFor(m => item.Complete_Count)</td>
-                        <td>@Html.DisplayFor(m => item.Inprogress_Count)</td>
-                        <td>@Html.DisplayFor(m => item.Pending_Count)</td>
-                        <td>@Html.DisplayFor(m => item.OverDue_Count)</td>
-                        <td>@Html.DisplayFor(m => item.Average_Score)</td>
-                        <td><span class="btn btn-link" onclick="callJoinTeamModal('@item.User_Id')">@Html.DisplayFor(m => item.JoinTeam_Count)</span></td>
-                    </tr>
+                <tr>
+                    <td class="fit"><span class="btn btn-link" onclick="callSatisfactionModal('@item.User_Id')">@Html.DisplayFor(m => item.User_Name)</span></td>
+                    <td>@Html.DisplayFor(m => item.SuccessPoint)</td>
+                    <td>@Html.DisplayFor(m => item.Total)</td>
+                    <td>@Html.DisplayFor(m => item.Close_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Complete_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Inprogress_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Pending_Count)</td>
+                    <td>@Html.DisplayFor(m => item.OverDue_Count)</td>
+                    <td>@Html.DisplayFor(m => item.Average_Score)</td>
+                    <td><span class="btn btn-link" onclick="callJoinTeamModal('@item.User_Id')">@Html.DisplayFor(m => item.JoinTeam_Count)</span></td>
+                </tr>
                 }
             </tbody>
         </table>

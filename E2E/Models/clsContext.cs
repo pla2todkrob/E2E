@@ -11,7 +11,7 @@ namespace E2E.Models
             base.OnModelCreating(modelBuilder);
         }
 
-        public clsContext() : base(ConfigurationManager.AppSettings["DBCON"])
+        public clsContext() : base(ConfigurationManager.AppSettings["NameConn"])
         {
         }
 

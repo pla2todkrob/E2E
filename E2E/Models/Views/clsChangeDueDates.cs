@@ -19,6 +19,8 @@ namespace E2E.Models.Views
         [Display(Name = "Status")]
         public string DueDateStatus_Name { get; set; }
 
+        public string Remark { get; set; }
+
         [Display(Name = "Key")]
         public string Service_Key { get; set; }
 
@@ -29,7 +31,5 @@ namespace E2E.Models.Views
 
         [Display(Name = "User")]
         public string User_Name { get; set; }
-
-        public string Remark { get; set; }
     }
 }

@@ -9,7 +9,7 @@
     {
         if (Model.Value > 0)
         {
-            <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
+    <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
         }
     }
 </a>
@@ -18,15 +18,15 @@
     <a class="dropdown-item" href="@Url.Action("EForms_MyForms","EForms")">My forms</a>
     @if (ViewBag.Author == 2)
     {
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="@Url.Action("Approve","EForms")">
-            <div class="d-flex justify-content-between align-items-center">
-                <span>Approve</span>
-                @if (Model.Value > 0)
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="@Url.Action("Approve","EForms")">
+        <div class="d-flex justify-content-between align-items-center">
+            <span>Approve</span>
+            @if (Model.Value > 0)
                 {
-                    <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
+            <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
                 }
-            </div>
-        </a>
+        </div>
+    </a>
     }
 </div>
