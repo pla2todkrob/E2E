@@ -8,13 +8,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png">
     <link rel="manifest" href="~/site.webmanifest">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="~/Content/Site.css" rel="stylesheet" />
     <title>@ViewBag.Title - E2E one stop service</title>
     @Styles.Render("~/bundles/css")
     @Scripts.Render("~/bundles/modernizr")
     @RenderSection("css", required: false)
 </head>
 <body>
-    <nav class="navbar navbar-expand-xl navbar-light bg-light sticky-top">
+    <nav class="navbar navbar-expand-xl navbar-light bg-light">
         <div class="container-fluid">
             @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_top" aria-controls="navbar_top" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +30,8 @@
         @RenderSection("breadcrumb", required: false)
         @RenderBody()
     </div>
+
+    <button onclick="topFunction()" id="btnToTop" class="d-none" title="Go to top"><i class="fa fa-arrow-circle-up"></i></button>
 
     <footer class="mt-3">
         <small>&copy;&nbsp;@{ Html.RenderAction("_Copyright", "Configurations"); }</small>

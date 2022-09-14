@@ -29,6 +29,7 @@ $(function () {
         $($.fn.dataTable.tables(true)).DataTable()
             .columns.adjust();
     });
+    scrollFunction();
 });
 $(document).ajaxStart(function () {
     callSpin(true);
@@ -748,4 +749,21 @@ function callDeleteIMG_SC(urlAjax) {
             return false;
         }
     });
+}
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function () { scrollFunction() };
+
+function scrollFunction() {
+    var top = $('#btnToTop');
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        top.fadeIn(300);
+    } else {
+        top.fadeOut(300);
+    }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }

@@ -13,6 +13,8 @@ namespace E2E.Models
         private clsImage clsImag = new clsImage();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
+        private clsMail clsMail = new clsMail();
+        private clsManageMaster master = new clsManageMaster();
 
         protected bool Board_CountComment_Delete(Guid id, int num)
         {
@@ -353,13 +355,27 @@ namespace E2E.Models
                 db.TopicComments.Add(topicComments);
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
+                    var query = db.Topics.Find(model.Topic_Id);
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace("Boards_Comment", "Boards_Form");
+                    linkUrl += "/" + query.Topic_Id;
+
+                    string subject = string.Format("[E2E][Notify new comment] {0}", query.Topic_Title);
+                    string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(topicComments.User_Id.Value));
+                    content += "<br />";
+                    content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    res = clsMail.SendMail(query.User_Id, subject, content);
+
                     Board_CountComment_Update(model);
                 }
 
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -481,10 +497,10 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                var ID = db.TopicComments.Where(w => w.TopicComment_Id == model.TopicComment_Id).FirstOrDefault();
+                var DBTopicComment = db.TopicComments.Where(w => w.TopicComment_Id == model.TopicComment_Id).FirstOrDefault();
                 TopicComments topicComments = new TopicComments();
 
-                topicComments.Topic_Id = ID.Topic_Id;
+                topicComments.Topic_Id = DBTopicComment.Topic_Id;
                 topicComments.Ref_TopicComment_Id = model.TopicComment_Id;
                 topicComments.Comment_Content = model.Comment_Content;
                 topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
@@ -492,13 +508,27 @@ namespace E2E.Models
                 db.TopicComments.Add(topicComments);
                 if (db.SaveChanges() > 0)
                 {
-                    res = true;
-                    Board_CountComment_Update(ID);
+                    //var query = db.TopicComments.Where(w => w.Topic_Id == model.Topic_Id).Select(s=>s.).FirstOrDefault();
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace("Boards_Reply", "Boards_Form");
+                    linkUrl += "/" + DBTopicComment.Topics.Topic_Id;
+
+                    string subject = string.Format("[E2E][Notify new comment] {0}", DBTopicComment.Topics.Topic_Title);
+                    string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(DBTopicComment.User_Id.Value));
+                    content += "<br />";
+                    content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    res = clsMail.SendMail(DBTopicComment.User_Id.Value, subject, content);
+
+                    Board_CountComment_Update(DBTopicComment);
                 }
 
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -589,6 +619,7 @@ namespace E2E.Models
                 topicSections.TopicSection_Link = model.TopicSection_Link;
                 topicSections.TopicSection_Title = model.TopicSection_Title;
                 topicSections.Topic_Id = model.Topic_Id;
+
                 if (files[0].ContentLength > 0)
                 {
                     HttpPostedFileBase file = files[0];
@@ -619,6 +650,8 @@ namespace E2E.Models
                 bool res = new bool();
                 TopicSections topicSections = new TopicSections();
                 topicSections = db.TopicSections.Find(model.TopicSection_Id);
+
+                Boards_Section_UpdateTopics(model);
 
                 if (topicSections == null)
                 {
@@ -661,6 +694,28 @@ namespace E2E.Models
                     topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString(fulldir, file);
                 }
                 topicSections.Update = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Boards_Section_UpdateTopics(TopicSections model)
+        {
+            try
+            {
+                bool res = new bool();
+                Topics topics = new Topics();
+                topics = db.Topics.Where(w => w.Topic_Id == model.Topic_Id).FirstOrDefault();
+                topics.Update = model.Create;
 
                 if (db.SaveChanges() > 0)
                 {
