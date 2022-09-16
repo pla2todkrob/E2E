@@ -26,10 +26,9 @@ namespace E2E.Models
                     .Where(w => w.User_Id == id)
                     .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
-                List<Guid> userIds = db.Users
+                IQueryable<Guid> userIds = db.Users
                     .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == departmentName)
-                    .Select(s => s.User_Id)
-                    .ToList();
+                    .Select(s => s.User_Id);
                 IQueryable<Services> query = db.Services
                     .Where(w => userIds.Contains(w.User_Id));
 
@@ -51,10 +50,9 @@ namespace E2E.Models
                     .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
 
-                List<Guid> deptIds = db.Master_Departments
+                IQueryable<Guid> deptIds = db.Master_Departments
                     .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id)
-                    .ToList();
+                    .Select(s => s.Department_Id);
 
                 IQueryable<Services> query = db.Services
                     .Where(w => deptIds.Contains(w.Department_Id.Value));
@@ -91,10 +89,9 @@ namespace E2E.Models
                         .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                         .FirstOrDefault();
 
-                    List<Guid> deptIds = db.Master_Departments
+                    IQueryable<Guid> deptIds = db.Master_Departments
                     .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id)
-                    .ToList();
+                    .Select(s => s.Department_Id);
 
                     query = query.Where(w => (deptIds.Contains(w.Department_Id.Value) && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
                 }
@@ -176,9 +173,9 @@ namespace E2E.Models
                 clsReportKPI res = new clsReportKPI();
 
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                List<Guid> userIds = new List<Guid>();
+                IQueryable<Guid> userIds;
 
-                List<Guid> serviceIds = new List<Guid>();
+                IQueryable<Guid> serviceIds;
                 IQueryable<Services> query = db.Services.OrderBy(o => o.Create).ThenBy(t => t.Update);
 
                 res.Authorize_Id = db.Users
@@ -199,8 +196,7 @@ namespace E2E.Models
                 userIds = db.Users
                     .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
                     .OrderBy(o => o.User_Code)
-                    .Select(s => s.User_Id)
-                    .ToList();
+                    .Select(s => s.User_Id);
 
                 query = query.Where(w => userIds.Contains(w.Action_User_Id.Value));
 
@@ -211,26 +207,21 @@ namespace E2E.Models
                         query = query.Where(w => w.Create >= filter.Date_From);
                     }
 
-                    if (filter.Date_To.HasValue)
-                    {
-                        filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
-                        query = query.Where(w => w.Create <= filter.Date_To);
-                    }
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
                 }
 
                 if (res.Authorize_Id != 3)
                 {
                     foreach (var item in userIds)
                     {
-                        serviceIds = new List<Guid>();
                         serviceIds = query
                             .Where(w => w.Action_User_Id == item)
-                            .Select(s => s.Service_Id)
-                            .ToList();
+                            .Select(s => s.Service_Id);
 
                         ReportKPI_User reportKPI_User = new ReportKPI_User();
 
-                        if (serviceIds.Count > 0)
+                        if (serviceIds.Count() > 0)
                         {
                             int countSatisfaction = db.Satisfactions
                         .Where(w => serviceIds.Contains(w.Service_Id))
@@ -242,12 +233,15 @@ namespace E2E.Models
                         .Average(a => a.Satisfaction_Average);
                             }
 
-                            var Finish = query
-                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id)).ToList();
+                            int successCount = query
+                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
+                                    .Count();
 
-                            if (Finish.Count > 0)
+                            if (successCount > 0)
                             {
-                                reportKPI_User.SuccessPoint = Finish.Sum(s => s.System_Priorities.Priority_Point);
+                                reportKPI_User.SuccessPoint = query
+                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
+                                    .Sum(s => s.System_Priorities.Priority_Point);
                             }
 
                             reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
@@ -258,11 +252,9 @@ namespace E2E.Models
                             reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && serviceIds.Contains(w.Service_Id)).Count();
                         }
 
-                        serviceIds = new List<Guid>();
                         serviceIds = query
                         .Where(w => w.Action_User_Id != item)
-                        .Select(s => s.Service_Id)
-                        .ToList();
+                        .Select(s => s.Service_Id);
 
                         reportKPI_User.JoinTeam_Count = db.ServiceTeams
                             .Where(w => serviceIds.Contains(w.Service_Id) && w.User_Id == item)
@@ -277,12 +269,11 @@ namespace E2E.Models
                 {
                     serviceIds = query
                         .Where(w => w.Action_User_Id == userId)
-                        .Select(s => s.Service_Id)
-                        .ToList();
+                        .Select(s => s.Service_Id);
 
                     ReportKPI_User reportKPI_User = new ReportKPI_User();
 
-                    if (serviceIds.Count > 0)
+                    if (serviceIds.Count() > 0)
                     {
                         int countSatisfaction = db.Satisfactions
                         .Where(w => serviceIds.Contains(w.Service_Id))
@@ -295,9 +286,15 @@ namespace E2E.Models
                                 .Average(a => a.Satisfaction_Average);
                         }
 
-                        reportKPI_User.SuccessPoint = query
+                        int successCount = query
+                            .Where(w => finishIds.Contains(w.Status_Id) && serviceIds.Contains(w.Service_Id))
+                            .Count();
+                        if (successCount > 0)
+                        {
+                            reportKPI_User.SuccessPoint = query
                             .Where(w => finishIds.Contains(w.Status_Id) && serviceIds.Contains(w.Service_Id))
                         .Sum(s => s.System_Priorities.Priority_Point);
+                        }
 
                         reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
                         reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && serviceIds.Contains(w.Service_Id)).Count();
@@ -307,11 +304,9 @@ namespace E2E.Models
                         reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && serviceIds.Contains(w.Service_Id)).Count();
                     }
 
-                    serviceIds = new List<Guid>();
                     serviceIds = query
                         .Where(w => w.Action_User_Id != userId)
-                        .Select(s => s.Service_Id)
-                        .ToList();
+                        .Select(s => s.Service_Id);
 
                     reportKPI_User.JoinTeam_Count = db.ServiceTeams
                         .Where(w => serviceIds.Contains(w.Service_Id) && w.User_Id == userId)
@@ -322,16 +317,16 @@ namespace E2E.Models
                     res.ReportKPI_Users.Add(reportKPI_User);
                 }
 
-                res.ReportKPI_Overview.Average_Score = res.ReportKPI_Users
-                    .Where(w => w.Average_Score.HasValue)
-                    .Average(a => a.Average_Score);
-
                 res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
                 res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
                 res.ReportKPI_Overview.Inprogress_Count = res.ReportKPI_Users.Select(s => s.Inprogress_Count).Sum();
                 res.ReportKPI_Overview.Pending_Count = res.ReportKPI_Users.Select(s => s.Pending_Count).Sum();
                 res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
                 res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
+                int ontimeCount = res.ReportKPI_Overview.Total - res.ReportKPI_Overview.OverDue_Count;
+                res.ReportKPI_Overview.OnTime_Count = ontimeCount;
+                double ontimePercent = Convert.ToDouble(ontimeCount) / Convert.ToDouble(res.ReportKPI_Overview.Total);
+                res.ReportKPI_Overview.OnTime_Percent = ontimePercent;
 
                 return res;
             }
@@ -542,11 +537,8 @@ namespace E2E.Models
                         query = query.Where(w => w.Create >= filter.Date_From);
                     }
 
-                    if (filter.Date_To.HasValue)
-                    {
-                        filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
-                        query = query.Where(w => w.Create <= filter.Date_To);
-                    }
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
                 }
 
                 return query.ToList();
@@ -1248,7 +1240,7 @@ namespace E2E.Models
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
-                var serviceTeams = db.ServiceTeams.Where(w => w.User_Id == id).Select(s => s.Service_Id).ToList();
+                IQueryable<Guid> serviceTeams = db.ServiceTeams.Where(w => w.User_Id == id).Select(s => s.Service_Id);
 
                 return Services_GetAllTask_IQ()
                     .Where(w => w.Action_User_Id == id || serviceTeams.Contains(w.Service_Id))
@@ -1276,9 +1268,8 @@ namespace E2E.Models
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-                List<Guid> userIdList = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
-                var sql = db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
+                IQueryable<Guid> userIdList = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id);
                 return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
             }
             catch (Exception)
@@ -2294,11 +2285,8 @@ namespace E2E.Models
                         query = query.Where(w => w.Create >= filter.Date_From);
                     }
 
-                    if (filter.Date_To.HasValue)
-                    {
-                        filter.Date_To = filter.Date_To.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
-                        query = query.Where(w => w.Create <= filter.Date_To);
-                    }
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
                 }
 
                 return query.ToList();

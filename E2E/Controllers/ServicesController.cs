@@ -701,7 +701,8 @@ namespace E2E.Controllers
             {
                 string key = db.Services.Find(id).Service_Key;
                 string dir = string.Format("Service/{0}/DocumentControls/", key);
-                ftp.Ftp_DownloadFolder(dir, key);
+                string zipDir = string.Format("DocumentControls\\{0}", key);
+                ftp.Ftp_DownloadFolder(dir, zipDir);
             }
             catch (Exception)
             {
@@ -1037,6 +1038,70 @@ namespace E2E.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public ActionResult RenameFolder()
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    var serviceList = db.Services
+                        .Select(s => new
+                        {
+                            Id = s.Service_Id,
+                            Key = s.Service_Key
+                        }).ToList();
+
+                    foreach (var item in serviceList)
+                    {
+                        List<ServiceFiles> serviceFiles = new List<ServiceFiles>();
+                        serviceFiles = db.ServiceFiles
+                            .Where(w => w.Service_Id == item.Id && w.ServiceFile_Path.Contains(item.Id.ToString()))
+                            .ToList();
+                        if (serviceFiles.Count > 0)
+                        {
+                            foreach (var item2 in serviceFiles)
+                            {
+                                item2.ServiceFile_Path = item2.ServiceFile_Path.Replace(item.Id.ToString(), item.Key);
+                                db.Entry(item2).State = System.Data.Entity.EntityState.Modified;
+                            }
+                        }
+
+                        List<Guid> serviceCommentsIds = new List<Guid>();
+                        serviceCommentsIds = db.ServiceComments
+                            .Where(w => w.Service_Id == item.Id)
+                            .Select(s => s.ServiceComment_Id)
+                            .ToList();
+                        List<ServiceCommentFiles> serviceCommentFiles = new List<ServiceCommentFiles>();
+                        serviceCommentFiles = db.ServiceCommentFiles
+                            .Where(w => serviceCommentsIds.Contains(w.ServiceComment_Id) && w.ServiceCommentFile_Path.Contains(item.Id.ToString()))
+                            .ToList();
+                        if (serviceCommentFiles.Count > 0)
+                        {
+                            foreach (var item2 in serviceCommentFiles)
+                            {
+                                item2.ServiceCommentFile_Path = item2.ServiceCommentFile_Path.Replace(item.Id.ToString(), item.Key);
+                                db.Entry(item2).State = System.Data.Entity.EntityState.Modified;
+                            }
+                        }
+                    }
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        if (ftp.Ftp_RenameFolder("Service"))
+                        {
+                            scope.Complete();
+                        }
+                    }
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
         }
 

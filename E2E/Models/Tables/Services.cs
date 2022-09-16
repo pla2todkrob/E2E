@@ -37,7 +37,10 @@ namespace E2E.Models.Tables
         [Display(Name = "Service Reference")]
         public Guid? Ref_Service_Id { get; set; }
 
-        [Display(Name = "Contact number")]
+        [Display(Name = "Actual time")]
+        public int Service_ActualTime { get; set; }
+
+        [Display(Name = "Contact")]
         public string Service_Contact { get; set; }
 
         [Display(Name = "Description")]
@@ -46,7 +49,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Due date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? Service_DueDate { get; set; }
 
-        [Display(Name = "Estimate days")]
+        [Display(Name = "Estimate time")]
         public int Service_EstimateTime { get; set; }
 
         public int Service_FileCount { get; set; }
