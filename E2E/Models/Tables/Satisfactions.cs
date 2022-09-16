@@ -21,5 +21,6 @@ namespace E2E.Models.Tables
 
         public Guid Service_Id { get; set; }
         public virtual Services Services { get; set; }
+        public bool Unsatisfied { get; set; }
     }
 }

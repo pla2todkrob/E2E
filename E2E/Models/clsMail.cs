@@ -2,10 +2,12 @@
 using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Web;
 
 namespace E2E.Models
@@ -19,7 +21,6 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
                               | SecurityProtocolType.Tls11
                               | SecurityProtocolType.Tls12;
@@ -98,7 +99,7 @@ namespace E2E.Models
             }
         }
 
-        public bool SendMail(List<Guid> sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null)
+        public bool SendMail(List<Guid> sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null, List<string> attachPaths = null)
         {
             try
             {
@@ -126,6 +127,20 @@ namespace E2E.Models
                     dear += receiveDatas[i].NameEN;
                 }
 
+                foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
+                {
+                    var email = new EmailAddressAttribute();
+                    if (email.IsValid(item))
+                    {
+                        msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
+                    }
+                }
+
+                if (msg.To.Count == 0)
+                {
+                    return true;
+                }
+
                 if (sendCC != null)
                 {
                     List<ReceiveData> receiveCC = db.UserDetails
@@ -139,9 +154,13 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
-                    foreach (var item in receiveCC)
+                    foreach (var item in receiveCC.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
-                        msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                        var email = new EmailAddressAttribute();
+                        if (email.IsValid(item))
+                        {
+                            msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                        }
                     }
                 }
 
@@ -158,9 +177,23 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
-                    foreach (var item in receiveBCC)
+                    foreach (var item in receiveBCC.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
-                        msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                        var email = new EmailAddressAttribute();
+                        if (email.IsValid(item))
+                        {
+                            msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                        }
+                    }
+                }
+
+                if (attachPaths != null)
+                {
+                    foreach (var item in attachPaths)
+                    {
+                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+
+                        msg.Attachments.Add(attachment);
                     }
                 }
 
@@ -177,13 +210,28 @@ namespace E2E.Models
                 strBody += string.Format("<p><b>{0}</b></p>", dear);
                 strBody += sendFrom;
                 strBody += strContent;
+                if (receiveDatas.Where(w => string.IsNullOrEmpty(w.Email)).Count() > 0)
+                {
+                    string warningContent = "Can't send email to: ";
+                    List<ReceiveData> noEmail = new List<ReceiveData>();
+                    noEmail = receiveDatas.Where(w => string.IsNullOrEmpty(w.Email)).ToList();
+                    for (int i = 0; i < noEmail.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            warningContent += noEmail[i].FullNameEN;
+                        }
+                        else
+                        {
+                            warningContent += ", " + noEmail[i].FullNameEN;
+                        }
+                    }
+
+                    warningContent += " because there's no email.";
+                    strBody += warningContent;
+                }
                 strBody += "</body>";
                 strBody += "</html>";
-
-                foreach (var item in receiveDatas)
-                {
-                    msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
-                }
 
                 msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
                 msg.Subject = strSubject;
@@ -198,14 +246,14 @@ namespace E2E.Models
             }
         }
 
-        public bool SendMail(Guid sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null)
+        public bool SendMail(Guid sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null, List<string> attachPaths = null)
         {
             try
             {
                 MailMessage msg = new MailMessage();
 
                 string dear = "Dear ";
-                List<ReceiveData> receiveDatas = db.UserDetails
+                ReceiveData receiveDatas = db.UserDetails
                     .Where(w => w.User_Id == sendTo)
                     .Select(s => new ReceiveData()
                     {
@@ -214,17 +262,22 @@ namespace E2E.Models
                         NameTH = s.Detail_TH_FirstName,
                         FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                    }).ToList();
+                    }).FirstOrDefault();
 
-                for (int i = 0; i < receiveDatas.Count; i++)
+                if (string.IsNullOrEmpty(receiveDatas.Email))
                 {
-                    if (i != 0)
-                    {
-                        dear += ", ";
-                    }
-
-                    dear += receiveDatas[i].NameEN;
+                    return true;
                 }
+
+                var email = new EmailAddressAttribute();
+                if (!email.IsValid(receiveDatas.Email))
+                {
+                    return true;
+                }
+
+                msg.To.Add(new MailAddress(receiveDatas.Email, receiveDatas.FullNameEN));
+
+                dear += receiveDatas.NameEN;
 
                 if (sendCC != null)
                 {
@@ -241,7 +294,11 @@ namespace E2E.Models
 
                     foreach (var item in receiveCC)
                     {
-                        msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                        email = new EmailAddressAttribute();
+                        if (email.IsValid(item.Email))
+                        {
+                            msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                        }
                     }
                 }
 
@@ -260,7 +317,21 @@ namespace E2E.Models
 
                     foreach (var item in receiveBCC)
                     {
-                        msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                        email = new EmailAddressAttribute();
+                        if (email.IsValid(item.Email))
+                        {
+                            msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                        }
+                    }
+                }
+
+                if (attachPaths != null)
+                {
+                    foreach (var item in attachPaths)
+                    {
+                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+
+                        msg.Attachments.Add(attachment);
                     }
                 }
 
@@ -280,13 +351,110 @@ namespace E2E.Models
                 strBody += "</body>";
                 strBody += "</html>";
 
-                foreach (var item in receiveDatas)
-                {
-                    msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
-                }
-
                 msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
                 msg.Subject = strSubject;
+                msg.Body = new MessageBody(BodyType.HTML, strBody);
+                msg.IsBodyHtml = true;
+
+                return SendMail(msg);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool SendMail(List<string> sendTo, string subject, string content, List<string> attachPaths = null)
+        {
+            try
+            {
+                MailMessage msg = new MailMessage();
+                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+                foreach (var item in sendTo)
+                {
+                    var email = new EmailAddressAttribute();
+                    if (email.IsValid(item))
+                    {
+                        msg.To.Add(item);
+                    }
+                }
+
+                msg.Subject = subject;
+
+                string strBody = "<html>";
+                strBody += "<head>";
+                strBody += "</head>";
+                strBody += "<body>";
+                strBody += content;
+                strBody += "</body>";
+                strBody += "</html>";
+
+                if (attachPaths != null)
+                {
+                    foreach (var item in attachPaths)
+                    {
+                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+
+                        msg.Attachments.Add(attachment);
+                    }
+                }
+
+                msg.Body = new MessageBody(BodyType.HTML, strBody);
+                msg.IsBodyHtml = true;
+
+                return SendMail(msg);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool SendMail(List<string> sendTo, string subject, string content, Guid sendCC, List<string> attachPaths = null)
+        {
+            try
+            {
+                MailMessage msg = new MailMessage();
+
+                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+
+                var email = new EmailAddressAttribute();
+                foreach (var item in sendTo)
+                {
+                    email = new EmailAddressAttribute();
+                    if (email.IsValid(item))
+                    {
+                        msg.To.Add(item);
+                    }
+                }
+
+                string emailCC = db.Users.Find(sendCC).User_Email;
+                email = new EmailAddressAttribute();
+                if (email.IsValid(emailCC))
+                {
+                    msg.CC.Add(emailCC);
+                }
+
+                msg.Subject = subject;
+
+                string strBody = "<html>";
+                strBody += "<head>";
+                strBody += "</head>";
+                strBody += "<body>";
+                strBody += content;
+                strBody += "</body>";
+                strBody += "</html>";
+
+                if (attachPaths != null)
+                {
+                    foreach (var item in attachPaths)
+                    {
+                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+
+                        msg.Attachments.Add(attachment);
+                    }
+                }
+
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 

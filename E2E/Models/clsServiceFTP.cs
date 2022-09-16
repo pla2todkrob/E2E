@@ -16,9 +16,10 @@ namespace E2E.Models
     {
         private static string saveToPath = string.Empty;
         private string dir = ConfigurationManager.AppSettings["FTP_Dir"];
+        private clsMail mail = new clsMail();
         private string pass = ConfigurationManager.AppSettings["FTP_Password"];
-        private string url = ConfigurationManager.AppSettings["FTP_Url"];
-        private string urlDomain = ConfigurationManager.AppSettings["UrlDomain"];
+        private string urlDomain = ConfigurationManager.AppSettings["Domain_Url"];
+        private string urlFtp = ConfigurationManager.AppSettings["FTP_Url"];
         private string user = ConfigurationManager.AppSettings["FTP_User"];
         private string webPath = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -49,7 +50,7 @@ namespace E2E.Models
         {
             string res = string.Empty;
         StartMethod:
-            string path = url;
+            string path = urlFtp;
             try
             {
                 string[] splitDir = fullDir.Trim().Split('/');
@@ -100,7 +101,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                path = path.Replace(urlDomain, url);
+                path = path.Replace(urlDomain, urlFtp);
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
                 request.Method = WebRequestMethods.Ftp.DeleteFile;
                 request.Credentials = new NetworkCredential(user, pass);
@@ -123,7 +124,7 @@ namespace E2E.Models
         {
             try
             {
-                pathFile = pathFile.Replace(urlDomain, url);
+                pathFile = pathFile.Replace(urlDomain, urlFtp);
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(pathFile));
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
                 request.Credentials = new NetworkCredential(user, pass);
@@ -208,11 +209,16 @@ namespace E2E.Models
                     Directory.CreateDirectory(saveToPath);
                 }
 
-                saveToPath = string.Concat(saveToPath, keyFolder, "\\");
-
-                if (!Directory.Exists(saveToPath))
+                List<string> subFolder = new List<string>();
+                subFolder = keyFolder.Split('\\').ToList();
+                foreach (var item in subFolder)
                 {
-                    Directory.CreateDirectory(saveToPath);
+                    saveToPath = string.Concat(saveToPath, item, "\\");
+
+                    if (!Directory.Exists(saveToPath))
+                    {
+                        Directory.CreateDirectory(saveToPath);
+                    }
                 }
 
                 foreach (var item in filesName)
@@ -226,6 +232,7 @@ namespace E2E.Models
 
                     using (FtpWebResponse responseFile = (FtpWebResponse)request.GetResponse())
                     {
+                        request = null;
                         using (Stream streamFile = responseFile.GetResponseStream())
                         {
                             using (MemoryStream memoryStream = new MemoryStream())
@@ -250,42 +257,243 @@ namespace E2E.Models
             }
         }
 
-        public void Ftp_DownloadFolder(string pathFolder, string zipName)
+        public void Ftp_DownloadFolder(string ftpFileDir, string zirDir)
         {
             try
             {
-                zipName = zipName.Replace(".zip", "");
+                zirDir = zirDir.Replace(".zip", "");
                 List<string> files = new List<string>();
-                finalPath = GetFinallyPath(string.Concat(dir, pathFolder));
+                finalPath = GetFinallyPath(string.Concat(dir, ftpFileDir));
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
                 request.Credentials = new NetworkCredential(user, pass);
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                 {
-                    StreamReader streamReader = new StreamReader(response.GetResponseStream());
-                    string line = streamReader.ReadLine();
-                    while (!string.IsNullOrEmpty(line))
+                    request = null;
+                    using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
                     {
-                        files.Add(line);
-                        line = streamReader.ReadLine();
+                        string line = streamReader.ReadLine();
+                        while (!string.IsNullOrEmpty(line))
+                        {
+                            files.Add(line);
+                            line = streamReader.ReadLine();
+                        }
                     }
-                    streamReader.Close();
                 }
 
-                if (Ftp_DownloadFileToLocal(files, zipName))
+                if (Ftp_DownloadFileToLocal(files, zirDir))
                 {
-                    string[] splitPath = saveToPath.Split('\\');
-                    splitPath = splitPath.Take(splitPath.Length - 1).ToArray();
                     string zipPath = saveToPath.TrimEnd('\\');
-                    zipPath = zipPath.Replace(splitPath.LastOrDefault(), string.Concat(zipName, ".zip"));
+                    zipPath = string.Concat(zipPath, ".zip");
                     if (File.Exists(zipPath))
                     {
                         File.Delete(zipPath);
                     }
                     ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
-                    Local_DownloadZip(zipPath);
+                    if (Local_DownloadZip(zipPath))
+                    {
+                        Directory.Delete(saveToPath, true);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void Ftp_DownloadFolder(List<string> pathsFolder, string zirDir)
+        {
+            try
+            {
+                zirDir = zirDir.Replace(".zip", "");
+                foreach (var item in pathsFolder)
+                {
+                    List<string> files = new List<string>();
+                    finalPath = GetFinallyPath(string.Concat(dir, item));
+                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
+                    request.Method = WebRequestMethods.Ftp.ListDirectory;
+                    request.Credentials = new NetworkCredential(user, pass);
+                    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                    {
+                        request = null;
+                        using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                        {
+                            string line = streamReader.ReadLine();
+                            while (!string.IsNullOrEmpty(line))
+                            {
+                                files.Add(line);
+                                line = streamReader.ReadLine();
+                            }
+                        }
+                    }
+
+                    if (Ftp_DownloadFileToLocal(files, string.Format("{0}\\{1}", zirDir, item.Split('/').ElementAt(1))))
+                    {
+                        continue;
+                    }
+                }
+                saveToPath = saveToPath.TrimEnd('\\');
+                saveToPath = saveToPath.Replace(saveToPath.Split('\\').LastOrDefault(), "");
+                string zipPath = saveToPath.TrimEnd('\\');
+                zipPath = string.Concat(zipPath, ".zip");
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+                ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
+                if (Local_DownloadZip(zipPath))
+                {
                     Directory.Delete(saveToPath, true);
                 }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void Ftp_DownloadFolder(List<string> pathsFolder, string zirDir, List<string> emails, string subject, string content)
+        {
+            try
+            {
+                zirDir = zirDir.Replace(".zip", "");
+                foreach (var item in pathsFolder)
+                {
+                    List<string> files = new List<string>();
+                    finalPath = GetFinallyPath(string.Concat(dir, item));
+                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
+                    request.Method = WebRequestMethods.Ftp.ListDirectory;
+                    request.Credentials = new NetworkCredential(user, pass);
+                    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                    {
+                        request = null;
+                        using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                        {
+                            string line = streamReader.ReadLine();
+                            while (!string.IsNullOrEmpty(line))
+                            {
+                                files.Add(line);
+                                line = streamReader.ReadLine();
+                            }
+                        }
+                    }
+
+                    if (Ftp_DownloadFileToLocal(files, string.Format("{0}\\{1}", zirDir, item.Split('/').ElementAt(1))))
+                    {
+                        continue;
+                    }
+                }
+
+                saveToPath = saveToPath.TrimEnd('\\');
+                saveToPath = saveToPath.Replace(saveToPath.Split('\\').LastOrDefault(), "");
+                string zipPath = saveToPath.TrimEnd('\\');
+                zipPath = string.Concat(zipPath, ".zip");
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+                ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
+
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                List<string> attachPath = new List<string>();
+                attachPath.Add(zipPath);
+                if (mail.SendMail(emails, subject, content, userId, attachPath))
+                {
+                    Directory.Delete(saveToPath, true);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Ftp_RenameFolder(string folderName)
+        {
+            try
+            {
+                bool res = new bool();
+                string path = string.Concat(urlFtp, dir, folderName, "/");
+                List<Guid> dirList = new List<Guid>();
+                Guid folderGuid;
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
+                request.Method = WebRequestMethods.Ftp.ListDirectory;
+                request.Credentials = new NetworkCredential(user, pass);
+                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                {
+                    request = null;
+                    using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                    {
+                        string line = streamReader.ReadLine();
+                        while (!string.IsNullOrEmpty(line))
+                        {
+                            if (Guid.TryParse(line, out folderGuid))
+                            {
+                                dirList.Add(Guid.Parse(line));
+                            }
+                            line = streamReader.ReadLine();
+                        }
+                    }
+                }
+
+                foreach (var item in dirList)
+                {
+                    res = false;
+                    string key = string.Empty;
+                    string checkFolder = string.Empty;
+                    string changeFolder = string.Concat(path, item.ToString());
+                    using (clsContext db = new clsContext())
+                    {
+                        var data = db.Services.Find(item);
+                        if (data == null)
+                        {
+                            res = true;
+                            continue;
+                        }
+
+                        key = data.Service_Key;
+                        checkFolder = string.Concat(path, key);
+                    }
+
+                    try
+                    {
+                        request = (FtpWebRequest)WebRequest.Create(new Uri(checkFolder));
+                        request.Method = WebRequestMethods.Ftp.ListDirectory;
+                        request.Credentials = new NetworkCredential(user, pass);
+                        using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                        {
+                            request = null;
+                            if (response.StatusCode == FtpStatusCode.DataAlreadyOpen)
+                            {
+                                key = string.Concat(key, "_");
+                                goto StartRename;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        goto StartRename;
+                    }
+
+                StartRename:
+                    request = (FtpWebRequest)WebRequest.Create(new Uri(changeFolder));
+                    request.Method = WebRequestMethods.Ftp.Rename;
+                    request.Credentials = new NetworkCredential(user, pass);
+                    request.RenameTo = key;
+
+                    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                    {
+                        request = null;
+                        if (response.StatusCode == FtpStatusCode.FileActionOK)
+                        {
+                            res = true;
+                            continue;
+                        }
+                    }
+                }
+
+                return res;
             }
             catch (Exception)
             {
@@ -327,7 +535,7 @@ namespace E2E.Models
                     reqStream.Write(bytes, 0, bytes.Length);
                     if (reqStream.CanWrite)
                     {
-                        res = fileName.Replace(url, urlDomain);
+                        res = fileName.Replace(urlFtp, urlDomain);
                     }
                 }
 
@@ -385,11 +593,11 @@ namespace E2E.Models
                         {
                             if (string.IsNullOrEmpty(res.OriginalPath))
                             {
-                                res.OriginalPath = item.FtpPath.Replace(url, urlDomain);
+                                res.OriginalPath = item.FtpPath.Replace(urlFtp, urlDomain);
                             }
                             else
                             {
-                                res.ThumbnailPath = item.FtpPath.Replace(url, urlDomain);
+                                res.ThumbnailPath = item.FtpPath.Replace(urlFtp, urlDomain);
                             }
                         }
                     }
@@ -452,11 +660,11 @@ namespace E2E.Models
                         {
                             if (string.IsNullOrEmpty(res.OriginalPath))
                             {
-                                res.OriginalPath = item.FtpPath.Replace(url, urlDomain);
+                                res.OriginalPath = item.FtpPath.Replace(urlFtp, urlDomain);
                             }
                             else
                             {
-                                res.ThumbnailPath = item.FtpPath.Replace(url, urlDomain);
+                                res.ThumbnailPath = item.FtpPath.Replace(urlFtp, urlDomain);
                             }
                         }
                     }
@@ -469,7 +677,7 @@ namespace E2E.Models
             }
         }
 
-        public void Local_DownloadZip(string zipPath)
+        public bool Local_DownloadZip(string zipPath)
         {
             try
             {
@@ -483,6 +691,7 @@ namespace E2E.Models
                 HttpContext.Current.Response.Flush();
                 File.Delete(zipPath);
                 HttpContext.Current.Response.End();
+                return true;
             }
             catch (Exception)
             {

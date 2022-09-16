@@ -19,21 +19,22 @@ namespace E2E.Models.Views
 
     public class ReportKPI_Filter
     {
+        public ReportKPI_Filter()
+        {
+            Date_To = DateTime.Today;
+        }
+
         [Display(Name = "From"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
         public DateTime? Date_From { get; set; }
 
         [Display(Name = "To"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
-        public DateTime? Date_To { get; set; }
+        public DateTime Date_To { get; set; }
     }
 
     public class ReportKPI_Overview
     {
-        [Display(Name = "Average")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
-        public double? Average_Score { get; set; }
-
         [Display(Name = "Close")]
         public int Close_Count { get; set; }
 
@@ -43,14 +44,28 @@ namespace E2E.Models.Views
         [Display(Name = "In progress")]
         public int Inprogress_Count { get; set; }
 
+        [Display(Name = "Ontime")]
+        public int OnTime_Count { get; set; }
+
+        [Display(Name = "Ontime %")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:p}")]
+        public double OnTime_Percent { get; set; }
+
         [Display(Name = "Over due")]
         public int OverDue_Count { get; set; }
 
         [Display(Name = "Pending")]
         public int Pending_Count { get; set; }
 
+        [Display(Name = "Satisfied %")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:p}")]
+        public double Satisfied_Percent { get; set; }
+
         [Display(Name = "Total")]
         public int Total { get; set; }
+
+        [Display(Name = "Unsatisfied")]
+        public int Unsatisfied_Count { get; set; }
     }
 
     public class ReportKPI_User

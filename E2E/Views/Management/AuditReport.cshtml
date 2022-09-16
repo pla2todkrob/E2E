@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "Audit report";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb ">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item">Management</li>
+            <li class="breadcrumb-item active" aria-current="page">Audit report</li>
+        </ol>
+    </nav>
+}
+
+@section scripts{
+    <script>
+        var checkList = [];
+        $(function () {
+
+            reloadTable();
+            toggleTool();
+
+        });
+
+        function reloadTable() {
+            callFilter('@Url.Action("AuditReport_Filter", "Management")').then(function () {
+                callTable('@Url.Action("AuditReport_Table", "Management")', true, true, [1, 5]).then(function () {
+                    checkList = [];
+                });
+            });
+        }
+
+        function getCheckedVal(element) {
+            if ($(element).is(':checked')) {
+                checkList.push($(element).val());
+            }
+            else {
+                checkList.splice(checkList.indexOf($(element).val()),1);
+            }
+            toggleTool();
+        }
+
+        function toggleTool() {
+            if (checkList.length > 0) {
+                $('#actionTool').fadeIn();
+            }
+            else {
+                $('#actionTool').fadeOut();
+            }
+        }
+
+        async function doAction(email) {
+            var actionUrl = '@Url.Action("AuditReport_Action", "Management")';
+            actionUrl += '?id=' + JSON.stringify(checkList);
+            if (email != '') {
+                actionUrl += '&emails=' + email;
+            }
+
+            window.location = actionUrl;
+        }
+    </script>
+}
+
+<div class="mb-3 d-flex">
+    <div id="filter"></div>
+    <div class="ml-auto" id="actionTool">
+        <button class="btn btn-secondary" onclick="doAction('')"><i class="fa fa-download" aria-hidden="true"></i></button>
+        <button class="btn btn-primary" onclick="callModal('@Url.Action("AuditReport_Email","Management")')"><i class="fa fa-share" aria-hidden="true"></i></button>
+    </div>
+</div>
+<div id="datalist"></div>

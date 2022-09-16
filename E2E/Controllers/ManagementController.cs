@@ -1,6 +1,7 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
@@ -14,7 +15,136 @@ namespace E2E.Controllers
     {
         private clsManageManagement data = new clsManageManagement();
         private clsContext db = new clsContext();
+        private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
+
+        public ActionResult AuditReport()
+        {
+            return View();
+        }
+
+        public ActionResult AuditReport_Action(string id, string emails = "")
+        {
+            try
+            {
+                List<Guid> guids = JsonConvert.DeserializeObject<List<Guid>>(id);
+                List<string> arrEmail = new List<string>();
+                List<string> dirList = new List<string>();
+                if (!string.IsNullOrEmpty(emails))
+                {
+                    arrEmail = emails.Split(';').ToList();
+                }
+
+                foreach (var item in guids)
+                {
+                    if (db.ServiceDocuments.Any(a => a.Service_Id == item && !string.IsNullOrEmpty(a.ServiceDocument_Path)))
+                    {
+                        string key = db.Services.Find(item).Service_Key;
+                        string dir = string.Format("Service/{0}/DocumentControls/", key);
+                        dirList.Add(dir);
+                    }
+                }
+
+                string zipName = DateTime.Now.ToString("d").Replace("/", "");
+
+                if (arrEmail.Count > 0)
+                {
+                    string subject = "[E2E][Document controls] นำส่งเอกสาร";
+                    string content = string.Format("<p><b>Attached file: </b> {0}.zip</p>", zipName);
+                    content += string.Format("<b>Include {0} job.</b><br />", dirList.Count());
+                    content += "<p>";
+                    for (int i = 1; i <= dirList.Count(); i++)
+                    {
+                        content += string.Format("{0}. {1}<br />", i, dirList[i - 1].Split('/').ElementAt(1));
+                    }
+                    content += "</p>";
+                    content += "<b>Please do not reply to this mail. Thank you</b>";
+
+                    ftp.Ftp_DownloadFolder(dirList, string.Format("AuditReport\\{0}", zipName), arrEmail, subject, content);
+                }
+                else
+                {
+                    ftp.Ftp_DownloadFolder(dirList, string.Format("AuditReport\\{0}", zipName));
+                }
+
+                return RedirectToAction("AuditReport");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult AuditReport_Email()
+        {
+            return View();
+        }
+
+        public ActionResult AuditReport_Filter(string filter)
+        {
+            try
+            {
+                AuditReport_Filter _Filter = new AuditReport_Filter();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    _Filter = JsonConvert.DeserializeObject<AuditReport_Filter>(filter);
+                }
+
+                return View(_Filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult AuditReport_Table(string filter)
+        {
+            try
+            {
+                AuditReport_Filter _Filter = new AuditReport_Filter();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    _Filter = JsonConvert.DeserializeObject<AuditReport_Filter>(filter);
+                }
+
+                int[] finishIds = { 3, 4 };
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                List<Guid> deptIds = db.Master_Departments.Where(w => w.Department_Name == deptName).Select(s => s.Department_Id).ToList();
+                IQueryable<Services> query = db.Services
+                    .Where(w => finishIds.Contains(w.Status_Id) && deptIds.Contains(w.Department_Id.Value));
+                _Filter.Date_To = _Filter.Date_To.AddDays(1);
+                query = query.Where(w => w.Create >= _Filter.Date_From);
+                query = query.Where(w => w.Create <= _Filter.Date_To);
+
+                List<Guid> hasDocIds = db.ServiceDocuments
+                    .Where(w => query.Select(s => s.Service_Id).Contains(w.Service_Id))
+                    .Select(s => s.Service_Id)
+                    .Distinct()
+                    .ToList();
+
+                List<clsAuditReport> clsAuditReports = query
+                    .Where(w => hasDocIds.Contains(w.Service_Id))
+                    .AsEnumerable()
+                    .Select(s => new clsAuditReport()
+                    {
+                        Create = s.Create,
+                        Service_Id = s.Service_Id,
+                        Service_Key = s.Service_Key,
+                        Service_Subject = s.Service_Subject,
+                        WorkRoots = s.WorkRoots,
+                        User_Name = master.Users_GetInfomation(s.Action_User_Id.Value),
+                        Update = s.Update.Value
+                    }).OrderBy(o => o.Create).ToList();
+
+                return View(clsAuditReports);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public ActionResult DocumentControl()
         {
