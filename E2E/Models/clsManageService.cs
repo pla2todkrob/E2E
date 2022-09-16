@@ -643,23 +643,26 @@ namespace E2E.Models
             try
             {
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                Guid departmentId = db.Users
+                string deptName = db.Users
                     .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
+                IQueryable<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id);
 
-                List<Guid> userIdInTeam = ServiceTeams_IQ(id)
-                    .Select(s => s.User_Id)
-                    .ToList();
+                IQueryable<Guid> userIdInTeam = ServiceTeams_IQ(id)
+                    .Select(s => s.User_Id);
 
-                return db.UserDetails
-                    .Where(w => w.Users.Master_Processes.Master_Sections.Department_Id == departmentId &&
-                    w.Users.Active &&
+                return db.Users
+                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id) &&
+                    w.Active &&
                     !userIdInTeam.Contains(w.User_Id) &&
                     w.User_Id != userId)
+                    .AsEnumerable()
                     .Select(s => new SelectListItem()
                     {
-                        Text = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "]",
+                        Text = master.Users_GetInfomation(s.User_Id),
                         Value = s.User_Id.ToString()
                     }).ToList();
             }
