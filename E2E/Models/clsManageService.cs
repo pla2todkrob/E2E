@@ -1388,24 +1388,27 @@ namespace E2E.Models
                             .Where(w => w.Status_Id == 3)
                             .FirstOrDefault();
 
+                        ServiceComments serviceComments = new ServiceComments();
+
                         Services services = new Services();
                         services = db.Services.Find(model.Ref_Service_Id);
-                        services.Status_Id = 3;
-                        services.Update = DateTime.Now;
-                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
-
-                        ServiceComments serviceComments = new ServiceComments();
-                        serviceComments.Service_Id = model.Ref_Service_Id.Value;
-                        serviceComments.Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
-
-                        if (Services_Comment(serviceComments))
+                        if (services.Status_Id == 2)
                         {
+                            services.Status_Id = 3;
+                            services.Update = DateTime.Now;
+                            db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                            db.SaveChanges();
+
                             serviceComments = new ServiceComments();
                             serviceComments.Service_Id = model.Ref_Service_Id.Value;
-                            serviceComments.Comment_Content = string.Format("Forward this job to new service key {0}", model.Service_Key);
-                            res = Services_Comment(serviceComments);
+                            serviceComments.Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
+                            Services_Comment(serviceComments);
                         }
+
+                        serviceComments = new ServiceComments();
+                        serviceComments.Service_Id = model.Ref_Service_Id.Value;
+                        serviceComments.Comment_Content = string.Format("Forward this job to new service key {0}", model.Service_Key);
+                        res = Services_Comment(serviceComments);
                     }
                     else
                     {
@@ -1634,14 +1637,16 @@ namespace E2E.Models
                     services = db.Services.Find(nextId.Value);
                     if (services.Status_Id == 3)
                     {
-                        services.Status_Id = 4;
+                        System_Statuses system_Statuses = new System_Statuses();
+                        system_Statuses = db.System_Statuses.Find(4);
+                        services.Status_Id = system_Statuses.Status_Id;
                         services.Update = DateTime.Now;
                         db.Entry(services).State = System.Data.Entity.EntityState.Modified;
                         if (db.SaveChanges() > 0)
                         {
                             ServiceComments serviceComments = new ServiceComments();
                             serviceComments.Service_Id = nextId.Value;
-                            serviceComments.Comment_Content = "Close job";
+                            serviceComments.Comment_Content = string.Format("Status update to {0}", system_Statuses.Status_Name);
                             if (Services_Comment(serviceComments))
                             {
                                 if (services.Ref_Service_Id.HasValue)

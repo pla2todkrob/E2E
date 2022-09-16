@@ -70,29 +70,33 @@
         <div class="card" id="serviceInfo">
             <div class="card-body">
                 <div class="d-flex mb-3">
-                    @{
-                        if (ViewBag.AuthorizeIndex < 3)
+                    <div class="mr-auto">
+                        @if (ViewBag.AuthorizeIndex < 3)
                         {
                             <button class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id})')">Return job</button>
                         }
-                        if (!ViewBag.Is_MustBeApproved)
-                        {
-                            <button type="button" class="btn btn-warning ml-auto" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Must approved</button>
-                        }
-                        if (Model.Services.Ref_Service_Id.HasValue)
-                        {
-                            if (!Model.Services.Is_FreePoint)
+                    </div>
+                    <div class="ml-auto">
+                        @{
+                            if (!ViewBag.Is_MustBeApproved)
                             {
-                                if (Model.Services.Action_User_Id.HasValue)
+                                <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Must approved</button>
+                            }
+                            if (Model.Services.Ref_Service_Id.HasValue)
+                            {
+                                if (!Model.Services.Is_FreePoint)
                                 {
-                                    if (Model.Services.Action_User_Id.Equals(userId))
+                                    if (Model.Services.Action_User_Id.HasValue)
                                     {
-                                        <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                                        if (Model.Services.Action_User_Id.Equals(userId))
+                                        {
+                                            <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
+                    </div>
                 </div>
 
                 <dl class="row">
