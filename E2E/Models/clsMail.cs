@@ -130,7 +130,7 @@ namespace E2E.Models
                 foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
                 {
                     var email = new EmailAddressAttribute();
-                    if (email.IsValid(item))
+                    if (email.IsValid(item.Email))
                     {
                         msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
                     }
@@ -157,7 +157,7 @@ namespace E2E.Models
                     foreach (var item in receiveCC.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
                         var email = new EmailAddressAttribute();
-                        if (email.IsValid(item))
+                        if (email.IsValid(item.Email))
                         {
                             msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
                         }
@@ -180,7 +180,7 @@ namespace E2E.Models
                     foreach (var item in receiveBCC.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
                         var email = new EmailAddressAttribute();
-                        if (email.IsValid(item))
+                        if (email.IsValid(item.Email))
                         {
                             msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
                         }
