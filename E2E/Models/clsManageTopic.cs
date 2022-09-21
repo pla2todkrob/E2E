@@ -11,9 +11,9 @@ namespace E2E.Models
     public class clsManageTopic
     {
         private clsImage clsImag = new clsImage();
+        private clsMail clsMail = new clsMail();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
-        private clsMail clsMail = new clsMail();
         private clsManageMaster master = new clsManageMaster();
 
         protected bool Board_CountComment_Delete(Guid id, int num)

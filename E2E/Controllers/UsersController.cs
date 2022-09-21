@@ -195,24 +195,17 @@ namespace E2E.Controllers
                         return View(model);
                     }
 
-                    string password = db.UserDetails
-                        .Where(w => w.User_Id == users.User_Id)
-                        .Select(s => s.Detail_Password)
-                        .FirstOrDefault();
-                    if (string.IsNullOrEmpty(password))
+                    if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
                     {
-                        if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
-                        {
-                            goto SetAuthen;
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("Password", "The password is incorrect.");
-                            return View(model);
-                        }
+                        goto SetAuthen;
                     }
                     else
                     {
+                        string password = db.UserDetails
+                        .Where(w => w.User_Id == users.User_Id)
+                        .Select(s => s.Detail_Password)
+                        .FirstOrDefault();
+
                         if (string.Equals(password, data.Users_Password(model.Password.Trim())))
                         {
                             goto SetAuthen;

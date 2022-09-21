@@ -28,10 +28,10 @@ namespace E2E
                         //
                         //c.Schemes(new[] { "http", "https" });
 
-                        // Use "SingleApiVersion" to describe a single version API. Swagger 2.0 includes an "Info" object to
-                        // hold additional metadata for an API. Version and title are required but you can also provide
-                        // additional fields by chaining methods off SingleApiVersion.
-                        //
+                        // Use "SingleApiVersion" to describe a single version API. Swagger 2.0
+                        // includes an "Info" object to hold additional metadata for an API. Version
+                        // and title are required but you can also provide additional fields by
+                        // chaining methods off SingleApiVersion.
                         c.SingleApiVersion("v1", "E2E");
 
                         // If you want the output Swagger docs to be indented properly, enable the "PrettyPrint" option.

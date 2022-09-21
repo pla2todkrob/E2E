@@ -13,11 +13,11 @@ namespace E2E.Controllers
 {
     public class TopicsController : Controller
     {
+        private clsMail clsMail = new clsMail();
         private clsManageTopic data = new clsManageTopic();
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
-        private clsMail clsMail = new clsMail();
         private clsSwal swal = new clsSwal();
 
         public ActionResult _FileCollection(Guid id)
@@ -393,6 +393,108 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult Boards_ReportComment(Guid id)
+        {
+            var sql = db.TopicComments.Find(id);
+            return View(sql);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Boards_ReportComment(TopicComments model, string CommentReportUser)
+        {
+            if (!string.IsNullOrEmpty(CommentReportUser))
+            {
+                try
+                {
+                    var sql = db.TopicComments.Find(model.TopicComment_Id);
+                    Guid Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                    string DeptName = db.Users.Where(w => w.User_Id == sql.User_Id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
+                    var Approver = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == DeptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
+
+                    var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace("Boards_ReportComment", "Boards_Form");
+                    linkUrl += "/" + sql.Topics.Topic_Id + "/#" + model.TopicComment_Id;
+
+                    string subject = string.Format("[E2E][Notify inappropriate comment] {0}", sql.Topics.Topic_Title);
+                    string content = string.Format("<p><b>Reporter:</b> {0} <b>Comment:</b> {1}", master.Users_GetInfomation(Id), CommentReportUser);
+                    content += "<br />";
+                    content += string.Format("<b>Commentator:</b> {1} <b>Comment:</b> {0}", sql.Comment_Content, master.Users_GetInfomation(sql.User_Id.Value));
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+
+                    if (clsMail.SendMail(Approver, subject, content))
+                    {
+                        swal.dangerMode = false;
+                        swal.icon = "success";
+                        swal.text = "ส่งรายงานเรียบร้อยแล้ว";
+                        swal.title = "Successful";
+                    }
+                    else
+                    {
+                        swal.icon = "warning";
+                        swal.text = "ส่งรายงานไม่สำเร็จ";
+                        swal.title = "Warning";
+                    }
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    foreach (var item in ex.EntityValidationErrors)
+                    {
+                        foreach (var item2 in item.ValidationErrors)
+                        {
+                            if (string.IsNullOrEmpty(swal.text))
+                            {
+                                swal.text = item2.ErrorMessage;
+                            }
+                            else
+                            {
+                                swal.text += "\n" + item2.ErrorMessage;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.title = ex.TargetSite.Name;
+                    swal.text = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        swal.text = ex.InnerException.Message;
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            swal.text = ex.InnerException.InnerException.Message;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var errors = ModelState.Select(x => x.Value.Errors)
+                                   .Where(y => y.Count > 0)
+                                   .ToList();
+                swal.icon = "warning";
+                swal.title = "Warning";
+                foreach (var item in errors)
+                {
+                    foreach (var item2 in item)
+                    {
+                        if (string.IsNullOrEmpty(swal.text))
+                        {
+                            swal.text = item2.ErrorMessage;
+                        }
+                        else
+                        {
+                            swal.text += "\n" + item2.ErrorMessage;
+                        }
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult Boards_Section(Guid topicId, Guid? id)
         {
             try
@@ -669,108 +771,6 @@ namespace E2E.Controllers
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
-        }
-
-        public ActionResult Boards_ReportComment(Guid id)
-        {
-            var sql = db.TopicComments.Find(id);
-            return View(sql);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_ReportComment(TopicComments model, string CommentReportUser)
-        {
-            if (!string.IsNullOrEmpty(CommentReportUser))
-            {
-                try
-                {
-                    var sql = db.TopicComments.Find(model.TopicComment_Id);
-                    Guid Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
-                    string DeptName = db.Users.Where(w => w.User_Id == sql.User_Id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
-                    var Approver = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == DeptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-
-                    var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
-                    linkUrl = linkUrl.Replace("Boards_ReportComment", "Boards_Form");
-                    linkUrl += "/" + sql.Topics.Topic_Id + "/#" + model.TopicComment_Id;
-
-                    string subject = string.Format("[E2E][Notify inappropriate comment] {0}", sql.Topics.Topic_Title);
-                    string content = string.Format("<p><b>Reporter:</b> {0} <b>Comment:</b> {1}", master.Users_GetInfomation(Id), CommentReportUser);
-                    content += "<br />";
-                    content += string.Format("<b>Commentator:</b> {1} <b>Comment:</b> {0}", sql.Comment_Content, master.Users_GetInfomation(sql.User_Id.Value));
-                    content += "</p>";
-                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                    content += "<p>Thank you for your consideration</p>";
-
-                    if (clsMail.SendMail(Approver, subject, content))
-                    {
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ส่งรายงานเรียบร้อยแล้ว";
-                        swal.title = "Successful";
-                    }
-                    else
-                    {
-                        swal.icon = "warning";
-                        swal.text = "ส่งรายงานไม่สำเร็จ";
-                        swal.title = "Warning";
-                    }
-                }
-                catch (DbEntityValidationException ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    foreach (var item in ex.EntityValidationErrors)
-                    {
-                        foreach (var item2 in item.ValidationErrors)
-                        {
-                            if (string.IsNullOrEmpty(swal.text))
-                            {
-                                swal.text = item2.ErrorMessage;
-                            }
-                            else
-                            {
-                                swal.text += "\n" + item2.ErrorMessage;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
-                    if (ex.InnerException != null)
-                    {
-                        swal.text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.text = ex.InnerException.InnerException.Message;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.text))
-                        {
-                            swal.text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Delete_Reply(Guid id)
