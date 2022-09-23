@@ -22,9 +22,9 @@ namespace E2E.Controllers
         {
             clsEForm clsEForm = new clsEForm();
 
-            clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+            clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).OrderBy(o => o.EForm_Gallery_Seq).ToList();
 
-            clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+            clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).OrderBy(o => o.EForm_File_Seq).ToList();
 
             return View(clsEForm);
         }

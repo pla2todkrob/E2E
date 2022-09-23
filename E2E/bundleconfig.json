@@ -40,5 +40,11 @@
     "inputFiles": [
       "Asset/EForm.js"
     ]
+  },
+  {
+    "outputFileName": "Content/colorbox.min.css",
+    "inputFiles": [
+      "Content/colorbox.css"
+    ]
   }
 ]

@@ -25,12 +25,10 @@ namespace E2E.Models
                               | SecurityProtocolType.Tls11
                               | SecurityProtocolType.Tls12;
 
-                using (SmtpClient client = new SmtpClient())
+                using (SmtpClient client = new SmtpClient(ConfigurationManager.AppSettings["Mail_Host"], Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"])))
                 {
                     client.UseDefaultCredentials = false;
                     client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"], ConfigurationManager.AppSettings["Mail_Domain"]);
-                    client.Port = Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"]); // You can use Port 25 for online, Port 587 is for local
-                    client.Host = ConfigurationManager.AppSettings["Mail_Host"];
                     client.DeliveryMethod = SmtpDeliveryMethod.Network;
                     client.EnableSsl = true;
                     client.Send(model);

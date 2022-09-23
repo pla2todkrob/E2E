@@ -19,6 +19,7 @@ namespace E2E.Models.Tables
 
         public DateTime Create { get; set; }
 
+        public bool IsPublic { get; set; }
         public virtual Master_Categories Master_Categories { get; set; }
 
         [Display(Name = "Content")]

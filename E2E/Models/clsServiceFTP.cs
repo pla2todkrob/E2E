@@ -501,16 +501,53 @@ namespace E2E.Models
             }
         }
 
-        public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost)
+        {
+            try
+            {
+                string res = string.Empty;
+                string fileName = filePost.FileName;
+                finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                fileName = string.Concat(finalPath, fileName);
+
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
+                request.Method = WebRequestMethods.Ftp.UploadFile;
+                request.Credentials = new NetworkCredential(user, pass);
+
+                byte[] bytes = null;
+                using (Stream fileStream = filePost.InputStream)
+                {
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        fileStream.CopyTo(memory);
+                        bytes = memory.ToArray();
+                    }
+                }
+                request.ContentLength = bytes.Length;
+
+                using (Stream reqStream = request.GetRequestStream())
+                {
+                    reqStream.Write(bytes, 0, bytes.Length);
+                    if (reqStream.CanWrite)
+                    {
+                        res = fileName.Replace(urlFtp, urlDomain);
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
         {
             try
             {
                 string res = string.Empty;
                 finalPath = GetFinallyPath(string.Concat(dir, fullDir));
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    fileName = filePost.FileName;
-                }
 
                 fileName = replaceName(fileName);
                 fileName = string.Concat(finalPath, fileName);
@@ -547,70 +584,7 @@ namespace E2E.Models
             }
         }
 
-        public clsImage Ftp_UploadImageFixSizeToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
-        {
-            try
-            {
-                clsImage res = new clsImage();
-                finalPath = GetFinallyPath(string.Concat(dir, fullDir));
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    fileName = filePost.FileName;
-                }
-                fileName = replaceName(fileName);
-                fileName = string.Concat(finalPath, fileName);
-
-                List<clsImage> clsImages = new List<clsImage>();
-                Image originalFile = Image.FromStream(filePost.InputStream, true, true);
-                clsImage clsImage = new clsImage();
-                clsImage.Image = originalFile;
-                clsImage.FtpPath = fileName;
-                clsImages.Add(clsImage);
-
-                Image thumbnailFile = originalFile.GetThumbnailImage(192, 108, null, IntPtr.Zero);
-                clsImage = new clsImage();
-                clsImage.Image = thumbnailFile;
-                clsImage.FtpPath = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
-                clsImages.Add(clsImage);
-
-                foreach (var item in clsImages)
-                {
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(item.FtpPath));
-                    request.Method = WebRequestMethods.Ftp.UploadFile;
-                    request.Credentials = new NetworkCredential(user, pass);
-                    byte[] bytes = null;
-
-                    using (var memory = new MemoryStream())
-                    {
-                        item.Image.Save(memory, originalFile.RawFormat);
-                        bytes = memory.ToArray();
-                    }
-
-                    using (Stream reqStream = request.GetRequestStream())
-                    {
-                        reqStream.Write(bytes, 0, bytes.Length);
-                        if (reqStream.CanWrite)
-                        {
-                            if (string.IsNullOrEmpty(res.OriginalPath))
-                            {
-                                res.OriginalPath = item.FtpPath.Replace(urlFtp, urlDomain);
-                            }
-                            else
-                            {
-                                res.ThumbnailPath = item.FtpPath.Replace(urlFtp, urlDomain);
-                            }
-                        }
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "", int maxHeight = 256)
         {
             try
             {
@@ -632,10 +606,18 @@ namespace E2E.Models
                 clsImage.FtpPath = fileName;
                 clsImages.Add(clsImage);
 
-                double widthRatio = 192 / originalFile.Width;
-                double heightRatio = 108 / originalFile.Height;
-                double ratio = (widthRatio < heightRatio) ? widthRatio : heightRatio;
-                Image thumbnailFile = originalFile.GetThumbnailImage((int)(originalFile.Width * ratio), (int)(originalFile.Height * ratio), null, IntPtr.Zero);
+                int thumbW = originalFile.Width;
+                int thumbH = originalFile.Height;
+
+                if (originalFile.Height > maxHeight)
+                {
+                    decimal formula = Convert.ToDecimal(maxHeight) / Convert.ToDecimal(originalFile.Height);
+
+                    thumbW = Convert.ToInt32(formula * Convert.ToDecimal(originalFile.Width));
+                    thumbH = Convert.ToInt32(formula * Convert.ToDecimal(originalFile.Height));
+                }
+
+                Image thumbnailFile = originalFile.GetThumbnailImage(thumbW, thumbH, null, IntPtr.Zero);
                 clsImage.Image = thumbnailFile;
                 clsImage.FtpPath = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
                 clsImages.Add(clsImage);

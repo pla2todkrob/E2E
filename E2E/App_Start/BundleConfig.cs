@@ -26,6 +26,8 @@ namespace E2E
                       "~/Scripts/moment.min.js",
                       "~/Scripts/select2.min.js",
                       "~/Scripts/spin.min.js",
+                      "~/Scripts/jquery.justifiedGallery.min.js",
+                      "~/Scripts/colorbox/jquery.colorbox-min.js",
                       "~/Scripts/Site.min.js"));
 
             bundles.Add(new StyleBundle("~/bundles/css").Include(
@@ -34,6 +36,7 @@ namespace E2E
                       "~/Content/css/select2.min.css",
                       "~/Content/css/select2-bootstrap4.min.css",
                       "~/Content/DataTables/css/dataTables.bootstrap4.min.css",
+                      "~/Content/justifiedGallery.min.css",
                       "~/Content/Site.min.css"));
 
             BundleTable.EnableOptimizations = true;

@@ -8,6 +8,7 @@ using System.Data.Entity.Validation;
 using System.Linq;
 using System.Transactions;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace E2E.Controllers
 {
@@ -24,9 +25,9 @@ namespace E2E.Controllers
         {
             clsTopic clsTopic = new clsTopic();
 
-            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList();
 
-            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList();
 
             return View(clsTopic);
         }
@@ -268,12 +269,25 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        [AllowAnonymous]
         public ActionResult Boards_Form(Guid? id)
         {
             clsTopic clsTopic = new clsTopic();
 
             if (id.HasValue)
             {
+                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id.Value).FirstOrDefault();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.TopicGallery_Seq).ToList();
+                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.TopicFile_Seq).ToList();
+                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
+                if (!clsTopic.Topics.IsPublic)
+                {
+                    if (string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                    {
+                        FormsAuthentication.RedirectToLoginPage();
+                    }
+                }
                 using (TransactionScope scope = new TransactionScope())
                 {
                     if (data.UpdateView(id))
@@ -281,12 +295,6 @@ namespace E2E.Controllers
                         scope.Complete();
                     }
                 }
-
-                clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id.Value).FirstOrDefault();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).ToList();
-                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
-                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).ToList();
-                clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
             }
 
             return View(clsTopic);
@@ -927,9 +935,9 @@ namespace E2E.Controllers
         {
             clsTopic clsTopic = new clsTopic();
 
-            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList();
 
-            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
+            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList();
 
             return View(clsTopic);
         }

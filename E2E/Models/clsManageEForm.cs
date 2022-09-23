@@ -52,7 +52,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                clsImag = ftp.Ftp_UploadImageFixSizeToString(dir, file, FileName);
+                                clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(eForms, clsImag, FileName);
@@ -145,7 +145,7 @@ namespace E2E.Models
                                     FileName = string.Concat("_", file.FileName);
                                 }
 
-                                clsImag = ftp.Ftp_UploadImageFixSizeToString(dir, file, FileName);
+                                clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(EForms, clsImag, FileName);
