@@ -823,6 +823,10 @@ namespace E2E.Models
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
+                        if (!linkUrl.EndsWith(serviceId.ToString()))
+                        {
+                            linkUrl += string.Format("/{0}", serviceId);
+                        }
 
                         Services services = new Services();
                         services = db.Services.Find(serviceId);
