@@ -139,11 +139,10 @@ $(document).on('submit', '#SaveReply', function (e) {
                             <div class="col-md-8 col-lg-9">
                                 <div class="d-flex justify-content-between flex-column h-100">
                                     <div>
-                                        <div class="d-flex">
-                                            <h5>@item.TopicSection_Title</h5>
-                                            <small class="ml-auto">@item.Create</small>
-                                        </div>
-
+                                        <blockquote class="blockquote">
+                                            <p class="mb-0">@item.TopicSection_Title</p>
+                                            <footer class="blockquote-footer"><cite title="@item.Create">@item.Create</cite></footer>
+                                        </blockquote>
                                         <p class="font-weight-lighter PreLine">@item.TopicSection_Description</p>
 
                                         @if (!string.IsNullOrEmpty(item.TopicSection_Link))
