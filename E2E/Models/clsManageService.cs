@@ -1653,10 +1653,18 @@ namespace E2E.Models
                             serviceComments.Comment_Content = string.Format("Status update to {0}", system_Statuses.Status_Name);
                             if (Services_Comment(serviceComments))
                             {
+                                res = true;
                                 if (services.Ref_Service_Id.HasValue)
                                 {
                                     nextId = services.Ref_Service_Id.Value;
-                                    res = SaveEstimate(nextId.Value, score);
+                                    if (db.Services.Any(a => a.Service_Id == nextId && a.Status_Id == 3))
+                                    {
+                                        res = SaveEstimate(nextId.Value, score);
+                                    }
+                                    else
+                                    {
+                                        nextId = null;
+                                    }
                                 }
                                 else
                                 {
