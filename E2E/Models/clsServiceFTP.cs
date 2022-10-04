@@ -618,6 +618,7 @@ namespace E2E.Models
                 }
 
                 Image thumbnailFile = originalFile.GetThumbnailImage(thumbW, thumbH, null, IntPtr.Zero);
+                clsImage = new clsImage();
                 clsImage.Image = thumbnailFile;
                 clsImage.FtpPath = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
                 clsImages.Add(clsImage);
@@ -634,6 +635,10 @@ namespace E2E.Models
                         item.Image.Save(memory, originalFile.RawFormat);
                         bytes = memory.ToArray();
                     }
+
+                    request.KeepAlive = true;
+                    request.UseBinary = true;
+                    request.ContentLength = bytes.Length;
 
                     using (Stream reqStream = request.GetRequestStream())
                     {
