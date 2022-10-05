@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Web;
+using System.Web.Security;
 
 namespace E2E.Models.Views
 {
@@ -53,5 +55,25 @@ namespace E2E.Models.Views
 
         [Display(Name = "Point")]
         public int User_Point { get; set; }
+
+        public void RemoveCookie()
+        {
+            try
+            {
+                var cookies = HttpContext.Current.Request.Cookies.AllKeys;
+                foreach (var item in cookies)
+                {
+                    HttpCookie myCookie = new HttpCookie(item);
+                    myCookie.Expires = DateTime.Now.AddDays(-1d);
+                    HttpContext.Current.Response.Cookies.Add(myCookie);
+                }
+
+                FormsAuthentication.RedirectToLoginPage();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

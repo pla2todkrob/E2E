@@ -19,6 +19,7 @@ namespace E2E.Controllers
         private clsContext db = new clsContext();
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsManageMaster master = new clsManageMaster();
+        private clsUsers users = new clsUsers();
 
         public ActionResult _Copyright()
         {
@@ -44,6 +45,10 @@ namespace E2E.Controllers
                     .Where(w => w.User_Id == id)
                     .Select(s => s.Role_Id)
                     .FirstOrDefault();
+                }
+                else
+                {
+                    users.RemoveCookie();
                 }
             }
 
@@ -86,6 +91,10 @@ namespace E2E.Controllers
                                 w.Users.Master_Processes.Master_Sections.Department_Id == deptId).Count();
                         }
                     }
+                    else
+                    {
+                        users.RemoveCookie();
+                    }
                 }
 
                 return PartialView("_NavDepartment", res);
@@ -122,6 +131,10 @@ namespace E2E.Controllers
                             .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
                         res = db.EForms.Where(w => w.Status_Id == 1 && userIdList.Contains(w.User_Id)).ToList().Count();
                     }
+                    else
+                    {
+                        users.RemoveCookie();
+                    }
                 }
 
                 return PartialView("_NavEForms", res);
@@ -151,6 +164,10 @@ namespace E2E.Controllers
                         {
                             res = true;
                         }
+                    }
+                    else
+                    {
+                        users.RemoveCookie();
                     }
                 }
             }
@@ -187,6 +204,10 @@ namespace E2E.Controllers
                             res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                         }
                     }
+                    else
+                    {
+                        users.RemoveCookie();
+                    }
                 }
                 return PartialView("_NavService", res);
             }
@@ -214,6 +235,10 @@ namespace E2E.Controllers
                             User_Code = s.User_Code,
                             User_Point = s.User_Point
                         }).FirstOrDefault();
+                    }
+                    else
+                    {
+                        users.RemoveCookie();
                     }
                 }
 
