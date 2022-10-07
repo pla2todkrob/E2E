@@ -937,7 +937,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 TopicGalleries topicGalleries = new TopicGalleries();
-                var Count = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id).OrderByDescending(o => o.TopicGallery_Seq).FirstOrDefault();
+                int Count = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id).OrderByDescending(o => o.TopicGallery_Seq).Select(s => s.TopicGallery_Seq).FirstOrDefault();
 
                 topicGalleries.Topic_Id = model.Topic_Id;
                 topicGalleries.TopicGallery_Original = clsImage.OriginalPath;
@@ -945,13 +945,14 @@ namespace E2E.Models
                 topicGalleries.TopicGallery_Name = file;
                 topicGalleries.TopicGallery_Extension = Path.GetExtension(file);
 
-                if (Count == null)
+                if (Count == 0)
                 {
                     topicGalleries.TopicGallery_Seq = 1;
                 }
                 else
                 {
-                    topicGalleries.TopicGallery_Seq = Count.TopicGallery_Seq++;
+                    int sum = Count + 1;
+                    topicGalleries.TopicGallery_Seq = sum;
                 }
 
                 db.TopicGalleries.Add(topicGalleries);
