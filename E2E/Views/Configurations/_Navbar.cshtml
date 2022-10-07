@@ -7,21 +7,20 @@
 <div class="collapse navbar-collapse" id="navbar_top">
     <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@{ Html.RenderAction("_NavService", "Configurations"); }</a>
+            <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@*@{ Html.RenderAction("_NavService", "Configurations"); }*@</a>
         </li>
 
         <li class="nav-item dropdown" id="nav_department">
-            @{ Html.RenderAction("_NavDepartment", "Configurations"); }
+            @*@{ Html.RenderAction("_NavDepartment", "Configurations"); }*@
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@{ Html.RenderAction("_Newtopic", "Topics"); } </a>
+            <a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@*@{ Html.RenderAction("_Newtopic", "Topics"); }*@ </a>
         </li>
 
         <li class="nav-item dropdown">
             @{ Html.RenderAction("_NavEForms", "Configurations"); }
-            @*<a class="nav-link" href="@Url.Action("Index","EForms")">E-Forms</a>*@
         </li>
 
         @if (Model.Admin.HasValue)

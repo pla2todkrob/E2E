@@ -19,6 +19,7 @@ namespace E2E.Controllers
         private clsServiceFTP ftp = new clsServiceFTP();
         private clsMail mail = new clsMail();
         private clsManageMaster master = new clsManageMaster();
+        private ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
 
         public ActionResult _AddTeam(Guid id)
         {
@@ -317,7 +318,27 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(db.Services.OrderByDescending(o => o.Priority_Id).ThenBy(t => new { t.Service_DueDate, t.Create }).ToList());
+                var data = db.Services
+                    .OrderByDescending(o => o.Priority_Id)
+                    .ThenBy(t => new { t.Service_DueDate, t.Create })
+                    .Select(s => new ServiceAll()
+                    {
+                        Create = s.Create,
+                        Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
+                        Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                        Priority_Class = s.System_Priorities.Priority_Class,
+                        Priority_Id = s.Priority_Id,
+                        Priority_Name = s.System_Priorities.Priority_Name,
+                        Service_Id = s.Service_Id,
+                        Service_Key = s.Service_Key,
+                        Service_Subject = s.Service_Subject,
+                        Status_Class = s.System_Statuses.Status_Class,
+                        Status_Name = s.System_Statuses.Status_Name,
+                        Update = s.Update,
+                        Is_OverDue = s.Is_OverDue
+                    }).ToList();
+
+                return View(data);
             }
             catch (Exception)
             {
@@ -351,7 +372,7 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.Services_GetDepartmentTask());
+                return View(data.Services_GetAllTask_IQ().ToList());
             }
             catch (Exception)
             {
@@ -987,7 +1008,7 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.Services_GetWaitActionList(Guid.Parse(HttpContext.User.Identity.Name)));
+                return View(data.Services_GetWaitAction_IQ(Guid.Parse(HttpContext.User.Identity.Name)));
             }
             catch (Exception)
             {
@@ -999,7 +1020,7 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.Services_GetWaitCommitList());
+                return View(data.Services_GetWaitCommit_IQ());
             }
             catch (Exception)
             {
@@ -1121,11 +1142,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = new ReportKPI_Filter();
-                if (!string.IsNullOrEmpty(filter))
-                {
-                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
-                }
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
 
                 Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 ViewBag.AuthorizeId = db.Users
@@ -1147,11 +1164,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = new ReportKPI_Filter();
-                if (!string.IsNullOrEmpty(filter))
-                {
-                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
-                }
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
 
                 return View(data.Services_ViewJoinTeamList(id, _Filter));
             }
@@ -1165,11 +1178,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = new ReportKPI_Filter();
-                if (!string.IsNullOrEmpty(filter))
-                {
-                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
-                }
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
 
                 return View(data.ClsReportKPI_ViewList(_Filter));
             }
@@ -1183,11 +1192,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = new ReportKPI_Filter();
-                if (!string.IsNullOrEmpty(filter))
-                {
-                    _Filter = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
-                }
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
 
                 return View(data.ReportKPI_User_Views(id, _Filter));
             }

@@ -40,83 +40,12 @@ namespace E2E.Models
             }
         }
 
-        private IQueryable<Services> Services_GetAllTask_IQ()
-        {
-            try
-            {
-                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                string deptName = db.Users
-                    .Where(w => w.User_Id == id)
-                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                    .FirstOrDefault();
-
-                IQueryable<Guid> deptIds = db.Master_Departments
-                    .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id);
-
-                IQueryable<Services> query = db.Services
-                    .Where(w => deptIds.Contains(w.Department_Id.Value));
-
-                return query;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         private IQueryable<Services> Services_GetNoPending_IQ()
         {
             return db.Services
                 .Where(w => w.Status_Id != 1)
                 .OrderByDescending(o => o.Priority_Id)
                 .ThenBy(o => new { o.Create, o.Service_DueDate });
-        }
-
-        private IQueryable<Services> Services_GetWaitAction_IQ(Guid? id)
-        {
-            try
-            {
-                IQueryable<Services> query = db.Services
-                    .Where(w => w.Is_Commit && w.Status_Id == 1 && (w.Is_Approval || !w.Is_MustBeApproved))
-                    .OrderByDescending(o => o.Priority_Id)
-                    .ThenBy(o => new { o.Create, o.Service_DueDate });
-
-                if (id.HasValue)
-                {
-                    string deptName = db.Users
-                        .Where(w => w.User_Id == id.Value)
-                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                        .FirstOrDefault();
-
-                    IQueryable<Guid> deptIds = db.Master_Departments
-                    .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id);
-
-                    query = query.Where(w => (deptIds.Contains(w.Department_Id.Value) && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
-                }
-
-                return query;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private IQueryable<Services> Services_GetWaitCommit_IQ()
-        {
-            try
-            {
-                return db.Services
-                    .Where(w => !w.Is_Commit && w.Status_Id == 1 && (!w.Is_MustBeApproved || w.Is_Approval))
-                    .OrderByDescending(o => o.Priority_Id)
-                    .ThenBy(t => new { t.Create, t.Service_DueDate });
-            }
-            catch (Exception)
-            {
-                throw;
-            }
         }
 
         private IQueryable<ServiceTeams> ServiceTeams_IQ(Guid id)
@@ -233,11 +162,7 @@ namespace E2E.Models
                         .Average(a => a.Satisfaction_Average);
                             }
 
-                            int successCount = query
-                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
-                                    .Count();
-
-                            if (successCount > 0)
+                            if (query.Any(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id)))
                             {
                                 reportKPI_User.SuccessPoint = query
                                     .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
@@ -511,9 +436,8 @@ namespace E2E.Models
         {
             try
             {
-                int[] statusIds = { 3, 4 };
                 IQueryable<ReportKPI_User_Views> query = db.Services
-                    .Where(w => w.Action_User_Id == id && statusIds.Contains(w.Status_Id))
+                    .Where(w => w.Action_User_Id == id)
                     .GroupJoin(db.Satisfactions, ser => ser.Service_Id, sat => sat.Service_Id, (ser, g) => new
                     {
                         ser = ser,
@@ -1202,11 +1126,24 @@ namespace E2E.Models
             }
         }
 
-        public List<Services> Services_GetDepartmentRequest()
+        public IQueryable<Services> Services_GetAllTask_IQ()
         {
             try
             {
-                return Services_GetAllRequest_IQ().ToList();
+                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                string deptName = db.Users
+                    .Where(w => w.User_Id == id)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                    .FirstOrDefault();
+
+                IQueryable<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id);
+
+                IQueryable<Services> query = db.Services
+                    .Where(w => deptIds.Contains(w.Department_Id.Value));
+
+                return query;
             }
             catch (Exception)
             {
@@ -1214,11 +1151,11 @@ namespace E2E.Models
             }
         }
 
-        public List<Services> Services_GetDepartmentTask()
+        public List<Services> Services_GetDepartmentRequest()
         {
             try
             {
-                return Services_GetAllTask_IQ().ToList();
+                return Services_GetAllRequest_IQ().ToList();
             }
             catch (Exception)
             {
@@ -1285,6 +1222,37 @@ namespace E2E.Models
             }
         }
 
+        public IQueryable<Services> Services_GetWaitAction_IQ(Guid? id)
+        {
+            try
+            {
+                IQueryable<Services> query = db.Services
+                    .Where(w => w.Is_Commit && w.Status_Id == 1 && (w.Is_Approval || !w.Is_MustBeApproved))
+                    .OrderByDescending(o => o.Priority_Id)
+                    .ThenBy(o => new { o.Create, o.Service_DueDate });
+
+                if (id.HasValue)
+                {
+                    string deptName = db.Users
+                        .Where(w => w.User_Id == id.Value)
+                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                        .FirstOrDefault();
+
+                    IQueryable<Guid> deptIds = db.Master_Departments
+                    .Where(w => w.Department_Name == deptName)
+                    .Select(s => s.Department_Id);
+
+                    query = query.Where(w => (deptIds.Contains(w.Department_Id.Value) && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
+                }
+
+                return query;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public int Services_GetWaitActionCount(Guid? id = null)
         {
             try
@@ -1297,11 +1265,14 @@ namespace E2E.Models
             }
         }
 
-        public List<Services> Services_GetWaitActionList(Guid? id = null)
+        public IQueryable<Services> Services_GetWaitCommit_IQ()
         {
             try
             {
-                return Services_GetWaitAction_IQ(id).ToList();
+                return db.Services
+                    .Where(w => !w.Is_Commit && w.Status_Id == 1 && (!w.Is_MustBeApproved || w.Is_Approval))
+                    .OrderByDescending(o => o.Priority_Id)
+                    .ThenBy(t => new { t.Create, t.Service_DueDate });
             }
             catch (Exception)
             {
@@ -1318,18 +1289,6 @@ namespace E2E.Models
             catch (Exception)
             {
                 throw;
-            }
-        }
-
-        public List<Services> Services_GetWaitCommitList()
-        {
-            try
-            {
-                return Services_GetWaitCommit_IQ().ToList();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
             }
         }
 

@@ -29,7 +29,10 @@ $(function () {
         $($.fn.dataTable.tables(true)).DataTable()
             .columns.adjust();
     });
-    scrollFunction();
+
+    reloadCount().then(function () {
+        scrollFunction();
+    });
 });
 $(document).ajaxStart(function () {
     callSpin(true);
@@ -37,7 +40,7 @@ $(document).ajaxStart(function () {
     callSpin(false);
 });
 
-function reloadCount() {
+async function reloadCount() {
     $('#nav_service').load(baseUrl + '/Configurations/_NavService');
     $('#nav_department').load(baseUrl + '/Configurations/_NavDepartment');
     $('#nav_Newtopic').load(baseUrl + '/Topics/_Newtopic');
@@ -177,7 +180,6 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                     });
                 }
             });
-            reloadCount();
         }
     });
     return true;
@@ -224,7 +226,6 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
                 }
             });
             table.columns.adjust();
-            reloadCount();
         }
     });
     return true;
@@ -236,8 +237,6 @@ async function callTable_Manuals(urlAjax, hasDate = false, dateCol = 0, blockId 
         async: true,
         success: function (res) {
             $(blockId).html(res);
-
-            reloadCount();
         }
     });
     return true;
@@ -364,7 +363,9 @@ function callSubmitModal(urlAjax, form) {
                     }).then(function (e) {
                         if (res.icon == 'success') {
                             $('#modalArea').modal('hide');
-                            reloadTable();
+                            reloadCount().then(function () {
+                                reloadTable();
+                            });
                         }
                     });
                 }
@@ -757,9 +758,9 @@ window.onscroll = function () { scrollFunction() };
 function scrollFunction() {
     var top = $('#btnToTop');
     if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        top.fadeIn(300);
+        top.fadeIn();
     } else {
-        top.fadeOut(300);
+        top.fadeOut();
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿@{
     ViewBag.Title = "All";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
 }
 
 @section scripts{
@@ -18,7 +18,7 @@
     </script>
 }
 
-@model IEnumerable<E2E.Models.Tables.Services>
+@model IEnumerable<E2E.Models.Views.ServiceAll>
 @section breadcrumb{
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -27,15 +27,16 @@
         </ol>
     </nav>
 }
+
 <table class="display table table-bordered table-hover nowrap w-100">
     <thead>
         <tr>
             <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.System_Statuses.Status_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Status_Name)</th>
             <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Priority_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Plant_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Department_Name)</th>
             @*<th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>*@
             <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
@@ -48,19 +49,19 @@
             {
                 txtColor = "text-danger";
             }
-        <tr class="@txtColor">
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
-            <td>
-                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
-                <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-            </td>
-            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
-            <td>@Html.DisplayFor(i => item.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name)</td>
-            <td>@Html.DisplayFor(i => item.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)</td>
-            @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
-            <td>@Html.DisplayFor(i => item.Update)</td>
-        </tr>
+            <tr class="@txtColor">
+                <td>@Html.DisplayFor(i => item.Create)</td>
+                <td class="text-center"><span class="@item.Status_Class">@Html.DisplayFor(i => item.Status_Name)</span></td>
+                <td>
+                    <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+                    <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+                </td>
+                <td class="text-center"><span class="@Html.ValueFor(i => item.Priority_Class)">@Html.DisplayFor(i => item.Priority_Name)</span></td>
+                <td>@Html.DisplayFor(i => item.Plant_Name)</td>
+                <td>@Html.DisplayFor(i => item.Department_Name)</td>
+                @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
+                <td>@Html.DisplayFor(i => item.Update)</td>
+            </tr>
         }
     </tbody>
 </table>

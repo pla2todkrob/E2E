@@ -825,8 +825,8 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Shared\_NavbarBrand.cshtml" />
-    <Content Include="Views\Shared\_Navbar.cshtml" />
+    <Content Include="Views\Configurations\_NavbarBrand.cshtml" />
+    <Content Include="Views\Configurations\_Navbar.cshtml" />
     <Content Include="Views\Shared\_NavbarAdmin.cshtml" />
     <Content Include="Views\Topics\Index.cshtml" />
     <Content Include="Views\Services\Index.cshtml" />
@@ -856,7 +856,7 @@
     <Content Include="Views\Masters\Departments_Form.cshtml" />
     <Content Include="Views\Masters\Sections_Form.cshtml" />
     <Content Include="Views\Masters\Processes_Form.cshtml" />
-    <Content Include="Views\Shared\_Profile.cshtml" />
+    <Content Include="Views\Configurations\_Profile.cshtml" />
     <Content Include="Views\Topics\Boards.cshtml" />
     <Content Include="Views\Topics\Boards_Table.cshtml" />
     <Content Include="Views\Topics\Boards_Form.cshtml" />
@@ -865,7 +865,7 @@
     <Content Include="Views\Topics\Boards_Comment.cshtml" />
     <Content Include="Views\Topics\Boards_Reply.cshtml" />
     <Content Include="Views\Services\_File.cshtml" />
-    <Content Include="Views\Shared\_NavService.cshtml" />
+    <Content Include="Views\Configurations\_NavService.cshtml" />
     <Content Include="Views\Services\Commit.cshtml" />
     <Content Include="Views\Services\_RefService.cshtml" />
     <Content Include="Views\Services\Approve.cshtml" />
@@ -877,7 +877,7 @@
     <Content Include="Views\Services\Index_Table_WaitAction.cshtml" />
     <Content Include="Views\Services\Action.cshtml" />
     <Content Include="Views\Topics\_FileCollection.cshtml" />
-    <Content Include="Views\Shared\_NavDepartment.cshtml" />
+    <Content Include="Views\Configurations\_NavDepartment.cshtml" />
     <Content Include="Views\Services\Approve_Table_Waiting.cshtml" />
     <Content Include="Views\Services\Approve_Table_Approved.cshtml" />
     <Content Include="Views\Services\SetInProgress.cshtml" />
@@ -903,10 +903,10 @@
     <Content Include="Views\Services\RequestChangeDue_Form.cshtml" />
     <Content Include="Views\Services\RequestChangeDue_Table.cshtml" />
     <Content Include="Views\Services\SetCancel.cshtml" />
-    <Content Include="Views\Shared\_Copyright.cshtml" />
-    <Content Include="Views\Shared\_Newtopic.cshtml" />
-    <Content Include="Views\Shared\_SortTopicAnnounce.cshtml" />
-    <Content Include="Views\Shared\_SortTopicNew.cshtml" />
+    <Content Include="Views\Configurations\_Copyright.cshtml" />
+    <Content Include="Views\Topics\_Newtopic.cshtml" />
+    <Content Include="Views\Topics\_SortTopicAnnounce.cshtml" />
+    <Content Include="Views\Topics\_SortTopicNew.cshtml" />
     <Content Include="Views\Services\SetReturnJob.cshtml" />
     <Content Include="Views\Services\_AddTeam.cshtml" />
     <Content Include="Views\Services\Form_Forward.cshtml" />
@@ -943,11 +943,11 @@
     <Content Include="Views\Masters\Categories_Table.cshtml" />
     <Content Include="Views\Services\SetClose.cshtml" />
     <Content Include="Views\Users\ChangePassword.cshtml" />
-    <Content Include="Views\Shared\_ShowChangePassword.cshtml" />
+    <Content Include="Views\Users\_ShowChangePassword.cshtml" />
     <Content Include="Views\Users\_UploadHistory.cshtml" />
     <Content Include="Views\Services\SetMustApprove.cshtml" />
     <Content Include="Views\Services\SetApproved.cshtml" />
-    <Content Include="Views\Shared\_NavManagement.cshtml" />
+    <Content Include="Views\Configurations\_NavManagement.cshtml" />
     <Content Include="Views\Management\DocumentControl.cshtml" />
     <Content Include="Views\Management\DocumentControl_Table.cshtml" />
     <Content Include="Views\Management\DocumentControl_Create.cshtml" />

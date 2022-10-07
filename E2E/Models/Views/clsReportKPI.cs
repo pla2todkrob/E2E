@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -31,6 +32,24 @@ namespace E2E.Models.Views
         [Display(Name = "To"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
         public DateTime Date_To { get; set; }
+
+        public ReportKPI_Filter DeserializeFilter(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter res = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
+                if (!res.Date_From.HasValue)
+                {
+                    res.Date_From = new DateTime(res.Date_To.Year, res.Date_To.Month, 1);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
     public class ReportKPI_Overview
