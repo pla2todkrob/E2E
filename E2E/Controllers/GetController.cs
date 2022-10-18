@@ -16,27 +16,10 @@ namespace E2E.Controllers
         public clsApi GetAllUser()
         {
             clsApi clsApi = new clsApi();
-            List<responseUser> responseUsers = new List<responseUser>();
             try
             {
-                responseUsers = db.Users
-                    .AsEnumerable()
-                    .Select(s => new
-                    {
-                        U = s,
-                        UD = db.UserDetails
-                        .Where(w => w.User_Id == s.User_Id)
-                        .Select(s2 => new { s2.Detail_EN_FirstName, s2.Detail_EN_LastName })
-                        .FirstOrDefault()
-                    }).Select(s => new responseUser()
-                    {
-                        Users = s.U,
-                        FirstName = s.UD.Detail_EN_FirstName,
-                        LastName = s.UD.Detail_EN_LastName
-                    }).ToList();
-
                 clsApi.isSuccess = true;
-                clsApi.Value = responseUsers;
+                clsApi.Value = db.UserDetails.ToList();
             }
             catch (Exception ex)
             {
