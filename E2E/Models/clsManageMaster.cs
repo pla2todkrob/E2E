@@ -2332,19 +2332,12 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                List<Users> users = new List<Users>();
-                users = db.Users
-                    .Where(w => !userCodeList.Contains(w.User_Code))
-                    .ToList();
+                IQueryable<Users> users = db.Users
+                    .Where(w => !userCodeList.Contains(w.User_Code));
 
                 foreach (var item in users)
                 {
-                    string emailAD = GetEmailAD(item.User_Code);
-                    int loginCount = db.Log_Logins
-                        .Where(w => w.User_Id == item.User_Id)
-                        .Count();
-
-                    if (string.IsNullOrEmpty(emailAD) && loginCount == 0)
+                    if (string.IsNullOrEmpty(GetEmailAD(item.User_Code)) && !db.Log_Logins.Any(a => a.User_Id == item.User_Id))
                     {
                         db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
                     }
@@ -2354,11 +2347,11 @@ namespace E2E.Models
                         item.Update = DateTime.Now;
                         db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                     }
+                }
 
-                    if (db.SaveChanges() > 0)
-                    {
-                        continue;
-                    }
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
                 }
                 return res;
             }

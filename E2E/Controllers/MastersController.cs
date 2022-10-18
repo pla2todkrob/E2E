@@ -1636,7 +1636,6 @@ namespace E2E.Controllers
                 try
                 {
                     var files = Request.Files;
-                    bool doComplete = new bool();
                     List<string> userCodeList = new List<string>();
                     foreach (string item in files)
                     {
@@ -1694,7 +1693,6 @@ namespace E2E.Controllers
                                                             userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
                                                             if (data.Users_Save(userDetails))
                                                             {
-                                                                doComplete = true;
                                                                 userCodeList.Add(userDetails.Users.User_Code);
                                                             }
                                                             else
@@ -1712,9 +1710,8 @@ namespace E2E.Controllers
                         }
                     }
 
-                    doComplete = data.Users_AdjustMissing(userCodeList);
                 EndProcess:
-                    if (doComplete)
+                    if (data.Users_AdjustMissing(userCodeList))
                     {
                         scope.Complete();
                         swal.icon = "success";
