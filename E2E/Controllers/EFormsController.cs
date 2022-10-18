@@ -580,20 +580,16 @@ namespace E2E.Controllers
         public List<SelectListItem> SelectListItems_Category_Name()
         {
             Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
-            var DeptDistinct = db.Master_Departments.Select(s => s.Department_Name).ToList().Distinct();
+            var DeptDistinct = db.Master_Departments.Select(s => s.Department_Name).Distinct();
             List<SelectListItem> item = new List<SelectListItem>();
             item.Add(new SelectListItem() { Text = "Select Category", Value = "" });
-            foreach (var item1 in DeptDistinct)
+
+            item.AddRange(DeptDistinct.Select(s => new SelectListItem()
             {
-                var sql = db.Master_Departments.Where(w => w.Department_Name == item1)
-                    .Select(s => new SelectListItem()
-                    {
-                        Value = s.Department_Id.ToString(),
-                        Text = s.Department_Name
-                    })
-                    .FirstOrDefault();
-                item.Add(sql);
+                Text = s,
+                Value = db.Master_Departments.Where(w => w.Department_Name == s).Select(s2 => s2.Department_Id).FirstOrDefault().ToString()
             }
+            ));
 
             return item;
         }
