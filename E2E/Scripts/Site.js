@@ -231,17 +231,6 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
     return true;
 }
 
-async function callTable_Manuals(urlAjax, hasDate = false, dateCol = 0, blockId = '#datalist') {
-    $.ajax({
-        url: urlAjax,
-        async: true,
-        success: function (res) {
-            $(blockId).html(res);
-        }
-    });
-    return true;
-}
-
 async function callFilter(urlAjax, blockId = '#filter') {
     try {
         $.ajax({
