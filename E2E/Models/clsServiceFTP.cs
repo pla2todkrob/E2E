@@ -14,6 +14,10 @@ namespace E2E.Models
 {
     public class clsServiceFTP
     {
+        private clsTP_Service clsTP_Service = new clsTP_Service();
+        private clsServiceFile clsServiceFile = new clsServiceFile();
+        private ReturnUpload returnUpload = new ReturnUpload();
+        private ReturnDelete returnDelete = new ReturnDelete();
         private static string saveToPath = string.Empty;
         private string dir = ConfigurationManager.AppSettings["FTP_Dir"];
         private clsMail mail = new clsMail();
@@ -101,22 +105,34 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                path = path.Replace(urlDomain, urlFtp);
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
-                request.Method = WebRequestMethods.Ftp.DeleteFile;
-                request.Credentials = new NetworkCredential(user, pass);
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                returnDelete = clsTP_Service.Delete_File(path);
+
+                //path = path.Replace(urlDomain, urlFtp);
+                //FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
+                //request.Method = WebRequestMethods.Ftp.DeleteFile;
+                //request.Credentials = new NetworkCredential(user, pass);
+                //using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                //{
+                //    if (response.StatusCode == FtpStatusCode.FileActionOK)
+                //    {
+                //        res = true;
+                //    }
+                //}
+
+                if (returnDelete.canDelete)
                 {
-                    if (response.StatusCode == FtpStatusCode.FileActionOK)
-                    {
-                        res = true;
-                    }
+                    res = returnDelete.canDelete;
+                }
+                else
+                {
+                    Exception ex = new Exception(returnDelete.errorMessage);
+                    throw ex;
                 }
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -501,40 +517,46 @@ namespace E2E.Models
             }
         }
 
+        //API Complete
         public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost)
         {
             try
             {
-                string res = string.Empty;
-                string fileName = filePost.FileName;
-                finalPath = GetFinallyPath(string.Concat(dir, fullDir));
-                fileName = string.Concat(finalPath, fileName);
+                //string res = string.Empty;
+                //string fileName = filePost.FileName;
+                //finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                //fileName = string.Concat(finalPath, fileName);
 
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
-                request.Method = WebRequestMethods.Ftp.UploadFile;
-                request.Credentials = new NetworkCredential(user, pass);
+                //FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
+                //request.Method = WebRequestMethods.Ftp.UploadFile;
+                //request.Credentials = new NetworkCredential(user, pass);
 
-                byte[] bytes = null;
-                using (Stream fileStream = filePost.InputStream)
-                {
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        fileStream.CopyTo(memory);
-                        bytes = memory.ToArray();
-                    }
-                }
-                request.ContentLength = bytes.Length;
+                //byte[] bytes = null;
+                //using (Stream fileStream = filePost.InputStream)
+                //{
+                //    using (MemoryStream memory = new MemoryStream())
+                //    {
+                //        fileStream.CopyTo(memory);
+                //        bytes = memory.ToArray();
+                //    }
+                //}
+                //request.ContentLength = bytes.Length;
 
-                using (Stream reqStream = request.GetRequestStream())
-                {
-                    reqStream.Write(bytes, 0, bytes.Length);
-                    if (reqStream.CanWrite)
-                    {
-                        res = fileName.Replace(urlFtp, urlDomain);
-                    }
-                }
+                //using (Stream reqStream = request.GetRequestStream())
+                //{
+                //    reqStream.Write(bytes, 0, bytes.Length);
+                //    if (reqStream.CanWrite)
+                //    {
+                //        res = fileName.Replace(urlFtp, urlDomain);
+                //    }
+                //}
+                clsServiceFile.folderPath = fullDir;
 
-                return res;
+                clsServiceFile.filename = filePost.FileName;
+
+                returnUpload = clsTP_Service.UploadFile(clsServiceFile, filePost);
+
+                return returnUpload.fileUrl;
             }
             catch (Exception)
             {
@@ -542,120 +564,151 @@ namespace E2E.Models
             }
         }
 
+        //API Complete
         public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
         {
             try
             {
-                string res = string.Empty;
-                finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                //string res = string.Empty;
+                //finalPath = GetFinallyPath(string.Concat(dir, fullDir));
 
-                fileName = replaceName(fileName);
-                fileName = string.Concat(finalPath, fileName);
+                //fileName = replaceName(fileName);
+                //fileName = string.Concat(finalPath, fileName);
 
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
-                request.Method = WebRequestMethods.Ftp.UploadFile;
-                request.Credentials = new NetworkCredential(user, pass);
+                //FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(fileName));
+                //request.Method = WebRequestMethods.Ftp.UploadFile;
+                //request.Credentials = new NetworkCredential(user, pass);
 
-                byte[] bytes = null;
-                using (Stream fileStream = filePost.InputStream)
+                //byte[] bytes = null;
+                //using (Stream fileStream = filePost.InputStream)
+                //{
+                //    using (MemoryStream memory = new MemoryStream())
+                //    {
+                //        fileStream.CopyTo(memory);
+                //        bytes = memory.ToArray();
+                //    }
+                //}
+                //request.ContentLength = bytes.Length;
+
+                //using (Stream reqStream = request.GetRequestStream())
+                //{
+                //    reqStream.Write(bytes, 0, bytes.Length);
+                //    if (reqStream.CanWrite)
+                //    {
+                //        res = fileName.Replace(urlFtp, urlDomain);
+                //    }
+                //}
+                clsServiceFile.folderPath = fullDir;
+
+                if (!string.IsNullOrEmpty(fileName))
                 {
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        fileStream.CopyTo(memory);
-                        bytes = memory.ToArray();
-                    }
+                    clsServiceFile.filename = fileName;
                 }
-                request.ContentLength = bytes.Length;
-
-                using (Stream reqStream = request.GetRequestStream())
+                else
                 {
-                    reqStream.Write(bytes, 0, bytes.Length);
-                    if (reqStream.CanWrite)
-                    {
-                        res = fileName.Replace(urlFtp, urlDomain);
-                    }
+                    clsServiceFile.filename = filePost.FileName;
                 }
 
-                return res;
+                returnUpload = clsTP_Service.UploadFile(clsServiceFile, filePost);
+
+                return returnUpload.fileUrl;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
+        //API Complete
         public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "", int maxHeight = 256)
         {
             try
             {
                 clsImage res = new clsImage();
-                finalPath = GetFinallyPath(string.Concat(dir, fullDir));
-                if (string.IsNullOrEmpty(fileName))
+                //finalPath = GetFinallyPath(string.Concat(dir, fullDir));
+                //if (string.IsNullOrEmpty(fileName))
+                //{
+                //    fileName = filePost.FileName;
+                //}
+
+                //fileName = replaceName(fileName);
+
+                //fileName = string.Concat(finalPath, fileName);
+
+                //List<clsImage> clsImages = new List<clsImage>();
+                //Image originalFile = Image.FromStream(filePost.InputStream, true, true);
+                //clsImage clsImage = new clsImage();
+                //clsImage.Image = originalFile;
+                //clsImage.FtpPath = fileName;
+                //clsImages.Add(clsImage);
+
+                //int thumbW = originalFile.Width;
+                //int thumbH = originalFile.Height;
+
+                //if (originalFile.Height > maxHeight)
+                //{
+                //    decimal formula = Convert.ToDecimal(maxHeight) / Convert.ToDecimal(originalFile.Height);
+
+                //    thumbW = Convert.ToInt32(formula * Convert.ToDecimal(originalFile.Width));
+                //    thumbH = Convert.ToInt32(formula * Convert.ToDecimal(originalFile.Height));
+                //}
+
+                //Image thumbnailFile = originalFile.GetThumbnailImage(thumbW, thumbH, null, IntPtr.Zero);
+                //clsImage = new clsImage();
+                //clsImage.Image = thumbnailFile;
+                //clsImage.FtpPath = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
+                //clsImages.Add(clsImage);
+
+                //foreach (var item in clsImages)
+                //{
+                //    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(item.FtpPath));
+                //    request.Method = WebRequestMethods.Ftp.UploadFile;
+                //    request.Credentials = new NetworkCredential(user, pass);
+                //    byte[] bytes = null;
+
+                //    using (var memory = new MemoryStream())
+                //    {
+                //        item.Image.Save(memory, originalFile.RawFormat);
+                //        bytes = memory.ToArray();
+                //    }
+
+                //    request.KeepAlive = true;
+                //    request.UseBinary = true;
+                //    request.ContentLength = bytes.Length;
+
+                //    using (Stream reqStream = request.GetRequestStream())
+                //    {
+                //        reqStream.Write(bytes, 0, bytes.Length);
+                //        if (reqStream.CanWrite)
+                //        {
+                //            if (string.IsNullOrEmpty(res.OriginalPath))
+                //            {
+                //                res.OriginalPath = item.FtpPath.Replace(urlFtp, urlDomain);
+                //            }
+                //            else
+                //            {
+                //                res.ThumbnailPath = item.FtpPath.Replace(urlFtp, urlDomain);
+                //            }
+                //        }
+                //    }
+                //}
+
+                clsServiceFile.folderPath = fullDir;
+
+                if (!string.IsNullOrEmpty(fileName))
                 {
-                    fileName = filePost.FileName;
+                    clsServiceFile.filename = fileName;
+                }
+                else
+                {
+                    clsServiceFile.filename = filePost.FileName;
                 }
 
-                fileName = replaceName(fileName);
+                returnUpload = clsTP_Service.UploadFile(clsServiceFile, filePost);
 
-                fileName = string.Concat(finalPath, fileName);
+                res.OriginalPath = returnUpload.fileUrl;
+                res.ThumbnailPath = returnUpload.fileThumbnailUrl;
 
-                List<clsImage> clsImages = new List<clsImage>();
-                Image originalFile = Image.FromStream(filePost.InputStream, true, true);
-                clsImage clsImage = new clsImage();
-                clsImage.Image = originalFile;
-                clsImage.FtpPath = fileName;
-                clsImages.Add(clsImage);
-
-                int thumbW = originalFile.Width;
-                int thumbH = originalFile.Height;
-
-                if (originalFile.Height > maxHeight)
-                {
-                    decimal formula = Convert.ToDecimal(maxHeight) / Convert.ToDecimal(originalFile.Height);
-
-                    thumbW = Convert.ToInt32(formula * Convert.ToDecimal(originalFile.Width));
-                    thumbH = Convert.ToInt32(formula * Convert.ToDecimal(originalFile.Height));
-                }
-
-                Image thumbnailFile = originalFile.GetThumbnailImage(thumbW, thumbH, null, IntPtr.Zero);
-                clsImage = new clsImage();
-                clsImage.Image = thumbnailFile;
-                clsImage.FtpPath = fileName.Replace(Path.GetExtension(fileName), string.Concat("_thumbnail", Path.GetExtension(fileName)));
-                clsImages.Add(clsImage);
-
-                foreach (var item in clsImages)
-                {
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(item.FtpPath));
-                    request.Method = WebRequestMethods.Ftp.UploadFile;
-                    request.Credentials = new NetworkCredential(user, pass);
-                    byte[] bytes = null;
-
-                    using (var memory = new MemoryStream())
-                    {
-                        item.Image.Save(memory, originalFile.RawFormat);
-                        bytes = memory.ToArray();
-                    }
-
-                    request.KeepAlive = true;
-                    request.UseBinary = true;
-                    request.ContentLength = bytes.Length;
-
-                    using (Stream reqStream = request.GetRequestStream())
-                    {
-                        reqStream.Write(bytes, 0, bytes.Length);
-                        if (reqStream.CanWrite)
-                        {
-                            if (string.IsNullOrEmpty(res.OriginalPath))
-                            {
-                                res.OriginalPath = item.FtpPath.Replace(urlFtp, urlDomain);
-                            }
-                            else
-                            {
-                                res.ThumbnailPath = item.FtpPath.Replace(urlFtp, urlDomain);
-                            }
-                        }
-                    }
-                }
                 return res;
             }
             catch (Exception)

@@ -463,7 +463,7 @@ namespace E2E.Controllers
             linkUrl = linkUrl.Replace("Approve_Forms", "EForms_Content");
             linkUrl = linkUrl.Split('?').FirstOrDefault();
 
-            string subject = string.Format("[E2E][" + status + "] {0} - {1}", "E-Forms", eForms.EForm_Title);
+            string subject = string.Format("[" + status + "] {0} - {1}", "E-Forms", eForms.EForm_Title);
             string content = string.Format("<p><b>Description:</b> {0}", eForms.EForm_Description);
             content += "<br />";
             content += "<br />";

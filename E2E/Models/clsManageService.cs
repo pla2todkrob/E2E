@@ -687,7 +687,7 @@ namespace E2E.Models
                     Getteam += master.Users_GetInfomation(item) + "<br />";
                 }
 
-                string subject = string.Format("[E2E][Notify add team] {0} - {1}", services.Service_Key, services.Service_Subject);
+                string subject = string.Format("[Notify add team] {0} - {1}", services.Service_Key, services.Service_Subject);
                 string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
                 content += "<br />";
                 content += "<br />";
@@ -768,7 +768,7 @@ namespace E2E.Models
 
                         listTeam.Add(serviceTeams.User_Id);
 
-                        string subject = string.Format("[E2E][Notify delete member] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Notify delete member] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = "<p><b>Delete: </b>" + userName;
                         content += "<br />";
                         content += "<br />";
@@ -827,7 +827,7 @@ namespace E2E.Models
                             linkUrl = linkUrl.Replace("RequestChangeDue_Accept/" + cut[5], "Action");
                             linkUrl += "/" + serviceComments.Service_Id;
 
-                            string subject = string.Format("[E2E][Accept Request change due] {0} - {1}", services.Service_Key, services.Service_Subject);
+                            string subject = string.Format("[Accept Request change due] {0} - {1}", services.Service_Key, services.Service_Subject);
                             string content = string.Format("<p><b>Comment: </b> {0}<br />", serviceComments.Comment_Content);
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -914,7 +914,7 @@ namespace E2E.Models
                     linkUrl = linkUrl.Replace("RequestChangeDue_Reject/" + cut[5], "Action");
                     linkUrl += "/" + serviceComments.Service_Id;
 
-                    string subject = string.Format("[E2E][Reject Request change due] {0} - {1}", Sendto.Services.Service_Key, Sendto.Services.Service_Subject);
+                    string subject = string.Format("[Reject Request change due] {0} - {1}", Sendto.Services.Service_Key, Sendto.Services.Service_Subject);
                     string content = string.Format("<p><b>Comment: </b> {0}<br />", "Reject due date change request");
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -955,7 +955,7 @@ namespace E2E.Models
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "RequestChangeDue");
 
-                        string subject = string.Format("[E2E][Request change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Request change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Description:</b> {0}</p>", Comment);
                         content += string.Format("<p><b>Remark:</b> {0}</p>", model.Remark);
 
@@ -1530,7 +1530,7 @@ namespace E2E.Models
                         linkUrl += "/" + services.Service_Id;
                         linkUrl = linkUrl.Replace(methodName, "Approve_Form");
 
-                        string subject = string.Format("[E2E][Approval] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Approval] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -1705,7 +1705,7 @@ namespace E2E.Models
                         linkUrl += "/" + services.Service_Id;
                         linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
-                        string subject = string.Format("[E2E][Require close job] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Require close job] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -1890,7 +1890,7 @@ namespace E2E.Models
                         linkUrl += "/" + services.Service_Id;
                         linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
-                        string subject = string.Format("[E2E][Reject] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Reject] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -1936,7 +1936,7 @@ namespace E2E.Models
                         linkUrl += "/" + services.Service_Id;
                         linkUrl = linkUrl.Replace(methodName, "Approve_Form");
 
-                        string subject = string.Format("[E2E][Require approve] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Require approve] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
                         content += "<br />";
                         content += "<br />";
@@ -1989,7 +1989,7 @@ namespace E2E.Models
                             linkUrl += "/" + services.Service_Id;
                             linkUrl = linkUrl.Replace(methodName, "Action");
 
-                            string subject = string.Format("[E2E][Return assignments] {0} - {1}", services.Service_Key, services.Service_Subject);
+                            string subject = string.Format("[Return assignments] {0} - {1}", services.Service_Key, services.Service_Subject);
                             string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -2052,7 +2052,7 @@ namespace E2E.Models
                             linkUrl += "/" + services.Service_Id;
                             linkUrl = linkUrl.Replace(methodName, "Commit");
 
-                            string subject = string.Format("[E2E][Return] {0} - {1}", services.Service_Key, services.Service_Subject);
+                            string subject = string.Format("[Return] {0} - {1}", services.Service_Key, services.Service_Subject);
                             string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
@@ -2133,7 +2133,7 @@ namespace E2E.Models
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "Action");
 
-                        string subject = string.Format("[E2E][Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
                         content += "<br />";
                         content += string.Format("<b>Description:</b> {0}", services.Service_Description);
@@ -2179,7 +2179,7 @@ namespace E2E.Models
                         linkUrl = linkUrl.Replace(methodName, "Action");
                         linkUrl = string.Concat(linkUrl, "/", id);
 
-                        string subject = string.Format("[E2E][Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string subject = string.Format("[Assign] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
                         content += "<br />";
                         content += string.Format("<b>Description:</b> {0}", services.Service_Description);

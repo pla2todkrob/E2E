@@ -87,7 +87,7 @@ namespace E2E.Models
                     linkUrl += "/" + eForms.EForm_Id;
                     linkUrl = linkUrl.Replace("EForms_Create", "Approve_Forms");
 
-                    string subject = string.Format("[E2E][Require approve] {0} - {1}", "E-Forms", eForms.EForm_Title);
+                    string subject = string.Format("[Require approve] {0} - {1}", "E-Forms", eForms.EForm_Title);
                     string content = string.Format("<p><b>Description:</b> {0}", eForms.EForm_Description);
                     content += "<br />";
                     content += "<br />";
