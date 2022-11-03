@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Transactions;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -197,7 +198,6 @@ namespace E2E.Controllers
                         if (data.Board_Save(model, Request.Files))
                         {
                             scope.Complete();
-
                             swal.dangerMode = false;
                             swal.icon = "success";
                             swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
@@ -423,7 +423,7 @@ namespace E2E.Controllers
                     linkUrl = linkUrl.Replace("Boards_ReportComment", "Boards_Form");
                     linkUrl += "/" + sql.Topics.Topic_Id + "/#" + model.TopicComment_Id;
 
-                    string subject = string.Format("[E2E][Notify inappropriate comment] {0}", sql.Topics.Topic_Title);
+                    string subject = string.Format("[Notify inappropriate comment] {0}", sql.Topics.Topic_Title);
                     string content = string.Format("<p><b>Reporter:</b> {0} <b>Comment:</b> {1}", master.Users_GetInfomation(Id), CommentReportUser);
                     content += "<br />";
                     content += string.Format("<b>Commentator:</b> {1} <b>Comment:</b> {0}", sql.Comment_Content, master.Users_GetInfomation(sql.User_Id.Value));

@@ -15,6 +15,8 @@ namespace E2E.Models
     public class clsMail
     {
         private clsContext db = new clsContext();
+        private clsServiceEmail clsServiceEmail = new clsServiceEmail();
+        private clsTP_Service clsTP_Service = new clsTP_Service();
 
         private bool SendMail(MailMessage model)
         {
@@ -97,6 +99,7 @@ namespace E2E.Models
             }
         }
 
+        //API Complete
         public bool SendMail(List<Guid> sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null, List<string> attachPaths = null)
         {
             try
@@ -125,19 +128,22 @@ namespace E2E.Models
                     dear += receiveDatas[i].NameEN;
                 }
 
+                List<string> strto = new List<string>();
                 foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
                 {
                     var email = new EmailAddressAttribute();
                     if (email.IsValid(item.Email))
                     {
-                        msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
+                        //msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
+                        strto.Add(item.Email);
+                        clsServiceEmail.sendTo = strto.ToArray();
                     }
                 }
 
-                if (msg.To.Count == 0)
-                {
-                    return true;
-                }
+                //if (msg.To.Count == 0)
+                //{
+                //    return true;
+                //}
 
                 if (sendCC != null)
                 {
@@ -152,16 +158,20 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
+                    List<string> strcc = new List<string>();
                     foreach (var item in receiveCC.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
                         var email = new EmailAddressAttribute();
                         if (email.IsValid(item.Email))
                         {
-                            msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                            //msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                            strcc.Add(item.Email);
+                            clsServiceEmail.sendCC = strcc.ToArray();
                         }
                     }
                 }
 
+                List<string> strbcc = new List<string>();
                 if (sendBCC != null)
                 {
                     List<ReceiveData> receiveBCC = db.UserDetails
@@ -180,18 +190,21 @@ namespace E2E.Models
                         var email = new EmailAddressAttribute();
                         if (email.IsValid(item.Email))
                         {
-                            msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                            //msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                            strbcc.Add(item.Email);
+                            clsServiceEmail.sendBCC = strbcc.ToArray();
                         }
                     }
                 }
-
+                List<string> filePath = new List<string>();
                 if (attachPaths != null)
                 {
                     foreach (var item in attachPaths)
                     {
-                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
-
-                        msg.Attachments.Add(attachment);
+                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+                        //msg.Attachments.Add(attachment);
+                        filePath.Add(item);
+                        clsServiceEmail.filePath = filePath.ToArray();
                     }
                 }
 
@@ -231,12 +244,16 @@ namespace E2E.Models
                 strBody += "</body>";
                 strBody += "</html>";
 
-                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
                 msg.Subject = strSubject;
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 
-                return SendMail(msg);
+                clsServiceEmail.Body = strContent;
+                clsServiceEmail.Subject = strSubject;
+                clsServiceEmail.sendFrom = userDetails.Users.User_Email;
+
+                return clsTP_Service.SendMail(clsServiceEmail);
             }
             catch (Exception)
             {
@@ -244,6 +261,7 @@ namespace E2E.Models
             }
         }
 
+        //API Complete
         public bool SendMail(Guid sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null, List<string> attachPaths = null)
         {
             try
@@ -273,7 +291,9 @@ namespace E2E.Models
                     return true;
                 }
 
-                msg.To.Add(new MailAddress(receiveDatas.Email, receiveDatas.FullNameEN));
+                //msg.To.Add(new MailAddress(receiveDatas.Email, receiveDatas.FullNameEN));
+                string[] strto = { receiveDatas.Email };
+                clsServiceEmail.sendTo = strto;
 
                 dear += receiveDatas.NameEN;
 
@@ -290,12 +310,15 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
+                    List<string> strcc = new List<string>();
                     foreach (var item in receiveCC)
                     {
                         email = new EmailAddressAttribute();
                         if (email.IsValid(item.Email))
                         {
-                            msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                            //msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
+                            strcc.Add(item.Email);
+                            clsServiceEmail.sendCC = strcc.ToArray();
                         }
                     }
                 }
@@ -313,23 +336,29 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
+                    List<string> strbcc = new List<string>();
                     foreach (var item in receiveBCC)
                     {
                         email = new EmailAddressAttribute();
                         if (email.IsValid(item.Email))
                         {
-                            msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                            //msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
+                            strbcc.Add(item.Email);
+                            clsServiceEmail.sendBCC = strbcc.ToArray();
                         }
                     }
                 }
 
                 if (attachPaths != null)
                 {
+                    List<string> strfile = new List<string>();
                     foreach (var item in attachPaths)
                     {
-                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+                        //msg.Attachments.Add(attachment);
 
-                        msg.Attachments.Add(attachment);
+                        strfile.Add(item);
+                        clsServiceEmail.filePath = strfile.ToArray();
                     }
                 }
 
@@ -349,31 +378,40 @@ namespace E2E.Models
                 strBody += "</body>";
                 strBody += "</html>";
 
-                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
                 msg.Subject = strSubject;
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 
-                return SendMail(msg);
+                clsServiceEmail.Body = strContent;
+                clsServiceEmail.Subject = strSubject;
+                clsServiceEmail.sendFrom = userDetails.Users.User_Email;
+
+                return clsTP_Service.SendMail(clsServiceEmail);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
+        //API Complete
         public bool SendMail(List<string> sendTo, string subject, string content, List<string> attachPaths = null)
         {
             try
             {
                 MailMessage msg = new MailMessage();
-                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+
+                List<string> strto = new List<string>();
                 foreach (var item in sendTo)
                 {
                     var email = new EmailAddressAttribute();
                     if (email.IsValid(item))
                     {
-                        msg.To.Add(item);
+                        //msg.To.Add(item);
+                        strto.Add(item);
+                        clsServiceEmail.sendTo = strto.ToArray();
                     }
                 }
 
@@ -389,18 +427,25 @@ namespace E2E.Models
 
                 if (attachPaths != null)
                 {
+                    List<string> strfile = new List<string>();
                     foreach (var item in attachPaths)
                     {
-                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
 
-                        msg.Attachments.Add(attachment);
+                        //msg.Attachments.Add(attachment);
+
+                        strfile.Add(item);
+                        clsServiceEmail.filePath = strfile.ToArray();
                     }
                 }
 
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 
-                return SendMail(msg);
+                clsServiceEmail.Body = content;
+                clsServiceEmail.Subject = subject;
+
+                return clsTP_Service.SendMail(clsServiceEmail);
             }
             catch (Exception)
             {
@@ -414,15 +459,18 @@ namespace E2E.Models
             {
                 MailMessage msg = new MailMessage();
 
-                msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
+                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
 
                 var email = new EmailAddressAttribute();
+                List<string> strto = new List<string>();
                 foreach (var item in sendTo)
                 {
                     email = new EmailAddressAttribute();
                     if (email.IsValid(item))
                     {
-                        msg.To.Add(item);
+                        //msg.To.Add(item);
+                        strto.Add(item);
+                        clsServiceEmail.sendTo = strto.ToArray();
                     }
                 }
 
@@ -430,7 +478,9 @@ namespace E2E.Models
                 email = new EmailAddressAttribute();
                 if (email.IsValid(emailCC))
                 {
-                    msg.CC.Add(emailCC);
+                    //msg.CC.Add(emailCC);
+                    string[] strcc = { emailCC };
+                    clsServiceEmail.sendCC = strcc;
                 }
 
                 msg.Subject = subject;
@@ -445,18 +495,24 @@ namespace E2E.Models
 
                 if (attachPaths != null)
                 {
+                    List<string> strfile = new List<string>();
                     foreach (var item in attachPaths)
                     {
-                        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
+                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
 
-                        msg.Attachments.Add(attachment);
+                        //msg.Attachments.Add(attachment);
+                        strfile.Add(item);
+                        clsServiceEmail.filePath = strfile.ToArray();
                     }
                 }
 
                 msg.Body = new MessageBody(BodyType.HTML, strBody);
                 msg.IsBodyHtml = true;
 
-                return SendMail(msg);
+                clsServiceEmail.Subject = subject;
+                clsServiceEmail.Body = content;
+
+                return clsTP_Service.SendMail(clsServiceEmail);
             }
             catch (Exception)
             {
@@ -464,6 +520,7 @@ namespace E2E.Models
             }
         }
 
+        //API Complete
         public class ReceiveData
         {
             public string Email { get; set; }

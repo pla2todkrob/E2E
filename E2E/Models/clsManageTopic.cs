@@ -338,7 +338,7 @@ namespace E2E.Models
                     linkUrl = linkUrl.Replace("Boards_Comment", "Boards_Form");
                     linkUrl += "/" + query.Topic_Id;
 
-                    string subject = string.Format("[E2E][Notify new comment] {0}", query.Topic_Title);
+                    string subject = string.Format("[Notify new comment] {0}", query.Topic_Title);
                     string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(topicComments.User_Id.Value));
                     content += "<br />";
                     content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
@@ -491,7 +491,7 @@ namespace E2E.Models
                     linkUrl = linkUrl.Replace("Boards_Reply", "Boards_Form");
                     linkUrl += "/" + DBTopicComment.Topics.Topic_Id;
 
-                    string subject = string.Format("[E2E][Notify new comment] {0}", DBTopicComment.Topics.Topic_Title);
+                    string subject = string.Format("[Notify new comment] {0}", DBTopicComment.Topics.Topic_Title);
                     string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(DBTopicComment.User_Id.Value));
                     content += "<br />";
                     content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
