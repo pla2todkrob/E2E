@@ -12,9 +12,11 @@ namespace E2E.Models.Tables
 
         public static List<System_Roles> DefaultList()
         {
-            List<System_Roles> list = new List<System_Roles>();
-            list.Add(new System_Roles() { Role_Name = "Admin" });
-            list.Add(new System_Roles() { Role_Name = "User" });
+            List<System_Roles> list = new List<System_Roles>
+            {
+                new System_Roles() { Role_Name = "Admin" },
+                new System_Roles() { Role_Name = "User" }
+            };
 
             return list;
         }

@@ -162,9 +162,9 @@ namespace E2E.Controllers
                 {
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             return View();
         }

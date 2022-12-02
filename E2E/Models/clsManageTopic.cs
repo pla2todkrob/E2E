@@ -10,11 +10,11 @@ namespace E2E.Models
 {
     public class clsManageTopic
     {
+        private readonly clsMail clsMail = new clsMail();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsManageMaster master = new clsManageMaster();
         private clsImage clsImag = new clsImage();
-        private clsMail clsMail = new clsMail();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsManageMaster master = new clsManageMaster();
 
         protected bool Board_CountComment_Delete(Guid id, int num)
         {
@@ -125,16 +125,17 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Topics topics = new Topics();
-
-                topics.Topic_Title = model.Topic_Title.Trim();
-                topics.Topic_Content = model.Topic_Content.Trim();
-                topics.Topic_Pin = model.Topic_Pin;
-                topics.Topic_Pin_EndDate = model.Topic_Pin_EndDate;
-                topics.Create = DateTime.Now;
-                topics.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                topics.Category_Id = model.Category_Id;
-                topics.IsPublic = model.IsPublic;
+                Topics topics = new Topics
+                {
+                    Topic_Title = model.Topic_Title.Trim(),
+                    Topic_Content = model.Topic_Content.Trim(),
+                    Topic_Pin = model.Topic_Pin,
+                    Topic_Pin_EndDate = model.Topic_Pin_EndDate,
+                    Create = DateTime.Now,
+                    User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name),
+                    Category_Id = model.Category_Id,
+                    IsPublic = model.IsPublic
+                };
 
                 db.Topics.Add(topics);
                 if (db.SaveChanges() > 0)
@@ -324,10 +325,12 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                TopicComments topicComments = new TopicComments();
-                topicComments.Topic_Id = model.Topic_Id;
-                topicComments.Comment_Content = model.Comment_Content;
-                topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                TopicComments topicComments = new TopicComments
+                {
+                    Topic_Id = model.Topic_Id,
+                    Comment_Content = model.Comment_Content,
+                    User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
+                };
 
                 db.TopicComments.Add(topicComments);
                 if (db.SaveChanges() > 0)
@@ -423,7 +426,7 @@ namespace E2E.Models
                     {
                         foreach (var item in File_)
                         {
-                            ftp.Ftp_DeleteFile(item);
+                            ftp.Api_DeleteFile(item);
                         }
                     }
                     res = true;
@@ -441,10 +444,12 @@ namespace E2E.Models
         {
             try
             {
-                clsTopic clsTopic = new clsTopic();
-                clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id || w.Ref_TopicComment_Id == id).ToList();
-                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList();
+                clsTopic clsTopic = new clsTopic
+                {
+                    TopicComments = db.TopicComments.Where(w => w.Topic_Id == id || w.Ref_TopicComment_Id == id).ToList(),
+                    TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList(),
+                    TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).ToList()
+                };
 
                 if (clsTopic.TopicComments.Count > 0)
                 {
@@ -475,12 +480,13 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 var DBTopicComment = db.TopicComments.Where(w => w.TopicComment_Id == model.TopicComment_Id).FirstOrDefault();
-                TopicComments topicComments = new TopicComments();
-
-                topicComments.Topic_Id = DBTopicComment.Topic_Id;
-                topicComments.Ref_TopicComment_Id = model.TopicComment_Id;
-                topicComments.Comment_Content = model.Comment_Content;
-                topicComments.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                TopicComments topicComments = new TopicComments
+                {
+                    Topic_Id = DBTopicComment.Topic_Id,
+                    Ref_TopicComment_Id = model.TopicComment_Id,
+                    Comment_Content = model.Comment_Content,
+                    User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
+                };
 
                 db.TopicComments.Add(topicComments);
                 if (db.SaveChanges() > 0)
@@ -591,11 +597,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                TopicSections topicSections = new TopicSections();
-                topicSections.TopicSection_Description = model.TopicSection_Description;
-                topicSections.TopicSection_Link = model.TopicSection_Link;
-                topicSections.TopicSection_Title = model.TopicSection_Title;
-                topicSections.Topic_Id = model.Topic_Id;
+                TopicSections topicSections = new TopicSections
+                {
+                    TopicSection_Description = model.TopicSection_Description,
+                    TopicSection_Link = model.TopicSection_Link,
+                    TopicSection_Title = model.TopicSection_Title,
+                    Topic_Id = model.Topic_Id
+                };
 
                 if (files[0].ContentLength > 0)
                 {
@@ -762,7 +770,7 @@ namespace E2E.Models
                     res = true;
                     if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
                     {
-                        res = ftp.Ftp_DeleteFile(TopicSections.TopicSection_Path);
+                        res = ftp.Api_DeleteFile(TopicSections.TopicSection_Path);
                     }
                 }
 
@@ -792,7 +800,7 @@ namespace E2E.Models
                 {
                     if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
                     {
-                        res = ftp.Ftp_DeleteFile(TopicSections.TopicSection_Path);
+                        res = ftp.Api_DeleteFile(TopicSections.TopicSection_Path);
                     }
                 }
 
@@ -847,7 +855,7 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Ftp_DeleteFile(TopicFiles.TopicFile_Path);
+                        ftp.Api_DeleteFile(TopicFiles.TopicFile_Path);
                     }
 
                     res = DeleteFile_Count(topic_id);
@@ -877,8 +885,8 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Original);
-                        ftp.Ftp_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
+                        ftp.Api_DeleteFile(TopicGalleries.TopicGallery_Original);
+                        ftp.Api_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
                     }
 
                     res = DeleteGallery_Count(topic_id);
@@ -897,12 +905,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                TopicFiles topicFiles = new TopicFiles();
-
-                topicFiles.Topic_Id = model.Topic_Id;
-                topicFiles.TopicFile_Path = filepath;
-                topicFiles.TopicFile_Name = file;
-                topicFiles.TopicFile_Extension = Path.GetExtension(file);
+                TopicFiles topicFiles = new TopicFiles
+                {
+                    Topic_Id = model.Topic_Id,
+                    TopicFile_Path = filepath,
+                    TopicFile_Name = file,
+                    TopicFile_Extension = Path.GetExtension(file)
+                };
 
                 db.TopicFiles.Add(topicFiles);
                 if (db.SaveChanges() > 0)

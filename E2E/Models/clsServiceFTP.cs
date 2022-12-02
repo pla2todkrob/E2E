@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -14,18 +13,18 @@ namespace E2E.Models
 {
     public class clsServiceFTP
     {
-        private clsTP_Service clsTP_Service = new clsTP_Service();
-        private clsServiceFile clsServiceFile = new clsServiceFile();
-        private ReturnUpload returnUpload = new ReturnUpload();
-        private ReturnDelete returnDelete = new ReturnDelete();
         private static string saveToPath = string.Empty;
-        private string dir = ConfigurationManager.AppSettings["FTP_Dir"];
-        private clsMail mail = new clsMail();
-        private string pass = ConfigurationManager.AppSettings["FTP_Password"];
-        private string urlDomain = ConfigurationManager.AppSettings["Domain_Url"];
-        private string urlFtp = ConfigurationManager.AppSettings["FTP_Url"];
-        private string user = ConfigurationManager.AppSettings["FTP_User"];
-        private string webPath = AppDomain.CurrentDomain.BaseDirectory;
+        private readonly clsServiceFile clsServiceFile = new clsServiceFile();
+        private readonly clsTP_Service clsTP_Service = new clsTP_Service();
+        private readonly string dir = ConfigurationManager.AppSettings["FTP_Dir"];
+        private readonly clsMail mail = new clsMail();
+        private readonly string pass = ConfigurationManager.AppSettings["FTP_Password"];
+        private readonly string urlDomain = ConfigurationManager.AppSettings["Domain_Url"];
+        private readonly string urlFtp = ConfigurationManager.AppSettings["FTP_Url"];
+        private readonly string user = ConfigurationManager.AppSettings["FTP_User"];
+        private readonly string webPath = AppDomain.CurrentDomain.BaseDirectory;
+        private ReturnDelete returnDelete = new ReturnDelete();
+        private ReturnUpload returnUpload = new ReturnUpload();
 
         private bool CreateDirectory(string path)
         {
@@ -100,11 +99,10 @@ namespace E2E.Models
 
         public static string finalPath { get; set; }
 
-        public bool Ftp_DeleteFile(string path)
+        public bool Api_DeleteFile(string path)
         {
             try
             {
-                bool res = new bool();
                 returnDelete = clsTP_Service.Delete_File(path);
 
                 //path = path.Replace(urlDomain, urlFtp);
@@ -119,16 +117,11 @@ namespace E2E.Models
                 //    }
                 //}
 
-                if (returnDelete.canDelete)
+                if (!returnDelete.canDelete)
                 {
-                    res = returnDelete.canDelete;
+                    throw new Exception(returnDelete.errorMessage);
                 }
-                else
-                {
-                    Exception ex = new Exception(returnDelete.errorMessage);
-                    throw ex;
-                }
-                return res;
+                return returnDelete.canDelete;
             }
             catch (Exception ex)
             {
@@ -412,8 +405,10 @@ namespace E2E.Models
                 ZipFile.CreateFromDirectory(saveToPath, zipPath, CompressionLevel.Optimal, true);
 
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                List<string> attachPath = new List<string>();
-                attachPath.Add(zipPath);
+                List<string> attachPath = new List<string>
+                {
+                    zipPath
+                };
                 if (mail.SendMail(emails, subject, content, userId, attachPath))
                 {
                     Directory.Delete(saveToPath, true);
@@ -432,7 +427,6 @@ namespace E2E.Models
                 bool res = new bool();
                 string path = string.Concat(urlFtp, dir, folderName, "/");
                 List<Guid> dirList = new List<Guid>();
-                Guid folderGuid;
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
                 request.Credentials = new NetworkCredential(user, pass);
@@ -444,7 +438,7 @@ namespace E2E.Models
                         string line = streamReader.ReadLine();
                         while (!string.IsNullOrEmpty(line))
                         {
-                            if (Guid.TryParse(line, out folderGuid))
+                            if (Guid.TryParse(line, out Guid folderGuid))
                             {
                                 dirList.Add(Guid.Parse(line));
                             }
@@ -666,15 +660,10 @@ namespace E2E.Models
                 //    request.Credentials = new NetworkCredential(user, pass);
                 //    byte[] bytes = null;
 
-                //    using (var memory = new MemoryStream())
-                //    {
-                //        item.Image.Save(memory, originalFile.RawFormat);
-                //        bytes = memory.ToArray();
-                //    }
+                // using (var memory = new MemoryStream()) { item.Image.Save(memory,
+                // originalFile.RawFormat); bytes = memory.ToArray(); }
 
-                //    request.KeepAlive = true;
-                //    request.UseBinary = true;
-                //    request.ContentLength = bytes.Length;
+                // request.KeepAlive = true; request.UseBinary = true; request.ContentLength = bytes.Length;
 
                 //    using (Stream reqStream = request.GetRequestStream())
                 //    {

@@ -1,201 +1,36 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Configuration;
-using System.Dynamic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
+using System.Net.Http.Headers;
 using System.Web;
-using System.Web.Script.Serialization;
 
 namespace E2E.Models
 {
     public class clsTP_Service
     {
-        public bool SendMail(clsServiceEmail clsServiceEmail, HttpFileCollectionBase file = null)
+        private byte[] GetByteFileBase(HttpPostedFileBase file)
         {
-            bool res = new bool();
-            string resApi = string.Empty;
-            ReturnSend returnSend = new ReturnSend();
-
             try
             {
-                List<clsFile> clsFiles = new List<clsFile>();
-                string API_KEY = GetToken();
-                //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_Email/send";
-                string ApiUrl = GetDomainURL() + "api/Service_Email/send";
-
-                var httpWebRequest = (HttpWebRequest)WebRequest.Create(ApiUrl);
-                httpWebRequest.ContentType = "application/json";
-                httpWebRequest.Method = "POST";
-                httpWebRequest.Headers.Add("Token", API_KEY);
-
-                if (file?.Count > 0)
+                byte[] data;
+                using (Stream inputStream = file.InputStream)
                 {
-                    for (int i = 0; i < file.Count; i++)
+                    if (!(inputStream is MemoryStream memoryStream))
                     {
-                        var fileBase = file.Get(i);
-
-                        byte[] data = readFileContents(fileBase);
-
-                        string B64 = Convert.ToBase64String(data);
-
-                        clsFiles.Add(new clsFile() { Base64 = B64, FileName = fileBase.FileName });
+                        memoryStream = new MemoryStream();
+                        inputStream.CopyTo(memoryStream);
                     }
+                    data = memoryStream.ToArray();
                 }
-
-                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-                {
-                    string json = new JavaScriptSerializer().Serialize(new
-                    {
-                        sendFrom = clsServiceEmail.sendFrom,
-                        sendTo = clsServiceEmail.sendTo,
-                        sendCC = clsServiceEmail.sendCC,
-                        sendBCC = clsServiceEmail.sendBCC,
-                        Subject = clsServiceEmail.Subject,
-                        Body = clsServiceEmail.Body,
-                        filePath = clsServiceEmail.filePath,
-                        clsFiles = clsFiles
-                    });
-
-                    streamWriter.Write(json);
-                }
-                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    resApi = streamReader.ReadToEnd();
-                }
-
-                returnSend = JsonConvert.DeserializeObject<ReturnSend>(resApi);
-
-                if (returnSend.canSend)
-                {
-                    res = returnSend.canSend;
-                }
-                else
-                {
-                    Exception ex = new Exception(returnSend.errorMessage);
-                    throw ex;
-                }
+                return data;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
-
-            return res;
-        }
-
-        public ReturnUpload UploadFile(clsServiceFile clsServiceFile, HttpPostedFileBase file = null)
-        {
-            ReturnUpload returnUpload = new ReturnUpload();
-            string resApi = string.Empty;
-
-            try
-            {
-                string API_KEY = GetToken();
-                //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_File/upload";
-                string ApiUrl = GetDomainURL() + "api/Service_File/upload";
-
-                var httpWebRequest = (HttpWebRequest)WebRequest.Create(ApiUrl);
-                httpWebRequest.ContentType = "application/json";
-                httpWebRequest.Method = "POST";
-                httpWebRequest.Headers.Add("Token", API_KEY);
-
-                if (file?.ContentLength > 0)
-                {
-                    byte[] data = readFileContents(file);
-                    string B64 = Convert.ToBase64String(data);
-
-                    clsServiceFile.Base64 = B64;
-                    if (string.IsNullOrEmpty(clsServiceFile.filename))
-                    {
-                        clsServiceFile.filename = file.FileName;
-                    }
-                }
-
-                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-                {
-                    string json = new JavaScriptSerializer().Serialize(new
-                    {
-                        folderPath = clsServiceFile.folderPath,
-                        Base64 = clsServiceFile.Base64,
-                        filename = clsServiceFile.filename
-                    });
-
-                    streamWriter.Write(json);
-                }
-                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    resApi = streamReader.ReadToEnd();
-                }
-
-                returnUpload = JsonConvert.DeserializeObject<ReturnUpload>(resApi);
-
-                if (returnUpload.canUpload)
-                {
-                }
-                else
-                {
-                    Exception ex = new Exception(returnUpload.errorMessage);
-                    throw ex;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            return returnUpload;
-        }
-
-        public ReturnDelete Delete_File(string path)
-        {
-            ReturnDelete res = new ReturnDelete();
-            string API_KEY = GetToken();
-            //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_Email/send";
-            string ApiUrl = GetDomainURL() + "api/Service_File/Delete_File";
-
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(ApiUrl);
-            httpWebRequest.ContentType = "application/json";
-            httpWebRequest.Method = "POST";
-            httpWebRequest.Headers.Add("Token", API_KEY);
-
-            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-            {
-                string json = new JavaScriptSerializer().Serialize(new
-                {
-                    path = path
-                });
-
-                streamWriter.Write(json);
-            }
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
-                var resApi = streamReader.ReadToEnd();
-
-                res = JsonConvert.DeserializeObject<ReturnDelete>(resApi);
-            }
-
-            return res;
-        }
-
-        private byte[] readFileContents(HttpPostedFileBase file)
-        {
-            Stream fileStream = file.InputStream;
-            var mStreamer = new MemoryStream();
-            mStreamer.SetLength(fileStream.Length);
-            fileStream.Read(mStreamer.GetBuffer(), 0, (int)fileStream.Length);
-            mStreamer.Seek(0, SeekOrigin.Begin);
-            byte[] fileBytes = mStreamer.GetBuffer();
-
-            return fileBytes;
         }
 
         private string GetDomainURL()
@@ -251,6 +86,134 @@ namespace E2E.Models
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        public ReturnDelete Delete_File(string fileUrl)
+        {
+            ReturnDelete res = new ReturnDelete();
+            string TokenKey = GetToken();
+            //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_Email/send";
+            string ApiUrl = GetDomainURL() + "api/Service_File/Delete_File";
+            var keyVal = new
+            {
+                path = fileUrl
+            };
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Token", TokenKey);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                HttpResponseMessage response = client.PostAsJsonAsync(ApiUrl, keyVal).Result;
+                response.EnsureSuccessStatusCode();
+                var content = response.Content.ReadAsStringAsync().Result;
+                res = JsonConvert.DeserializeObject<ReturnDelete>(content);
+            }
+
+            return res;
+        }
+
+        public bool SendMail(clsServiceEmail clsServiceEmail, HttpFileCollectionBase file = null)
+        {
+            try
+            {
+                ReturnSend returnSend = new ReturnSend();
+                string resApi = string.Empty;
+                List<clsFile> clsFiles = new List<clsFile>();
+                string TokenKey = GetToken();
+                //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_Email/send";
+                string ApiUrl = GetDomainURL() + "api/Service_Email/send";
+
+                if (file?.Count > 0)
+                {
+                    for (int i = 0; i < file.Count; i++)
+                    {
+                        var fileBase = file.Get(i);
+
+                        byte[] data = GetByteFileBase(fileBase);
+
+                        string B64 = Convert.ToBase64String(data);
+
+                        clsFiles.Add(new clsFile() { Base64 = B64, FileName = fileBase.FileName });
+                    }
+                }
+
+                var multiClass = new
+                {
+                    clsServiceEmail.sendFrom,
+                    clsServiceEmail.sendTo,
+                    clsServiceEmail.sendCC,
+                    clsServiceEmail.sendBCC,
+                    clsServiceEmail.Subject,
+                    clsServiceEmail.Body,
+                    clsServiceEmail.filePath,
+                    clsFiles
+                };
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("Token", TokenKey);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage response = client.PostAsJsonAsync(ApiUrl, multiClass).Result;
+                    response.EnsureSuccessStatusCode();
+                    var content = response.Content.ReadAsStringAsync().Result;
+                    returnSend = JsonConvert.DeserializeObject<ReturnSend>(resApi);
+                }
+
+                if (!returnSend.canSend)
+                {
+                    throw new Exception(returnSend.errorMessage);
+                }
+
+                return returnSend.canSend;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public ReturnUpload UploadFile(clsServiceFile clsServiceFile, HttpPostedFileBase file = null)
+        {
+            try
+            {
+                ReturnUpload returnUpload = new ReturnUpload();
+                string resApi = string.Empty;
+                string TokenKey = GetToken();
+                //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_File/upload";
+                string ApiUrl = GetDomainURL() + "api/Service_File/upload";
+                var formContent = new MultipartFormDataContent
+                {
+                    { new StringContent(file.FileName), "filename" },
+                    { new StringContent(clsServiceFile.folderPath), "folderPath" }
+                };
+
+                if (file.ContentLength > 0)
+                {
+                    StreamContent stream = new StreamContent(file.InputStream, file.ContentLength);
+                    stream.Headers.ContentType = new MediaTypeHeaderValue(MimeMapping.GetMimeMapping(file.FileName));
+                    formContent.Add(stream, "fileUpload", file.FileName);
+                }
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("Token", TokenKey);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage response = client.PostAsync(ApiUrl, formContent).Result;
+                    response.EnsureSuccessStatusCode();
+                    var content = response.Content.ReadAsStringAsync().Result;
+                    returnUpload = JsonConvert.DeserializeObject<ReturnUpload>(content);
+                }
+
+                if (!returnUpload.canUpload)
+                {
+                    throw new Exception(returnUpload.errorMessage);
+                }
+
+                return returnUpload;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

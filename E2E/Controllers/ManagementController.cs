@@ -13,10 +13,10 @@ namespace E2E.Controllers
 {
     public class ManagementController : Controller
     {
-        private clsManageManagement data = new clsManageManagement();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsManageMaster master = new clsManageMaster();
+        private readonly clsManageManagement data = new clsManageManagement();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsManageMaster master = new clsManageMaster();
 
         public ActionResult AuditReport()
         {
@@ -434,12 +434,14 @@ namespace E2E.Controllers
                     .Distinct()
                     .ToList();
 
-                listItems = new List<SelectListItem>();
-                listItems.Add(new SelectListItem()
+                listItems = new List<SelectListItem>
                 {
-                    Text = "Select section",
-                    Value = ""
-                });
+                    new SelectListItem()
+                    {
+                        Text = "Select section",
+                        Value = ""
+                    }
+                };
 
                 foreach (string item in secNames)
                 {

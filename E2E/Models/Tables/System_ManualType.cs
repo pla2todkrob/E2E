@@ -22,10 +22,12 @@ namespace E2E.Models.Tables
 
         public static List<System_ManualType> DefaultList()
         {
-            List<System_ManualType> list = new List<System_ManualType>();
-            list.Add(new System_ManualType() { Manual_TypeName = "TOPIC", Create = DateTime.Now });
-            list.Add(new System_ManualType() { Manual_TypeName = "EFORM", Create = DateTime.Now });
-            list.Add(new System_ManualType() { Manual_TypeName = "SERVICE", Create = DateTime.Now });
+            List<System_ManualType> list = new List<System_ManualType>
+            {
+                new System_ManualType() { Manual_TypeName = "TOPIC", Create = DateTime.Now },
+                new System_ManualType() { Manual_TypeName = "EFORM", Create = DateTime.Now },
+                new System_ManualType() { Manual_TypeName = "SERVICE", Create = DateTime.Now }
+            };
 
             return list;
         }

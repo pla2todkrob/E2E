@@ -15,17 +15,19 @@ namespace E2E.Models
 {
     public class clsManageMaster
     {
-        private clsContext db = new clsContext();
+        private readonly clsContext db = new clsContext();
 
         protected bool Department_Insert(Master_Departments model)
         {
             try
             {
                 bool res = new bool();
-                Master_Departments master_Departments = new Master_Departments();
-                master_Departments.Department_Name = model.Department_Name;
-                master_Departments.Active = model.Active;
-                master_Departments.Division_Id = model.Division_Id;
+                Master_Departments master_Departments = new Master_Departments
+                {
+                    Department_Name = model.Department_Name,
+                    Active = model.Active,
+                    Division_Id = model.Division_Id
+                };
 
                 db.Master_Departments.Add(master_Departments);
                 if (db.SaveChanges() > 0)
@@ -81,10 +83,12 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Divisions master_Divisions = new Master_Divisions();
-                master_Divisions.Division_Name = model.Division_Name;
-                master_Divisions.Active = model.Active;
-                master_Divisions.Plant_Id = model.Plant_Id;
+                Master_Divisions master_Divisions = new Master_Divisions
+                {
+                    Division_Name = model.Division_Name,
+                    Active = model.Active,
+                    Plant_Id = model.Plant_Id
+                };
 
                 db.Master_Divisions.Add(master_Divisions);
                 if (db.SaveChanges() > 0)
@@ -140,11 +144,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Grades master_Grades = new Master_Grades();
-                master_Grades.LineWork_Id = model.LineWork_Id;
-                master_Grades.Grade_Name = model.Grade_Name.Trim();
-                master_Grades.Grade_Position = model.Grade_Position.Trim();
-                master_Grades.Active = model.Active;
+                Master_Grades master_Grades = new Master_Grades
+                {
+                    LineWork_Id = model.LineWork_Id,
+                    Grade_Name = model.Grade_Name.Trim(),
+                    Grade_Position = model.Grade_Position.Trim(),
+                    Active = model.Active
+                };
 
                 db.Master_Grades.Add(master_Grades);
                 if (db.SaveChanges() > 0)
@@ -204,9 +210,11 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_LineWorks master_LineWorks = new Master_LineWorks();
-                master_LineWorks.LineWork_Name = model.LineWork_Name.Trim();
-                master_LineWorks.Authorize_Id = model.Authorize_Id;
+                Master_LineWorks master_LineWorks = new Master_LineWorks
+                {
+                    LineWork_Name = model.LineWork_Name.Trim(),
+                    Authorize_Id = model.Authorize_Id
+                };
 
                 db.Master_LineWorks.Add(master_LineWorks);
                 if (db.SaveChanges() > 0)
@@ -265,9 +273,11 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Plants master_Plants = new Master_Plants();
-                master_Plants.Plant_Name = model.Plant_Name;
-                master_Plants.Active = model.Active;
+                Master_Plants master_Plants = new Master_Plants
+                {
+                    Plant_Name = model.Plant_Name,
+                    Active = model.Active
+                };
 
                 db.Master_Plants.Add(master_Plants);
                 if (db.SaveChanges() > 0)
@@ -323,10 +333,12 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Processes master_Processes = new Master_Processes();
-                master_Processes.Process_Name = model.Process_Name;
-                master_Processes.Active = model.Active;
-                master_Processes.Section_Id = model.Section_Id;
+                Master_Processes master_Processes = new Master_Processes
+                {
+                    Process_Name = model.Process_Name,
+                    Active = model.Active,
+                    Section_Id = model.Section_Id
+                };
 
                 db.Master_Processes.Add(master_Processes);
                 if (db.SaveChanges() > 0)
@@ -383,10 +395,12 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Sections master_Sections = new Master_Sections();
-                master_Sections.Section_Name = model.Section_Name;
-                master_Sections.Active = model.Active;
-                master_Sections.Department_Id = model.Department_Id;
+                Master_Sections master_Sections = new Master_Sections
+                {
+                    Section_Name = model.Section_Name,
+                    Active = model.Active,
+                    Department_Id = model.Department_Id
+                };
 
                 db.Master_Sections.Add(master_Sections);
                 if (db.SaveChanges() > 0)
@@ -444,14 +458,16 @@ namespace E2E.Models
             {
                 bool res = new bool();
 
-                Users users = new Users();
-                users.User_Code = model.Users.User_Code.Trim();
-                users.Grade_Id = model.Users.Grade_Id;
-                users.Process_Id = model.Users.Process_Id;
-                users.Role_Id = 2;
-                users.User_CostCenter = model.Users.User_CostCenter.Trim();
-                users.User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]);
-                users.YearSetPoint = DateTime.Now.Year;
+                Users users = new Users
+                {
+                    User_Code = model.Users.User_Code.Trim(),
+                    Grade_Id = model.Users.Grade_Id,
+                    Process_Id = model.Users.Process_Id,
+                    Role_Id = 2,
+                    User_CostCenter = model.Users.User_CostCenter.Trim(),
+                    User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]),
+                    YearSetPoint = DateTime.Now.Year
+                };
 
                 System_Configurations system_ = new System_Configurations();
                 system_ = db.System_Configurations
@@ -472,10 +488,12 @@ namespace E2E.Models
 
                 db.Users.Add(users);
 
-                UserDetails userDetails = new UserDetails();
-                userDetails.Detail_EN_FirstName = model.Detail_EN_FirstName.Trim();
-                userDetails.Detail_EN_LastName = model.Detail_EN_LastName.Trim();
-                userDetails.Prefix_EN_Id = model.Prefix_EN_Id;
+                UserDetails userDetails = new UserDetails
+                {
+                    Detail_EN_FirstName = model.Detail_EN_FirstName.Trim(),
+                    Detail_EN_LastName = model.Detail_EN_LastName.Trim(),
+                    Prefix_EN_Id = model.Prefix_EN_Id
+                };
 
                 if (!string.IsNullOrEmpty(model.Detail_Password))
                 {
@@ -589,9 +607,10 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Categories master_Categories = new Master_Categories();
-
-                master_Categories.Category_Name = model.Category_Name;
+                Master_Categories master_Categories = new Master_Categories
+                {
+                    Category_Name = model.Category_Name
+                };
 
                 db.Master_Categories.Add(master_Categories);
 
@@ -889,9 +908,11 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Departments master_Departments = new Master_Departments();
-                master_Departments.Department_Name = val.Trim();
-                master_Departments.Division_Id = divisionId;
+                Master_Departments master_Departments = new Master_Departments
+                {
+                    Department_Name = val.Trim(),
+                    Division_Id = divisionId
+                };
                 db.Master_Departments.Add(master_Departments);
                 if (db.SaveChanges() > 0)
                 {
@@ -1046,9 +1067,11 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Divisions master_Divisions = new Master_Divisions();
-                master_Divisions.Division_Name = val.Trim();
-                master_Divisions.Plant_Id = plantId;
+                Master_Divisions master_Divisions = new Master_Divisions
+                {
+                    Division_Name = val.Trim(),
+                    Plant_Id = plantId
+                };
                 db.Master_Divisions.Add(master_Divisions);
                 if (db.SaveChanges() > 0)
                 {
@@ -1071,11 +1094,15 @@ namespace E2E.Models
                 string domainName = ConfigurationManager.AppSettings["DomainName"];
                 using (var context = new PrincipalContext(ContextType.Domain, domainName))
                 {
-                    UserPrincipal user = new UserPrincipal(context);
-                    user.Description = code.Trim();
+                    UserPrincipal user = new UserPrincipal(context)
+                    {
+                        Description = code.Trim()
+                    };
 
-                    PrincipalSearcher searcher = new PrincipalSearcher();
-                    searcher.QueryFilter = user;
+                    PrincipalSearcher searcher = new PrincipalSearcher
+                    {
+                        QueryFilter = user
+                    };
                     Principal principal = searcher.FindOne();
                     if (principal != null)
                     {
@@ -1114,10 +1141,12 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(grade) && !string.IsNullOrEmpty(position))
                         {
-                            master_Grades = new Master_Grades();
-                            master_Grades.Grade_Name = grade;
-                            master_Grades.Grade_Position = position;
-                            master_Grades.LineWork_Id = lineWorkId;
+                            master_Grades = new Master_Grades
+                            {
+                                Grade_Name = grade,
+                                Grade_Position = position,
+                                LineWork_Id = lineWorkId
+                            };
 
                             if (Grade_Save(master_Grades))
                             {
@@ -1354,8 +1383,10 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            master_LineWorks = new Master_LineWorks();
-                            master_LineWorks.LineWork_Name = val;
+                            master_LineWorks = new Master_LineWorks
+                            {
+                                LineWork_Name = val
+                            };
                             if (val.StartsWith("J"))
                             {
                                 master_LineWorks.Authorize_Id = 1;
@@ -1580,8 +1611,10 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Plants master_Plants = new Master_Plants();
-                master_Plants.Plant_Name = val.Trim();
+                Master_Plants master_Plants = new Master_Plants
+                {
+                    Plant_Name = val.Trim()
+                };
                 db.Master_Plants.Add(master_Plants);
                 if (db.SaveChanges() > 0)
                 {
@@ -1668,8 +1701,10 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
-                system_Prefix_EN.Prefix_EN_Name = val.Trim();
+                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN
+                {
+                    Prefix_EN_Name = val.Trim()
+                };
                 db.System_Prefix_ENs.Add(system_Prefix_EN);
                 if (db.SaveChanges() > 0)
                 {
@@ -1723,8 +1758,10 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
-                system_Prefix_TH.Prefix_TH_Name = val.Trim();
+                System_Prefix_TH system_Prefix_TH = new System_Prefix_TH
+                {
+                    Prefix_TH_Name = val.Trim()
+                };
                 db.System_Prefix_THs.Add(system_Prefix_TH);
                 if (db.SaveChanges() > 0)
                 {
@@ -1880,9 +1917,11 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Processes master_Processes = new Master_Processes();
-                master_Processes.Process_Name = val.Trim();
-                master_Processes.Section_Id = sectionId;
+                Master_Processes master_Processes = new Master_Processes
+                {
+                    Process_Name = val.Trim(),
+                    Section_Id = sectionId
+                };
                 db.Master_Processes.Add(master_Processes);
                 if (db.SaveChanges() > 0)
                 {
@@ -2062,9 +2101,11 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Sections master_Sections = new Master_Sections();
-                master_Sections.Department_Id = departmentId;
-                master_Sections.Section_Name = val.Trim();
+                Master_Sections master_Sections = new Master_Sections
+                {
+                    Department_Id = departmentId,
+                    Section_Name = val.Trim()
+                };
                 db.Master_Sections.Add(master_Sections);
                 if (db.SaveChanges() > 0)
                 {
@@ -2083,8 +2124,10 @@ namespace E2E.Models
         {
             IQueryable<System_Authorize> query = db.System_Authorizes;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Authorize", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Authorize", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -2097,8 +2140,10 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_Department(Guid? divisionId)
         {
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Department", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Department", Value = "" }
+            };
 
             if (divisionId.HasValue)
             {
@@ -2117,8 +2162,10 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_Division(Guid? plantId)
         {
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Division", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Division", Value = "" }
+            };
 
             if (plantId.HasValue)
             {
@@ -2137,8 +2184,10 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_Grade(Guid? lineworkId)
         {
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Grade", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Grade", Value = "" }
+            };
 
             if (lineworkId.HasValue)
             {
@@ -2160,8 +2209,10 @@ namespace E2E.Models
             IQueryable<Master_LineWorks> query = db.Master_LineWorks
                 .Where(w => w.Active);
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Line of work", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Line of work", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -2177,8 +2228,10 @@ namespace E2E.Models
             IQueryable<Master_Plants> query = db.Master_Plants
                 .Where(w => w.Active);
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Plant", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Plant", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -2193,8 +2246,10 @@ namespace E2E.Models
         {
             IQueryable<System_Prefix_EN> query = db.System_Prefix_ENs;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Prefix", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Prefix", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -2209,8 +2264,10 @@ namespace E2E.Models
         {
             IQueryable<System_Prefix_TH> query = db.System_Prefix_THs;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Prefix", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Prefix", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -2223,8 +2280,10 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_Process(Guid? sectionId)
         {
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Process", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Process", Value = "" }
+            };
 
             if (sectionId.HasValue)
             {
@@ -2245,8 +2304,10 @@ namespace E2E.Models
         {
             IQueryable<System_Roles> query = db.System_Roles;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Role", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Role", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -2259,8 +2320,10 @@ namespace E2E.Models
 
         public List<SelectListItem> SelectListItems_Section(Guid? departmentId)
         {
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Section", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Section", Value = "" }
+            };
 
             if (departmentId.HasValue)
             {
@@ -2289,8 +2352,10 @@ namespace E2E.Models
                     .Where(w => w.Process_Id == processId);
             }
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select User", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select User", Value = "" }
+            };
 
             item.AddRange(query
                 .Select(s => new SelectListItem()

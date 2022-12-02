@@ -49,19 +49,19 @@
             {
                 txtColor = "text-danger";
             }
-            <tr class="@txtColor">
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td class="text-center"><span class="@item.Status_Class">@Html.DisplayFor(i => item.Status_Name)</span></td>
-                <td>
-                    <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
-                    <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                </td>
-                <td class="text-center"><span class="@Html.ValueFor(i => item.Priority_Class)">@Html.DisplayFor(i => item.Priority_Name)</span></td>
-                <td>@Html.DisplayFor(i => item.Plant_Name)</td>
-                <td>@Html.DisplayFor(i => item.Department_Name)</td>
-                @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
-                <td>@Html.DisplayFor(i => item.Update)</td>
-            </tr>
+        <tr class="@txtColor">
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td class="text-center"><span class="@item.Status_Class">@Html.DisplayFor(i => item.Status_Name)</span></td>
+            <td>
+                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+                <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+            </td>
+            <td class="text-center"><span class="@Html.ValueFor(i => item.Priority_Class)">@Html.DisplayFor(i => item.Priority_Name)</span></td>
+            <td>@Html.DisplayFor(i => item.Plant_Name)</td>
+            <td>@Html.DisplayFor(i => item.Department_Name)</td>
+            @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
         }
     </tbody>
 </table>

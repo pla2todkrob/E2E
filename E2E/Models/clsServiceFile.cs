@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace E2E.Models
+﻿namespace E2E.Models
 {
     public class clsServiceFile
     {
-        public string folderPath { get; set; }
         public string Base64 { get; set; }
         public string filename { get; set; }
+        public string folderPath { get; set; }
     }
 
-    public class ReturnUpload
+    public class ReturnDelete
     {
-        public string fileUrl { get; set; }
-        public string fileThumbnailUrl { get; set; }
-        public bool canUpload { get; set; }
+        public bool canDelete { get; set; }
         public string errorMessage { get; set; }
     }
 
@@ -26,9 +19,11 @@ namespace E2E.Models
         public string errorMessage { get; set; }
     }
 
-    public class ReturnDelete
+    public class ReturnUpload
     {
-        public bool canDelete { get; set; }
+        public bool canUpload { get; set; }
         public string errorMessage { get; set; }
+        public string fileThumbnailUrl { get; set; }
+        public string fileUrl { get; set; }
     }
 }

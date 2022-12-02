@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Transactions;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -15,20 +14,21 @@ namespace E2E.Controllers
 {
     public class TopicsController : Controller
     {
-        private clsMail clsMail = new clsMail();
-        private clsManageTopic data = new clsManageTopic();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsManageMaster master = new clsManageMaster();
-        private clsSwal swal = new clsSwal();
+        private readonly clsMail clsMail = new clsMail();
+        private readonly clsManageTopic data = new clsManageTopic();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly clsSwal swal = new clsSwal();
 
         public ActionResult _FileCollection(Guid id)
         {
-            clsTopic clsTopic = new clsTopic();
+            clsTopic clsTopic = new clsTopic
+            {
+                TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList(),
 
-            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList();
-
-            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList();
+                TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList()
+            };
 
             return View(clsTopic);
         }
@@ -67,8 +67,10 @@ namespace E2E.Controllers
 
         public ActionResult Boards_Comment(Guid id, Guid? comment_id)
         {
-            TopicComments topicComments = new TopicComments();
-            topicComments.Topic_Id = id;
+            TopicComments topicComments = new TopicComments
+            {
+                Topic_Id = id
+            };
             if (comment_id.HasValue)
             {
                 topicComments = db.TopicComments.Find(comment_id);
@@ -303,8 +305,10 @@ namespace E2E.Controllers
         public ActionResult Boards_Reply(Guid comment_id, Guid? id)
         {
             Session["Boards_Reply"] = "I";
-            TopicComments topicComments = new TopicComments();
-            topicComments.TopicComment_Id = comment_id;
+            TopicComments topicComments = new TopicComments
+            {
+                TopicComment_Id = comment_id
+            };
             if (id.HasValue)
             {
                 topicComments = db.TopicComments.Find(comment_id);
@@ -507,8 +511,10 @@ namespace E2E.Controllers
         {
             try
             {
-                TopicSections topicSections = new TopicSections();
-                topicSections.Topic_Id = topicId;
+                TopicSections topicSections = new TopicSections
+                {
+                    Topic_Id = topicId
+                };
 
                 ViewBag.IsNew = true;
 
@@ -933,11 +939,12 @@ namespace E2E.Controllers
 
         public ActionResult ReloadModel(Guid id)
         {
-            clsTopic clsTopic = new clsTopic();
+            clsTopic clsTopic = new clsTopic
+            {
+                TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList(),
 
-            clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList();
-
-            clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList();
+                TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList()
+            };
 
             return View(clsTopic);
         }
@@ -1033,8 +1040,10 @@ namespace E2E.Controllers
         {
             IQueryable<Master_Categories> query = db.Master_Categories;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "All topics", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "All topics", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -1049,8 +1058,10 @@ namespace E2E.Controllers
         {
             IQueryable<Master_Categories> query = db.Master_Categories.Where(w => w.Active);
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select category", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select category", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {

@@ -13,10 +13,12 @@ namespace E2E.Models.Tables
 
         public static List<System_Authorize> DefaultList()
         {
-            List<System_Authorize> list = new List<System_Authorize>();
-            list.Add(new System_Authorize() { Authorize_Name = "Acknowledge" });
-            list.Add(new System_Authorize() { Authorize_Name = "Approved" });
-            list.Add(new System_Authorize() { Authorize_Name = "Requestor" });
+            List<System_Authorize> list = new List<System_Authorize>
+            {
+                new System_Authorize() { Authorize_Name = "Acknowledge" },
+                new System_Authorize() { Authorize_Name = "Approved" },
+                new System_Authorize() { Authorize_Name = "Requestor" }
+            };
 
             return list;
         }

@@ -12,8 +12,8 @@ namespace E2E.Controllers
 {
     public class UsersController : Controller
     {
-        private clsManageMaster data = new clsManageMaster();
-        private clsContext db = new clsContext();
+        private readonly clsManageMaster data = new clsManageMaster();
+        private readonly clsContext db = new clsContext();
 
         public ActionResult _ShowChangePassword()
         {
@@ -50,8 +50,10 @@ namespace E2E.Controllers
         {
             try
             {
-                clsPassword clsPassword = new clsPassword();
-                clsPassword.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                clsPassword clsPassword = new clsPassword
+                {
+                    User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name)
+                };
 
                 return View(clsPassword);
             }

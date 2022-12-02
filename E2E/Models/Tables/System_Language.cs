@@ -22,9 +22,11 @@ namespace E2E.Models.Tables
 
         public static List<System_Language> DefaultList()
         {
-            List<System_Language> list = new List<System_Language>();
-            list.Add(new System_Language() { Language_Name = "TH", Create = DateTime.Now });
-            list.Add(new System_Language() { Language_Name = "EN", Create = DateTime.Now });
+            List<System_Language> list = new List<System_Language>
+            {
+                new System_Language() { Language_Name = "TH", Create = DateTime.Now },
+                new System_Language() { Language_Name = "EN", Create = DateTime.Now }
+            };
             return list;
         }
     }
