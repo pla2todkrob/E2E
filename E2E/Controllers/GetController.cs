@@ -1,17 +1,13 @@
 ﻿using E2E.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 
 namespace E2E.Controllers
 {
     public class GetController : ApiController
     {
-        private clsContext db = new clsContext();
-        private clsManageMaster master = new clsManageMaster();
+        private readonly clsContext db = new clsContext();
 
         public clsApi GetAllUser()
         {

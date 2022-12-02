@@ -8,18 +8,17 @@ using System.Linq;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.Security;
 
 namespace E2E.Controllers
 {
     [AllowAnonymous]
     public class ConfigurationsController : Controller
     {
-        private clsManageService data = new clsManageService();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsManageMaster master = new clsManageMaster();
-        private clsUsers users = new clsUsers();
+        private readonly clsManageService data = new clsManageService();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly clsUsers users = new clsUsers();
 
         public ActionResult _Copyright()
         {
@@ -31,9 +30,10 @@ namespace E2E.Controllers
 
         public ActionResult _Navbar()
         {
-            clsCountNavbar res = new clsCountNavbar();
-
-            res.Admin = null;
+            clsCountNavbar res = new clsCountNavbar
+            {
+                Admin = null
+            };
 
             if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
             {
@@ -370,7 +370,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult deletelogo()
+        public ActionResult Deletelogo()
         {
             clsSwal swal = new clsSwal();
             using (TransactionScope scope = new TransactionScope())

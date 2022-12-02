@@ -13,18 +13,19 @@ namespace E2E.Controllers
 {
     public class EFormsController : Controller
     {
-        private clsManageEForm data = new clsManageEForm();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsMail mail = new clsMail();
+        private readonly clsManageEForm data = new clsManageEForm();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsMail mail = new clsMail();
 
         public ActionResult _FileCollections(Guid id)
         {
-            clsEForm clsEForm = new clsEForm();
+            clsEForm clsEForm = new clsEForm
+            {
+                EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).OrderBy(o => o.EForm_Gallery_Seq).ToList(),
 
-            clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).OrderBy(o => o.EForm_Gallery_Seq).ToList();
-
-            clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).OrderBy(o => o.EForm_File_Seq).ToList();
+                EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).OrderBy(o => o.EForm_File_Seq).ToList()
+            };
 
             return View(clsEForm);
         }
@@ -80,10 +81,12 @@ namespace E2E.Controllers
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
 
-                clsEForm clsEForm = new clsEForm();
-                clsEForm.EForms = db.EForms.Find(id);
-                clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
-                clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
+                clsEForm clsEForm = new clsEForm
+                {
+                    EForms = db.EForms.Find(id),
+                    EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList(),
+                    EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList()
+                };
 
                 return View(clsEForm);
             }
@@ -285,8 +288,10 @@ namespace E2E.Controllers
         {
             try
             {
-                EForms eForms = new EForms();
-                eForms.EForm_Start = DateTime.Now;
+                EForms eForms = new EForms
+                {
+                    EForm_Start = DateTime.Now
+                };
 
                 bool isNew = true;
                 if (id.HasValue)
@@ -453,10 +458,8 @@ namespace E2E.Controllers
 
         public void EmailForms(Guid id, string status)
         {
-            EForms eForms = new EForms();
-            eForms = db.EForms.Find(id);
+            EForms eForms = db.EForms.Find(id);
 
-            string deptName = db.Users.Find(eForms.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
             Guid sendTo = eForms.User_Id;
             var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
             linkUrl += "/" + eForms.EForm_Id;
@@ -481,11 +484,12 @@ namespace E2E.Controllers
 
         public ActionResult ReloadModel(Guid id)
         {
-            clsEForm clsEForm = new clsEForm();
+            clsEForm clsEForm = new clsEForm
+            {
+                EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList(),
 
-            clsEForm.EForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == id).ToList();
-
-            clsEForm.EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList();
+                EForm_Files = db.EForm_Files.Where(w => w.EForm_Id == id).ToList()
+            };
 
             return View(clsEForm);
         }
@@ -581,8 +585,10 @@ namespace E2E.Controllers
         {
             Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
             var DeptDistinct = db.Master_Departments.Select(s => s.Department_Name).Distinct();
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Category", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Category", Value = "" }
+            };
 
             item.AddRange(DeptDistinct.Select(s => new SelectListItem()
             {

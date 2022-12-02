@@ -63,8 +63,10 @@ namespace E2E.Models.Views
                 var cookies = HttpContext.Current.Request.Cookies.AllKeys;
                 foreach (var item in cookies)
                 {
-                    HttpCookie myCookie = new HttpCookie(item);
-                    myCookie.Expires = DateTime.Now.AddDays(-1d);
+                    HttpCookie myCookie = new HttpCookie(item)
+                    {
+                        Expires = DateTime.Now.AddDays(-1d)
+                    };
                     HttpContext.Current.Response.Cookies.Add(myCookie);
                 }
 

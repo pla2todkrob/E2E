@@ -10,26 +10,27 @@ namespace E2E.Models
 {
     public class clsManageEForm
     {
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsMail mail = new clsMail();
         private clsImage clsImag = new clsImage();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsMail mail = new clsMail();
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
         {
             try
             {
                 bool res = new bool();
-                EForms eForms = new EForms();
-
-                eForms.EForm_Title = model.EForm_Title;
-                eForms.EForm_Link = model.EForm_Link.Trim();
-                eForms.EForm_Description = model.EForm_Description;
-                eForms.Active = model.Active;
-                eForms.EForm_Start = model.EForm_Start;
-                eForms.EForm_End = model.EForm_End;
-                eForms.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                eForms.Status_Id = 1;
+                EForms eForms = new EForms
+                {
+                    EForm_Title = model.EForm_Title,
+                    EForm_Link = model.EForm_Link.Trim(),
+                    EForm_Description = model.EForm_Description,
+                    Active = model.Active,
+                    EForm_Start = model.EForm_Start,
+                    EForm_End = model.EForm_End,
+                    User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name),
+                    Status_Id = 1
+                };
                 db.EForms.Add(eForms);
                 if (db.SaveChanges() > 0)
                 {
@@ -258,7 +259,7 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Ftp_DeleteFile(Files.EForm_File_Path);
+                        ftp.Api_DeleteFile(Files.EForm_File_Path);
                     }
 
                     res = true;
@@ -286,8 +287,8 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Original);
-                        ftp.Ftp_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
+                        ftp.Api_DeleteFile(Galleries.EForm_Gallery_Original);
+                        ftp.Api_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
                     }
                     res = true;
                 }
@@ -315,7 +316,7 @@ namespace E2E.Models
                     {
                         foreach (var item in File_)
                         {
-                            ftp.Ftp_DeleteFile(item);
+                            ftp.Api_DeleteFile(item);
                         }
                     }
                     res = true;

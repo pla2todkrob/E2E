@@ -14,8 +14,8 @@ namespace E2E.Controllers
 {
     public class ManualsController : Controller
     {
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
 
         // GET: Manuals
         public ActionResult Index()
@@ -150,8 +150,10 @@ namespace E2E.Controllers
         {
             IQueryable<System_Language> query = db.System_Language;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Language", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Language", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {
@@ -166,8 +168,10 @@ namespace E2E.Controllers
         {
             IQueryable<System_ManualType> query = db.System_ManualType;
 
-            List<SelectListItem> item = new List<SelectListItem>();
-            item.Add(new SelectListItem() { Text = "Select Type", Value = "" });
+            List<SelectListItem> item = new List<SelectListItem>
+            {
+                new SelectListItem() { Text = "Select Type", Value = "" }
+            };
             item.AddRange(query
                 .Select(s => new SelectListItem()
                 {

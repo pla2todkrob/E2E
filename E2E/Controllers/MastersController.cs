@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Transactions;
 using System.Web.Mvc;
 
@@ -15,8 +15,8 @@ namespace E2E.Controllers
 {
     public class MastersController : Controller
     {
-        private clsManageMaster data = new clsManageMaster();
-        private clsContext db = new clsContext();
+        private readonly clsManageMaster data = new clsManageMaster();
+        private readonly clsContext db = new clsContext();
 
         public ActionResult Categories()
         {
@@ -710,8 +710,10 @@ namespace E2E.Controllers
         public ActionResult InquiryTopic_Form(Guid? id)
         {
             bool isNew = new bool();
-            Master_InquiryTopics master_InquiryTopics = new Master_InquiryTopics();
-            master_InquiryTopics.InquiryTopic_Index = 1;
+            Master_InquiryTopics master_InquiryTopics = new Master_InquiryTopics
+            {
+                InquiryTopic_Index = 1
+            };
 
             if (db.Master_InquiryTopics.Count() > 0)
             {
@@ -1489,8 +1491,10 @@ namespace E2E.Controllers
             ViewBag.PrefixENList = data.SelectListItems_PrefixEN();
             ViewBag.IsNew = true;
 
-            UserDetails userDetails = new UserDetails();
-            userDetails.Users = new Users();
+            UserDetails userDetails = new UserDetails
+            {
+                Users = new Users()
+            };
             if (id.HasValue)
             {
                 userDetails = data.UserDetails_Get(id.Value);
@@ -1628,9 +1632,11 @@ namespace E2E.Controllers
         {
             clsSwal swal = new clsSwal();
 
-            TransactionOptions options = new TransactionOptions();
-            options.IsolationLevel = IsolationLevel.ReadCommitted;
-            options.Timeout = TimeSpan.MaxValue;
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
             using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
             {
                 try
@@ -1645,60 +1651,59 @@ namespace E2E.Controllers
                         {
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             clsServiceFTP serviceFTP = new clsServiceFTP();
-                            UserUploadHistories userUploadHistories = new UserUploadHistories();
-                            userUploadHistories.UserUploadHistoryFile = serviceFTP.Ftp_UploadFileToString(dir, file);
+                            UserUploadHistories userUploadHistories = new UserUploadHistories
+                            {
+                                UserUploadHistoryFile = serviceFTP.Ftp_UploadFileToString(dir, file)
+                            };
                             userUploadHistories.UserUploadHistoryFileName = Path.GetFileName(userUploadHistories.UserUploadHistoryFile);
                             userUploadHistories.User_Id = Guid.Parse(HttpContext.User.Identity.Name);
                             db.Entry(userUploadHistories).State = System.Data.Entity.EntityState.Added;
                             if (db.SaveChanges() > 0)
                             {
-                                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(userUploadHistories.UserUploadHistoryFile);
-                                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                                using (HttpClient client = new HttpClient())
                                 {
-                                    if (response.ContentLength > 0)
+                                    using (Stream stream = client.GetStreamAsync(userUploadHistories.UserUploadHistoryFile).Result)
                                     {
-                                        using (Stream stream = response.GetResponseStream())
+                                        using (ExcelPackage package = new ExcelPackage(stream))
                                         {
-                                            using (ExcelPackage package = new ExcelPackage(stream))
+                                            foreach (var sheet in package.Workbook.Worksheets)
                                             {
-                                                foreach (var sheet in package.Workbook.Worksheets)
+                                                for (int row = 1; row <= sheet.Dimension.End.Row; row++)
                                                 {
-                                                    for (int row = 1; row <= sheet.Dimension.End.Row; row++)
+                                                    var recNo = sheet.Cells[row, 1].Text;
+                                                    if (int.TryParse(recNo, out int startData))
                                                     {
-                                                        int startData = 0;
-                                                        var recNo = sheet.Cells[row, 1].Text;
-                                                        if (int.TryParse(recNo, out startData))
+                                                        if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
                                                         {
-                                                            if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
-                                                            {
-                                                                goto EndProcess;
-                                                            }
-                                                            UserDetails userDetails = new UserDetails();
-                                                            userDetails.Detail_EN_FirstName = sheet.Cells[row, 4].Text;
-                                                            userDetails.Detail_EN_LastName = sheet.Cells[row, 5].Text;
-                                                            userDetails.Prefix_EN_Id = data.Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value;
-                                                            userDetails.Detail_TH_FirstName = sheet.Cells[row, 7].Text;
-                                                            userDetails.Detail_TH_LastName = sheet.Cells[row, 8].Text;
-                                                            userDetails.Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value;
-                                                            userDetails.Users = new Users();
-                                                            Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
-                                                            userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                                            Guid? plantId = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
-                                                            Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
-                                                            Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
-                                                            Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
+                                                            goto EndProcess;
+                                                        }
+                                                        UserDetails userDetails = new UserDetails
+                                                        {
+                                                            Detail_EN_FirstName = sheet.Cells[row, 4].Text,
+                                                            Detail_EN_LastName = sheet.Cells[row, 5].Text,
+                                                            Prefix_EN_Id = data.Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value,
+                                                            Detail_TH_FirstName = sheet.Cells[row, 7].Text,
+                                                            Detail_TH_LastName = sheet.Cells[row, 8].Text,
+                                                            Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value,
+                                                            Users = new Users()
+                                                        };
+                                                        Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
+                                                        userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
+                                                        Guid? plantId = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
+                                                        Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
+                                                        Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
+                                                        Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
 
-                                                            userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
-                                                            userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
-                                                            userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
-                                                            if (data.Users_Save(userDetails))
-                                                            {
-                                                                userCodeList.Add(userDetails.Users.User_Code);
-                                                            }
-                                                            else
-                                                            {
-                                                                goto EndProcess;
-                                                            }
+                                                        userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
+                                                        userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
+                                                        userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
+                                                        if (data.Users_Save(userDetails))
+                                                        {
+                                                            userCodeList.Add(userDetails.Users.User_Code);
+                                                        }
+                                                        else
+                                                        {
+                                                            goto EndProcess;
                                                         }
                                                     }
                                                 }

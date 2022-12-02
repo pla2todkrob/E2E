@@ -10,8 +10,8 @@ namespace E2E.Controllers
 {
     public class PostController : ApiController
     {
-        private clsContext db = new clsContext();
-        private clsManageMaster master = new clsManageMaster();
+        private readonly clsContext db = new clsContext();
+        private readonly clsManageMaster master = new clsManageMaster();
 
         [HttpPost]
         public clsApi ChangePassword(clsPassword clsPassword)

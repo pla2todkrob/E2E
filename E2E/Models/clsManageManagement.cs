@@ -9,8 +9,8 @@ namespace E2E.Models
 {
     public class clsManageManagement
     {
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
 
         protected bool Document_Insert(clsDocuments model, HttpFileCollectionBase files)
         {
@@ -204,18 +204,22 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                WorkRoots workRoots = new WorkRoots();
-                workRoots.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                workRoots.Section_Id = model.WorkRoots.Section_Id;
-                workRoots.WorkRoot_Name = model.WorkRoots.WorkRoot_Name;
+                WorkRoots workRoots = new WorkRoots
+                {
+                    User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name),
+                    Section_Id = model.WorkRoots.Section_Id,
+                    WorkRoot_Name = model.WorkRoots.WorkRoot_Name
+                };
                 db.Entry(workRoots).State = System.Data.Entity.EntityState.Added;
                 if (model.Document_Id != null)
                 {
                     foreach (var item in model.Document_Id)
                     {
-                        WorkRootDocuments documents = new WorkRootDocuments();
-                        documents.WorkRoot_Id = workRoots.WorkRoot_Id;
-                        documents.Document_Id = item;
+                        WorkRootDocuments documents = new WorkRootDocuments
+                        {
+                            WorkRoot_Id = workRoots.WorkRoot_Id,
+                            Document_Id = item
+                        };
                         db.Entry(documents).State = System.Data.Entity.EntityState.Added;
                     }
                 }
@@ -283,9 +287,11 @@ namespace E2E.Models
 
                             if (findHas == null)
                             {
-                                WorkRootDocuments documents = new WorkRootDocuments();
-                                documents.WorkRoot_Id = model.WorkRoots.WorkRoot_Id;
-                                documents.Document_Id = item;
+                                WorkRootDocuments documents = new WorkRootDocuments
+                                {
+                                    WorkRoot_Id = model.WorkRoots.WorkRoot_Id,
+                                    Document_Id = item
+                                };
                                 db.Entry(documents).State = System.Data.Entity.EntityState.Added;
                             }
                         }
@@ -312,9 +318,11 @@ namespace E2E.Models
                 {
                     foreach (var item in model.Document_Id)
                     {
-                        WorkRootDocuments documents = new WorkRootDocuments();
-                        documents.WorkRoot_Id = model.WorkRoots.WorkRoot_Id;
-                        documents.Document_Id = item;
+                        WorkRootDocuments documents = new WorkRootDocuments
+                        {
+                            WorkRoot_Id = model.WorkRoots.WorkRoot_Id,
+                            Document_Id = item
+                        };
                         db.Entry(documents).State = System.Data.Entity.EntityState.Added;
                     }
                 }

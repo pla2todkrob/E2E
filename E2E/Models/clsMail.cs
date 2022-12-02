@@ -7,16 +7,15 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Net.Mime;
 using System.Web;
 
 namespace E2E.Models
 {
     public class clsMail
     {
-        private clsContext db = new clsContext();
-        private clsServiceEmail clsServiceEmail = new clsServiceEmail();
-        private clsTP_Service clsTP_Service = new clsTP_Service();
+        private readonly clsServiceEmail clsServiceEmail = new clsServiceEmail();
+        private readonly clsTP_Service clsTP_Service = new clsTP_Service();
+        private readonly clsContext db = new clsContext();
 
         private bool SendMail(MailMessage model)
         {

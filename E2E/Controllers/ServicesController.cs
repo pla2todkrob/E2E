@@ -1,7 +1,6 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
@@ -14,20 +13,22 @@ namespace E2E.Controllers
 {
     public class ServicesController : Controller
     {
-        private clsManageService data = new clsManageService();
-        private clsContext db = new clsContext();
-        private clsServiceFTP ftp = new clsServiceFTP();
-        private clsMail mail = new clsMail();
-        private clsManageMaster master = new clsManageMaster();
-        private ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
+        private readonly clsManageService data = new clsManageService();
+        private readonly clsContext db = new clsContext();
+        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly clsMail mail = new clsMail();
+        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
 
         public ActionResult _AddTeam(Guid id)
         {
             try
             {
                 ViewBag.TeamList = data.SelectListItems_Team(id);
-                clsServiceTeams clsServiceTeams = new clsServiceTeams();
-                clsServiceTeams.Service_Id = id;
+                clsServiceTeams clsServiceTeams = new clsServiceTeams
+                {
+                    Service_Id = id
+                };
                 return PartialView("_AddTeam", clsServiceTeams);
             }
             catch (Exception)
@@ -99,8 +100,10 @@ namespace E2E.Controllers
         {
             try
             {
-                ServiceComments serviceComments = new ServiceComments();
-                serviceComments.Service_Id = id;
+                ServiceComments serviceComments = new ServiceComments
+                {
+                    Service_Id = id
+                };
                 return PartialView("_Comment", serviceComments);
             }
             catch (Exception)
@@ -741,8 +744,10 @@ namespace E2E.Controllers
                 ViewBag.RefServiceList = data.SelectListItems_RefService(userId);
                 ViewBag.UserList = data.SelectListItems_User();
                 bool isNew = true;
-                Services services = new Services();
-                services.User_Id = userId;
+                Services services = new Services
+                {
+                    User_Id = userId
+                };
                 if (id.HasValue)
                 {
                     services = data.Services_View(id.Value);
@@ -856,9 +861,11 @@ namespace E2E.Controllers
             try
             {
                 ViewBag.PriorityList = data.SelectListItems_Priority();
-                Services services = new Services();
-                services.Ref_Service_Id = id;
-                services.User_Id = db.Services.Find(id).User_Id;
+                Services services = new Services
+                {
+                    Ref_Service_Id = id,
+                    User_Id = db.Services.Find(id).User_Id
+                };
 
                 return View(services);
             }
@@ -1702,8 +1709,10 @@ namespace E2E.Controllers
                     }).OrderBy(o => o.Text)
                     .ToList();
 
-                clsServices clsServices = new clsServices();
-                clsServices.Service_Id = id;
+                clsServices clsServices = new clsServices
+                {
+                    Service_Id = id
+                };
 
                 return View(clsServices);
             }
@@ -1834,8 +1843,10 @@ namespace E2E.Controllers
 
         public ActionResult SetCancel(Guid id)
         {
-            ServiceComments serviceComments = new ServiceComments();
-            serviceComments.Service_Id = id;
+            ServiceComments serviceComments = new ServiceComments
+            {
+                Service_Id = id
+            };
 
             return View(serviceComments);
         }
@@ -1901,9 +1912,11 @@ namespace E2E.Controllers
 
         public ActionResult SetClose(Guid id)
         {
-            clsInquiryTopics clsInquiryTopics = new clsInquiryTopics();
-            clsInquiryTopics.Services = db.Services.Find(id);
-            clsInquiryTopics.List_Master_InquiryTopics = db.Master_InquiryTopics.OrderBy(o => o.InquiryTopic_Index).ToList();
+            clsInquiryTopics clsInquiryTopics = new clsInquiryTopics
+            {
+                Services = db.Services.Find(id),
+                List_Master_InquiryTopics = db.Master_InquiryTopics.OrderBy(o => o.InquiryTopic_Index).ToList()
+            };
 
             return View(clsInquiryTopics);
         }
@@ -1968,8 +1981,10 @@ namespace E2E.Controllers
 
         public ActionResult SetComplete(Guid id)
         {
-            ServiceComments serviceComments = new ServiceComments();
-            serviceComments.Service_Id = id;
+            ServiceComments serviceComments = new ServiceComments
+            {
+                Service_Id = id
+            };
 
             return View(serviceComments);
         }
@@ -2382,8 +2397,10 @@ namespace E2E.Controllers
         {
             try
             {
-                ServiceComments serviceComments = new ServiceComments();
-                serviceComments.Service_Id = id;
+                ServiceComments serviceComments = new ServiceComments
+                {
+                    Service_Id = id
+                };
 
                 return View(serviceComments);
             }
@@ -2455,8 +2472,10 @@ namespace E2E.Controllers
 
         public ActionResult SetReturnAssign(Guid id)
         {
-            ServiceComments serviceComments = new ServiceComments();
-            serviceComments.Service_Id = id;
+            ServiceComments serviceComments = new ServiceComments
+            {
+                Service_Id = id
+            };
 
             return View(serviceComments);
         }
@@ -2522,8 +2541,10 @@ namespace E2E.Controllers
 
         public ActionResult SetReturnJob(Guid id)
         {
-            ServiceComments serviceComments = new ServiceComments();
-            serviceComments.Service_Id = id;
+            ServiceComments serviceComments = new ServiceComments
+            {
+                Service_Id = id
+            };
 
             return View(serviceComments);
         }
