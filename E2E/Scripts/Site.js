@@ -1,13 +1,13 @@
 ﻿//For publish
-var baseUrl = '/E2E';
+//let baseUrl = '/E2E';
 
 //For develop
-//var baseUrl = '';
+let baseUrl = '';
 
-var chat;
+let chat;
 $(function () {
-    var classEmpty = true;
-    var url = window.location.pathname,
+    let classEmpty = true;
+    const url = window.location.pathname,
         urlRegExp = new RegExp(url.replace(/\/$/, '') + "$");
 
     $('#navbar_top').find('ul.navbar-nav').each(function () {
@@ -48,7 +48,7 @@ async function reloadCount() {
     $('._reloadCountN').load(baseUrl + '/Topics/_SortTopicNew');
 }
 function callSpin(active) {
-    var opts = {
+    const opts = {
         lines: 13, // The number of lines to draw
         length: 38, // The length of each line
         width: 17, // The line thickness
@@ -69,8 +69,8 @@ function callSpin(active) {
         position: 'absolute', // Element positioning
     };
 
-    var target = document.getElementById('objSpin');
-    var spinner = new Spinner(opts).spin(target);
+    const target = document.getElementById('objSpin');
+    const spinner = new Spinner(opts).spin(target);
 
     if (active) {
         target.appendChild(spinner.el);
@@ -82,7 +82,7 @@ function callSpin(active) {
 
 function getQueryString() {
     try {
-        var pairs = window.location.search.substring(1).split("&"),
+        let pairs = window.location.search.substring(1).split("&"),
             obj = {},
             pair,
             i;
@@ -102,10 +102,10 @@ function getQueryString() {
 
 function getQueryStringName(param) {
     try {
-        var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        const url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
 
-        for (var i = 0; i < url.length; i++) {
-            var urlparam = url[i].split('=');
+        for (let i = 0; i < url.length; i++) {
+            let urlparam = url[i].split('=');
             if (urlparam[0] == param) {
                 return urlparam[1];
             }
@@ -138,8 +138,8 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                 });
             });
 
-            var targetArr = [];
-            var targetObj = {};
+            let targetArr = [];
+            let targetObj = {};
 
             $.each(dateCol, function (key, val) {
                 targetObj = {};
@@ -199,11 +199,11 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
                     width: '100%'
                 });
             });
-            var table;
+            let table;
             $(blockId).find('table').each(function (i, v) {
                 if (hasDate) {
-                    var targetArr = [];
-                    var targetObj = {};
+                    let targetArr = [];
+                    let targetObj = {};
 
                     $.each(dateCol, function (key, val) {
                         targetObj = {};
@@ -258,7 +258,7 @@ async function callFilter(urlAjax, blockId = '#filter') {
 }
 
 function setTable_File(tableId, bOrder = false, bSearch = false) {
-    var table = $(tableId).DataTable({
+    table = $(tableId).DataTable({
         "ordering": bOrder,
         "searching": bSearch
     });
@@ -333,7 +333,7 @@ function callSubmitModal(urlAjax, form) {
         icon: "warning"
     }).then(function (cf) {
         if (cf) {
-            var fd = new FormData(form);
+            const fd = new FormData(form);
             $.ajax({
                 url: urlAjax,
                 method: "POST",
@@ -373,7 +373,7 @@ function callSubmitPage(urlAjax, form) {
         icon: "warning"
     }).then(function (cf) {
         if (cf) {
-            var fd = new FormData(form);
+            const fd = new FormData(form);
 
             $.ajax({
                 url: urlAjax,
@@ -410,7 +410,7 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
         icon: "warning"
     }).then((cf) => {
         if (cf) {
-            var fd = new FormData(form);
+            const fd = new FormData(form);
 
             $.ajax({
                 url: urlAjax,
@@ -494,7 +494,7 @@ function notifySignout(url) {
     });
 }
 function getSelectOp(urlAjax, val, desSelectId) {
-    var eSelect = $(desSelectId);
+    const eSelect = $(desSelectId);
     eSelect.empty();
     $.ajax({
         url: urlAjax,
@@ -727,7 +727,7 @@ function callDeleteIMG_SC(urlAjax) {
                         dangerMode: res.dangerMode
                     }).then(function () {
                         if (res.icon == 'success') {
-                            var id = res.option;
+                            const id = res.option;
 
                             $('#MediaSC').empty();
                             $('#' + id).empty();
@@ -745,7 +745,7 @@ function callDeleteIMG_SC(urlAjax) {
 window.onscroll = function () { scrollFunction() };
 
 function scrollFunction() {
-    var top = $('#btnToTop');
+    const top = $('#btnToTop');
     if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
         top.fadeIn();
     } else {

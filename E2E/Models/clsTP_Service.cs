@@ -177,38 +177,46 @@ namespace E2E.Models
             try
             {
                 ReturnUpload returnUpload = new ReturnUpload();
+
                 string resApi = string.Empty;
                 string TokenKey = GetToken();
                 //string ApiUrl = "https://tp-portal.thaiparker.co.th/TP_Service/api/Service_File/upload";
                 string ApiUrl = GetDomainURL() + "api/Service_File/upload";
-                var formContent = new MultipartFormDataContent
-                {
-                    { new StringContent(file.FileName), "filename" },
-                    { new StringContent(clsServiceFile.folderPath), "folderPath" }
-                };
 
-                if (file.ContentLength > 0)
+                using (MultipartFormDataContent dataContent = new MultipartFormDataContent())
                 {
-                    StreamContent stream = new StreamContent(file.InputStream, file.ContentLength);
-                    stream.Headers.ContentType = new MediaTypeHeaderValue(MimeMapping.GetMimeMapping(file.FileName));
-                    formContent.Add(stream, "fileUpload", file.FileName);
+                    dataContent.Add(new StringContent(file.FileName), "filename");
+                    dataContent.Add(new StringContent(clsServiceFile.folderPath), "folderPath");
+                    if (file.ContentLength > 0)
+                    {
+                        StreamContent streamContent = new StreamContent(file.InputStream, file.ContentLength);
+                        streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType)
+                        {
+                            CharSet = "utf-8"
+                        };
+                        streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                        {
+                            Name = "fileUpload",
+                            FileName = file.FileName
+                        };
+                        dataContent.Add(streamContent);
+                    }
+
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.Add("Token", TokenKey);
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        HttpResponseMessage response = client.PostAsync(ApiUrl, dataContent).Result;
+                        response.EnsureSuccessStatusCode();
+                        string content = response.Content.ReadAsStringAsync().Result;
+                        returnUpload = JsonConvert.DeserializeObject<ReturnUpload>(content);
+                    }
+
+                    if (!returnUpload.canUpload)
+                    {
+                        throw new Exception(returnUpload.errorMessage);
+                    }
                 }
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.Add("Token", TokenKey);
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage response = client.PostAsync(ApiUrl, formContent).Result;
-                    response.EnsureSuccessStatusCode();
-                    var content = response.Content.ReadAsStringAsync().Result;
-                    returnUpload = JsonConvert.DeserializeObject<ReturnUpload>(content);
-                }
-
-                if (!returnUpload.canUpload)
-                {
-                    throw new Exception(returnUpload.errorMessage);
-                }
-
                 return returnUpload;
             }
             catch (Exception)
