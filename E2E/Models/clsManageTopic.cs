@@ -1043,19 +1043,74 @@ namespace E2E.Models
         {
             try
             {
+
+                TopicView topicView = new TopicView();
                 bool res = new bool();
+
+                string strUserId = HttpContext.Current.User.Identity.Name;
+
+                Guid? userId = null;
+
+
+                if (!string.IsNullOrEmpty(strUserId))
+                {
+                    userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                    topicView = db.TopicView.Where(w => w.Topic_Id == id && w.User_Id == userId).FirstOrDefault();
+                }
 
                 if (!id.HasValue)
                 {
                     return res;
                 }
 
+
                 Topics topics = new Topics();
                 topics = db.Topics
                     .Where(w => w.Topic_Id == id)
                     .FirstOrDefault();
 
+                if (topicView?.Count > 0)
+                {
+                    topicView.Count += 1;
+                    topicView.LastTime = DateTime.Now;
+                }
+                else
+                {
+                    InsertUpdateView(id, userId);
+                }
+
                 topics.Count_View += 1;
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool InsertUpdateView(Guid? id, Guid? UserId)
+        {
+            try
+            {
+                bool res = new bool();
+
+                if (!id.HasValue || !UserId.HasValue)
+                {
+                    return res;
+                }
+
+                TopicView topicView = new TopicView();
+                topicView.Topic_Id = id;
+                topicView.Count += 1;
+                topicView.User_Id = UserId;
+
+                db.TopicView.Add(topicView);
 
                 if (db.SaveChanges() > 0)
                 {

@@ -615,6 +615,23 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult Boards_View(Guid id)
+        {
+            var topicView = db.TopicView.Where(w => w.Topic_Id == id)
+                 .Join(db.UserDetails,
+                 j => j.User_Id,
+                 ud => ud.User_Id,
+                 (j, ud) => new clsTopicView()
+                 {
+                     Name = ud.Detail_EN_FirstName + " " + ud.Detail_EN_LastName,
+                     UserCode = ud.Users.User_Code,
+                     Count = j.Count,
+                     LastTime = j.LastTime
+
+                 }).ToList();
+            return View(topicView);
+        }
+
         public ActionResult Boards_Table(int? res, Guid? category = null)
         {
             try
