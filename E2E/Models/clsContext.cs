@@ -53,6 +53,7 @@ namespace E2E.Models
         public DbSet<System_Roles> System_Roles { get; set; }
         public DbSet<System_Statuses> System_Statuses { get; set; }
 
+        public DbSet<TopicView> TopicView { get; set; }
         public DbSet<TopicComments> TopicComments { get; set; }
         public DbSet<TopicFiles> TopicFiles { get; set; }
         public DbSet<TopicGalleries> TopicGalleries { get; set; }
