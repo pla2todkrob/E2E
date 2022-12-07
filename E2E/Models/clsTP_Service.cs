@@ -189,17 +189,29 @@ namespace E2E.Models
                     dataContent.Add(new StringContent(clsServiceFile.folderPath), "folderPath");
                     if (file.ContentLength > 0)
                     {
-                        StreamContent streamContent = new StreamContent(file.InputStream, file.ContentLength);
-                        streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType)
+                        //StreamContent streamContent = new StreamContent(file.InputStream, file.ContentLength);
+                        //streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType)
+                        //{
+                        //    CharSet = "utf-8"
+                        //};
+                        //streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                        //{
+                        //    Name = "fileUpload",
+                        //    FileName = file.FileName
+                        //};
+                        //dataContent.Add(streamContent);
+
+                        ByteArrayContent arrayContent = new ByteArrayContent(GetByteFileBase(file));
+                        arrayContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType)
                         {
                             CharSet = "utf-8"
                         };
-                        streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                        arrayContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
                         {
                             Name = "fileUpload",
                             FileName = file.FileName
                         };
-                        dataContent.Add(streamContent);
+                        dataContent.Add(arrayContent);
                     }
 
                     using (HttpClient client = new HttpClient())
