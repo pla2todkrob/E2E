@@ -11,7 +11,7 @@ namespace E2E.Controllers
     [AllowAnonymous]
     public class HomeController : Controller
     {
-        private readonly clsContext db = new clsContext();
+        private readonly ClsContext db = new ClsContext();
 
         public ActionResult ChangeFileUrl()
         {

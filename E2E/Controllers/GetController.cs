@@ -7,19 +7,19 @@ namespace E2E.Controllers
 {
     public class GetController : ApiController
     {
-        private readonly clsContext db = new clsContext();
+        private readonly ClsContext db = new ClsContext();
 
-        public clsApi GetAllUser()
+        public ClsApi GetAllUser()
         {
-            clsApi clsApi = new clsApi();
+            ClsApi clsApi = new ClsApi();
             try
             {
-                clsApi.isSuccess = true;
+                clsApi.IsSuccess = true;
                 clsApi.Value = db.UserDetails.ToList();
             }
             catch (Exception ex)
             {
-                clsApi.isSuccess = false;
+                clsApi.IsSuccess = false;
                 clsApi.Message = ex.Message;
                 var inner = ex.InnerException;
 

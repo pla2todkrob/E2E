@@ -12,8 +12,8 @@ namespace E2E.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly clsManageMaster data = new clsManageMaster();
-        private readonly clsContext db = new clsContext();
+        private readonly ClsManageMaster data = new ClsManageMaster();
+        private readonly ClsContext db = new ClsContext();
 
         public ActionResult _ShowChangePassword()
         {
@@ -38,7 +38,7 @@ namespace E2E.Controllers
         {
             try
             {
-                return Json(data.clsUsers_GetView(val), JsonRequestBehavior.AllowGet);
+                return Json(data.ClsUsers_GetView(val), JsonRequestBehavior.AllowGet);
             }
             catch (Exception)
             {
@@ -228,7 +228,7 @@ namespace E2E.Controllers
                         int year = DateTime.Today.Year;
                         if (!int.Equals(users.YearSetPoint, year))
                         {
-                            clsDefaultSystem.Generate();
+                            ClsDefaultSystem.Generate();
                         }
                         FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
                         if (!string.IsNullOrEmpty(returnUrl))

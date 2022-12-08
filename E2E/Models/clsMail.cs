@@ -11,38 +11,11 @@ using System.Web;
 
 namespace E2E.Models
 {
-    public class clsMail
+    public class ClsMail
     {
-        private readonly clsServiceEmail clsServiceEmail = new clsServiceEmail();
-        private readonly clsTP_Service clsTP_Service = new clsTP_Service();
-        private readonly clsContext db = new clsContext();
-
-        private bool SendMail(MailMessage model)
-        {
-            try
-            {
-                bool res = new bool();
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                              | SecurityProtocolType.Tls11
-                              | SecurityProtocolType.Tls12;
-
-                using (SmtpClient client = new SmtpClient(ConfigurationManager.AppSettings["Mail_Host"], Convert.ToInt32(ConfigurationManager.AppSettings["Mail_Port"])))
-                {
-                    client.UseDefaultCredentials = false;
-                    client.Credentials = new System.Net.NetworkCredential(ConfigurationManager.AppSettings["Mail"], ConfigurationManager.AppSettings["Mail_Password"], ConfigurationManager.AppSettings["Mail_Domain"]);
-                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    client.EnableSsl = true;
-                    client.Send(model);
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        private readonly ClsApi clsApi = new ClsApi();
+        private readonly ClsServiceEmail clsServiceEmail = new ClsServiceEmail();
+        private readonly ClsContext db = new ClsContext();
 
         public string Content { get; set; }
         public List<Guid?> SendBCC { get; set; }
@@ -135,7 +108,7 @@ namespace E2E.Models
                     {
                         //msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
                         strto.Add(item.Email);
-                        clsServiceEmail.sendTo = strto.ToArray();
+                        clsServiceEmail.SendTo = strto.ToArray();
                     }
                 }
 
@@ -165,7 +138,7 @@ namespace E2E.Models
                         {
                             //msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
                             strcc.Add(item.Email);
-                            clsServiceEmail.sendCC = strcc.ToArray();
+                            clsServiceEmail.SendCC = strcc.ToArray();
                         }
                     }
                 }
@@ -191,7 +164,7 @@ namespace E2E.Models
                         {
                             //msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
                             strbcc.Add(item.Email);
-                            clsServiceEmail.sendBCC = strbcc.ToArray();
+                            clsServiceEmail.SendBCC = strbcc.ToArray();
                         }
                     }
                 }
@@ -203,7 +176,7 @@ namespace E2E.Models
                         //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
                         //msg.Attachments.Add(attachment);
                         filePath.Add(item);
-                        clsServiceEmail.filePath = filePath.ToArray();
+                        clsServiceEmail.FilePath = filePath.ToArray();
                     }
                 }
 
@@ -250,9 +223,9 @@ namespace E2E.Models
 
                 clsServiceEmail.Body = strContent;
                 clsServiceEmail.Subject = strSubject;
-                clsServiceEmail.sendFrom = userDetails.Users.User_Email;
+                clsServiceEmail.SendFrom = userDetails.Users.User_Email;
 
-                return clsTP_Service.SendMail(clsServiceEmail);
+                return clsApi.SendMail(clsServiceEmail);
             }
             catch (Exception)
             {
@@ -292,7 +265,7 @@ namespace E2E.Models
 
                 //msg.To.Add(new MailAddress(receiveDatas.Email, receiveDatas.FullNameEN));
                 string[] strto = { receiveDatas.Email };
-                clsServiceEmail.sendTo = strto;
+                clsServiceEmail.SendTo = strto;
 
                 dear += receiveDatas.NameEN;
 
@@ -317,7 +290,7 @@ namespace E2E.Models
                         {
                             //msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
                             strcc.Add(item.Email);
-                            clsServiceEmail.sendCC = strcc.ToArray();
+                            clsServiceEmail.SendCC = strcc.ToArray();
                         }
                     }
                 }
@@ -343,7 +316,7 @@ namespace E2E.Models
                         {
                             //msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
                             strbcc.Add(item.Email);
-                            clsServiceEmail.sendBCC = strbcc.ToArray();
+                            clsServiceEmail.SendBCC = strbcc.ToArray();
                         }
                     }
                 }
@@ -357,7 +330,7 @@ namespace E2E.Models
                         //msg.Attachments.Add(attachment);
 
                         strfile.Add(item);
-                        clsServiceEmail.filePath = strfile.ToArray();
+                        clsServiceEmail.FilePath = strfile.ToArray();
                     }
                 }
 
@@ -384,9 +357,9 @@ namespace E2E.Models
 
                 clsServiceEmail.Body = strContent;
                 clsServiceEmail.Subject = strSubject;
-                clsServiceEmail.sendFrom = userDetails.Users.User_Email;
+                clsServiceEmail.SendFrom = userDetails.Users.User_Email;
 
-                return clsTP_Service.SendMail(clsServiceEmail);
+                return clsApi.SendMail(clsServiceEmail);
             }
             catch (Exception ex)
             {
@@ -410,7 +383,7 @@ namespace E2E.Models
                     {
                         //msg.To.Add(item);
                         strto.Add(item);
-                        clsServiceEmail.sendTo = strto.ToArray();
+                        clsServiceEmail.SendTo = strto.ToArray();
                     }
                 }
 
@@ -434,7 +407,7 @@ namespace E2E.Models
                         //msg.Attachments.Add(attachment);
 
                         strfile.Add(item);
-                        clsServiceEmail.filePath = strfile.ToArray();
+                        clsServiceEmail.FilePath = strfile.ToArray();
                     }
                 }
 
@@ -444,7 +417,7 @@ namespace E2E.Models
                 clsServiceEmail.Body = content;
                 clsServiceEmail.Subject = subject;
 
-                return clsTP_Service.SendMail(clsServiceEmail);
+                return clsApi.SendMail(clsServiceEmail);
             }
             catch (Exception)
             {
@@ -469,7 +442,7 @@ namespace E2E.Models
                     {
                         //msg.To.Add(item);
                         strto.Add(item);
-                        clsServiceEmail.sendTo = strto.ToArray();
+                        clsServiceEmail.SendTo = strto.ToArray();
                     }
                 }
 
@@ -479,7 +452,7 @@ namespace E2E.Models
                 {
                     //msg.CC.Add(emailCC);
                     string[] strcc = { emailCC };
-                    clsServiceEmail.sendCC = strcc;
+                    clsServiceEmail.SendCC = strcc;
                 }
 
                 msg.Subject = subject;
@@ -501,7 +474,7 @@ namespace E2E.Models
 
                         //msg.Attachments.Add(attachment);
                         strfile.Add(item);
-                        clsServiceEmail.filePath = strfile.ToArray();
+                        clsServiceEmail.FilePath = strfile.ToArray();
                     }
                 }
 
@@ -511,7 +484,7 @@ namespace E2E.Models
                 clsServiceEmail.Subject = subject;
                 clsServiceEmail.Body = content;
 
-                return clsTP_Service.SendMail(clsServiceEmail);
+                return clsApi.SendMail(clsServiceEmail);
             }
             catch (Exception)
             {

@@ -13,10 +13,10 @@ namespace E2E.Controllers
 {
     public class ManagementController : Controller
     {
-        private readonly clsManageManagement data = new clsManageManagement();
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsManageManagement data = new ClsManageManagement();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageMaster master = new ClsManageMaster();
 
         public ActionResult AuditReport()
         {
@@ -316,7 +316,7 @@ namespace E2E.Controllers
                     .FirstOrDefault();
                 if (master_DocumentVersions != null)
                 {
-                    new clsServiceFTP().Ftp_DownloadFile(master_DocumentVersions.DocumentVersion_Path);
+                    new ClsServiceFTP().Ftp_DownloadFile(master_DocumentVersions.DocumentVersion_Path);
                 }
             }
             catch (Exception)

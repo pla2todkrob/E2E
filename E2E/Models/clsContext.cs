@@ -4,14 +4,14 @@ using System.Data.Entity;
 
 namespace E2E.Models
 {
-    public class clsContext : DbContext
+    public class ClsContext : DbContext
     {
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
         }
 
-        public clsContext() : base(ConfigurationManager.AppSettings["NameConn"])
+        public ClsContext() : base(ConfigurationManager.AppSettings["NameConn"])
         {
         }
 
@@ -53,12 +53,12 @@ namespace E2E.Models
         public DbSet<System_Roles> System_Roles { get; set; }
         public DbSet<System_Statuses> System_Statuses { get; set; }
 
-        public DbSet<TopicView> TopicView { get; set; }
         public DbSet<TopicComments> TopicComments { get; set; }
         public DbSet<TopicFiles> TopicFiles { get; set; }
         public DbSet<TopicGalleries> TopicGalleries { get; set; }
         public DbSet<Topics> Topics { get; set; }
         public DbSet<TopicSections> TopicSections { get; set; }
+        public DbSet<TopicView> TopicView { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<UserUploadHistories> UserUploadHistories { get; set; }

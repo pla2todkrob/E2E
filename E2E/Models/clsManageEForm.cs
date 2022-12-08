@@ -8,11 +8,11 @@ using System.Web;
 
 namespace E2E.Models
 {
-    public class clsManageEForm
+    public class ClsManageEForm
     {
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsMail mail = new clsMail();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsMail mail = new ClsMail();
         private clsImage clsImag = new clsImage();
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)

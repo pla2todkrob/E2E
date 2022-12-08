@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace E2E.Models
 {
-    public class clsChatHub : Hub
+    public class ClsChatHub : Hub
     {
         public void JoinGroup(string groupName)
         {

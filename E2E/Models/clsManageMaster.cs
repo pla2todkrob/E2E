@@ -13,9 +13,9 @@ using System.Web.Mvc;
 
 namespace E2E.Models
 {
-    public class clsManageMaster
+    public class ClsManageMaster
     {
-        private readonly clsContext db = new clsContext();
+        private readonly ClsContext db = new ClsContext();
 
         protected bool Department_Insert(Master_Departments model)
         {
@@ -666,7 +666,7 @@ namespace E2E.Models
             return res;
         }
 
-        public List<clsUsers> clsUsers_GetAllView()
+        public List<clsUsers> ClsUsers_GetAllView()
         {
             try
             {
@@ -699,12 +699,12 @@ namespace E2E.Models
             }
         }
 
-        public clsUsers clsUsers_GetView(Guid id)
+        public clsUsers ClsUsers_GetView(string val)
         {
             try
             {
                 return db.UserDetails
-                    .Where(w => w.User_Id == id)
+                    .Where(w => w.Users.User_Code == val)
                 .Select(s => new clsUsers()
                 {
                     User_Id = s.Users.User_Id,
@@ -733,12 +733,12 @@ namespace E2E.Models
             }
         }
 
-        public clsUsers clsUsers_GetView(string val)
+        public clsUsers ClsUsers_GetView(Guid id)
         {
             try
             {
                 return db.UserDetails
-                    .Where(w => w.Users.User_Code == val)
+                    .Where(w => w.User_Id == id)
                 .Select(s => new clsUsers()
                 {
                     User_Id = s.Users.User_Id,

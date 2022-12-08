@@ -13,10 +13,10 @@ namespace E2E.Controllers
 {
     public class EFormsController : Controller
     {
-        private readonly clsManageEForm data = new clsManageEForm();
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsMail mail = new clsMail();
+        private readonly ClsManageEForm data = new ClsManageEForm();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsMail mail = new ClsMail();
 
         public ActionResult _FileCollections(Guid id)
         {

@@ -14,10 +14,10 @@ namespace E2E.Controllers
     [AllowAnonymous]
     public class ConfigurationsController : Controller
     {
-        private readonly clsManageService data = new clsManageService();
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsManageService data = new ClsManageService();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly clsUsers users = new clsUsers();
 
         public ActionResult _Copyright()
@@ -196,12 +196,12 @@ namespace E2E.Controllers
 
                         if (authorIndex == 3)
                         {
-                            res = new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                            res = new ClsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                         }
                         else
                         {
-                            res = new clsManageService().Services_GetWaitCommitCount();
-                            res += new clsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                            res = new ClsManageService().Services_GetWaitCommitCount();
+                            res += new ClsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
                         }
                     }
                     else

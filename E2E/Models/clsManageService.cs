@@ -10,12 +10,12 @@ using System.Web.Mvc;
 
 namespace E2E.Models
 {
-    public class clsManageService
+    public class ClsManageService
     {
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsMail mail = new clsMail();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsMail mail = new ClsMail();
+        private readonly ClsManageMaster master = new ClsManageMaster();
 
         private IQueryable<Services> Services_GetAllRequest_IQ()
         {
