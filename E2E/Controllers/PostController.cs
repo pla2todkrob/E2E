@@ -10,13 +10,13 @@ namespace E2E.Controllers
 {
     public class PostController : ApiController
     {
-        private readonly clsContext db = new clsContext();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsManageMaster master = new ClsManageMaster();
 
         [HttpPost]
-        public clsApi ChangePassword(clsPassword clsPassword)
+        public ClsApi ChangePassword(clsPassword clsPassword)
         {
-            clsApi clsApi = new clsApi();
+            ClsApi clsApi = new ClsApi();
             if (ModelState.IsValid)
             {
                 try
@@ -50,7 +50,7 @@ namespace E2E.Controllers
                                         if (db.SaveChanges() > 0)
                                         {
                                             scope.Complete();
-                                            clsApi.isSuccess = true;
+                                            clsApi.IsSuccess = true;
                                             clsApi.Message = "Update password successful";
                                         }
                                     }
@@ -109,16 +109,16 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public clsApi CheckLogin(clsLogin model)
+        public ClsApi CheckLogin(clsLogin model)
         {
-            clsApi clsApi = new clsApi();
+            ClsApi clsApi = new ClsApi();
             if (ModelState.IsValid)
             {
-                responseUser responseUser = new responseUser();
+                ResponseUser responseUser = new ResponseUser();
                 try
                 {
                     bool loginPass = new bool();
-                    string passEncrypt = new clsManageMaster().Users_Password(model.Password);
+                    string passEncrypt = new ClsManageMaster().Users_Password(model.Password);
                     Users users = new Users();
                     users = db.Users
                         .Where(w => w.User_Code == model.Username || w.User_Email == model.Username)
@@ -172,7 +172,7 @@ namespace E2E.Controllers
                         responseUser.LastName = name.Detail_EN_LastName;
 
                         clsApi.Value = responseUser;
-                        clsApi.isSuccess = true;
+                        clsApi.IsSuccess = true;
                     }
                     else
                     {

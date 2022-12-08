@@ -14,11 +14,11 @@ namespace E2E.Controllers
 {
     public class TopicsController : Controller
     {
-        private readonly clsMail clsMail = new clsMail();
-        private readonly clsManageTopic data = new clsManageTopic();
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsMail clsMail = new ClsMail();
+        private readonly ClsManageTopic data = new ClsManageTopic();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly clsSwal swal = new clsSwal();
 
         public ActionResult _FileCollection(Guid id)
@@ -621,7 +621,7 @@ namespace E2E.Controllers
                  .Join(db.UserDetails,
                  j => j.User_Id,
                  ud => ud.User_Id,
-                 (j, ud) => new clsTopicView()
+                 (j, ud) => new ClsTopicView()
                  {
                      Name = ud.Detail_EN_FirstName + " " + ud.Detail_EN_LastName,
                      UserCode = ud.Users.User_Code,

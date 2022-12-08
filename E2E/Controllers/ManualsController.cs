@@ -14,8 +14,8 @@ namespace E2E.Controllers
 {
     public class ManualsController : Controller
     {
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
 
         // GET: Manuals
         public ActionResult Index()

@@ -8,12 +8,12 @@ using System.Web;
 
 namespace E2E.Models
 {
-    public class clsManageTopic
+    public class ClsManageTopic
     {
-        private readonly clsMail clsMail = new clsMail();
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsMail clsMail = new ClsMail();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageMaster master = new ClsManageMaster();
         private clsImage clsImag = new clsImage();
 
         protected bool Board_CountComment_Delete(Guid id, int num)
@@ -1016,6 +1016,39 @@ namespace E2E.Models
             }
         }
 
+        public bool InsertUpdateView(Guid? id, Guid? UserId)
+        {
+            try
+            {
+                bool res = new bool();
+
+                if (!id.HasValue || !UserId.HasValue)
+                {
+                    return res;
+                }
+
+                TopicView topicView = new TopicView
+                {
+                    Topic_Id = id
+                };
+                topicView.Count += 1;
+                topicView.User_Id = UserId;
+
+                db.TopicView.Add(topicView);
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public bool IsRecognisedImageFile(string fileName)
         {
             string targetExtension = System.IO.Path.GetExtension(fileName);
@@ -1043,14 +1076,12 @@ namespace E2E.Models
         {
             try
             {
-
                 TopicView topicView = new TopicView();
                 bool res = new bool();
 
                 string strUserId = HttpContext.Current.User.Identity.Name;
 
                 Guid? userId = null;
-
 
                 if (!string.IsNullOrEmpty(strUserId))
                 {
@@ -1062,7 +1093,6 @@ namespace E2E.Models
                 {
                     return res;
                 }
-
 
                 Topics topics = new Topics();
                 topics = db.Topics
@@ -1080,37 +1110,6 @@ namespace E2E.Models
                 }
 
                 topics.Count_View += 1;
-
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool InsertUpdateView(Guid? id, Guid? UserId)
-        {
-            try
-            {
-                bool res = new bool();
-
-                if (!id.HasValue || !UserId.HasValue)
-                {
-                    return res;
-                }
-
-                TopicView topicView = new TopicView();
-                topicView.Topic_Id = id;
-                topicView.Count += 1;
-                topicView.User_Id = UserId;
-
-                db.TopicView.Add(topicView);
 
                 if (db.SaveChanges() > 0)
                 {

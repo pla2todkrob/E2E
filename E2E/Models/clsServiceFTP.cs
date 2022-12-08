@@ -11,13 +11,13 @@ using System.Web;
 
 namespace E2E.Models
 {
-    public class clsServiceFTP
+    public class ClsServiceFTP
     {
         private static string saveToPath = string.Empty;
-        private readonly clsServiceFile clsServiceFile = new clsServiceFile();
-        private readonly clsTP_Service clsTP_Service = new clsTP_Service();
+        private readonly ClsApi clsApi = new ClsApi();
+        private readonly ClsServiceFile clsServiceFile = new ClsServiceFile();
         private readonly string dir = ConfigurationManager.AppSettings["FTP_Dir"];
-        private readonly clsMail mail = new clsMail();
+        private readonly ClsMail mail = new ClsMail();
         private readonly string pass = ConfigurationManager.AppSettings["FTP_Password"];
         private readonly string urlDomain = ConfigurationManager.AppSettings["Domain_Url"];
         private readonly string urlFtp = ConfigurationManager.AppSettings["FTP_Url"];
@@ -91,19 +91,13 @@ namespace E2E.Models
             }
         }
 
-        private string replaceName(string name)
-        {
-            return name.Replace("!", "_").Replace("@", "_").Replace("#", "_").Replace("$", "_").Replace("%", "_")
-                .Replace("^", "_").Replace("&", "_").Replace("'", "_");
-        }
-
-        public static string finalPath { get; set; }
+        public static string FinalPath { get; set; }
 
         public bool Api_DeleteFile(string path)
         {
             try
             {
-                returnDelete = clsTP_Service.Delete_File(path);
+                returnDelete = clsApi.Delete_File(path);
 
                 //path = path.Replace(urlDomain, urlFtp);
                 //FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
@@ -117,11 +111,11 @@ namespace E2E.Models
                 //    }
                 //}
 
-                if (!returnDelete.canDelete)
+                if (!returnDelete.CanDelete)
                 {
-                    throw new Exception(returnDelete.errorMessage);
+                    throw new Exception(returnDelete.ErrorMessage);
                 }
-                return returnDelete.canDelete;
+                return returnDelete.CanDelete;
             }
             catch (Exception ex)
             {
@@ -175,7 +169,7 @@ namespace E2E.Models
                     Directory.CreateDirectory(saveToPath);
                 }
 
-                string pathFile = string.Concat(finalPath, fileName);
+                string pathFile = string.Concat(FinalPath, fileName);
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(pathFile));
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
                 request.Credentials = new NetworkCredential(user, pass);
@@ -232,7 +226,7 @@ namespace E2E.Models
 
                 foreach (var item in filesName)
                 {
-                    string pathFile = string.Concat(finalPath, item);
+                    string pathFile = string.Concat(FinalPath, item);
                     FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(pathFile));
                     request.Method = WebRequestMethods.Ftp.DownloadFile;
                     request.Credentials = new NetworkCredential(user, pass);
@@ -272,8 +266,8 @@ namespace E2E.Models
             {
                 zirDir = zirDir.Replace(".zip", "");
                 List<string> files = new List<string>();
-                finalPath = GetFinallyPath(string.Concat(dir, ftpFileDir));
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
+                FinalPath = GetFinallyPath(string.Concat(dir, ftpFileDir));
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(FinalPath));
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
                 request.Credentials = new NetworkCredential(user, pass);
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
@@ -319,8 +313,8 @@ namespace E2E.Models
                 foreach (var item in pathsFolder)
                 {
                     List<string> files = new List<string>();
-                    finalPath = GetFinallyPath(string.Concat(dir, item));
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
+                    FinalPath = GetFinallyPath(string.Concat(dir, item));
+                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(FinalPath));
                     request.Method = WebRequestMethods.Ftp.ListDirectory;
                     request.Credentials = new NetworkCredential(user, pass);
                     using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
@@ -370,8 +364,8 @@ namespace E2E.Models
                 foreach (var item in pathsFolder)
                 {
                     List<string> files = new List<string>();
-                    finalPath = GetFinallyPath(string.Concat(dir, item));
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(finalPath));
+                    FinalPath = GetFinallyPath(string.Concat(dir, item));
+                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(FinalPath));
                     request.Method = WebRequestMethods.Ftp.ListDirectory;
                     request.Credentials = new NetworkCredential(user, pass);
                     using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
@@ -453,7 +447,7 @@ namespace E2E.Models
                     string key = string.Empty;
                     string checkFolder = string.Empty;
                     string changeFolder = string.Concat(path, item.ToString());
-                    using (clsContext db = new clsContext())
+                    using (ClsContext db = new ClsContext())
                     {
                         var data = db.Services.Find(item);
                         if (data == null)
@@ -544,13 +538,13 @@ namespace E2E.Models
                 //        res = fileName.Replace(urlFtp, urlDomain);
                 //    }
                 //}
-                clsServiceFile.folderPath = fullDir;
+                clsServiceFile.FolderPath = fullDir;
 
-                clsServiceFile.filename = filePost.FileName;
+                clsServiceFile.Filename = filePost.FileName;
 
-                returnUpload = clsTP_Service.UploadFile(clsServiceFile, filePost);
+                returnUpload = clsApi.UploadFile(clsServiceFile, filePost);
 
-                return returnUpload.fileUrl;
+                return returnUpload.FileUrl;
             }
             catch (Exception)
             {
@@ -592,20 +586,20 @@ namespace E2E.Models
                 //        res = fileName.Replace(urlFtp, urlDomain);
                 //    }
                 //}
-                clsServiceFile.folderPath = fullDir;
+                clsServiceFile.FolderPath = fullDir;
 
                 if (!string.IsNullOrEmpty(fileName))
                 {
-                    clsServiceFile.filename = fileName;
+                    clsServiceFile.Filename = fileName;
                 }
                 else
                 {
-                    clsServiceFile.filename = filePost.FileName;
+                    clsServiceFile.Filename = filePost.FileName;
                 }
 
-                returnUpload = clsTP_Service.UploadFile(clsServiceFile, filePost);
+                returnUpload = clsApi.UploadFile(clsServiceFile, filePost);
 
-                return returnUpload.fileUrl;
+                return returnUpload.FileUrl;
             }
             catch (Exception ex)
             {
@@ -614,8 +608,23 @@ namespace E2E.Models
         }
 
         //API Complete
-        public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "", int maxHeight = 256)
+        public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
+            if (string.IsNullOrEmpty(fullDir))
+            {
+                throw new ArgumentException($"'{nameof(fullDir)}' cannot be null or empty.", nameof(fullDir));
+            }
+
+            if (filePost is null)
+            {
+                throw new ArgumentNullException(nameof(filePost));
+            }
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException($"'{nameof(fileName)}' cannot be null or empty.", nameof(fileName));
+            }
+
             try
             {
                 clsImage res = new clsImage();
@@ -682,21 +691,21 @@ namespace E2E.Models
                 //    }
                 //}
 
-                clsServiceFile.folderPath = fullDir;
+                clsServiceFile.FolderPath = fullDir;
 
                 if (!string.IsNullOrEmpty(fileName))
                 {
-                    clsServiceFile.filename = fileName;
+                    clsServiceFile.Filename = fileName;
                 }
                 else
                 {
-                    clsServiceFile.filename = filePost.FileName;
+                    clsServiceFile.Filename = filePost.FileName;
                 }
 
-                returnUpload = clsTP_Service.UploadFile(clsServiceFile, filePost);
+                returnUpload = clsApi.UploadFile(clsServiceFile, filePost);
 
-                res.OriginalPath = returnUpload.fileUrl;
-                res.ThumbnailPath = returnUpload.fileThumbnailUrl;
+                res.OriginalPath = returnUpload.FileUrl;
+                res.ThumbnailPath = returnUpload.FileThumbnailUrl;
 
                 return res;
             }

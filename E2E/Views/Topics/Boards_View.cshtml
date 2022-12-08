@@ -1,5 +1,4 @@
-﻿@model IEnumerable<E2E.Models.Views.clsTopicView>
-
+﻿@model IEnumerable<E2E.Models.Views.ClsTopicView>
 
 @{
     Layout = null;
@@ -36,29 +35,28 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(i => item.UserCode)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.Department)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.Count)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.LastTime)
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(i => item.UserCode)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Department)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Count)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.LastTime)
+                        </td>
+                    </tr>
 
                 }
             </tbody>
         </table>
     </div>
-
 </div>
 <div class="card-footer">
     <div class="d-flex">

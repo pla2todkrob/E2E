@@ -7,10 +7,10 @@ using System.Web;
 
 namespace E2E.Models
 {
-    public class clsManageManagement
+    public class ClsManageManagement
     {
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
 
         protected bool Document_Insert(clsDocuments model, HttpFileCollectionBase files)
         {

@@ -13,11 +13,11 @@ namespace E2E.Controllers
 {
     public class ServicesController : Controller
     {
-        private readonly clsManageService data = new clsManageService();
-        private readonly clsContext db = new clsContext();
-        private readonly clsServiceFTP ftp = new clsServiceFTP();
-        private readonly clsMail mail = new clsMail();
-        private readonly clsManageMaster master = new clsManageMaster();
+        private readonly ClsManageService data = new ClsManageService();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsMail mail = new ClsMail();
+        private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
 
         public ActionResult _AddTeam(Guid id)
@@ -471,7 +471,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ViewBag.PlantList = new clsManageMaster().SelectListItems_Plant();
+                ViewBag.PlantList = new ClsManageMaster().SelectListItems_Plant();
 
                 clsServices clsServices = data.ClsServices_View(id);
 

@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace E2E.Models
 {
-    public static class clsDefaultSystem
+    public static class ClsDefaultSystem
     {
-        private static readonly clsContext db = new clsContext();
+        private static readonly ClsContext db = new ClsContext();
 
         private static void Authorize_Save()
         {

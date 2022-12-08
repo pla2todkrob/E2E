@@ -15,8 +15,8 @@ namespace E2E.Controllers
 {
     public class MastersController : Controller
     {
-        private readonly clsManageMaster data = new clsManageMaster();
-        private readonly clsContext db = new clsContext();
+        private readonly ClsManageMaster data = new ClsManageMaster();
+        private readonly ClsContext db = new ClsContext();
 
         public ActionResult Categories()
         {
@@ -1619,7 +1619,7 @@ namespace E2E.Controllers
 
         public ActionResult Users_Table()
         {
-            return View(data.clsUsers_GetAllView());
+            return View(data.ClsUsers_GetAllView());
         }
 
         public ActionResult Users_Upload()
@@ -1650,7 +1650,7 @@ namespace E2E.Controllers
                         if (file.ContentLength > 0)
                         {
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
-                            clsServiceFTP serviceFTP = new clsServiceFTP();
+                            ClsServiceFTP serviceFTP = new ClsServiceFTP();
                             UserUploadHistories userUploadHistories = new UserUploadHistories
                             {
                                 UserUploadHistoryFile = serviceFTP.Ftp_UploadFileToString(dir, file)
