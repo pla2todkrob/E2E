@@ -626,8 +626,8 @@ namespace E2E.Controllers
                      Name = ud.Detail_EN_FirstName + " " + ud.Detail_EN_LastName,
                      UserCode = ud.Users.User_Code,
                      Count = j.Count,
-                     LastTime = j.LastTime
-
+                     LastTime = j.LastTime,
+                     Department = ud.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name
                  }).ToList();
             return View(topicView);
         }

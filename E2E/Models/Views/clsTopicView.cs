@@ -11,6 +11,7 @@ namespace E2E.Models.Views
     {
         public string Name { get; set; }
         public string UserCode { get; set; }
+        public string Department { get; set; }
         [Display(Name = "View")]
         public int Count { get; set; }
         public DateTime LastTime { get; set; }
