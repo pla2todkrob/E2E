@@ -41,7 +41,12 @@ namespace E2E.Controllers
             HttpFileCollectionBase files = Request.Files;
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {

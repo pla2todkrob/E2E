@@ -193,7 +193,12 @@ namespace E2E.Controllers
             ClsSwal swal = new ClsSwal();
             if (model.Topic_Title != string.Empty && model.Topic_Content != string.Empty)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {
@@ -297,9 +302,12 @@ namespace E2E.Controllers
                         scope.Complete();
                     }
                 }
+                return View(clsTopic);
             }
-
-            return View(clsTopic);
+            else
+            {
+                return RedirectToAction("Boards", "Topics");
+            }
         }
 
         public ActionResult Boards_Reply(Guid comment_id, Guid? id)
@@ -537,7 +545,12 @@ namespace E2E.Controllers
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {

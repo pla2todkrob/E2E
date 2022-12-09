@@ -265,7 +265,12 @@ namespace E2E.Controllers
             HttpFileCollectionBase files = Request.Files;
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {
@@ -284,10 +289,18 @@ namespace E2E.Controllers
                         {
                             system_Configurations.Configuration_Brand = model.Configuration_Brand;
                         }
-                        system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
+                        if (!string.IsNullOrEmpty(model.Copyright))
+                        {
+                            system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
+                        }
+
+                        if (!string.IsNullOrEmpty(model.SystemName))
+                        {
+                            system_Configurations.SystemName = model.SystemName.Trim();
+                        }
+
                         system_Configurations.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
                         system_Configurations.Configuration_Point = model.Configuration_Point;
-                        system_Configurations.SystemName = model.SystemName;
 
                         db.System_Configurations.Add(system_Configurations);
                         if (db.SaveChanges() > 0)

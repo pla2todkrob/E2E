@@ -1,5 +1,5 @@
-﻿function callModalTopics(urlAjax, urlLoad = '', bigSize = false) {
-    $.ajax({
+﻿async function callModalTopics(urlAjax, urlLoad = '', bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -31,12 +31,11 @@
             $('#modalArea').modal('show');
         }
     });
-    return false;
 }
 
-function savegallery_T(urlAjax, urlLoad) {
+async function savegallery_T(urlAjax, urlLoad) {
     var arr = [];
-    $('table#tableGal').find('tbody').each(function () {
+    await $('table#tableGal').find('tbody').each(function () {
         $(this).find('tr').each(function () {
             $(this).find('td#rowVal').each(function () {
                 var obj = {};
@@ -46,7 +45,7 @@ function savegallery_T(urlAjax, urlLoad) {
             });
         });
     });
-    $.ajax({
+    return $.ajax({
         url: urlAjax,
         async: true,
         data: {
@@ -69,22 +68,22 @@ function savegallery_T(urlAjax, urlLoad) {
     });
 }
 
-function checkPin(ele) {
+async function checkPin(ele) {
     if ($(ele).is(':checked')) {
-        $('#Topic_Pin_EndDate').attr('required', 'required');
-        $('#Pins').slideDown();
+        await $('#Topic_Pin_EndDate').attr('required', 'required');
+        return $('#Pins').slideDown();
     } else {
-        $('#Topic_Pin_EndDate').removeAttr('required');
-        $('#Pins').slideUp();
+        await $('#Topic_Pin_EndDate').removeAttr('required');
+        return $('#Pins').slideUp();
     }
 }
 
-function callFileCollection(urlLoad) {
-    $('#fileCollection').load(urlLoad);
+async function callFileCollection(urlLoad) {
+    return $('#fileCollection').load(urlLoad);
 }
 
-function deleteFiles(urlAjax, urlLoad) {
-    swal({
+async function deleteFiles(urlAjax, urlLoad) {
+    return swal({
         title: 'Are you sure?',
         text: 'Once deleted, you will not be able to recover this file',
         icon: 'warning',
@@ -111,15 +110,14 @@ function deleteFiles(urlAjax, urlLoad) {
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function previewMultiple(event) {
+async function previewMultiple(event) {
     $('#galImage').empty();
-    var saida = document.getElementById('fileImage');
-    var quantos = saida.files.length;
+    var saida = await document.getElementById('fileImage');
+    var quantos = await saida.files.length;
     for (i = 0; i < quantos; i++) {
         var urls = URL.createObjectURL(event.target.files[i]);
 

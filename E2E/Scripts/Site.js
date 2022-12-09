@@ -280,7 +280,6 @@ async function callModal(urlAjax, bigSize = false, callback = null) {
             $('#modalArea').modal('show');
         }
     });
-    
 }
 async function callModalTable(urlAjax, bigSize = false) {
     return $.ajax({
@@ -382,7 +381,7 @@ async function callSubmitPage(urlAjax, form) {
     });
 }
 async function callSubmitRedirect(urlAjax, form, urlRedirect) {
-   return swal({
+    return swal({
         title: 'Are you sure?',
         text: 'This information is saved to the database.',
         buttons: true,
@@ -421,7 +420,7 @@ async function callSubmitRedirect(urlAjax, form, urlRedirect) {
     });
 }
 async function callDeleteItem(urlAjax, reloadPage = false) {
-   return swal({
+    return swal({
         title: 'Are you sure?',
         text: 'Once you delete this information, you cannot recover it.',
         icon: 'warning',
@@ -546,7 +545,7 @@ async function setDangerByIdRePage(urlAjax) {
 }
 
 async function setSuccessByIdReTable(urlAjax) {
-   return swal({
+    return swal({
         title: 'Are you sure?',
         text: 'If is confirmed, it cannot be reversed.',
         icon: 'warning',
@@ -576,7 +575,7 @@ async function setSuccessByIdReTable(urlAjax) {
 }
 
 async function setDangerByIdReTable(urlAjax) {
-   return swal({
+    return swal({
         title: 'Are you sure?',
         text: 'If is confirmed, it cannot be reversed.',
         icon: 'warning',
@@ -607,7 +606,7 @@ async function setDangerByIdReTable(urlAjax) {
 }
 
 async function setSuccessByIdReDirect(urlAjax, urlRedirect) {
-   return swal({
+    return swal({
         title: 'Are you sure?',
         text: 'If is confirmed, it cannot be reversed.',
         icon: 'warning',
@@ -641,7 +640,7 @@ async function setSuccessByIdReDirect(urlAjax, urlRedirect) {
 }
 
 async function setDangerByIdReDirect(urlAjax, urlRedirect) {
-   return swal({
+    return swal({
         title: 'Are you sure?',
         text: 'If is confirmed, it cannot be reversed.',
         icon: 'warning',
@@ -716,7 +715,7 @@ async function scrollFunction() {
     if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
         return top.fadeIn();
     } else {
-       return top.fadeOut();
+        return top.fadeOut();
     }
 }
 

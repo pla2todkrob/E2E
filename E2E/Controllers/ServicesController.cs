@@ -116,7 +116,12 @@ namespace E2E.Controllers
         public ActionResult _Comment(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
             {
                 try
                 {
@@ -769,7 +774,12 @@ namespace E2E.Controllers
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {
@@ -881,7 +891,12 @@ namespace E2E.Controllers
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {
@@ -1552,7 +1567,12 @@ namespace E2E.Controllers
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
                 {
                     try
                     {
