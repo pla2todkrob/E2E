@@ -1,7 +1,8 @@
 ﻿$(function () {
-    adjustHeight();
-    $(window).resize(function () {
-        adjustHeight();
+    adjustHeight().then(t => {
+        $(window).resize(function () {
+            adjustHeight();
+        });
     });
 });
 
@@ -22,21 +23,21 @@ async function adjustHeight() {
     }
 }
 
-function CheckNotClose(urlAjax, urlAjaxCHK, bigSize = false) {
-    $.ajax({
+async function CheckNotClose(urlAjax, urlAjaxCHK, bigSize = false) {
+    return $.ajax({
         url: urlAjaxCHK,
         async: true,
         success: function (res) {
-            if (res.option != null) {
+            if (res.Option != null) {
                 swal({
-                    title: res.title,
-                    text: res.text,
-                    icon: res.icon,
-                    button: res.button,
-                    dangerMode: res.dangerMode
+                    title: res.Title,
+                    text: res.Text,
+                    icon: res.Icon,
+                    button: res.Button,
+                    dangerMode: res.DangerMode
                 }).then(function () {
-                    if (res.icon == 'warning') {
-                        window.location.href = baseUrl + '/Services/ServiceInfomation/' + res.option;
+                    if (res.Icon == 'warning') {
+                        window.location.href = baseUrl + '/Services/ServiceInfomation/' + res.Option;
                     }
                 });
             }
@@ -45,11 +46,10 @@ function CheckNotClose(urlAjax, urlAjaxCHK, bigSize = false) {
             }
         }
     });
-    return false;
 }
 
-function callModalService(urlAjax, bigSize = false) {
-    $.ajax({
+async function callModalService(urlAjax, bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -79,15 +79,13 @@ function callModalService(urlAjax, bigSize = false) {
             $('#modalArea').modal('show');
         }
     });
-
-    return false;
 }
 
-function deleteFile(urlAjax, urlLoad) {
-    swal({
-        title: "Are you sure?",
-        text: "Once deleted, you will not be able to recover this file",
-        icon: "warning",
+async function deleteFile(urlAjax, urlLoad) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'Once deleted, you will not be able to recover this file',
+        icon: 'warning',
         buttons: true,
         dangerMode: true,
     })
@@ -98,25 +96,24 @@ function deleteFile(urlAjax, urlLoad) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 $('#fileTable').load(urlLoad);
                             }
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function setDateRange(val) {
-    $.ajax({
+async function setDateRange(val) {
+    return $.ajax({
         url: baseUrl + '/Services/GetPriorityDateRange',
         data: {
             id: val
@@ -131,12 +128,12 @@ function setDateRange(val) {
     });
 }
 
-function setRequired(urlAjax, urlRedirect) {
-    swal({
-        title: "Are you sure?",
-        text: "This item will be sent to the requester's department manager.",
+async function setRequired(urlAjax, urlRedirect) {
+    return swal({
+        title: `Are you sure?`,
+        text: `This item will be sent to the requester's department manager.`,
         buttons: true,
-        icon: "warning"
+        icon: `warning`
     })
         .then((cf) => {
             if (cf) {
@@ -145,13 +142,13 @@ function setRequired(urlAjax, urlRedirect) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 window.location.replace(urlRedirect);
                             }
                         });
@@ -159,16 +156,14 @@ function setRequired(urlAjax, urlRedirect) {
                 });
             }
         });
-
-    return false;
 }
 
-function setCommitToDepartment(urlAjax, urlRedirect) {
-    swal({
-        title: "Are you sure?",
-        text: "This item request will be imported to your department.",
+async function setCommitToDepartment(urlAjax, urlRedirect) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'This item request will be imported to your department.',
         buttons: true,
-        icon: "warning"
+        icon: 'warning'
     })
         .then((cf) => {
             if (cf) {
@@ -177,13 +172,13 @@ function setCommitToDepartment(urlAjax, urlRedirect) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 window.location.replace(urlRedirect);
                             }
                         });
@@ -191,16 +186,14 @@ function setCommitToDepartment(urlAjax, urlRedirect) {
                 });
             }
         });
-
-    return false;
 }
 
-function resendEmail(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "An email will be sent to the creator of the request again.",
+async function resendEmail(urlAjax) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'An email will be sent to the creator of the request again.',
         buttons: true,
-        icon: "warning"
+        icon: 'warning'
     })
         .then((cf) => {
             if (cf) {
@@ -209,16 +202,14 @@ function resendEmail(urlAjax) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         });
                     }
                 });
             }
         });
-
-    return false;
 }

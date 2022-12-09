@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace E2E.Models.Views
 {
-    public class clsServiceComments
+    public class ClsServiceComments
     {
-        public clsServiceComments()
+        public ClsServiceComments()
         {
             ServiceCommentFiles = new List<ServiceCommentFiles>();
         }

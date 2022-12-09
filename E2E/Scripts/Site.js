@@ -1,14 +1,14 @@
 ﻿//For publish
-//let baseUrl = '/E2E';
+//const baseUrl = '/E2E';
 
 //For develop
-let baseUrl = '';
-
+const baseUrl = '';
 let chat;
+
 $(function () {
     let classEmpty = true;
     const url = window.location.pathname,
-        urlRegExp = new RegExp(url.replace(/\/$/, '') + "$");
+        urlRegExp = new RegExp(url.replace(/\/$/, '') + '$');
 
     $('#navbar_top').find('ul.navbar-nav').each(function () {
         $(this).find('li.nav-item a').each(function () {
@@ -41,13 +41,13 @@ $(document).ajaxStart(function () {
 });
 
 async function reloadCount() {
-    $('#nav_service').load(baseUrl + '/Configurations/_NavService');
-    $('#nav_department').load(baseUrl + '/Configurations/_NavDepartment');
-    $('#nav_Newtopic').load(baseUrl + '/Topics/_Newtopic');
-    $('._reloadCountA').load(baseUrl + '/Topics/_SortTopicAnnounce');
-    $('._reloadCountN').load(baseUrl + '/Topics/_SortTopicNew');
+    await $('#nav_service').load(baseUrl + '/Configurations/_NavService');
+    await $('#nav_department').load(baseUrl + '/Configurations/_NavDepartment');
+    await $('#nav_Newtopic').load(baseUrl + '/Topics/_Newtopic');
+    await $('._reloadCountA').load(baseUrl + '/Topics/_SortTopicAnnounce');
+    await $('._reloadCountN').load(baseUrl + '/Topics/_SortTopicNew');
 }
-function callSpin(active) {
+async function callSpin(active) {
     const opts = {
         lines: 13, // The number of lines to draw
         length: 38, // The length of each line
@@ -69,61 +69,53 @@ function callSpin(active) {
         position: 'absolute', // Element positioning
     };
 
-    const target = document.getElementById('objSpin');
-    const spinner = new Spinner(opts).spin(target);
+    const target = await document.getElementById('objSpin');
+    const spinner = await new Spinner(opts).spin(target);
 
     if (active) {
-        target.appendChild(spinner.el);
+        await target.appendChild(spinner.el);
     }
     else {
-        $(target).empty();
+        await $(target).empty();
     }
 }
 
-function getQueryString() {
-    try {
-        let pairs = window.location.search.substring(1).split("&"),
-            obj = {},
-            pair,
-            i;
+async function getQueryString() {
+    let pairs = window.location.search.substring(1).split('&'),
+        obj = {},
+        pair,
+        i;
 
-        for (i in pairs) {
-            if (pairs[i] === "") continue;
+    for (i in pairs) {
+        if (pairs[i] === '') continue;
 
-            pair = pairs[i].split("=");
-            obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        pair = pairs[i].split('=');
+        obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+    }
+
+    return JSON.stringify(obj);
+}
+
+async function getQueryStringName(param) {
+    const url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+
+    for (let i = 0; i < url.length; i++) {
+        let urlparam = url[i].split('=');
+        if (urlparam[0] == param) {
+            return urlparam[1];
         }
-
-        return JSON.stringify(obj);
-    } catch (e) {
-        console.log(e);
     }
+
+    return 'empty';
 }
 
-function getQueryStringName(param) {
-    try {
-        const url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-
-        for (let i = 0; i < url.length; i++) {
-            let urlparam = url[i].split('=');
-            if (urlparam[0] == param) {
-                return urlparam[1];
-            }
-        }
-
-        return 'empty';
-    } catch (e) {
-        console.log(e);
-    }
-}
-
-function clearQueryString() {
-    history.pushState({}, null, location.href.split('?')[0]);
-    location.reload();
+async function clearQueryString() {
+    await history.pushState({}, null, location.href.split('?')[0]);
+    return location.reload();
 }
 
 async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = [], blockId = '#datalist') {
-    $.ajax({
+    return $.ajax({
         url: urlAjax,
         async: true,
         data: {
@@ -156,36 +148,35 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                     targetArr.push(targetObj);
 
                     $(this).DataTable({
-                        "columnDefs": targetArr,
+                        'columnDefs': targetArr,
                         'order': [[dateCol[0], 'desc']],
-                        "scrollX": true
+                        'scrollX': true
                     });
                 }
                 else if (hasDate) {
                     $(this).DataTable({
-                        "columnDefs": targetArr,
+                        'columnDefs': targetArr,
                         'order': [[dateCol[0], 'desc']],
-                        "scrollX": true
+                        'scrollX': true
                     });
                 }
                 else if (hasButton) {
                     $(this).DataTable({
-                        "columnDefs": [{ "targets": 0, "orderable": false }],
-                        "scrollX": true
+                        'columnDefs': [{ 'targets': 0, 'orderable': false }],
+                        'scrollX': true
                     });
                 }
                 else {
                     $(this).DataTable({
-                        "scrollX": true
+                        'scrollX': true
                     });
                 }
             });
         }
     });
-    return true;
 }
 async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId = '#datalist') {
-    $.ajax({
+    return $.ajax({
         url: urlAjax,
         async: true,
         data: {
@@ -213,66 +204,59 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
                     });
 
                     table = $(this).DataTable({
-                        "columnDefs": targetArr,
-                        "ordering": false,
-                        "scrollX": true
+                        'columnDefs': targetArr,
+                        'ordering': false,
+                        'scrollX': true
                     });
                 }
                 else {
                     table = $(this).DataTable({
-                        "ordering": false,
-                        "scrollX": true
+                        'ordering': false,
+                        'scrollX': true
                     });
                 }
             });
             table.columns.adjust();
         }
     });
-    return true;
 }
 
 async function callFilter(urlAjax, blockId = '#filter') {
-    try {
-        $.ajax({
-            url: urlAjax,
-            async: true,
-            cache: false,
-            data: {
-                filter: getQueryString()
-            },
-            success: function (res) {
-                $(blockId).html(res).fadeIn(500);
-                $(blockId).find('select').each(function () {
-                    $(this).select2({
-                        width: '100%',
-                        theme: 'bootstrap4'
-                    });
+    return $.ajax({
+        url: urlAjax,
+        async: true,
+        cache: false,
+        data: {
+            filter: getQueryString()
+        },
+        success: function (res) {
+            $(blockId).html(res).fadeIn(500);
+            $(blockId).find('select').each(function () {
+                $(this).select2({
+                    width: '100%',
+                    theme: 'bootstrap4'
                 });
-            }
-        });
-        return true;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-}
-
-function setTable_File(tableId, bOrder = false, bSearch = false) {
-    table = $(tableId).DataTable({
-        "ordering": bOrder,
-        "searching": bSearch
+            });
+        }
     });
 }
-function setDropdown_Form() {
-    $('form').find('select').each(function () {
+
+async function setTable_File(tableId, bOrder = false, bSearch = false) {
+    return table = await $(tableId).DataTable({
+        'ordering': bOrder,
+        'searching': bSearch
+    });
+}
+async function setDropdown_Form() {
+    return $('form').find('select').each(function () {
         $(this).select2({
             theme: 'bootstrap4',
             width: '100%'
         });
     });
 }
-function callModal(urlAjax, bigSize = false, callback = null) {
-    $.ajax({
+async function callModal(urlAjax, bigSize = false, callback = null) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -293,13 +277,13 @@ function callModal(urlAjax, bigSize = false, callback = null) {
             if (callback != null) {
                 callback();
             }
+            $('#modalArea').modal('show');
         }
     });
-    $('#modalArea').modal('show');
-    return false;
+    
 }
-function callModalTable(urlAjax, bigSize = false) {
-    $.ajax({
+async function callModalTable(urlAjax, bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -323,20 +307,19 @@ function callModalTable(urlAjax, bigSize = false) {
             $('#modalArea').modal('show');
         }
     });
-    return false;
 }
-function callSubmitModal(urlAjax, form) {
-    swal({
-        title: "Are you sure?",
-        text: "This information is saved to the database.",
+async function callSubmitModal(urlAjax, form) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'This information is saved to the database.',
         buttons: true,
-        icon: "warning"
+        icon: 'warning'
     }).then(function (cf) {
         if (cf) {
             const fd = new FormData(form);
             $.ajax({
                 url: urlAjax,
-                method: "POST",
+                method: 'POST',
                 async: true,
                 data: fd,
                 processData: false,
@@ -344,13 +327,13 @@ function callSubmitModal(urlAjax, form) {
                 traditional: true,
                 success: function (res) {
                     swal({
-                        title: res.title,
-                        text: res.text,
-                        icon: res.icon,
-                        button: res.button,
-                        dangerMode: res.dangerMode
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
                     }).then(function (e) {
-                        if (res.icon == 'success') {
+                        if (res.Icon == 'success') {
                             $('#modalArea').modal('hide');
                             reloadCount().then(function () {
                                 reloadTable();
@@ -361,23 +344,21 @@ function callSubmitModal(urlAjax, form) {
             });
         }
     });
-
-    return false;
 }
 
-function callSubmitPage(urlAjax, form) {
-    swal({
-        title: "Are you sure?",
-        text: "This information is saved to the database.",
+async function callSubmitPage(urlAjax, form) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'This information is saved to the database.',
         buttons: true,
-        icon: "warning"
+        icon: 'warning'
     }).then(function (cf) {
         if (cf) {
             const fd = new FormData(form);
 
             $.ajax({
                 url: urlAjax,
-                method: "POST",
+                method: 'POST',
                 async: true,
                 data: fd,
                 processData: false,
@@ -385,13 +366,13 @@ function callSubmitPage(urlAjax, form) {
                 traditional: true,
                 success: function (res) {
                     swal({
-                        title: res.title,
-                        text: res.text,
-                        icon: res.icon,
-                        button: res.button,
-                        dangerMode: res.dangerMode
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
                     }).then(function (e) {
-                        if (res.icon == 'success') {
+                        if (res.Icon == 'success') {
                             window.location.reload();
                         }
                     });
@@ -399,22 +380,20 @@ function callSubmitPage(urlAjax, form) {
             });
         }
     });
-
-    return false;
 }
-function callSubmitRedirect(urlAjax, form, urlRedirect) {
-    swal({
-        title: "Are you sure?",
-        text: "This information is saved to the database.",
+async function callSubmitRedirect(urlAjax, form, urlRedirect) {
+   return swal({
+        title: 'Are you sure?',
+        text: 'This information is saved to the database.',
         buttons: true,
-        icon: "warning"
+        icon: 'warning'
     }).then((cf) => {
         if (cf) {
             const fd = new FormData(form);
 
             $.ajax({
                 url: urlAjax,
-                method: "POST",
+                method: 'POST',
                 async: true,
                 data: fd,
                 processData: false,
@@ -422,15 +401,15 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
                 traditional: true,
                 success: function (res) {
                     swal({
-                        title: res.title,
-                        text: res.text,
-                        icon: res.icon,
-                        button: res.button,
-                        dangerMode: res.dangerMode
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
                     }).then(function (e) {
-                        if (res.icon == 'success') {
-                            if (res.option != null) {
-                                urlRedirect += '/' + res.option;
+                        if (res.Icon == 'success') {
+                            if (res.Option != null) {
+                                urlRedirect += '/' + res.Option;
                             }
 
                             window.location.href = urlRedirect;
@@ -440,14 +419,12 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
             });
         }
     });
-
-    return false;
 }
-function callDeleteItem(urlAjax, reloadPage = false) {
-    swal({
-        title: "Are you sure?",
-        text: "Once you delete this information, you cannot recover it.",
-        icon: "warning",
+async function callDeleteItem(urlAjax, reloadPage = false) {
+   return swal({
+        title: 'Are you sure?',
+        text: 'Once you delete this information, you cannot recover it.',
+        icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((cf) => {
@@ -457,13 +434,13 @@ function callDeleteItem(urlAjax, reloadPage = false) {
                 async: true,
                 success: function (res) {
                     swal({
-                        title: res.title,
-                        text: res.text,
-                        icon: res.icon,
-                        button: res.button,
-                        dangerMode: res.dangerMode
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
                     }).then(function () {
-                        if (res.icon == 'success') {
+                        if (res.Icon == 'success') {
                             $('#modalArea').modal('hide');
                             if (reloadPage) {
                                 location.reload();
@@ -475,16 +452,14 @@ function callDeleteItem(urlAjax, reloadPage = false) {
                     });
                 }
             });
-
-            return false;
         }
     });
 }
-function notifySignout(url) {
-    swal({
-        title: "Are you sure?",
-        text: "Signout",
-        icon: "warning",
+async function notifySignout(url) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'Signout',
+        icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((cf) => {
@@ -493,10 +468,10 @@ function notifySignout(url) {
         }
     });
 }
-function getSelectOp(urlAjax, val, desSelectId) {
+async function getSelectOp(urlAjax, val, desSelectId) {
     const eSelect = $(desSelectId);
     eSelect.empty();
-    $.ajax({
+    return $.ajax({
         url: urlAjax,
         data: {
             id: val
@@ -509,11 +484,11 @@ function getSelectOp(urlAjax, val, desSelectId) {
         }
     });
 }
-function setSuccessByIdRePage(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "If is confirmed, it cannot be reversed.",
-        icon: "warning",
+async function setSuccessByIdRePage(urlAjax) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'If is confirmed, it cannot be reversed.',
+        icon: 'warning',
         buttons: true
     })
         .then((cf) => {
@@ -523,28 +498,27 @@ function setSuccessByIdRePage(urlAjax) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 location.reload();
                             }
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function setDangerByIdRePage(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "If is confirmed, it cannot be reversed.",
-        icon: "warning",
+async function setDangerByIdRePage(urlAjax) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'If is confirmed, it cannot be reversed.',
+        icon: 'warning',
         buttons: true,
         dangerMode: true
     })
@@ -555,28 +529,27 @@ function setDangerByIdRePage(urlAjax) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 location.reload();
                             }
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function setSuccessByIdReTable(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "If is confirmed, it cannot be reversed.",
-        icon: "warning",
+async function setSuccessByIdReTable(urlAjax) {
+   return swal({
+        title: 'Are you sure?',
+        text: 'If is confirmed, it cannot be reversed.',
+        icon: 'warning',
         buttons: true
     })
         .then((cf) => {
@@ -586,28 +559,27 @@ function setSuccessByIdReTable(urlAjax) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 reloadTable();
                             }
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function setDangerByIdReTable(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "If is confirmed, it cannot be reversed.",
-        icon: "warning",
+async function setDangerByIdReTable(urlAjax) {
+   return swal({
+        title: 'Are you sure?',
+        text: 'If is confirmed, it cannot be reversed.',
+        icon: 'warning',
         buttons: true,
         dangerMode: true
     })
@@ -618,28 +590,27 @@ function setDangerByIdReTable(urlAjax) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 reloadTable();
                             }
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function setSuccessByIdReDirect(urlAjax, urlRedirect) {
-    swal({
-        title: "Are you sure?",
-        text: "If is confirmed, it cannot be reversed.",
-        icon: "warning",
+async function setSuccessByIdReDirect(urlAjax, urlRedirect) {
+   return swal({
+        title: 'Are you sure?',
+        text: 'If is confirmed, it cannot be reversed.',
+        icon: 'warning',
         buttons: true
     })
         .then((cf) => {
@@ -649,15 +620,15 @@ function setSuccessByIdReDirect(urlAjax, urlRedirect) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
-                                if (res.option != null) {
-                                    urlRedirect += '/' + res.option;
+                            if (res.Icon == 'success') {
+                                if (res.Option != null) {
+                                    urlRedirect += '/' + res.Option;
                                 }
 
                                 window.location.href = urlRedirect;
@@ -665,16 +636,15 @@ function setSuccessByIdReDirect(urlAjax, urlRedirect) {
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function setDangerByIdReDirect(urlAjax, urlRedirect) {
-    swal({
-        title: "Are you sure?",
-        text: "If is confirmed, it cannot be reversed.",
-        icon: "warning",
+async function setDangerByIdReDirect(urlAjax, urlRedirect) {
+   return swal({
+        title: 'Are you sure?',
+        text: 'If is confirmed, it cannot be reversed.',
+        icon: 'warning',
         buttons: true,
         dangerMode: true
     })
@@ -685,15 +655,15 @@ function setDangerByIdReDirect(urlAjax, urlRedirect) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function () {
-                            if (res.icon == 'success') {
-                                if (res.option != null) {
-                                    urlRedirect += '/' + res.option;
+                            if (res.Icon == 'success') {
+                                if (res.Option != null) {
+                                    urlRedirect += '/' + res.Option;
                                 }
 
                                 window.location.href = urlRedirect;
@@ -701,16 +671,15 @@ function setDangerByIdReDirect(urlAjax, urlRedirect) {
                         });
                     }
                 });
-                return false;
             }
         });
 }
 
-function callDeleteIMG_SC(urlAjax) {
-    swal({
-        title: "Are you sure?",
-        text: "Once you delete this information, you cannot recover it.",
-        icon: "warning",
+async function callDeleteIMG_SC(urlAjax) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'Once you delete this information, you cannot recover it.',
+        icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((cf) => {
@@ -720,14 +689,14 @@ function callDeleteIMG_SC(urlAjax) {
                 async: true,
                 success: function (res) {
                     swal({
-                        title: res.title,
-                        text: res.text,
-                        icon: res.icon,
-                        button: res.button,
-                        dangerMode: res.dangerMode
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
                     }).then(function () {
-                        if (res.icon == 'success') {
-                            const id = res.option;
+                        if (res.Icon == 'success') {
+                            const id = res.Option;
 
                             $('#MediaSC').empty();
                             $('#' + id).empty();
@@ -735,8 +704,6 @@ function callDeleteIMG_SC(urlAjax) {
                     });
                 }
             });
-
-            return false;
         }
     });
 }
@@ -744,16 +711,16 @@ function callDeleteIMG_SC(urlAjax) {
 // When the user scrolls down 20px from the top of the document, show the button
 window.onscroll = function () { scrollFunction() };
 
-function scrollFunction() {
+async function scrollFunction() {
     const top = $('#btnToTop');
     if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        top.fadeIn();
+        return top.fadeIn();
     } else {
-        top.fadeOut();
+       return top.fadeOut();
     }
 }
 
 // When the user clicks on the button, scroll to the top of the document
-function topFunction() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+async function topFunction() {
+    await window.scrollTo({ top: 0, behavior: 'smooth' });
 }

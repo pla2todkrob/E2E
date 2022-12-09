@@ -3,7 +3,7 @@ using System;
 
 namespace E2E.Models.Views
 {
-    public class clsServiceTeams
+    public class ClsServiceTeams
     {
         public Guid Service_Id { get; set; }
         public ServiceTeams ServiceTeams { get; set; }

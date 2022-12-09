@@ -124,10 +124,10 @@ namespace E2E.Controllers
                     .Distinct()
                     .ToList();
 
-                List<clsAuditReport> clsAuditReports = query
+                List<ClsAuditReport> clsAuditReports = query
                     .Where(w => hasDocIds.Contains(w.Service_Id))
                     .AsEnumerable()
-                    .Select(s => new clsAuditReport()
+                    .Select(s => new ClsAuditReport()
                     {
                         Create = s.Create,
                         Service_Id = s.Service_Id,
@@ -154,7 +154,7 @@ namespace E2E.Controllers
         public ActionResult DocumentControl_Create(Guid? id)
         {
             ViewBag.IsNew = true;
-            clsDocuments clsDocuments = new clsDocuments();
+            ClsDocuments clsDocuments = new ClsDocuments();
             if (id.HasValue)
             {
                 ViewBag.IsNew = false;
@@ -168,9 +168,9 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult DocumentControl_Create(clsDocuments model)
+        public ActionResult DocumentControl_Create(ClsDocuments model)
         {
-            clsSwal swal = new clsSwal();
+            ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
                 using (TransactionScope scope = new TransactionScope())
@@ -181,46 +181,46 @@ namespace E2E.Controllers
                         {
                             scope.Complete();
 
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
+                            swal.DangerMode = false;
+                            swal.Icon = "success";
+                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.Title = "Successful";
                         }
                         else
                         {
-                            swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.title = "Warning";
+                            swal.Icon = "warning";
+                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.Title = "Warning";
                         }
                     }
                     catch (DbEntityValidationException ex)
                     {
-                        swal.title = ex.TargetSite.Name;
+                        swal.Title = ex.TargetSite.Name;
                         foreach (var item in ex.EntityValidationErrors)
                         {
                             foreach (var item2 in item.ValidationErrors)
                             {
-                                if (string.IsNullOrEmpty(swal.text))
+                                if (string.IsNullOrEmpty(swal.Text))
                                 {
-                                    swal.text = item2.ErrorMessage;
+                                    swal.Text = item2.ErrorMessage;
                                 }
                                 else
                                 {
-                                    swal.text += "\n" + item2.ErrorMessage;
+                                    swal.Text += "\n" + item2.ErrorMessage;
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
+                        swal.Title = ex.TargetSite.Name;
+                        swal.Text = ex.Message;
                         if (ex.InnerException != null)
                         {
-                            swal.text = ex.InnerException.Message;
+                            swal.Text = ex.InnerException.Message;
                             if (ex.InnerException.InnerException != null)
                             {
-                                swal.text = ex.InnerException.InnerException.Message;
+                                swal.Text = ex.InnerException.InnerException.Message;
                             }
                         }
                     }
@@ -231,19 +231,19 @@ namespace E2E.Controllers
                 var errors = ModelState.Select(x => x.Value.Errors)
                                    .Where(y => y.Count > 0)
                                    .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
+                swal.Icon = "warning";
+                swal.Title = "Warning";
                 foreach (var item in errors)
                 {
                     foreach (var item2 in item)
                     {
-                        if (string.IsNullOrEmpty(swal.text))
+                        if (string.IsNullOrEmpty(swal.Text))
                         {
-                            swal.text = item2.ErrorMessage;
+                            swal.Text = item2.ErrorMessage;
                         }
                         else
                         {
-                            swal.text += "\n" + item2.ErrorMessage;
+                            swal.Text += "\n" + item2.ErrorMessage;
                         }
                     }
                 }
@@ -256,34 +256,34 @@ namespace E2E.Controllers
         {
             using (TransactionScope scope = new TransactionScope())
             {
-                clsSwal swal = new clsSwal();
+                ClsSwal swal = new ClsSwal();
                 try
                 {
                     if (data.Delete_Document(id))
                     {
                         scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.title = "Successful";
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
                     }
                     else
                     {
-                        swal.icon = "warning";
-                        swal.text = "ข้อมูลถูกใช้งานอยู่";
-                        swal.title = "Warning";
+                        swal.Icon = "warning";
+                        swal.Text = "ข้อมูลถูกใช้งานอยู่";
+                        swal.Title = "Warning";
                     }
                 }
                 catch (Exception ex)
                 {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
+                    swal.Title = ex.TargetSite.Name;
+                    swal.Text = ex.Message;
                     if (ex.InnerException != null)
                     {
-                        swal.text = ex.InnerException.Message;
+                        swal.Text = ex.InnerException.Message;
                         if (ex.InnerException.InnerException != null)
                         {
-                            swal.text = ex.InnerException.InnerException.Message;
+                            swal.Text = ex.InnerException.InnerException.Message;
                         }
                     }
                 }
@@ -339,34 +339,34 @@ namespace E2E.Controllers
         {
             using (TransactionScope scope = new TransactionScope())
             {
-                clsSwal swal = new clsSwal();
+                ClsSwal swal = new ClsSwal();
                 try
                 {
                     if (data.WorkRoot_Delete(id))
                     {
                         scope.Complete();
-                        swal.dangerMode = false;
-                        swal.icon = "success";
-                        swal.text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.title = "Successful";
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
                     }
                     else
                     {
-                        swal.icon = "warning";
-                        swal.text = "ข้อมูลถูกใช้งานอยู่";
-                        swal.title = "Warning";
+                        swal.Icon = "warning";
+                        swal.Text = "ข้อมูลถูกใช้งานอยู่";
+                        swal.Title = "Warning";
                     }
                 }
                 catch (Exception ex)
                 {
-                    swal.title = ex.TargetSite.Name;
-                    swal.text = ex.Message;
+                    swal.Title = ex.TargetSite.Name;
+                    swal.Text = ex.Message;
                     if (ex.InnerException != null)
                     {
-                        swal.text = ex.InnerException.Message;
+                        swal.Text = ex.InnerException.Message;
                         if (ex.InnerException.InnerException != null)
                         {
-                            swal.text = ex.InnerException.InnerException.Message;
+                            swal.Text = ex.InnerException.InnerException.Message;
                         }
                     }
                 }
@@ -379,7 +379,7 @@ namespace E2E.Controllers
         {
             try
             {
-                clsWorkRoots clsWorkRoots = new clsWorkRoots();
+                ClsWorkRoots clsWorkRoots = new ClsWorkRoots();
                 bool isNew = true;
                 Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 string deptName = db.Users
@@ -467,9 +467,9 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult WorkRoot_Form(clsWorkRoots model)
+        public ActionResult WorkRoot_Form(ClsWorkRoots model)
         {
-            clsSwal swal = new clsSwal();
+            ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
                 using (TransactionScope scope = new TransactionScope())
@@ -480,26 +480,26 @@ namespace E2E.Controllers
                         {
                             scope.Complete();
 
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
+                            swal.DangerMode = false;
+                            swal.Icon = "success";
+                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.Title = "Successful";
                         }
                         else
                         {
-                            swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.title = "Warning";
+                            swal.Icon = "warning";
+                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.Title = "Warning";
                         }
                     }
                     catch (Exception ex)
                     {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
+                        swal.Title = ex.TargetSite.Name;
+                        swal.Text = ex.Message;
                         var inner = ex.InnerException;
                         while (inner == null)
                         {
-                            swal.text += "\n" + inner.Message;
+                            swal.Text += "\n" + inner.Message;
                             inner = inner.InnerException;
                         }
                     }
@@ -510,19 +510,19 @@ namespace E2E.Controllers
                 var errors = ModelState.Select(x => x.Value.Errors)
                                    .Where(y => y.Count > 0)
                                    .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
+                swal.Icon = "warning";
+                swal.Title = "Warning";
                 foreach (var item in errors)
                 {
                     foreach (var item2 in item)
                     {
-                        if (string.IsNullOrEmpty(swal.text))
+                        if (string.IsNullOrEmpty(swal.Text))
                         {
-                            swal.text = item2.ErrorMessage;
+                            swal.Text = item2.ErrorMessage;
                         }
                         else
                         {
-                            swal.text += "\n" + item2.ErrorMessage;
+                            swal.Text += "\n" + item2.ErrorMessage;
                         }
                     }
                 }

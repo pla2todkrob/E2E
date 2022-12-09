@@ -12,7 +12,7 @@ namespace E2E.Models
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
 
-        protected bool Document_Insert(clsDocuments model, HttpFileCollectionBase files)
+        protected bool Document_Insert(ClsDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Document_Update(clsDocuments model, HttpFileCollectionBase files)
+        protected bool Document_Update(ClsDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace E2E.Models
             return res;
         }
 
-        public bool Document_Save(clsDocuments model, HttpFileCollectionBase files)
+        public bool Document_Save(ClsDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -199,7 +199,7 @@ namespace E2E.Models
             }
         }
 
-        public bool WorkRoot_Insert(clsWorkRoots model)
+        public bool WorkRoot_Insert(ClsWorkRoots model)
         {
             try
             {
@@ -236,7 +236,7 @@ namespace E2E.Models
             }
         }
 
-        public bool WorkRoot_Save(clsWorkRoots model)
+        public bool WorkRoot_Save(ClsWorkRoots model)
         {
             try
             {
@@ -261,7 +261,7 @@ namespace E2E.Models
             }
         }
 
-        public bool WorkRoot_Update(clsWorkRoots model)
+        public bool WorkRoot_Update(ClsWorkRoots model)
         {
             try
             {

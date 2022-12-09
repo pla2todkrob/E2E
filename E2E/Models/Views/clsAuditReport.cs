@@ -21,9 +21,9 @@ namespace E2E.Models.Views
         public DateTime Date_To { get; set; }
     }
 
-    public class clsAuditReport
+    public class ClsAuditReport
     {
-        public clsAuditReport()
+        public ClsAuditReport()
         {
             WorkRoots = new WorkRoots();
         }

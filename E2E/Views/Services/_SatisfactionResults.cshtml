@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Views.clsSatisfaction
+﻿@model E2E.Models.Views.ClsSatisfaction
 
 @{
     Layout = null;
@@ -16,14 +16,14 @@
     <tbody>
         @foreach (var item in Model.SatisfactionDetails)
         {
-        <tr>
-            <td class="text-center">@Html.DisplayFor(m => item.Master_InquiryTopics.InquiryTopic_Index)</td>
-            <td>
-                @Html.DisplayFor(m => item.Master_InquiryTopics.Description_TH)<br />
-                <small>@Html.DisplayFor(m => item.Master_InquiryTopics.Description_EN)</small>
-            </td>
-            <td class="text-center">@Html.DisplayFor(m => item.Point)</td>
-        </tr>
+            <tr>
+                <td class="text-center">@Html.DisplayFor(m => item.Master_InquiryTopics.InquiryTopic_Index)</td>
+                <td>
+                    @Html.DisplayFor(m => item.Master_InquiryTopics.Description_TH)<br />
+                    <small>@Html.DisplayFor(m => item.Master_InquiryTopics.Description_EN)</small>
+                </td>
+                <td class="text-center">@Html.DisplayFor(m => item.Point)</td>
+            </tr>
         }
     </tbody>
     <tfoot>

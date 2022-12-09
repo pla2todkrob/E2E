@@ -1,6 +1,6 @@
 ﻿namespace E2E.Models.Views
 {
-    public class clsCountNavbar
+    public class ClsCountNavbar
     {
         public int? Admin { get; set; }
 

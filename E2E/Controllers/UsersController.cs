@@ -15,42 +15,11 @@ namespace E2E.Controllers
         private readonly ClsManageMaster data = new ClsManageMaster();
         private readonly ClsContext db = new ClsContext();
 
-        public ActionResult _ShowChangePassword()
-        {
-            bool res = new bool();
-            var id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
-            var Password = db.UserDetails.Where(w => w.User_Id == id).Select(s => s.Detail_Password).FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(Password))
-            {
-                res = true;
-            }
-
-            return PartialView("_ShowChangePassword", res);
-        }
-
-        public ActionResult _UploadHistory()
-        {
-            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
-        }
-
-        public ActionResult _UserInfomation(string val)
-        {
-            try
-            {
-                return Json(data.ClsUsers_GetView(val), JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public ActionResult ChangePassword()
         {
             try
             {
-                clsPassword clsPassword = new clsPassword
+                ClsPassword clsPassword = new ClsPassword
                 {
                     User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name)
                 };
@@ -64,9 +33,9 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ChangePassword(clsPassword model)
+        public ActionResult ChangePassword(ClsPassword model)
         {
-            clsSwal swal = new clsSwal();
+            ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
                 using (TransactionScope scope = new TransactionScope())
@@ -77,46 +46,46 @@ namespace E2E.Controllers
                         {
                             scope.Complete();
 
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
+                            swal.DangerMode = false;
+                            swal.Icon = "success";
+                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.Title = "Successful";
                         }
                         else
                         {
-                            swal.icon = "warning";
-                            swal.text = "รหัสผ่านเก่าไม่ถูกต้อง";
-                            swal.title = "Warning";
+                            swal.Icon = "warning";
+                            swal.Text = "รหัสผ่านเก่าไม่ถูกต้อง";
+                            swal.Title = "Warning";
                         }
                     }
                     catch (DbEntityValidationException ex)
                     {
-                        swal.title = ex.TargetSite.Name;
+                        swal.Title = ex.TargetSite.Name;
                         foreach (var item in ex.EntityValidationErrors)
                         {
                             foreach (var item2 in item.ValidationErrors)
                             {
-                                if (string.IsNullOrEmpty(swal.text))
+                                if (string.IsNullOrEmpty(swal.Text))
                                 {
-                                    swal.text = item2.ErrorMessage;
+                                    swal.Text = item2.ErrorMessage;
                                 }
                                 else
                                 {
-                                    swal.text += "\n" + item2.ErrorMessage;
+                                    swal.Text += "\n" + item2.ErrorMessage;
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
+                        swal.Title = ex.TargetSite.Name;
+                        swal.Text = ex.Message;
                         if (ex.InnerException != null)
                         {
-                            swal.text = ex.InnerException.Message;
+                            swal.Text = ex.InnerException.Message;
                             if (ex.InnerException.InnerException != null)
                             {
-                                swal.text = ex.InnerException.InnerException.Message;
+                                swal.Text = ex.InnerException.InnerException.Message;
                             }
                         }
                     }
@@ -127,19 +96,19 @@ namespace E2E.Controllers
                 var errors = ModelState.Select(x => x.Value.Errors)
                                    .Where(y => y.Count > 0)
                                    .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
+                swal.Icon = "warning";
+                swal.Title = "Warning";
                 foreach (var item in errors)
                 {
                     foreach (var item2 in item)
                     {
-                        if (string.IsNullOrEmpty(swal.text))
+                        if (string.IsNullOrEmpty(swal.Text))
                         {
-                            swal.text = item2.ErrorMessage;
+                            swal.Text = item2.ErrorMessage;
                         }
                         else
                         {
-                            swal.text += "\n" + item2.ErrorMessage;
+                            swal.Text += "\n" + item2.ErrorMessage;
                         }
                     }
                 }
@@ -172,7 +141,7 @@ namespace E2E.Controllers
                     }
                 }
 
-                return View(new clsLogin());
+                return View(new ClsLogin());
             }
             catch (Exception)
             {
@@ -181,7 +150,7 @@ namespace E2E.Controllers
         }
 
         [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Login(clsLogin model, string returnUrl)
+        public ActionResult Login(ClsLogin model, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -250,10 +219,41 @@ namespace E2E.Controllers
             return View(model);
         }
 
+        public ActionResult ShowChangePassword()
+        {
+            bool res = new bool();
+            var id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+            var Password = db.UserDetails.Where(w => w.User_Id == id).Select(s => s.Detail_Password).FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(Password))
+            {
+                res = true;
+            }
+
+            return PartialView("_ShowChangePassword", res);
+        }
+
         public ActionResult Signout()
         {
             FormsAuthentication.SignOut();
             return Redirect(FormsAuthentication.DefaultUrl);
+        }
+
+        public ActionResult UploadHistory()
+        {
+            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
+        }
+
+        public ActionResult UserInfomation(string val)
+        {
+            try
+            {
+                return Json(data.ClsUsers_GetView(val), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

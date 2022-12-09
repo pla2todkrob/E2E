@@ -5,7 +5,7 @@ using System.Web.Security;
 
 namespace E2E.Models.Views
 {
-    public class clsUsers
+    public class ClsUsers
     {
         public bool Active { get; set; }
         public DateTime Create { get; set; }

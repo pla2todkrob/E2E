@@ -5,13 +5,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class clsServices
+    public class ClsServices
     {
-        public clsServices()
+        public ClsServices()
         {
             ServiceFiles = new List<ServiceFiles>();
-            ClsServiceComments = new List<clsServiceComments>();
-            ClsServiceTeams = new List<clsServiceTeams>();
+            ClsServiceComments = new List<ClsServiceComments>();
+            ClsServiceTeams = new List<ClsServiceTeams>();
         }
 
         [Display(Name = "Email")]
@@ -20,9 +20,9 @@ namespace E2E.Models.Views
         [Display(Name = "Action by")]
         public string Action_Name { get; set; }
 
-        public List<clsServiceComments> ClsServiceComments { get; set; }
+        public List<ClsServiceComments> ClsServiceComments { get; set; }
 
-        public List<clsServiceTeams> ClsServiceTeams { get; set; }
+        public List<ClsServiceTeams> ClsServiceTeams { get; set; }
 
         [Display(Name = "Create by")]
         public string Create_Name { get; set; }

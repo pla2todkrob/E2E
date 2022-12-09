@@ -36,7 +36,7 @@ namespace E2E.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Manuals_Table(Manuals model)
         {
-            clsSwal swal = new clsSwal();
+            ClsSwal swal = new ClsSwal();
             bool res = new bool();
             HttpFileCollectionBase files = Request.Files;
             if (ModelState.IsValid)
@@ -75,46 +75,46 @@ namespace E2E.Controllers
                         {
                             scope.Complete();
 
-                            swal.dangerMode = false;
-                            swal.icon = "success";
-                            swal.text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.title = "Successful";
+                            swal.DangerMode = false;
+                            swal.Icon = "success";
+                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            swal.Title = "Successful";
                         }
                         else
                         {
-                            swal.icon = "warning";
-                            swal.text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.title = "Warning";
+                            swal.Icon = "warning";
+                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.Title = "Warning";
                         }
                     }
                     catch (DbEntityValidationException ex)
                     {
-                        swal.title = ex.TargetSite.Name;
+                        swal.Title = ex.TargetSite.Name;
                         foreach (var item in ex.EntityValidationErrors)
                         {
                             foreach (var item2 in item.ValidationErrors)
                             {
-                                if (string.IsNullOrEmpty(swal.text))
+                                if (string.IsNullOrEmpty(swal.Text))
                                 {
-                                    swal.text = item2.ErrorMessage;
+                                    swal.Text = item2.ErrorMessage;
                                 }
                                 else
                                 {
-                                    swal.text += "\n" + item2.ErrorMessage;
+                                    swal.Text += "\n" + item2.ErrorMessage;
                                 }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        swal.title = ex.TargetSite.Name;
-                        swal.text = ex.Message;
+                        swal.Title = ex.TargetSite.Name;
+                        swal.Text = ex.Message;
                         if (ex.InnerException != null)
                         {
-                            swal.text = ex.InnerException.Message;
+                            swal.Text = ex.InnerException.Message;
                             if (ex.InnerException.InnerException != null)
                             {
-                                swal.text = ex.InnerException.InnerException.Message;
+                                swal.Text = ex.InnerException.InnerException.Message;
                             }
                         }
                     }
@@ -125,19 +125,19 @@ namespace E2E.Controllers
                 var errors = ModelState.Select(x => x.Value.Errors)
                                    .Where(y => y.Count > 0)
                                    .ToList();
-                swal.icon = "warning";
-                swal.title = "Warning";
+                swal.Icon = "warning";
+                swal.Title = "Warning";
                 foreach (var item in errors)
                 {
                     foreach (var item2 in item)
                     {
-                        if (string.IsNullOrEmpty(swal.text))
+                        if (string.IsNullOrEmpty(swal.Text))
                         {
-                            swal.text = item2.ErrorMessage;
+                            swal.Text = item2.ErrorMessage;
                         }
                         else
                         {
-                            swal.text += "\n" + item2.ErrorMessage;
+                            swal.Text += "\n" + item2.ErrorMessage;
                         }
                     }
                 }

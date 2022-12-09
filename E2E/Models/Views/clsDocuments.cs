@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace E2E.Models.Views
 {
-    public class clsDocuments
+    public class ClsDocuments
     {
-        public clsDocuments()
+        public ClsDocuments()
         {
             Master_Documents = new Master_Documents();
             Master_DocumentVersions = new List<Master_DocumentVersions>();

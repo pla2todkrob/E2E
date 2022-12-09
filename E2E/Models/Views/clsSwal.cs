@@ -1,20 +1,20 @@
 ﻿namespace E2E.Models.Views
 {
-    public class clsSwal
+    public class ClsSwal
     {
-        public clsSwal()
+        public ClsSwal()
         {
-            title = "Error";
-            icon = "error";
-            button = "OK";
-            dangerMode = true;
+            Title = "Error";
+            Icon = "error";
+            Button = "OK";
+            DangerMode = true;
         }
 
-        public string button { get; set; }
-        public bool dangerMode { get; set; }
-        public string icon { get; set; }
-        public dynamic option { get; set; }
-        public string text { get; set; }
-        public string title { get; set; }
+        public string Button { get; set; }
+        public bool DangerMode { get; set; }
+        public string Icon { get; set; }
+        public dynamic Option { get; set; }
+        public string Text { get; set; }
+        public string Title { get; set; }
     }
 }

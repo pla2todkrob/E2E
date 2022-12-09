@@ -2,9 +2,9 @@
 
 namespace E2E.Models.Views
 {
-    public class clsLogin
+    public class ClsLogin
     {
-        public clsLogin()
+        public ClsLogin()
         {
             Remember = true;
         }

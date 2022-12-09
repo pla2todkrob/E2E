@@ -571,9 +571,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Categories_Delete(Guid id)
+        public ClsSaveResult Categories_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Categories master_Categories = new Master_Categories();
@@ -584,14 +584,14 @@ namespace E2E.Models
                 if (Count > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Categories.Remove(master_Categories);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -666,12 +666,12 @@ namespace E2E.Models
             return res;
         }
 
-        public List<clsUsers> ClsUsers_GetAllView()
+        public List<ClsUsers> ClsUsers_GetAllView()
         {
             try
             {
                 return db.UserDetails
-                .Select(s => new clsUsers()
+                .Select(s => new ClsUsers()
                 {
                     User_Id = s.Users.User_Id,
                     Active = s.Users.Active,
@@ -699,13 +699,13 @@ namespace E2E.Models
             }
         }
 
-        public clsUsers ClsUsers_GetView(string val)
+        public ClsUsers ClsUsers_GetView(string val)
         {
             try
             {
                 return db.UserDetails
                     .Where(w => w.Users.User_Code == val)
-                .Select(s => new clsUsers()
+                .Select(s => new ClsUsers()
                 {
                     User_Id = s.Users.User_Id,
                     Active = s.Users.Active,
@@ -733,13 +733,13 @@ namespace E2E.Models
             }
         }
 
-        public clsUsers ClsUsers_GetView(Guid id)
+        public ClsUsers ClsUsers_GetView(Guid id)
         {
             try
             {
                 return db.UserDetails
                     .Where(w => w.User_Id == id)
-                .Select(s => new clsUsers()
+                .Select(s => new ClsUsers()
                 {
                     User_Id = s.Users.User_Id,
                     Active = s.Users.Active,
@@ -767,9 +767,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Department_Delete(Guid id)
+        public ClsSaveResult Department_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Departments master_Departments = new Master_Departments();
@@ -781,14 +781,14 @@ namespace E2E.Models
                 if (userCount > 0 || deptCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Departments.Remove(master_Departments);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -809,10 +809,10 @@ namespace E2E.Models
             return db.Master_Departments.ToList();
         }
 
-        public List<clsDepartments> Department_GetAllView()
+        public List<ClsDepartments> Department_GetAllView()
         {
             return db.Master_Departments
-                .Select(s => new clsDepartments()
+                .Select(s => new ClsDepartments()
                 {
                     Department_Id = s.Department_Id,
                     Active = s.Active,
@@ -927,9 +927,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Division_Delete(Guid id)
+        public ClsSaveResult Division_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Divisions master_Divisions = new Master_Divisions();
@@ -941,14 +941,14 @@ namespace E2E.Models
                 if (userCount > 0 || deptCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Divisions.Remove(master_Divisions);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -969,10 +969,10 @@ namespace E2E.Models
             return db.Master_Divisions.ToList();
         }
 
-        public List<clsDivisions> Division_GetAllView()
+        public List<ClsDivisions> Division_GetAllView()
         {
             return db.Master_Divisions
-                .Select(s => new clsDivisions()
+                .Select(s => new ClsDivisions()
                 {
                     Division_Id = s.Division_Id,
                     Active = s.Active,
@@ -1206,9 +1206,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Grades_Delete(Guid id)
+        public ClsSaveResult Grades_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Grades master_Grades = new Master_Grades();
@@ -1219,14 +1219,14 @@ namespace E2E.Models
                 if (userCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Grades.Remove(master_Grades);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -1247,10 +1247,10 @@ namespace E2E.Models
             return db.Master_Grades.ToList();
         }
 
-        public List<clsGrades> Grades_GetAllView()
+        public List<ClsGrades> Grades_GetAllView()
         {
             return db.Master_Grades
-                .Select(s => new clsGrades()
+                .Select(s => new ClsGrades()
                 {
                     Active = s.Active,
                     Create = s.Create,
@@ -1262,9 +1262,9 @@ namespace E2E.Models
                 }).ToList();
         }
 
-        public clsSaveResult InquiryTopic_Delete(Guid id)
+        public ClsSaveResult InquiryTopic_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_InquiryTopics master_InquiryTopics = new Master_InquiryTopics();
@@ -1277,14 +1277,14 @@ namespace E2E.Models
                 if (satCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Entry(master_InquiryTopics).State = System.Data.Entity.EntityState.Deleted;
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -1457,9 +1457,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Lineworks_Delete(Guid id)
+        public ClsSaveResult Lineworks_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 int gradeCount = db.Master_Grades.Where(w => w.Grade_Id == id).Count();
@@ -1467,7 +1467,7 @@ namespace E2E.Models
                 if (gradeCount > 0 && userCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
@@ -1478,7 +1478,7 @@ namespace E2E.Models
                     db.Master_LineWorks.Remove(master_LineWorks);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -1629,9 +1629,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Plants_Delete(Guid id)
+        public ClsSaveResult Plants_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Plants master_Plants = new Master_Plants();
@@ -1643,14 +1643,14 @@ namespace E2E.Models
                 if (userCount > 0 || divisionCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Plants.Remove(master_Plants);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -1775,9 +1775,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Process_Delete(Guid id)
+        public ClsSaveResult Process_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Processes master_Processes = new Master_Processes();
@@ -1788,14 +1788,14 @@ namespace E2E.Models
                 if (userCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Processes.Remove(master_Processes);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -1816,10 +1816,10 @@ namespace E2E.Models
             return db.Master_Processes.ToList();
         }
 
-        public List<clsProcesses> Process_GetAllView()
+        public List<ClsProcesses> Process_GetAllView()
         {
             return db.Master_Processes
-                .Select(s => new clsProcesses()
+                .Select(s => new ClsProcesses()
                 {
                     Processes_Id = s.Process_Id,
                     Active = s.Active,
@@ -1935,7 +1935,7 @@ namespace E2E.Models
             }
         }
 
-        public bool SaveChangePassword(clsPassword model)
+        public bool SaveChangePassword(ClsPassword model)
         {
             try
             {
@@ -1959,9 +1959,9 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Section_Delete(Guid id)
+        public ClsSaveResult Section_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 Master_Sections master_Sections = new Master_Sections();
@@ -1973,14 +1973,14 @@ namespace E2E.Models
                 if (userCount > 0 || ProcessesCount > 0)
                 {
                     res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.CanSave = false;
+                    res.IsSuccess = false;
                 }
                 else
                 {
                     db.Master_Sections.Remove(master_Sections);
                     if (db.SaveChanges() > 0)
                     {
-                        res.CanSave = true;
+                        res.IsSuccess = true;
                     }
                 }
                 return res;
@@ -2001,10 +2001,10 @@ namespace E2E.Models
             return db.Master_Sections.ToList();
         }
 
-        public List<clsSections> Section_GetAllView()
+        public List<ClsSections> Section_GetAllView()
         {
             return db.Master_Sections
-                .Select(s => new clsSections()
+                .Select(s => new ClsSections()
                 {
                     Section_Id = s.Section_Id,
                     Active = s.Active,
@@ -2426,16 +2426,16 @@ namespace E2E.Models
             }
         }
 
-        public clsSaveResult Users_Delete(Guid id)
+        public ClsSaveResult Users_Delete(Guid id)
         {
-            clsSaveResult res = new clsSaveResult();
+            ClsSaveResult res = new ClsSaveResult();
             try
             {
                 db.UserDetails.Remove(db.UserDetails.FirstOrDefault(f => f.User_Id == id));
                 db.Users.Remove(db.Users.Find(id));
                 if (db.SaveChanges() > 0)
                 {
-                    res.CanSave = true;
+                    res.IsSuccess = true;
                 }
             }
             catch (DbEntityValidationException ex)

@@ -14,7 +14,7 @@ namespace E2E.Controllers
         private readonly ClsManageMaster master = new ClsManageMaster();
 
         [HttpPost]
-        public ClsApi ChangePassword(clsPassword clsPassword)
+        public ClsApi ChangePassword(ClsPassword clsPassword)
         {
             ClsApi clsApi = new ClsApi();
             if (ModelState.IsValid)
@@ -109,7 +109,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ClsApi CheckLogin(clsLogin model)
+        public ClsApi CheckLogin(ClsLogin model)
         {
             ClsApi clsApi = new ClsApi();
             if (ModelState.IsValid)

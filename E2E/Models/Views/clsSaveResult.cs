@@ -1,8 +1,8 @@
 ﻿namespace E2E.Models.Views
 {
-    public class clsSaveResult
+    public class ClsSaveResult
     {
-        public bool CanSave { get; set; }
+        public bool IsSuccess { get; set; }
         public string Message { get; set; }
     }
 }

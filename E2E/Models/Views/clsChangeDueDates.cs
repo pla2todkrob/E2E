@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class clsChangeDueDates
+    public class ClsChangeDueDates
     {
         public Guid ChangeDueDate_Id { get; set; }
         public DateTime Create { get; set; }

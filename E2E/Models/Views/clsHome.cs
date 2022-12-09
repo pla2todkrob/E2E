@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace E2E.Models.Views
 {
-    public class clsHome
+    public class ClsHome
     {
-        public clsHome()
+        public ClsHome()
         {
             Topics = new List<Topics>();
             EForms = new List<EForms>();

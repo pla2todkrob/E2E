@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Views.clsServices
+﻿@model E2E.Models.Views.ClsServices
 
 @section scripts{
     <script src="~/Asset/Service.min.js"></script>
@@ -65,9 +65,9 @@
                         <ul class="list-unstyled">
                             @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
                             {
-                            <li>
-                                <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                            </li>
+                                <li>
+                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                                </li>
                             }
                         </ul>
                     </dd>
@@ -77,10 +77,10 @@
                     {
                         if (ViewBag.AuthorizeIndex != 3)
                         {
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetCancel","Services",new { id=Model.Services.Service_Id })')">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="callModal('@Url.Action("SetApproved","Services",new { id=Model.Services.Service_Id })');">Approve</button>
-                    </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetCancel","Services",new { id=Model.Services.Service_Id })')">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="callModal('@Url.Action("SetApproved","Services",new { id=Model.Services.Service_Id })');">Approve</button>
+                            </div>
 
                         }
 

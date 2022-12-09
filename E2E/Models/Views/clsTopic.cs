@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace E2E.Models.Views
 {
-    public class clsTopic
+    public class ClsTopic
     {
-        public clsTopic()
+        public ClsTopic()
         {
             TopicComments = new List<TopicComments>();
             TopicFiles = new List<TopicFiles>();
@@ -13,7 +13,7 @@ namespace E2E.Models.Views
         }
 
         public List<TopicComments> TopicComments { get; set; }
-        public TopicComments topicComments_NoList { get; set; }
+        public TopicComments TopicComments_NoList { get; set; }
         public List<TopicFiles> TopicFiles { get; set; }
         public List<TopicGalleries> TopicGalleries { get; set; }
         public Topics Topics { get; set; }

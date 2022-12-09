@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
@@ -14,11 +11,15 @@ namespace E2E.Models.Tables
             LastTime = DateTime.Now;
         }
 
+        public int Count { get; set; }
+
+        public DateTime LastTime { get; set; }
+
+        public Guid? Topic_Id { get; set; }
+
         [Key]
         public Guid TopicView_Id { get; set; }
-        public Guid? Topic_Id { get; set; }
+
         public Guid? User_Id { get; set; }
-        public int Count { get; set; }
-        public DateTime LastTime { get; set; }
     }
 }

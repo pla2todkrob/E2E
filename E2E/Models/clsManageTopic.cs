@@ -14,7 +14,7 @@ namespace E2E.Models
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsManageMaster master = new ClsManageMaster();
-        private clsImage clsImag = new clsImage();
+        private ClsImage clsImag = new ClsImage();
 
         protected bool Board_CountComment_Delete(Guid id, int num)
         {
@@ -444,7 +444,7 @@ namespace E2E.Models
         {
             try
             {
-                clsTopic clsTopic = new clsTopic
+                ClsTopic clsTopic = new ClsTopic
                 {
                     TopicComments = db.TopicComments.Where(w => w.Topic_Id == id || w.Ref_TopicComment_Id == id).ToList(),
                     TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).ToList(),
@@ -720,7 +720,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                clsTopic clsTopic = new clsTopic();
+                ClsTopic clsTopic = new ClsTopic();
 
                 List<string> FilePath = new List<string>();
 
@@ -940,7 +940,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Galleries_Insert(Topics model, clsImage clsImage, string file)
+        public bool Galleries_Insert(Topics model, ClsImage clsImage, string file)
         {
             try
             {
@@ -978,7 +978,7 @@ namespace E2E.Models
             }
         }
 
-        public void Galleries_Save(Topics model, clsImage clsImage, string file)
+        public void Galleries_Save(Topics model, ClsImage clsImage, string file)
         {
             try
             {

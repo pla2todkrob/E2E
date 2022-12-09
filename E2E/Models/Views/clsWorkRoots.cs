@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class clsWorkRoots
+    public class ClsWorkRoots
     {
-        public clsWorkRoots()
+        public ClsWorkRoots()
         {
             WorkRoots = new WorkRoots();
             WorkRootDocuments = new List<WorkRootDocuments>();

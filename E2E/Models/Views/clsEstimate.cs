@@ -2,9 +2,9 @@
 
 namespace E2E.Models.Views
 {
-    public class clsEstimate
+    public class ClsEstimate
     {
-        public Guid id { get; set; }
-        public int score { get; set; }
+        public Guid Id { get; set; }
+        public int Score { get; set; }
     }
 }

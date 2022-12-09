@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class clsPassword
+    public class ClsPassword
     {
         [Display(Name = "Confirm Password")]
         [DataType(DataType.Password)]

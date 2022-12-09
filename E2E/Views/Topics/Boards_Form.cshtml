@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Views.clsTopic
+﻿@model E2E.Models.Views.ClsTopic
 
 @{
     ViewBag.Title = "Boards_Form";
@@ -18,7 +18,7 @@
             <li class="breadcrumb-item active" aria-current="page">
                 @if (Model.Topics.Master_Categories != null)
                 {
-                <span>@Model.Topics.Master_Categories.Category_Name</span>
+                    <span>@Model.Topics.Master_Categories.Category_Name</span>
                 }
             </li>
         </ol>
@@ -80,106 +80,106 @@ $(document).on('submit', '#SaveReply', function (e) {
 
         @if (Model.TopicGalleries.Count > 0)
         {
-        <hr />
-        <h5>Galleries</h5>
-        <div id="mygallery" class="justified-gallery">
-            @foreach (var img in Model.TopicGalleries)
+            <hr />
+            <h5>Galleries</h5>
+            <div id="mygallery" class="justified-gallery">
+                @foreach (var img in Model.TopicGalleries)
                 {
 
-            <a href="@img.TopicGallery_Original" rel="@img.TopicGallery_Seq">
-                <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Thumbnail" />
-            </a>
- <!-- other images... -->
+                    <a href="@img.TopicGallery_Original" rel="@img.TopicGallery_Seq">
+                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Thumbnail" />
+                    </a>
+                    <!-- other images... -->
 
                 }
-        </div>
+            </div>
         }
 
         @if (Model.TopicFiles.Count > 0)
         {
-        <hr />
-        <h5>Files</h5>
-        <ul>
-            @foreach (var files in Model.TopicFiles)
+            <hr />
+            <h5>Files</h5>
+            <ul>
+                @foreach (var files in Model.TopicFiles)
                 {
-            <li>
-                <a href="@files.TopicFile_Path" target="_blank">@files.TopicFile_Name</a>
-            </li>
+                    <li>
+                        <a href="@files.TopicFile_Path" target="_blank">@files.TopicFile_Name</a>
+                    </li>
 
                 }
-        </ul>
+            </ul>
         }
         @if (Model.TopicSections.Count() > 0)
         {
-        <div class="card mt-5">
-            <div class="card-body" id="mediaSection">
-                @foreach (var item in Model.TopicSections)
+            <div class="card mt-5">
+                <div class="card-body" id="mediaSection">
+                    @foreach (var item in Model.TopicSections)
                     {
-                <div class="row">
-                    <div class="col-md-4 col-lg-3 mediaRow" id="@item.TopicSection_Id">
-                        @if (!string.IsNullOrEmpty(item.TopicSection_ContentType))
+                        <div class="row">
+                            <div class="col-md-4 col-lg-3 mediaRow" id="@item.TopicSection_Id">
+                                @if (!string.IsNullOrEmpty(item.TopicSection_ContentType))
                                 {
                                     if (item.TopicSection_ContentType.StartsWith("image"))
                                     {
-                        <a href="@item.TopicSection_Path" target="_blank">
-                            <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
-                        </a>
+                                        <a href="@item.TopicSection_Path" target="_blank">
+                                            <img src="@item.TopicSection_Path" alt="@item.TopicSection_Name" class="img-fluid img-thumbnail" />
+                                        </a>
 
                                     }
                                     else
                                     {
-                        <div class="embed-responsive embed-responsive-16by9">
-                            <video class="embed-responsive-item" controls>
-                                <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
-                            </video>
-                        </div>
+                                        <div class="embed-responsive embed-responsive-16by9">
+                                            <video class="embed-responsive-item" controls>
+                                                <source src="@item.TopicSection_Path" type="@item.TopicSection_ContentType" />
+                                            </video>
+                                        </div>
                                     }
                                 }
-                    </div>
-                    <div class="col-md-8 col-lg-9">
-                        <div class="d-flex justify-content-between flex-column h-100">
-                            <div>
-                                <blockquote class="blockquote">
-                                    <p class="mb-0">@item.TopicSection_Title</p>
-                                    <footer class="blockquote-footer"><cite title="@item.Create">@item.Create</cite></footer>
-                                </blockquote>
-                                <p class="font-weight-lighter PreLine">@item.TopicSection_Description</p>
-
-                                @if (!string.IsNullOrEmpty(item.TopicSection_Link))
-                                        {
-                                <hr />
-                                <p><em>LINK: <a href="@item.TopicSection_Link" target="_blank">@item.TopicSection_Link</a></em></p>
-                                        }
                             </div>
-                            <div class="text-right">
-                                @if (Guid.Equals(Model.Topics.User_Id, userId))
+                            <div class="col-md-8 col-lg-9">
+                                <div class="d-flex justify-content-between flex-column h-100">
+                                    <div>
+                                        <blockquote class="blockquote">
+                                            <p class="mb-0">@item.TopicSection_Title</p>
+                                            <footer class="blockquote-footer"><cite title="@item.Create">@item.Create</cite></footer>
+                                        </blockquote>
+                                        <p class="font-weight-lighter PreLine">@item.TopicSection_Description</p>
+
+                                        @if (!string.IsNullOrEmpty(item.TopicSection_Link))
                                         {
-                                <button class="btn " type="button" onclick="callModal('@Url.Action("Boards_Section","Topics",new {  topicId=Html.ValueFor(w=>item.Topic_Id),id = Html.ValueFor(w=>item.TopicSection_Id)})')"><i class="fa fa-pencil"></i></button>@*Edit*@
+                                            <hr />
+                                            <p><em>LINK: <a href="@item.TopicSection_Link" target="_blank">@item.TopicSection_Link</a></em></p>
                                         }
+                                    </div>
+                                    <div class="text-right">
+                                        @if (Guid.Equals(Model.Topics.User_Id, userId))
+                                        {
+                                            <button class="btn " type="button" onclick="callModal('@Url.Action("Boards_Section","Topics",new {  topicId=Html.ValueFor(w=>item.Topic_Id),id = Html.ValueFor(w=>item.TopicSection_Id)})')"><i class="fa fa-pencil"></i></button>@*Edit*@
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <hr />
+                        <hr />
                     }
 
-                @if (Guid.Equals(Model.Topics.User_Id, userId))
+                    @if (Guid.Equals(Model.Topics.User_Id, userId))
                     {
-                <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
+                        <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
                     }
+                </div>
             </div>
-        </div>
         }
         else
         {
             if (Guid.Equals(Model.Topics.User_Id, userId))
             {
-        <div class="card mt-5">
-            <div class="card-body">
-                <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
-            </div>
-        </div>
+                <div class="card mt-5">
+                    <div class="card-body">
+                        <button type="button" class="btn btn-outline-primary w-100 text-center" onclick="callModal('@Url.Action("Boards_Section","Topics",new { topicId=Model.Topics.Topic_Id })')"><i class="fa fa-plus-square fa-2x"></i></button>
+                    </div>
+                </div>
 
             }
         }
@@ -196,7 +196,7 @@ $(document).on('submit', '#SaveReply', function (e) {
             <div class="ml-auto">
                 @if (userId.HasValue)
                 {
-                <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',true)"><i class="fa fa-commenting-o"></i></button>@*comment*@
+                    <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',true)"><i class="fa fa-commenting-o"></i></button>@*comment*@
                 }
             </div>
         </div>
@@ -207,85 +207,85 @@ $(document).on('submit', '#SaveReply', function (e) {
 @{
     if (Model.TopicComments.Count > 0)
     {
-    <div class="card">
-        <div class="card-body">
-            @foreach (var item in Model.TopicComments)
+        <div class="card">
+            <div class="card-body">
+                @foreach (var item in Model.TopicComments)
                 {
                     if (!item.Ref_TopicComment_Id.HasValue)
                     {
-            <div class="card mb-3" id="@item.TopicComment_Id">
-                <div class="card-header">
-                    <h6 class="card-title">
-                        @Html.DisplayFor(i => item.Users.User_Code)
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <span class="PreLine">@Html.DisplayFor(i => item.Comment_Content)</span>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex">
-                        <div class="mr-auto">
-                            <span class="font-weight-bold"> @Html.DisplayNameFor(i => item.Create):</span>
-                            @Html.DisplayFor(i => item.Create)
-                        </div>
-                        @if (userId.HasValue)
+                        <div class="card mb-3" id="@item.TopicComment_Id">
+                            <div class="card-header">
+                                <h6 class="card-title">
+                                    @Html.DisplayFor(i => item.Users.User_Code)
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <span class="PreLine">@Html.DisplayFor(i => item.Comment_Content)</span>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex">
+                                    <div class="mr-auto">
+                                        <span class="font-weight-bold"> @Html.DisplayNameFor(i => item.Create):</span>
+                                        @Html.DisplayFor(i => item.Create)
+                                    </div>
+                                    @if (userId.HasValue)
                                     {
-                        <div class="ml-auto">
-                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
-                            @{
+                                        <div class="ml-auto">
+                                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
+                                            @{
                                                 if (Guid.Equals(item.User_Id, userId))
                                                 {
-                                <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
+                                                    <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
                                                 }
-                            }
-                            <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item.TopicComment_Id})',true)"><i class="fa fa-flag"></i></button>@*ReportComment*@
-                        </div>
+                                            }
+                                            <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item.TopicComment_Id})',true)"><i class="fa fa-flag"></i></button>@*ReportComment*@
+                                        </div>
                                     }
-                    </div>
-                </div>
-            </div>
+                                </div>
+                            </div>
+                        </div>
                         var ReplyComment = Model.TopicComments.Where(w => w.Ref_TopicComment_Id == item.TopicComment_Id).ToList();
 
                         if (ReplyComment.Count > 0)
                         {
                             foreach (var item2 in ReplyComment)
                             {
-            <div class="card offset-1 mb-3" id="@item2.TopicComment_Id">
-                <div class="card-header">
-                    <h6 class="card-title">
-                        @Html.DisplayFor(i => item2.Users.User_Code)
-                    </h6>
-                </div>
-                <div class="card-body">
+                                <div class="card offset-1 mb-3" id="@item2.TopicComment_Id">
+                                    <div class="card-header">
+                                        <h6 class="card-title">
+                                            @Html.DisplayFor(i => item2.Users.User_Code)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
 
-                    <span class="PreLine">    @Html.DisplayFor(i => item2.Comment_Content)</span>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex">
-                        <div class="mr-auto">
-                            <span class="font-weight-bold"> @Html.DisplayNameFor(i => item2.Create):</span>
-                            @Html.DisplayFor(i => item2.Create)
-                        </div>
-                        @{
+                                        <span class="PreLine">    @Html.DisplayFor(i => item2.Comment_Content)</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex">
+                                            <div class="mr-auto">
+                                                <span class="font-weight-bold"> @Html.DisplayNameFor(i => item2.Create):</span>
+                                                @Html.DisplayFor(i => item2.Create)
+                                            </div>
+                                            @{
                                                 if (userId.HasValue)
                                                 {
                                                     if (Guid.Equals(item2.User_Id, userId))
                                                     {
-                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
+                                                        <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
                                                     }
-                            <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item2.TopicComment_Id})',true)"><i class="fa fa-flag"></i></button>@*ReportComment*@
+                                                    <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item2.TopicComment_Id})',true)"><i class="fa fa-flag"></i></button>@*ReportComment*@
                                                 }
 
-                        }
-                    </div>
-                </div>
-            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         }
                     }
 
                 }
+            </div>
         </div>
-    </div>
     }
 }

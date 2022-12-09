@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace E2E.Models.Views
 {
-    public class clsInquiryTopics
+    public class ClsInquiryTopics
     {
-        public clsInquiryTopics()
+        public ClsInquiryTopics()
         {
             List_SatisfactionDetails = new List<SatisfactionDetails>();
             List_Master_InquiryTopics = new List<Master_InquiryTopics>();

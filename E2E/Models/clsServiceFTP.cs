@@ -608,7 +608,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public clsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        public ClsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
             if (string.IsNullOrEmpty(fullDir))
             {
@@ -627,7 +627,7 @@ namespace E2E.Models
 
             try
             {
-                clsImage res = new clsImage();
+                ClsImage res = new ClsImage();
                 //finalPath = GetFinallyPath(string.Concat(dir, fullDir));
                 //if (string.IsNullOrEmpty(fileName))
                 //{

@@ -13,7 +13,7 @@ namespace E2E.Models
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsMail mail = new ClsMail();
-        private clsImage clsImag = new clsImage();
+        private ClsImage clsImag = new ClsImage();
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
         {
@@ -210,7 +210,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                clsEForm clsEForm = new clsEForm();
+                ClsEForm clsEForm = new ClsEForm();
 
                 List<string> FilePath = new List<string>();
 
@@ -422,7 +422,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Galleries_Insert(EForms model, clsImage clsImage, string file)
+        public bool Galleries_Insert(EForms model, ClsImage clsImage, string file)
         {
             try
             {
@@ -459,7 +459,7 @@ namespace E2E.Models
             }
         }
 
-        public void Galleries_Save(EForms model, clsImage clsImage, string file)
+        public void Galleries_Save(EForms model, ClsImage clsImage, string file)
         {
             try
             {

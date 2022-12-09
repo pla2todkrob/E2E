@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class clsReportKPI
+    public class ClsReportKPI
     {
-        public clsReportKPI()
+        public ClsReportKPI()
         {
             ReportKPI_Overview = new ReportKPI_Overview();
             ReportKPI_Users = new List<ReportKPI_User>();

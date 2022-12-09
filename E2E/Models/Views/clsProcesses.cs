@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class clsProcesses
+    public class ClsProcesses
     {
         public bool Active { get; set; }
         public DateTime Create { get; set; }

@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Views.clsServices
+﻿@model E2E.Models.Views.ClsServices
 
 @{
     ViewBag.Title = "Service information";
@@ -21,14 +21,16 @@
             }
             reloadComment();
 
-            chat = $.connection.ClsChatHub;
+            chat = $.connection.clsChatHub;
 
             // Declare a function on the chat hub so the server can invoke it
             chat.client.addChatMessage = function (message) {
+                console.log(message);
                 reloadComment();
             };
 
-            $.connection.hub.start(function () {
+            $.connection.hub.start(function (start) {
+                console.log(start);
                 chat.server.joinGroup($('#Services_Service_Id').val());
             });
         });
@@ -46,19 +48,19 @@
                 contentType: false,
                 traditional: true,
                 success: function (res) {
-                    if (res.icon != 'success') {
+                    if (res.Icon != 'success') {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         });
                     }
                     else {
 
                         $.connection.hub.start().done(function () {
-                            chat.server.sendMessageToGroup(res.option.Service_Id, res.option.Comment_Content);
+                            chat.server.sendMessageToGroup(res.Option.Service_Id, res.Option.Comment_Content);
                         });
                     }
                 }
@@ -100,13 +102,13 @@
                             url: '@Url.Action("SetClose","Services")',
                             success: function (res) {
                                 swal({
-                                    title: res.title,
-                                    text: res.text,
-                                    icon: res.icon,
-                                    button: res.button,
-                                    dangerMode: res.dangerMode
+                                    title: res.Title,
+                                    text: res.Text,
+                                    icon: res.Icon,
+                                    button: res.Button,
+                                    dangerMode: res.DangerMode
                                 }).then(function () {
-                                    if (res.icon == 'success') {
+                                    if (res.Icon == 'success') {
                                         location.reload();
                                     }
                                 });

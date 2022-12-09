@@ -54,9 +54,9 @@ namespace E2E.Models
                     .Where(w => w.Service_Id == id);
         }
 
-        public clsSwal CheckMissingDocument(Guid id)
+        public ClsSwal CheckMissingDocument(Guid id)
         {
-            clsSwal swal = new clsSwal();
+            ClsSwal swal = new ClsSwal();
             try
             {
                 List<ServiceDocuments> serviceDocuments = db.ServiceDocuments
@@ -65,29 +65,29 @@ namespace E2E.Models
 
                 if (serviceDocuments.Count > 0)
                 {
-                    swal.option = false;
-                    swal.icon = "warning";
-                    swal.title = "กรุณาอัพโหลดไฟล์ที่จำเป็น";
+                    swal.Option = false;
+                    swal.Icon = "warning";
+                    swal.Title = "กรุณาอัพโหลดไฟล์ที่จำเป็น";
                     foreach (var item in serviceDocuments)
                     {
-                        swal.text += string.Format("- {0}\n", item.Master_Documents.Document_Name);
+                        swal.Text += string.Format("- {0}\n", item.Master_Documents.Document_Name);
                     }
                 }
                 else
                 {
-                    swal.option = true;
+                    swal.Option = true;
                 }
             }
             catch (Exception ex)
             {
-                swal.title = ex.TargetSite.Name;
-                swal.text = ex.Message;
+                swal.Title = ex.TargetSite.Name;
+                swal.Text = ex.Message;
                 if (ex.InnerException != null)
                 {
-                    swal.text = ex.InnerException.Message;
+                    swal.Text = ex.InnerException.Message;
                     if (ex.InnerException.InnerException != null)
                     {
-                        swal.text = ex.InnerException.InnerException.Message;
+                        swal.Text = ex.InnerException.InnerException.Message;
                     }
                 }
             }
@@ -95,11 +95,11 @@ namespace E2E.Models
             return swal;
         }
 
-        public clsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
+        public ClsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
         {
             try
             {
-                clsReportKPI res = new clsReportKPI();
+                ClsReportKPI res = new ClsReportKPI();
 
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 IQueryable<Guid> userIds;
@@ -261,14 +261,14 @@ namespace E2E.Models
             }
         }
 
-        public clsSatisfaction ClsSatisfaction_View(Guid id)
+        public ClsSatisfaction ClsSatisfaction_View(Guid id)
         {
             try
             {
-                clsSatisfaction clsSatisfaction = new clsSatisfaction();
+                ClsSatisfaction clsSatisfaction = new ClsSatisfaction();
                 clsSatisfaction = db.Satisfactions
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.SatisfactionDetails.OrderBy(o => o.Master_InquiryTopics.InquiryTopic_Index), m => m.Satisfaction_Id, j => j.Satisfaction_Id, (m, gj) => new clsSatisfaction()
+                    .GroupJoin(db.SatisfactionDetails.OrderBy(o => o.Master_InquiryTopics.InquiryTopic_Index), m => m.Satisfaction_Id, j => j.Satisfaction_Id, (m, gj) => new ClsSatisfaction()
                     {
                         SatisfactionDetails = gj.ToList(),
                         Satisfactions = m
@@ -282,14 +282,14 @@ namespace E2E.Models
             }
         }
 
-        public clsServices ClsServices_View(Guid id)
+        public ClsServices ClsServices_View(Guid id)
         {
             try
             {
-                clsServices clsServices = new clsServices();
+                ClsServices clsServices = new ClsServices();
                 clsServices = db.Services
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new clsServices()
+                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new ClsServices()
                     {
                         ServiceFiles = gj.ToList(),
                         Services = m
@@ -315,7 +315,7 @@ namespace E2E.Models
 
                 foreach (var item in ServiceTeams_IQ(id))
                 {
-                    clsServiceTeams clsServiceTeams = new clsServiceTeams
+                    ClsServiceTeams clsServiceTeams = new ClsServiceTeams
                     {
                         ServiceTeams = item,
                         User_Name = master.Users_GetInfomation(item.User_Id)
@@ -331,16 +331,16 @@ namespace E2E.Models
             }
         }
 
-        public clsServices ClsServices_ViewComment(Guid id)
+        public ClsServices ClsServices_ViewComment(Guid id)
         {
             try
             {
-                clsServices clsServices = new clsServices
+                ClsServices clsServices = new ClsServices
                 {
                     Services = db.Services.Find(id),
                     ClsServiceComments = db.ServiceComments
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.ServiceCommentFiles, m => m.ServiceComment_Id, j => j.ServiceComment_Id, (m, gj) => new clsServiceComments()
+                    .GroupJoin(db.ServiceCommentFiles, m => m.ServiceComment_Id, j => j.ServiceComment_Id, (m, gj) => new ClsServiceComments()
                     {
                         ServiceComments = m,
                         ServiceCommentFiles = gj.ToList()
@@ -359,18 +359,18 @@ namespace E2E.Models
             }
         }
 
-        public List<clsServices> ClsServices_ViewList(Guid id)
+        public List<ClsServices> ClsServices_ViewList(Guid id)
         {
             try
             {
-                List<clsServices> res = new List<clsServices>();
+                List<ClsServices> res = new List<ClsServices>();
                 Guid? refId = id;
                 while (refId.HasValue)
                 {
-                    clsServices clsServices = new clsServices();
+                    ClsServices clsServices = new ClsServices();
                     clsServices = db.Services
                         .Where(w => w.Service_Id == refId.Value)
-                        .Select(s => new clsServices()
+                        .Select(s => new ClsServices()
                         {
                             Services = s,
                             ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
@@ -389,18 +389,18 @@ namespace E2E.Models
             }
         }
 
-        public List<clsServices> ClsServices_ViewRefList(Guid id)
+        public List<ClsServices> ClsServices_ViewRefList(Guid id)
         {
             try
             {
-                List<clsServices> res = new List<clsServices>();
+                List<ClsServices> res = new List<ClsServices>();
                 Guid? refId = db.Services.Find(id).Ref_Service_Id;
                 while (refId.HasValue)
                 {
-                    clsServices clsServices = new clsServices();
+                    ClsServices clsServices = new ClsServices();
                     clsServices = db.Services
                         .Where(w => w.Service_Id == refId.Value)
-                        .Select(s => new clsServices()
+                        .Select(s => new ClsServices()
                         {
                             Services = s,
                             ServiceFiles = db.ServiceFiles.Where(w => w.Service_Id == s.Service_Id).ToList()
@@ -418,7 +418,7 @@ namespace E2E.Models
 
                     foreach (var item in ServiceTeams_IQ(refId.Value))
                     {
-                        clsServiceTeams clsServiceTeams = new clsServiceTeams
+                        ClsServiceTeams clsServiceTeams = new ClsServiceTeams
                         {
                             ServiceTeams = item,
                             User_Name = master.Users_GetInfomation(item.User_Id)
@@ -479,13 +479,13 @@ namespace E2E.Models
             }
         }
 
-        public bool SaveEstimate(Guid id, List<clsEstimate> score)
+        public bool SaveEstimate(Guid id, List<ClsEstimate> score)
         {
             try
             {
                 bool res = new bool();
 
-                var average = score.Select(x => x.score).Average();
+                var average = score.Select(x => x.Score).Average();
 
                 Satisfactions satisfactions = new Satisfactions
                 {
@@ -499,8 +499,8 @@ namespace E2E.Models
                     SatisfactionDetails satisfactionDetails = new SatisfactionDetails
                     {
                         Satisfaction_Id = satisfactions.Satisfaction_Id,
-                        InquiryTopic_Id = item.id,
-                        Point = item.score
+                        InquiryTopic_Id = item.Id,
+                        Point = item.Score
                     };
 
                     db.SatisfactionDetails.Add(satisfactionDetails);
@@ -660,7 +660,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Service_AddTeam(clsServiceTeams model, string methodName)
+        public bool Service_AddTeam(ClsServiceTeams model, string methodName)
         {
             try
             {
@@ -1003,7 +1003,7 @@ namespace E2E.Models
             }
         }
 
-        public List<clsChangeDueDates> ServiceChangeDues_List()
+        public List<ClsChangeDueDates> ServiceChangeDues_List()
         {
             try
             {
@@ -1015,7 +1015,7 @@ namespace E2E.Models
                 return db.ServiceChangeDueDates
                     .Where(w => ids.Contains(w.Service_Id))
                     .AsEnumerable()
-                    .Select(s => new clsChangeDueDates()
+                    .Select(s => new ClsChangeDueDates()
                     {
                         ChangeDueDate_Id = s.ChangeDueDate_Id,
                         Service_Key = s.Services.Service_Key,
@@ -1037,7 +1037,7 @@ namespace E2E.Models
             }
         }
 
-        public List<clsChangeDueDates> ServiceChangeDues_ListCount()
+        public List<ClsChangeDueDates> ServiceChangeDues_ListCount()
         {
             try
             {
@@ -1049,7 +1049,7 @@ namespace E2E.Models
                 return db.ServiceChangeDueDates
                     .Where(w => ids.Contains(w.Service_Id) && w.DueDateStatus_Id == 1)
                     .AsEnumerable()
-                    .Select(s => new clsChangeDueDates()
+                    .Select(s => new ClsChangeDueDates()
                     {
                         ChangeDueDate_Id = s.ChangeDueDate_Id,
                         Service_Key = s.Services.Service_Key,
@@ -1636,7 +1636,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetClose(Guid id, List<clsEstimate> score)
+        public bool Services_SetClose(Guid id, List<ClsEstimate> score)
         {
             try
             {

@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Views.clsCountNavbar
+﻿@model E2E.Models.Views.ClsCountNavbar
 
 @{
     Layout = null;
@@ -53,7 +53,7 @@
                         }
                     </a>
                     <div class="dropdown-divider"></div>
-                    @{ Html.RenderAction("_ShowChangePassword", "Users"); }
+                    @{ Html.RenderAction("ShowChangePassword", "Users"); }
                     <a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
                 </div>
             </li>

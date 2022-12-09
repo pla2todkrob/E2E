@@ -1,10 +1,10 @@
-﻿function callFileCollections(urlLoad) {
-    $('#fileCollections').load(urlLoad);
+﻿async function callFileCollections(urlLoad) {
+    return $('#fileCollections').load(urlLoad);
 }
 
-function savegallery(urlAjax, urlLoad) {
+async function savegallery(urlAjax, urlLoad) {
     var arr = [];
-    $('table#tableGal').find('tbody').each(function () {
+    await $('table#tableGal').find('tbody').each(function () {
         $(this).find('tr').each(function () {
             $(this).find('td#rowVal').each(function () {
                 var obj = {};
@@ -14,7 +14,7 @@ function savegallery(urlAjax, urlLoad) {
             });
         });
     });
-    $.ajax({
+    return $.ajax({
         url: urlAjax,
         async: true,
         data: {
@@ -22,13 +22,13 @@ function savegallery(urlAjax, urlLoad) {
         },
         success: function (res) {
             swal({
-                title: res.title,
-                text: res.text,
-                icon: res.icon,
-                button: res.button,
-                dangerMode: res.dangerMode
+                title: res.Title,
+                text: res.Text,
+                icon: res.Icon,
+                button: res.Button,
+                dangerMode: res.DangerMode
             }).then(function () {
-                if (res.icon == 'success') {
+                if (res.Icon == 'success') {
                     reloadTable();
                     callFileCollections(urlLoad);
                 }
@@ -37,41 +37,39 @@ function savegallery(urlAjax, urlLoad) {
     });
 }
 
-function deleteFileEF(urlAjax, urlLoad) {
-    swal({
-        title: "Are you sure?",
-        text: "Once deleted, you will not be able to recover this file",
-        icon: "warning",
+async function deleteFileEF(urlAjax, urlLoad) {
+    return swal({
+        title: 'Are you sure?',
+        text: 'Once deleted, you will not be able to recover this file',
+        icon: 'warning',
         buttons: true,
         dangerMode: true,
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
-                        }).then(function () {
-                            if (res.icon == 'success') {
-                                reloadTable();
-                                callFileCollections(urlLoad);
-                            }
-                        });
-                    }
-                });
-                return false;
-            }
-        });
+    }).then((cf) => {
+        if (cf) {
+            $.ajax({
+                url: urlAjax,
+                async: true,
+                success: function (res) {
+                    swal({
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
+                    }).then(function () {
+                        if (res.Icon == 'success') {
+                            reloadTable();
+                            callFileCollections(urlLoad);
+                        }
+                    });
+                }
+            });
+        }
+    });
 }
 
-function callModalEForms(urlAjax, urlLoad = '', bigSize = false) {
-    $.ajax({
+async function callModalEForms(urlAjax, urlLoad = '', bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -97,23 +95,22 @@ function callModalEForms(urlAjax, urlLoad = '', bigSize = false) {
             $('#modalArea').modal('show');
         }
     });
-    return false;
 }
 
-function previewMultiple(event) {
+async function previewMultiple(event) {
     $('#galImage').empty();
 
-    var saida = document.getElementById("fileImage");
-    var quantos = saida.files.length;
+    var saida = await document.getElementById('fileImage');
+    var quantos = await saida.files.length;
     for (i = 0; i < quantos; i++) {
         var urls = URL.createObjectURL(event.target.files[i]);
 
         var filetype = event.target.files[i].type.split('/')[0];
         if (filetype == 'image') {
-            document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1" style="height:100px" title="' + event.target.files[i].name + '">';
+            document.getElementById('galImage').innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1" style="height:100px" title="' + event.target.files[i].name + '">';
         }
         else {
-            document.getElementById("galImage").innerHTML += '<i class="fa fa-file-text-o fa-5x" style="height:100px" title="' + event.target.files[i].name + '"></i>';
+            document.getElementById('galImage').innerHTML += '<i class="fa fa-file-text-o fa-5x" style="height:100px" title="' + event.target.files[i].name + '"></i>';
         }
     }
 }

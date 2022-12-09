@@ -171,7 +171,7 @@ namespace E2E.Controllers
 
         public ActionResult Index()
         {
-            clsHome clsHome = new clsHome()
+            ClsHome clsHome = new ClsHome()
             {
                 Topics = db.Topics.Where(w => w.Topic_Pin).OrderBy(o => o.Create).ToList(),
                 EForms = db.EForms.Take(10).OrderByDescending(o => o.Create).ToList(),

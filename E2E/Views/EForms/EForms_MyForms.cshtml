@@ -39,56 +39,56 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    <div class="row">
-                        <div class="col-12">
-                            @Html.ActionLink(item.EForm_Title, "EForms_Content", new { id = item.EForm_Id }) &nbsp;
+        <tr>
+            <td>
+                <div class="row">
+                    <div class="col-12">
+                        @Html.ActionLink(item.EForm_Title, "EForms_Content", new { id = item.EForm_Id }) &nbsp;
 
-                            @{
+                        @{
                                 if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
                                 {
                                     if (ViewBag.MyForm == true)
                                     {
-                                        <button onclick="callModalEForms('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })', '@Url.Action("_FileCollections", "EForms", new { id = item.EForm_Id })', true)" class="btn"><i class="fa fa-pencil"></i></button>
+                            <button onclick="callModalEForms('@Url.Action("EForms_Create", "EForms", new { id = Html.ValueFor(m => item.EForm_Id) })', '@Url.Action("_FileCollections", "EForms", new { id = item.EForm_Id })', true)" class="btn"><i class="fa fa-pencil"></i></button>
                                     }
                                 }
-                            }
-                        </div>
-                        <div class="col-12">
-                            <div class="row">
+                        }
+                    </div>
+                    <div class="col-12">
+                        <div class="row">
 
-                                <div class="col-12 col-sm-6">
-                                    <div class="d-flex">
-                                        <small class="mr-sm-auto">
+                            <div class="col-12 col-sm-6">
+                                <div class="d-flex">
+                                    <small class="mr-sm-auto">
 
-                                            <b>@Html.DisplayNameFor(m => m.EForm_Start):</b> @Html.DisplayFor(i => item.EForm_Start)<br />
-                                            <b>@Html.DisplayNameFor(m => m.EForm_End):</b> @Html.DisplayFor(i => item.EForm_End)<br />
-                                        </small>
-                                    </div>
+                                        <b>@Html.DisplayNameFor(m => m.EForm_Start):</b> @Html.DisplayFor(i => item.EForm_Start)<br />
+                                        <b>@Html.DisplayNameFor(m => m.EForm_End):</b> @Html.DisplayFor(i => item.EForm_End)<br />
+                                    </small>
                                 </div>
-                                <div class="col-12 col-sm-6">
-                                    <div class="d-flex">
-                                        <small class="ml-auto">
-                                            <b>@Html.DisplayNameFor(m => m.System_Statuses.Status_Name):</b> <span class="@item.System_Statuses.Status_Class"> @Html.DisplayFor(i => item.System_Statuses.Status_Name)</span><br />
-                                            @{
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <div class="d-flex">
+                                    <small class="ml-auto">
+                                        <b>@Html.DisplayNameFor(m => m.System_Statuses.Status_Name):</b> <span class="@item.System_Statuses.Status_Class"> @Html.DisplayFor(i => item.System_Statuses.Status_Name)</span><br />
+                                        @{
                                                 if (item.Update.HasValue)
                                                 {
-                                                    <b>@Html.DisplayNameFor(m => m.Update):</b> @Html.DisplayFor(i => item.Update)
+                                            <b>@Html.DisplayNameFor(m => m.Update):</b>  @Html.DisplayFor(i => item.Update)
                                                 }
                                                 else
                                                 {
-                                                    <b>@Html.DisplayNameFor(m => m.Create):</b> @Html.DisplayFor(i => item.Create)
+                                            <b>@Html.DisplayNameFor(m => m.Create):</b>  @Html.DisplayFor(i => item.Create)
                                                 }
-                                            }
-                                        </small>
-                                    </div>
+                                        }
+                                    </small>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </td>
-            </tr>
+                </div>
+            </td>
+        </tr>
         }
     </tbody>
 </table>

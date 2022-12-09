@@ -2,7 +2,7 @@
 
 namespace E2E.Models.Views
 {
-    public class clsEFormApprover
+    public class ClsEFormApprover
     {
         public string ApproverName { get; set; }
         public DateTime Create { get; set; }

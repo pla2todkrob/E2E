@@ -54,13 +54,13 @@ function savegallery_T(urlAjax, urlLoad) {
         },
         success: function (res) {
             swal({
-                title: res.title,
-                text: res.text,
-                icon: res.icon,
-                button: res.button,
-                dangerMode: res.dangerMode
+                title: res.Title,
+                text: res.Text,
+                icon: res.Icon,
+                button: res.Button,
+                dangerMode: res.DangerMode
             }).then(function (e) {
-                if (res.icon == 'success') {
+                if (res.Icon == 'success') {
                     reloadTable();
                     callFileCollection(urlLoad);
                 }
@@ -85,9 +85,9 @@ function callFileCollection(urlLoad) {
 
 function deleteFiles(urlAjax, urlLoad) {
     swal({
-        title: "Are you sure?",
-        text: "Once deleted, you will not be able to recover this file",
-        icon: "warning",
+        title: 'Are you sure?',
+        text: 'Once deleted, you will not be able to recover this file',
+        icon: 'warning',
         buttons: true,
         dangerMode: true,
     })
@@ -98,13 +98,13 @@ function deleteFiles(urlAjax, urlLoad) {
                     async: true,
                     success: function (res) {
                         swal({
-                            title: res.title,
-                            text: res.text,
-                            icon: res.icon,
-                            button: res.button,
-                            dangerMode: res.dangerMode
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
                         }).then(function (e) {
-                            if (res.icon == 'success') {
+                            if (res.Icon == 'success') {
                                 reloadTable();
                                 callFileCollection(urlLoad);
                             }
@@ -118,17 +118,17 @@ function deleteFiles(urlAjax, urlLoad) {
 
 function previewMultiple(event) {
     $('#galImage').empty();
-    var saida = document.getElementById("fileImage");
+    var saida = document.getElementById('fileImage');
     var quantos = saida.files.length;
     for (i = 0; i < quantos; i++) {
         var urls = URL.createObjectURL(event.target.files[i]);
 
         var filetype = event.target.files[i].type.split('/')[0];
         if (filetype == 'image') {
-            document.getElementById("galImage").innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1" style="height:100px" title="' + event.target.files[i].name + '">';
+            document.getElementById('galImage').innerHTML += '<img src="' + urls + '"class="img-fluid img-thumbnail mr-1" style="height:100px" title="' + event.target.files[i].name + '">';
         }
         else {
-            document.getElementById("galImage").innerHTML += '<i class="fa fa-file-text-o fa-5x" style="height:100px" title="' + event.target.files[i].name + '"></i>';
+            document.getElementById('galImage').innerHTML += '<i class="fa fa-file-text-o fa-5x" style="height:100px" title="' + event.target.files[i].name + '"></i>';
         }
     }
 }

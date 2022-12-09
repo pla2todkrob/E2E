@@ -2,7 +2,7 @@
 
 namespace E2E.Models.Views
 {
-    public class clsImage
+    public class ClsImage
     {
         public string FtpPath { get; set; }
         public Image Image { get; set; }

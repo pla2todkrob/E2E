@@ -1,5 +1,5 @@
-﻿function callModalDepartment(urlAjax, bigSize = false) {
-    $.ajax({
+﻿async function callModalDepartment(urlAjax, bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -25,11 +25,10 @@
             });
         }
     });
-    return false;
 }
 
-function callModalSection(urlAjax, bigSize = false) {
-    $.ajax({
+async function callModalSection(urlAjax, bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -62,11 +61,10 @@ function callModalSection(urlAjax, bigSize = false) {
             });
         }
     });
-    return false;
 }
 
-function callModalProcesses(urlAjax, bigSize = false) {
-    $.ajax({
+async function callModalProcesses(urlAjax, bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -105,11 +103,10 @@ function callModalProcesses(urlAjax, bigSize = false) {
             });
         }
     });
-    return false;
 }
 
-function callModalUser(urlAjax, bigSize = false) {
-    $.ajax({
+async function callModalUser(urlAjax, bigSize = false) {
+    return $.ajax({
         url: urlAjax,
         async: true,
         success: function (res) {
@@ -159,5 +156,4 @@ function callModalUser(urlAjax, bigSize = false) {
             });
         }
     });
-    return false;
 }

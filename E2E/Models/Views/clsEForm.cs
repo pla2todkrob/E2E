@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace E2E.Models.Views
 {
-    public class clsEForm
+    public class ClsEForm
     {
-        public clsEForm()
+        public ClsEForm()
         {
             EForm_Files = new List<EForm_Files>();
             EForm_Galleries = new List<EForm_Galleries>();
