@@ -32,6 +32,7 @@ namespace E2E
 
             bundles.Add(new StyleBundle("~/bundles/css").Include(
                       "~/Content/bootstrap.min.css",
+                      "~/Content/colorbox.min.css",
                       "~/Content/font-awesome.min.css",
                       "~/Content/css/select2.min.css",
                       "~/Content/css/select2-bootstrap4.min.css",

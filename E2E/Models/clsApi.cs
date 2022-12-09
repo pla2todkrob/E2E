@@ -194,7 +194,7 @@ namespace E2E.Models
                     RestRequest request = new RestRequest()
                         .AddHeader("Token", TokenKey)
                         .AddParameter("folderPath", clsServiceFile.FolderPath)
-                        .AddFile("fileUpload", GetByteFileBase(file), file.FileName);
+                        .AddFile("fileUpload", GetByteFileBase(file), file.FileName, file.ContentType);
                     RestResponse response = client.PostAsync(request).Result;
                     returnUpload = JsonConvert.DeserializeObject<ReturnUpload>(response.Content);
                 }

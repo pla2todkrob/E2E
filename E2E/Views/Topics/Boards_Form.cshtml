@@ -26,14 +26,14 @@
 }
 @section scripts{
     <script src="~/Asset/Topic.min.js"></script>
-    <script>
+    <script async defer>
         $(function () {
-            $("#mygallery").justifiedGallery({
+            return $("#mygallery").justifiedGallery({
                 rowHeight: 256,
                 maxRowHeight: 256,
                 margins: 8,
                 lastRow: 'center',
-                rel: 1
+                rel: 'gallery'
             }).on('jg.complete', function () {
                 $(this).find('a').colorbox({
                     maxHeight: '90%',
@@ -44,26 +44,26 @@
 
         $(document).on('submit', '#SaveComment', function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("Boards_Comment", "Topics")',this);
-            return false;
+            return callSubmitPage('@Url.Action("Boards_Comment", "Topics")',this);
+
         });
 
         $(document).on('submit', '#SectionForm', function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("Boards_Section", "Topics")',this);
-            return false;
+            return callSubmitPage('@Url.Action("Boards_Section", "Topics")',this);
+
         });
 
         $(document).on('submit', '#SaveReportComment', function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("Boards_ReportComment", "Topics")',this);
-            return false;
+            return callSubmitPage('@Url.Action("Boards_ReportComment", "Topics")',this);
+
         });
 
 $(document).on('submit', '#SaveReply', function (e) {
     e.preventDefault();
-    callSubmitPage('@Url.Action("Boards_Reply", "Topics")', this);
-            return false;
+    return callSubmitPage('@Url.Action("Boards_Reply", "Topics")', this);
+
         });
     </script>
 }
@@ -86,10 +86,9 @@ $(document).on('submit', '#SaveReply', function (e) {
                 @foreach (var img in Model.TopicGalleries)
                 {
 
-                    <a href="@img.TopicGallery_Original" rel="@img.TopicGallery_Seq">
-                        <img alt="@img.TopicGallery_Name" src="@img.TopicGallery_Thumbnail" />
+                    <a href="@img.TopicGallery_Original" rel="gallery">
+                        <img src="@img.TopicGallery_Thumbnail" alt="@img.TopicGallery_Name" />
                     </a>
-                    <!-- other images... -->
 
                 }
             </div>

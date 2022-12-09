@@ -24,7 +24,7 @@
                 maxRowHeight: 256,
                 margins: 8,
                 lastRow: 'center',
-                rel: 1
+                rel: 'gallery'
             }).on('jg.complete', function () {
                 $(this).find('a').colorbox({
                     maxHeight: '90%',
@@ -66,8 +66,8 @@
                 @foreach (var img in Model.EForm_Galleries)
                 {
 
-                    <a href="@img.EForm_Gallery_Original" rel="@img.EForm_Gallery_Seq">
-                        <img alt="@img.EForm_Gallery_Name" src="@img.EForm_Gallery_Original" />
+                    <a href="@img.EForm_Gallery_Original" rel="gallery">
+                        <img alt="@img.EForm_Gallery_Name" src="@img.EForm_Gallery_Thumbnail" />
                     </a>
                     <!-- other images... -->
 
