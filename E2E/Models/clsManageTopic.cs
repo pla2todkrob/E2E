@@ -1016,23 +1016,21 @@ namespace E2E.Models
             }
         }
 
-        public bool InsertUpdateView(Guid? id, Guid? UserId)
+        public bool InsertUpdateView(Guid id, Guid? UserId)
         {
             try
             {
                 bool res = new bool();
-
-                if (!id.HasValue || !UserId.HasValue)
-                {
-                    return res;
-                }
 
                 TopicView topicView = new TopicView
                 {
                     Topic_Id = id
                 };
                 topicView.Count += 1;
-                topicView.User_Id = UserId;
+                if (UserId.HasValue)
+                {
+                    topicView.User_Id = UserId;
+                }
 
                 db.TopicView.Add(topicView);
 
@@ -1072,7 +1070,7 @@ namespace E2E.Models
             return false;
         }
 
-        public bool UpdateView(Guid? id)
+        public bool UpdateView(Guid id)
         {
             try
             {
@@ -1085,13 +1083,8 @@ namespace E2E.Models
 
                 if (!string.IsNullOrEmpty(strUserId))
                 {
-                    userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                    userId = Guid.Parse(strUserId);
                     topicView = db.TopicView.Where(w => w.Topic_Id == id && w.User_Id == userId).FirstOrDefault();
-                }
-
-                if (!id.HasValue)
-                {
-                    return res;
                 }
 
                 Topics topics = new Topics();

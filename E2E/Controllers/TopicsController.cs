@@ -297,7 +297,7 @@ namespace E2E.Controllers
                 }
                 using (TransactionScope scope = new TransactionScope())
                 {
-                    if (data.UpdateView(id))
+                    if (data.UpdateView(id.Value))
                     {
                         scope.Complete();
                     }

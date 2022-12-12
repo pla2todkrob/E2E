@@ -15,7 +15,8 @@ namespace E2E.Models.Tables
 
         public DateTime LastTime { get; set; }
 
-        public Guid? Topic_Id { get; set; }
+        public Guid Topic_Id { get; set; }
+        public virtual Topics Topics { get; set; }
 
         [Key]
         public Guid TopicView_Id { get; set; }
