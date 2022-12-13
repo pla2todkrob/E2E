@@ -144,15 +144,14 @@ namespace E2E.Controllers
                 }
                 catch (Exception ex)
                 {
-                    swal.Title = ex.TargetSite.Name;
+                    swal.Title = ex.Source;
                     swal.Text = ex.Message;
-                    if (ex.InnerException != null)
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
                     {
-                        swal.Text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.Text = ex.InnerException.InnerException.Message;
-                        }
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
                     }
                 }
 
@@ -176,35 +175,16 @@ namespace E2E.Controllers
                         swal.Title = "Successful";
                     }
                 }
-                catch (DbEntityValidationException ex)
-                {
-                    swal.Title = ex.TargetSite.Name;
-                    foreach (var item in ex.EntityValidationErrors)
-                    {
-                        foreach (var item2 in item.ValidationErrors)
-                        {
-                            if (string.IsNullOrEmpty(swal.Text))
-                            {
-                                swal.Text = item2.ErrorMessage;
-                            }
-                            else
-                            {
-                                swal.Text += "\n" + item2.ErrorMessage;
-                            }
-                        }
-                    }
-                }
                 catch (Exception ex)
                 {
-                    swal.Title = ex.TargetSite.Name;
+                    swal.Title = ex.Source;
                     swal.Text = ex.Message;
-                    if (ex.InnerException != null)
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
                     {
-                        swal.Text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.Text = ex.InnerException.InnerException.Message;
-                        }
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
                     }
                 }
             }
@@ -228,35 +208,16 @@ namespace E2E.Controllers
                         swal.Title = "Successful";
                     }
                 }
-                catch (DbEntityValidationException ex)
-                {
-                    swal.Title = ex.TargetSite.Name;
-                    foreach (var item in ex.EntityValidationErrors)
-                    {
-                        foreach (var item2 in item.ValidationErrors)
-                        {
-                            if (string.IsNullOrEmpty(swal.Text))
-                            {
-                                swal.Text = item2.ErrorMessage;
-                            }
-                            else
-                            {
-                                swal.Text += "\n" + item2.ErrorMessage;
-                            }
-                        }
-                    }
-                }
                 catch (Exception ex)
                 {
-                    swal.Title = ex.TargetSite.Name;
+                    swal.Title = ex.Source;
                     swal.Text = ex.Message;
-                    if (ex.InnerException != null)
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
                     {
-                        swal.Text = ex.InnerException.Message;
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            swal.Text = ex.InnerException.InnerException.Message;
-                        }
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
                     }
                 }
             }
@@ -340,35 +301,16 @@ namespace E2E.Controllers
                             swal.Title = "Warning";
                         }
                     }
-                    catch (DbEntityValidationException ex)
-                    {
-                        swal.Title = ex.TargetSite.Name;
-                        foreach (var item in ex.EntityValidationErrors)
-                        {
-                            foreach (var item2 in item.ValidationErrors)
-                            {
-                                if (string.IsNullOrEmpty(swal.Text))
-                                {
-                                    swal.Text = item2.ErrorMessage;
-                                }
-                                else
-                                {
-                                    swal.Text += "\n" + item2.ErrorMessage;
-                                }
-                            }
-                        }
-                    }
                     catch (Exception ex)
                     {
-                        swal.Title = ex.TargetSite.Name;
+                        swal.Title = ex.Source;
                         swal.Text = ex.Message;
-                        if (ex.InnerException != null)
+                        Exception inner = ex.InnerException;
+                        while (inner != null)
                         {
-                            swal.Text = ex.InnerException.Message;
-                            if (ex.InnerException.InnerException != null)
-                            {
-                                swal.Text = ex.InnerException.InnerException.Message;
-                            }
+                            swal.Title = inner.Source;
+                            swal.Text += string.Format("\n{0}", inner.Message);
+                            inner = inner.InnerException;
                         }
                     }
                 }
@@ -527,35 +469,16 @@ namespace E2E.Controllers
                             swal.Title = "Warning";
                         }
                     }
-                    catch (DbEntityValidationException ex)
-                    {
-                        swal.Title = ex.TargetSite.Name;
-                        foreach (var item in ex.EntityValidationErrors)
-                        {
-                            foreach (var item2 in item.ValidationErrors)
-                            {
-                                if (string.IsNullOrEmpty(swal.Text))
-                                {
-                                    swal.Text = item2.ErrorMessage;
-                                }
-                                else
-                                {
-                                    swal.Text += "\n" + item2.ErrorMessage;
-                                }
-                            }
-                        }
-                    }
                     catch (Exception ex)
                     {
-                        swal.Title = ex.TargetSite.Name;
+                        swal.Title = ex.Source;
                         swal.Text = ex.Message;
-                        if (ex.InnerException != null)
+                        Exception inner = ex.InnerException;
+                        while (inner != null)
                         {
-                            swal.Text = ex.InnerException.Message;
-                            if (ex.InnerException.InnerException != null)
-                            {
-                                swal.Text = ex.InnerException.InnerException.Message;
-                            }
+                            swal.Title = inner.Source;
+                            swal.Text += string.Format("\n{0}", inner.Message);
+                            inner = inner.InnerException;
                         }
                     }
                 }

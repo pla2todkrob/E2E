@@ -24,7 +24,7 @@ async function adjustHeight() {
 }
 
 async function CheckNotClose(urlAjax, urlAjaxCHK, bigSize = false) {
-    return $.ajax({
+    $.ajax({
         url: urlAjaxCHK,
         async: true,
         success: function (res) {
@@ -37,12 +37,12 @@ async function CheckNotClose(urlAjax, urlAjaxCHK, bigSize = false) {
                     dangerMode: res.DangerMode
                 }).then(function () {
                     if (res.Icon == 'warning') {
-                        window.location.href = baseUrl + '/Services/ServiceInfomation/' + res.Option;
+                        return window.location.href = baseUrl + '/Services/ServiceInfomation/' + res.Option;
                     }
                 });
             }
             else {
-                callModalService(urlAjax, bigSize);
+                return callModalService(urlAjax, bigSize);
             }
         }
     });
@@ -82,7 +82,7 @@ async function callModalService(urlAjax, bigSize = false) {
 }
 
 async function deleteFile(urlAjax, urlLoad) {
-    return swal({
+    swal({
         title: 'Are you sure?',
         text: 'Once deleted, you will not be able to recover this file',
         icon: 'warning',
@@ -103,7 +103,7 @@ async function deleteFile(urlAjax, urlLoad) {
                             dangerMode: res.DangerMode
                         }).then(function () {
                             if (res.Icon == 'success') {
-                                $('#fileTable').load(urlLoad);
+                                return $('#fileTable').load(urlLoad);
                             }
                         });
                     }
@@ -129,7 +129,7 @@ async function setDateRange(val) {
 }
 
 async function setRequired(urlAjax, urlRedirect) {
-    return swal({
+    swal({
         title: `Are you sure?`,
         text: `This item will be sent to the requester's department manager.`,
         buttons: true,
@@ -149,7 +149,7 @@ async function setRequired(urlAjax, urlRedirect) {
                             dangerMode: res.DangerMode
                         }).then(function () {
                             if (res.Icon == 'success') {
-                                window.location.replace(urlRedirect);
+                                return window.location.replace(urlRedirect);
                             }
                         });
                     }
@@ -159,7 +159,7 @@ async function setRequired(urlAjax, urlRedirect) {
 }
 
 async function setCommitToDepartment(urlAjax, urlRedirect) {
-    return swal({
+    swal({
         title: 'Are you sure?',
         text: 'This item request will be imported to your department.',
         buttons: true,
@@ -179,7 +179,7 @@ async function setCommitToDepartment(urlAjax, urlRedirect) {
                             dangerMode: res.DangerMode
                         }).then(function () {
                             if (res.Icon == 'success') {
-                                window.location.replace(urlRedirect);
+                                return window.location.replace(urlRedirect);
                             }
                         });
                     }
@@ -189,7 +189,7 @@ async function setCommitToDepartment(urlAjax, urlRedirect) {
 }
 
 async function resendEmail(urlAjax) {
-    return swal({
+    swal({
         title: 'Are you sure?',
         text: 'An email will be sent to the creator of the request again.',
         buttons: true,
@@ -201,7 +201,7 @@ async function resendEmail(urlAjax) {
                     url: urlAjax,
                     async: true,
                     success: function (res) {
-                        swal({
+                        return swal({
                             title: res.Title,
                             text: res.Text,
                             icon: res.Icon,

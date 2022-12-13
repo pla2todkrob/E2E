@@ -2438,33 +2438,14 @@ namespace E2E.Models
                     res.IsSuccess = true;
                 }
             }
-            catch (DbEntityValidationException ex)
-            {
-                foreach (var item in ex.EntityValidationErrors)
-                {
-                    foreach (var item2 in item.ValidationErrors)
-                    {
-                        if (string.IsNullOrEmpty(res.Message))
-                        {
-                            res.Message = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            res.Message += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
             catch (Exception ex)
             {
                 res.Message = ex.Message;
-                if (ex.InnerException != null)
+                Exception inner = ex.InnerException;
+                while (inner != null)
                 {
-                    res.Message = ex.InnerException.Message;
-                    if (ex.InnerException.InnerException != null)
-                    {
-                        res.Message = ex.InnerException.InnerException.Message;
-                    }
+                    res.Message += string.Format("\n{0}", inner.Message);
+                    inner = inner.InnerException;
                 }
             }
 

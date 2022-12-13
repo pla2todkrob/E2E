@@ -80,15 +80,14 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-                swal.Title = ex.TargetSite.Name;
+                swal.Title = ex.Source;
                 swal.Text = ex.Message;
-                if (ex.InnerException != null)
+                Exception inner = ex.InnerException;
+                while (inner != null)
                 {
-                    swal.Text = ex.InnerException.Message;
-                    if (ex.InnerException.InnerException != null)
-                    {
-                        swal.Text = ex.InnerException.InnerException.Message;
-                    }
+                    swal.Title = inner.Source;
+                    swal.Text += string.Format("\n{0}", inner.Message);
+                    inner = inner.InnerException;
                 }
             }
 

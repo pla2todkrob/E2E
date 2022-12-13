@@ -45,7 +45,7 @@ async function savegallery_T(urlAjax, urlLoad) {
             });
         });
     });
-    return $.ajax({
+    $.ajax({
         url: urlAjax,
         async: true,
         data: {
@@ -61,7 +61,7 @@ async function savegallery_T(urlAjax, urlLoad) {
             }).then(function (e) {
                 if (res.Icon == 'success') {
                     reloadTable();
-                    callFileCollection(urlLoad);
+                    return callFileCollection(urlLoad);
                 }
             });
         }
@@ -83,7 +83,7 @@ async function callFileCollection(urlLoad) {
 }
 
 async function deleteFiles(urlAjax, urlLoad) {
-    return swal({
+    swal({
         title: 'Are you sure?',
         text: 'Once deleted, you will not be able to recover this file',
         icon: 'warning',
@@ -105,7 +105,7 @@ async function deleteFiles(urlAjax, urlLoad) {
                         }).then(function (e) {
                             if (res.Icon == 'success') {
                                 reloadTable();
-                                callFileCollection(urlLoad);
+                                return callFileCollection(urlLoad);
                             }
                         });
                     }
