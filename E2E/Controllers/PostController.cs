@@ -73,7 +73,7 @@ namespace E2E.Controllers
                 }
                 catch (Exception ex)
                 {
-                    var inner = ex.InnerException;
+                    Exception inner = ex.InnerException;
                     clsApi.Message = ex.Message;
 
                     while (inner != null)
@@ -182,7 +182,7 @@ namespace E2E.Controllers
                 }
                 catch (Exception ex)
                 {
-                    var inner = ex.InnerException;
+                    Exception inner = ex.InnerException;
                     clsApi.Message = ex.Message;
 
                     while (inner != null)

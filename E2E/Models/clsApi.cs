@@ -139,6 +139,9 @@ namespace E2E.Models
                     clsServiceEmail.FilePath
                 };
 
+                //Test text
+                //string jsonText = JsonConvert.SerializeObject(multiClass);
+
                 RestClientOptions options = new RestClientOptions(ApiUrl)
                 {
                     ThrowOnAnyError = true,
@@ -149,7 +152,7 @@ namespace E2E.Models
                 {
                     RestRequest request = new RestRequest()
                         .AddHeader("Token", TokenKey)
-                        .AddJsonBody(multiClass);
+                        .AddBody(multiClass, "application/json");
 
                     if (file != null)
                     {

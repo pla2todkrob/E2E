@@ -21,7 +21,7 @@ namespace E2E.Controllers
             {
                 clsApi.IsSuccess = false;
                 clsApi.Message = ex.Message;
-                var inner = ex.InnerException;
+                Exception inner = ex.InnerException;
 
                 while (inner != null)
                 {

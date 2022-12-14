@@ -478,12 +478,13 @@ namespace E2E.Controllers
                     }
                     catch (Exception ex)
                     {
-                        swal.Title = ex.TargetSite.Name;
+                        swal.Title = ex.Source;
                         swal.Text = ex.Message;
-                        var inner = ex.InnerException;
-                        while (inner == null)
+                        Exception inner = ex.InnerException;
+                        while (inner != null)
                         {
-                            swal.Text += "\n" + inner.Message;
+                            swal.Title = inner.Source;
+                            swal.Text += string.Format("\n{0}", inner.Message);
                             inner = inner.InnerException;
                         }
                     }

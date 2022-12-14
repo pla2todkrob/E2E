@@ -1,7 +1,7 @@
-﻿//For publish
+﻿//For external
 //const baseUrl = '/E2E';
 
-//For develop
+//For local
 const baseUrl = '';
 let chat;
 
