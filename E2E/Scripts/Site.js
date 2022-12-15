@@ -80,7 +80,7 @@ async function callSpin(active) {
     }
 }
 
-async function getQueryString() {
+function getQueryString() {
     let pairs = window.location.search.substring(1).split('&'),
         obj = {},
         pair,
@@ -226,6 +226,7 @@ async function callFilter(urlAjax, blockId = '#filter') {
         url: urlAjax,
         async: true,
         cache: false,
+        contentType: 'application/json',
         data: {
             filter: getQueryString()
         },
