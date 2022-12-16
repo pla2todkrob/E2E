@@ -6,68 +6,68 @@
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveForm", @class = "was-validated", enctype = "multipath/form-data" }))
 {
-@Html.AntiForgeryToken()
+    @Html.AntiForgeryToken()
 
-<div class="modal-header">
-    <h5 class="modal-title" id="modalTitle">Form</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-<div class="modal-body">
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-    @Html.HiddenFor(m => m.Topic_Id)
-    <div class="form-row">
+    <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Form</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m => m.Topic_Id)
+        <div class="form-row">
 
-        <div class="form-group col-4 ">
-            @Html.LabelFor(m => m.Master_Categories.Category_Id)
-            @Html.DropDownListFor(m => m.Category_Id, new SelectList(ViewBag.Create_Categories, "Value", "Text"), new { @class = "form-control", required = "required" })
-        </div>
-
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.Topic_Title)
-            @Html.TextBoxFor(m => m.Topic_Title, new { @class = "form-control", required = "required" })
-        </div>
-
-        <div class="form-group col-auto">
-            <label for="fileImage">
-                Upload files
-            </label>
-            <input name="fileImage" id="fileImage" type="file" multiple class="form-control-file" onchange="previewMultiple(event)" />
-        </div>
-
-        <div class="col-md-12 d-flex overflow-auto mb-3" id="galImage"></div>
-
-        <div id="fileCollection" class="col-12"></div>
-
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.Topic_Content)
-            @Html.TextAreaFor(m => m.Topic_Content, new { @class = "form-control", required = "required", rows = 8 })
-        </div>
-
-        <div class="col-md-6">
-            <div class="form-group form-check">
-                @Html.CheckBoxFor(m => m.IsPublic, new { @class = "form-check-input" })
-                @Html.LabelFor(m => m.IsPublic, new { @class = "form-check-label" })
+            <div class="form-group col">
+                @Html.LabelFor(m => m.Master_Categories.Category_Id)
+                @Html.DropDownListFor(m => m.Category_Id, new SelectList(ViewBag.Create_Categories, "Value", "Text"), new { @class = "form-control", required = "required" })
             </div>
-            <div class="form-group form-check">
-                @Html.CheckBoxFor(m => m.Topic_Pin, new { @class = "form-check-input" })
-                @Html.LabelFor(m => m.Topic_Pin, new { @class = "form-check-label" })
+
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.Topic_Title)
+                @Html.TextBoxFor(m => m.Topic_Title, new { @class = "form-control", required = "required" })
             </div>
-            <div class="form-group" id="Pins">
-                @Html.LabelFor(m => m.Topic_Pin_EndDate)
-                @Html.TextBoxFor(m => m.Topic_Pin_EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+
+            <div class="form-group col-auto">
+                <label for="fileImage">
+                    Upload files
+                </label>
+                <input name="fileImage" id="fileImage" type="file" multiple class="form-control-file" onchange="previewMultiple(event)" />
+            </div>
+
+            <div class="col-md-12 d-flex overflow-auto mb-3" id="galImage"></div>
+
+            <div id="fileCollection" class="col-12"></div>
+
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.Topic_Content)
+                @Html.TextAreaFor(m => m.Topic_Content, new { @class = "form-control", required = "required", rows = 8 })
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group form-check">
+                    @Html.CheckBoxFor(m => m.IsPublic, new { @class = "form-check-input" })
+                    @Html.LabelFor(m => m.IsPublic, new { @class = "form-check-label" })
+                </div>
+                <div class="form-group form-check">
+                    @Html.CheckBoxFor(m => m.Topic_Pin, new { @class = "form-check-input" })
+                    @Html.LabelFor(m => m.Topic_Pin, new { @class = "form-check-label" })
+                </div>
+                <div class="form-group" id="Pins">
+                    @Html.LabelFor(m => m.Topic_Pin_EndDate)
+                    @Html.TextBoxFor(m => m.Topic_Pin_EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="modal-footer">
-    @{
+    <div class="modal-footer">
+        @{
             if (ViewBag.isNew == false)
             {
-        <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.Topic_Id)})')"><i class="fa fa-trash"></i></button>
+                <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Delete_Boards_Create","Topics",new { id=Html.ValueFor(w=>w.Topic_Id)})')"><i class="fa fa-trash"></i></button>
             }
-    }
-    <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i></button>
-</div>
+        }
+        <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i></button>
+    </div>
 }

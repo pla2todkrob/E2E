@@ -31,6 +31,8 @@ namespace E2E.Models.Views
         [Display(Name = "Process")]
         public string Process_Name { get; set; }
 
+        public string Role { get; set; }
+
         [Display(Name = "Section")]
         public string Section_Name { get; set; }
 

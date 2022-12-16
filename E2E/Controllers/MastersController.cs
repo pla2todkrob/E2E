@@ -1494,7 +1494,10 @@ namespace E2E.Controllers
                                                         Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
                                                         Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
                                                         Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
-
+                                                        if (sheet.Cells[row, 16].Text.Contains("Application"))
+                                                        {
+                                                            userDetails.Users.Role_Id = 1;
+                                                        }
                                                         userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
                                                         userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
                                                         userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;

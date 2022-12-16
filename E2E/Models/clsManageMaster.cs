@@ -462,7 +462,7 @@ namespace E2E.Models
                     User_Code = model.Users.User_Code.Trim(),
                     Grade_Id = model.Users.Grade_Id,
                     Process_Id = model.Users.Process_Id,
-                    Role_Id = 2,
+                    Role_Id = model.Users.Role_Id != 0 ? model.Users.Role_Id : 2,
                     User_CostCenter = model.Users.User_CostCenter.Trim(),
                     User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]),
                     YearSetPoint = DateTime.Now.Year
@@ -531,7 +531,7 @@ namespace E2E.Models
                 bool res = new bool();
 
                 Users users = db.Users.Where(w => w.User_Code == model.Users.User_Code).FirstOrDefault();
-                if (model.Users.Role_Id > 0)
+                if (model.Users.Role_Id != 0)
                 {
                     users.Role_Id = model.Users.Role_Id;
                 }
@@ -690,6 +690,7 @@ namespace E2E.Models
                     User_Point = s.Users.User_Point,
                     User_Name_EN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
                     User_Name_TH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName,
+                    Role = s.Users.System_Roles.Role_Name
                 }).ToList();
             }
             catch (Exception)

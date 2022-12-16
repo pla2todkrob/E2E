@@ -19,7 +19,9 @@ namespace E2E.Models.Tables
 
         public DateTime Create { get; set; }
 
+        [Display(Name = "Publicly available")]
         public bool IsPublic { get; set; }
+
         public virtual Master_Categories Master_Categories { get; set; }
 
         [Display(Name = "Content")]
@@ -32,10 +34,10 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Topic_Id { get; set; }
 
-        [Display(Name = "Pin")]
+        [Display(Name = "Pin it")]
         public bool Topic_Pin { get; set; }
 
-        [Display(Name = "Pin EndDate")]
+        [Display(Name = "Pinned to date")]
         public DateTime? Topic_Pin_EndDate { get; set; }
 
         [Display(Name = "Title")]
