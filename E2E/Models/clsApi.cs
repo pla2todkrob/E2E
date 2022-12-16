@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Web;
 
 namespace E2E.Models
@@ -95,9 +96,9 @@ namespace E2E.Models
         public string Message { get; set; }
         public dynamic Value { get; set; }
 
-        public ReturnDelete Delete_File(string fileUrl)
+        public FileResponse Delete_File(string fileUrl)
         {
-            ReturnDelete res = new ReturnDelete();
+            FileResponse res = new FileResponse();
             string TokenKey = GetToken();
             Uri ApiUrl = new Uri(GetDomainURL() + "api/Service_File/Delete_File");
 
@@ -110,21 +111,21 @@ namespace E2E.Models
             {
                 RestRequest request = new RestRequest()
                     .AddHeader("Token", TokenKey)
-                    .AddParameter("path", fileUrl);
+                    .AddHeader("FilePath", HttpUtility.UrlEncode(fileUrl, Encoding.UTF8));
                 RestResponse response = client.PostAsync(request).Result;
-                res = JsonConvert.DeserializeObject<ReturnDelete>(response.Content);
+                res = JsonConvert.DeserializeObject<FileResponse>(response.Content);
             }
 
             return res;
         }
 
-        public bool SendMail(ClsServiceEmail clsServiceEmail, HttpFileCollectionBase file = null)
+        public bool SendMail(ClsServiceEmail clsServiceEmail, HttpFileCollectionBase files = null)
         {
             try
             {
-                ReturnSend returnSend = new ReturnSend();
+                MailResponse mailResponse = new MailResponse();
                 string resApi = string.Empty;
-                List<ClsFile> clsFiles = new List<ClsFile>();
+                List<ClsFileAttach> clsFiles = new List<ClsFileAttach>();
                 string TokenKey = GetToken();
                 Uri ApiUrl = new Uri(GetDomainURL() + "api/Service_Email/Send");
 
@@ -135,8 +136,7 @@ namespace E2E.Models
                     clsServiceEmail.SendCC,
                     clsServiceEmail.SendBCC,
                     clsServiceEmail.Subject,
-                    clsServiceEmail.Body,
-                    clsServiceEmail.FilePath
+                    clsServiceEmail.Body
                 };
 
                 //Test text
@@ -154,34 +154,35 @@ namespace E2E.Models
                         .AddHeader("Token", TokenKey)
                         .AddBody(multiClass, "application/json");
 
-                    if (file != null)
+                    if (files != null)
                     {
-                        for (int i = 0; i < file.Count; i++)
+                        foreach (var item in files.AllKeys)
                         {
-                            HttpPostedFileBase fileBase = file.Get(i);
-
-                            request.AddFile("fileAttach", GetByteFileBase(fileBase), fileBase.FileName, fileBase.ContentType);
+                            if (files[item].ContentLength > 0)
+                            {
+                                request.AddFile("fileAttach", GetByteFileBase(files[item]), HttpUtility.UrlEncode(files[item].FileName, Encoding.UTF8), files[item].ContentType);
+                            }
                         }
                     }
                     RestResponse response = client.PostAsync(request).Result;
-                    returnSend = JsonConvert.DeserializeObject<ReturnSend>(response.Content);
+                    mailResponse = JsonConvert.DeserializeObject<MailResponse>(response.Content);
                 }
 
-                if (!returnSend.CanSend)
+                if (!mailResponse.IsSuccess)
                 {
-                    throw new Exception(returnSend.ErrorMessage);
+                    throw new Exception(mailResponse.ErrorMessage);
                 }
 
-                return returnSend.CanSend;
+                return mailResponse.IsSuccess;
             }
             catch (Exception) { throw; }
         }
 
-        public ReturnUpload UploadFile(ClsServiceFile clsServiceFile, HttpPostedFileBase file = null)
+        public FileResponse UploadFile(ClsServiceFile clsServiceFile, HttpPostedFileBase file)
         {
             try
             {
-                ReturnUpload returnUpload = new ReturnUpload();
+                FileResponse fileResponse = new FileResponse();
 
                 string resApi = string.Empty;
                 string TokenKey = GetToken();
@@ -196,17 +197,17 @@ namespace E2E.Models
                 {
                     RestRequest request = new RestRequest()
                         .AddHeader("Token", TokenKey)
-                        .AddParameter("folderPath", clsServiceFile.FolderPath)
-                        .AddFile("fileUpload", GetByteFileBase(file), file.FileName, file.ContentType);
+                        .AddParameter("FolderPath", clsServiceFile.FolderPath)
+                        .AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName, Encoding.UTF8), file.ContentType);
                     RestResponse response = client.PostAsync(request).Result;
-                    returnUpload = JsonConvert.DeserializeObject<ReturnUpload>(response.Content);
+                    fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);
                 }
 
-                if (!returnUpload.CanUpload)
+                if (!fileResponse.IsSuccess)
                 {
-                    throw new Exception(returnUpload.ErrorMessage);
+                    throw new Exception(fileResponse.ErrorMessage);
                 }
-                return returnUpload;
+                return fileResponse;
             }
             catch (Exception)
             {

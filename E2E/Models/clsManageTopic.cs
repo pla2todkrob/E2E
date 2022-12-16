@@ -141,16 +141,13 @@ namespace E2E.Models
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
-                    if (files[0].ContentLength != 0)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        for (int i = 0; i < files.Count; i++)
+                        if (files[i].ContentLength > 0)
                         {
-                            HttpPostedFileBase file = files[i];
-
-                            bool CK_IMG = IsRecognisedImageFile(file.FileName);
                             string dir = "Topic/" + topics.Topic_Id;
-
-                            if (CK_IMG)
+                            HttpPostedFileBase file = files[i];
+                            if (file.ContentType.StartsWith("image"))
                             {
                                 string FileName = file.FileName;
 
@@ -215,16 +212,13 @@ namespace E2E.Models
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
-                    if (files[0].ContentLength != 0)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        for (int i = 0; i < files.Count; i++)
+                        if (files[i].ContentLength > 0)
                         {
                             HttpPostedFileBase file = files[i];
-
-                            bool CK_IMG = IsRecognisedImageFile(file.FileName);
                             string dir = "Topic/" + model.Topic_Id;
-
-                            if (CK_IMG)
+                            if (files[i].ContentType.StartsWith("image"))
                             {
                                 string FileName = file.FileName;
 
@@ -348,7 +342,10 @@ namespace E2E.Models
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    res = clsMail.SendMail(query.User_Id, subject, content);
+                    clsMail.SendToId = query.User_Id;
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+                    res = clsMail.SendMail(clsMail);
 
                     Board_CountComment_Update(model);
                 }
@@ -504,7 +501,10 @@ namespace E2E.Models
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    res = clsMail.SendMail(DBTopicComment.User_Id.Value, subject, content);
+                    clsMail.SendToId = DBTopicComment.User_Id;
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+                    res = clsMail.SendMail(clsMail);
 
                     Board_CountComment_Update(DBTopicComment);
                 }
@@ -1045,29 +1045,6 @@ namespace E2E.Models
             {
                 throw;
             }
-        }
-
-        public bool IsRecognisedImageFile(string fileName)
-        {
-            string targetExtension = System.IO.Path.GetExtension(fileName);
-            if (String.IsNullOrEmpty(targetExtension))
-                return false;
-            else
-                targetExtension = "*" + targetExtension.ToLowerInvariant();
-
-            List<string> recognisedImageExtensions = new List<string>();
-
-            foreach (System.Drawing.Imaging.ImageCodecInfo imageCodec in System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders())
-                recognisedImageExtensions.AddRange(imageCodec.FilenameExtension.ToLowerInvariant().Split(";".ToCharArray()));
-
-            foreach (string extension in recognisedImageExtensions)
-            {
-                if (extension.Equals(targetExtension))
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public bool UpdateView(Guid id)

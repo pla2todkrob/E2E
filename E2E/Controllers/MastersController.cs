@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Transactions;
+using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -1443,9 +1444,9 @@ namespace E2E.Controllers
                 {
                     var files = Request.Files;
                     List<string> userCodeList = new List<string>();
-                    foreach (string item in files)
+                    foreach (string item in files.AllKeys)
                     {
-                        var file = files[item];
+                        HttpPostedFileBase file = files[item];
 
                         if (file.ContentLength > 0)
                         {

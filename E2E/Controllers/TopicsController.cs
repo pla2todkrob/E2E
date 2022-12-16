@@ -385,8 +385,10 @@ namespace E2E.Controllers
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-
-                    if (clsMail.SendMail(Approver, subject, content))
+                    clsMail.SendToIds = Approver;
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+                    if (clsMail.SendMail(clsMail))
                     {
                         swal.DangerMode = false;
                         swal.Icon = "success";

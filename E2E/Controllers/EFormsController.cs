@@ -13,10 +13,10 @@ namespace E2E.Controllers
 {
     public class EFormsController : Controller
     {
+        private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsManageEForm data = new ClsManageEForm();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
-        private readonly ClsMail mail = new ClsMail();
 
         public ActionResult _FileCollections(Guid id)
         {
@@ -405,21 +405,31 @@ namespace E2E.Controllers
 
         public void EmailForms(Guid id, string status)
         {
-            EForms eForms = db.EForms.Find(id);
+            try
+            {
+                EForms eForms = db.EForms.Find(id);
 
-            Guid sendTo = eForms.User_Id;
-            var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
-            linkUrl += "/" + eForms.EForm_Id;
-            linkUrl = linkUrl.Replace("Approve_Forms", "EForms_Content");
-            linkUrl = linkUrl.Split('?').FirstOrDefault();
+                Guid sendTo = eForms.User_Id;
+                var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
+                linkUrl += "/" + eForms.EForm_Id;
+                linkUrl = linkUrl.Replace("Approve_Forms", "EForms_Content");
+                linkUrl = linkUrl.Split('?').FirstOrDefault();
 
-            string subject = string.Format("[" + status + "] {0} - {1}", "E-Forms", eForms.EForm_Title);
-            string content = string.Format("<p><b>Description:</b> {0}", eForms.EForm_Description);
-            content += "<br />";
-            content += "<br />";
-            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-            content += "<p>Thank you for your consideration</p>";
-            mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
+                string subject = string.Format("[" + status + "] {0} - {1}", "E-Forms", eForms.EForm_Title);
+                string content = string.Format("<p><b>Description:</b> {0}", eForms.EForm_Description);
+                content += "<br />";
+                content += "<br />";
+                content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                content += "<p>Thank you for your consideration</p>";
+                clsMail.SendToId = sendTo;
+                clsMail.Subject = subject;
+                clsMail.Body = content;
+                clsMail.SendMail(clsMail);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         // GET: EForms

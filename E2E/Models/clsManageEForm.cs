@@ -10,9 +10,9 @@ namespace E2E.Models
 {
     public class ClsManageEForm
     {
+        private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
-        private readonly ClsMail mail = new ClsMail();
         private ClsImage clsImag = new ClsImage();
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
@@ -94,7 +94,10 @@ namespace E2E.Models
                     content += "<br />";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    res = mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
+                    clsMail.SendToIds = sendTo;
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+                    res = clsMail.SendMail(clsMail, files);
                 }
 
                 return res;

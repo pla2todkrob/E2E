@@ -12,9 +12,9 @@ namespace E2E.Models
 {
     public class ClsManageService
     {
+        private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
-        private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
 
         private IQueryable<Services> Services_GetAllRequest_IQ()
@@ -711,7 +711,10 @@ namespace E2E.Models
                 content += "</p>";
                 content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
-                res = mail.SendMail(listTeam, subject, content);
+                clsMail.SendToIds = listTeam;
+                clsMail.Subject = subject;
+                clsMail.Body = content;
+                res = clsMail.SendMail(clsMail);
 
                 return res;
             }
@@ -794,7 +797,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(listTeam, subject, content);
+                        clsMail.SendToIds = listTeam;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
                 return res;
@@ -853,7 +859,10 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            res = mail.SendMail(Sendto.User_Id.Value, subject, content);
+                            clsMail.SendToId = Sendto.User_Id;
+                            clsMail.Subject = subject;
+                            clsMail.Body = content;
+                            res = clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -946,7 +955,10 @@ namespace E2E.Models
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    res = mail.SendMail(Sendto.User_Id.Value, subject, content);
+                    clsMail.SendToId = Sendto.User_Id;
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+                    res = clsMail.SendMail(clsMail);
                 }
 
                 return res;
@@ -990,7 +1002,10 @@ namespace E2E.Models
 
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(services.User_Id, subject, content);
+                        clsMail.SendToId = services.User_Id;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -1578,7 +1593,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(services.User_Id, subject, content);
+                        clsMail.SendToId = services.User_Id;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -1763,7 +1781,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        if (mail.SendMail(services.User_Id, subject, content))
+                        clsMail.SendToId = services.User_Id;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        if (clsMail.SendMail(clsMail))
                         {
                             MethodBase methodBase = MethodBase.GetCurrentMethod();
                             Log_SendEmail log_SendEmail = new Log_SendEmail
@@ -1964,7 +1985,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(services.User_Id, subject, content);
+                        clsMail.SendToId = services.User_Id;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2015,7 +2039,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(sendTo: sendTo, strSubject: subject, strContent: content);
+                        clsMail.SendToIds = sendTo;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2069,7 +2096,10 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            res = mail.SendMail(services.Assign_User_Id.Value, subject, content);
+                            clsMail.SendToId = services.Assign_User_Id;
+                            clsMail.Subject = subject;
+                            clsMail.Body = content;
+                            res = clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -2136,7 +2166,10 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            res = mail.SendMail(services.Assign_User_Id.Value, subject, content);
+                            clsMail.SendToId = services.Assign_User_Id;
+                            clsMail.Subject = subject;
+                            clsMail.Body = content;
+                            res = clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -2226,7 +2259,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(userId, subject, content);
+                        clsMail.SendToId = userId;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2274,7 +2310,10 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        res = mail.SendMail(userId, subject, content);
+                        clsMail.SendToId = userId;
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
+                        res = clsMail.SendMail(clsMail);
                     }
                 }
 

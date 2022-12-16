@@ -15,16 +15,15 @@ namespace E2E.Models
     {
         private static string saveToPath = string.Empty;
         private readonly ClsApi clsApi = new ClsApi();
+        private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsServiceFile clsServiceFile = new ClsServiceFile();
         private readonly string dir = ConfigurationManager.AppSettings["FTP_Dir"];
-        private readonly ClsMail mail = new ClsMail();
         private readonly string pass = ConfigurationManager.AppSettings["FTP_Password"];
         private readonly string urlDomain = ConfigurationManager.AppSettings["Domain_Url"];
         private readonly string urlFtp = ConfigurationManager.AppSettings["FTP_Url"];
         private readonly string user = ConfigurationManager.AppSettings["FTP_User"];
         private readonly string webPath = AppDomain.CurrentDomain.BaseDirectory;
-        private ReturnDelete returnDelete = new ReturnDelete();
-        private ReturnUpload returnUpload = new ReturnUpload();
+        private FileResponse fileResponse = new FileResponse();
 
         private bool CreateDirectory(string path)
         {
@@ -97,7 +96,7 @@ namespace E2E.Models
         {
             try
             {
-                returnDelete = clsApi.Delete_File(path);
+                fileResponse = clsApi.Delete_File(path);
 
                 //path = path.Replace(urlDomain, urlFtp);
                 //FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
@@ -111,11 +110,11 @@ namespace E2E.Models
                 //    }
                 //}
 
-                if (!returnDelete.CanDelete)
+                if (!fileResponse.IsSuccess)
                 {
-                    throw new Exception(returnDelete.ErrorMessage);
+                    throw new Exception(fileResponse.ErrorMessage);
                 }
-                return returnDelete.CanDelete;
+                return fileResponse.IsSuccess;
             }
             catch (Exception ex)
             {
@@ -403,7 +402,12 @@ namespace E2E.Models
                 {
                     zipPath
                 };
-                if (mail.SendMail(emails, subject, content, userId, attachPath))
+                clsMail.SendToStrs = emails;
+                clsMail.Subject = subject;
+                clsMail.Body = content;
+                clsMail.SendCC = userId;
+                clsMail.AttachPaths = attachPath;
+                if (clsMail.SendMail(clsMail))
                 {
                     Directory.Delete(saveToPath, true);
                 }
@@ -542,9 +546,9 @@ namespace E2E.Models
 
                 clsServiceFile.Filename = filePost.FileName;
 
-                returnUpload = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
 
-                return returnUpload.FileUrl;
+                return fileResponse.FileUrl;
             }
             catch (Exception)
             {
@@ -597,9 +601,9 @@ namespace E2E.Models
                     clsServiceFile.Filename = filePost.FileName;
                 }
 
-                returnUpload = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
 
-                return returnUpload.FileUrl;
+                return fileResponse.FileUrl;
             }
             catch (Exception ex)
             {
@@ -702,10 +706,10 @@ namespace E2E.Models
                     clsServiceFile.Filename = filePost.FileName;
                 }
 
-                returnUpload = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
 
-                res.OriginalPath = returnUpload.FileUrl;
-                res.ThumbnailPath = returnUpload.FileThumbnailUrl;
+                res.OriginalPath = fileResponse.FileUrl;
+                res.ThumbnailPath = fileResponse.FileThumbnailUrl;
 
                 return res;
             }

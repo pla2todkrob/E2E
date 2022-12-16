@@ -12,14 +12,27 @@ namespace E2E.Models
     public class ClsMail
     {
         private readonly ClsApi clsApi = new ClsApi();
-        private readonly ClsServiceEmail clsServiceEmail = new ClsServiceEmail();
         private readonly ClsContext db = new ClsContext();
 
-        public string Content { get; set; }
-        public List<Guid?> SendBCC { get; set; }
-        public List<Guid?> SendCC { get; set; }
+        public ClsMail()
+        {
+            SendToIds = new List<Guid>();
+            SendToStrs = new List<string>();
+            AttachPaths = new List<string>();
+            SendBCC = new List<Guid>();
+            SendCCs = new List<Guid>();
+        }
+
+        public List<string> AttachPaths { get; set; }
+        public string Body { get; set; }
+        public List<Guid> SendBCC { get; set; }
+        public Guid? SendCC { get; set; }
+        public List<Guid> SendCCs { get; set; }
         public Guid SendFrom { get; set; }
-        public List<Guid> SendTo { get; set; }
+        public Guid? SendToId { get; set; }
+        public List<Guid> SendToIds { get; set; }
+        public string SendToStr { get; set; }
+        public List<string> SendToStrs { get; set; }
         public string Subject { get; set; }
 
         public bool ResendMail(Guid logId)
@@ -30,9 +43,7 @@ namespace E2E.Models
                 Log_SendEmail log_SendEmail = new Log_SendEmail();
                 log_SendEmail = db.Log_SendEmails.Find(logId);
 
-                List<Guid> mailTo = new List<Guid>();
-                List<Guid?> mailCC = new List<Guid?>();
-                List<Guid?> mailBCC = new List<Guid?>();
+                ClsMail clsMail = new ClsMail();
 
                 List<Log_SendEmailTo> log_SendEmailTos = new List<Log_SendEmailTo>();
                 log_SendEmailTos = db.Log_SendEmailTos
@@ -43,15 +54,15 @@ namespace E2E.Models
                     switch (item.SendEmailTo_Type)
                     {
                         case "to":
-                            mailTo.Add(item.User_Id);
+                            clsMail.SendToIds.Add(item.User_Id);
                             break;
 
                         case "cc":
-                            mailCC.Add(item.User_Id);
+                            clsMail.SendCCs.Add(item.User_Id);
                             break;
 
                         case "bcc":
-                            mailBCC.Add(item.User_Id);
+                            clsMail.SendBCC.Add(item.User_Id);
                             break;
 
                         default:
@@ -59,7 +70,10 @@ namespace E2E.Models
                     }
                 }
 
-                res = SendMail(mailTo, log_SendEmail.SendEmail_Subject, log_SendEmail.SendEmail_Content, mailCC, mailBCC);
+                clsMail.Subject = log_SendEmail.SendEmail_Subject;
+                clsMail.Body = log_SendEmail.SendEmail_Content;
+
+                res = SendMail(clsMail);
 
                 return res;
             }
@@ -69,16 +83,18 @@ namespace E2E.Models
             }
         }
 
-        //API Complete
-        public bool SendMail(List<Guid> sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null, List<string> attachPaths = null)
+        public bool SendMail(ClsMail model, HttpFileCollectionBase files = null)
         {
             try
             {
-                MailMessage msg = new MailMessage();
-
+                EmailAddressAttribute attribute = new EmailAddressAttribute();
+                ClsServiceEmail clsServiceEmail = new ClsServiceEmail();
                 string dear = "Dear ";
-                List<ReceiveData> receiveDatas = db.UserDetails
-                    .Where(w => sendTo.Contains(w.User_Id))
+
+                if (model.SendToIds.Count > 0)
+                {
+                    List<ReceiveData> receiveDatas = db.UserDetails
+                    .Where(w => model.SendToIds.Contains(w.User_Id))
                     .Select(s => new ReceiveData()
                     {
                         Email = s.Users.User_Email,
@@ -88,159 +104,32 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
-                for (int i = 0; i < receiveDatas.Count; i++)
-                {
-                    if (i != 0)
+                    if (receiveDatas.Count == 0)
                     {
-                        dear += ", ";
+                        return true;
                     }
 
-                    dear += receiveDatas[i].NameEN;
-                }
-
-                List<string> strto = new List<string>();
-                foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
-                {
-                    var email = new EmailAddressAttribute();
-                    if (email.IsValid(item.Email))
+                    List<string> EmailTos = new List<string>();
+                    foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
-                        //msg.To.Add(new MailAddress(item.Email, item.FullNameEN));
-                        strto.Add(item.Email);
-                        clsServiceEmail.SendTo = strto.ToArray();
-                    }
-                }
-
-                //if (msg.To.Count == 0)
-                //{
-                //    return true;
-                //}
-
-                if (sendCC != null)
-                {
-                    List<ReceiveData> receiveCC = db.UserDetails
-                    .Where(w => sendCC.Contains(w.User_Id))
-                    .Select(s => new ReceiveData()
-                    {
-                        Email = s.Users.User_Email,
-                        NameEN = s.Detail_EN_FirstName,
-                        NameTH = s.Detail_TH_FirstName,
-                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                    }).ToList();
-
-                    List<string> strcc = new List<string>();
-                    foreach (var item in receiveCC.Where(w => !string.IsNullOrEmpty(w.Email)))
-                    {
-                        var email = new EmailAddressAttribute();
-                        if (email.IsValid(item.Email))
+                        attribute = new EmailAddressAttribute();
+                        if (attribute.IsValid(item.Email))
                         {
-                            //msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
-                            strcc.Add(item.Email);
-                            clsServiceEmail.SendCC = strcc.ToArray();
+                            dear += string.Format("{0}, ", item.FullNameEN);
+                            EmailTos.Add(item.Email);
                         }
                     }
-                }
+                    dear = dear.Trim().TrimEnd(',');
 
-                List<string> strbcc = new List<string>();
-                if (sendBCC != null)
-                {
-                    List<ReceiveData> receiveBCC = db.UserDetails
-                    .Where(w => sendBCC.Contains(w.User_Id))
-                    .Select(s => new ReceiveData()
+                    if (EmailTos.Count > 0)
                     {
-                        Email = s.Users.User_Email,
-                        NameEN = s.Detail_EN_FirstName,
-                        NameTH = s.Detail_TH_FirstName,
-                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                    }).ToList();
-
-                    foreach (var item in receiveBCC.Where(w => !string.IsNullOrEmpty(w.Email)))
-                    {
-                        var email = new EmailAddressAttribute();
-                        if (email.IsValid(item.Email))
-                        {
-                            //msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
-                            strbcc.Add(item.Email);
-                            clsServiceEmail.SendBCC = strbcc.ToArray();
-                        }
+                        clsServiceEmail.SendTo = EmailTos.ToArray();
                     }
                 }
-                List<string> filePath = new List<string>();
-                if (attachPaths != null)
+                else if (model.SendToId.HasValue)
                 {
-                    foreach (var item in attachPaths)
-                    {
-                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
-                        //msg.Attachments.Add(attachment);
-                        filePath.Add(item);
-                        clsServiceEmail.FilePath = filePath.ToArray();
-                    }
-                }
-
-                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-                UserDetails userDetails = new UserDetails();
-                userDetails = db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefault();
-                string sendFrom = string.Format("<p>Send from: <a href='mailto:{0}'>{1} {2} <{3}></a></p>", userDetails.Users.User_Email, userDetails.Detail_EN_FirstName, userDetails.Detail_EN_LastName, userDetails.Users.User_Email);
-
-                string strBody = "<html>";
-                strBody += "<head>";
-                strBody += "</head>";
-                strBody += "<body>";
-                strBody += string.Format("<p><b>{0}</b></p>", dear);
-                strBody += sendFrom;
-                strBody += strContent;
-                if (receiveDatas.Where(w => string.IsNullOrEmpty(w.Email)).Count() > 0)
-                {
-                    string warningContent = "Can't send email to: ";
-                    List<ReceiveData> noEmail = new List<ReceiveData>();
-                    noEmail = receiveDatas.Where(w => string.IsNullOrEmpty(w.Email)).ToList();
-                    for (int i = 0; i < noEmail.Count; i++)
-                    {
-                        if (i == 0)
-                        {
-                            warningContent += noEmail[i].FullNameEN;
-                        }
-                        else
-                        {
-                            warningContent += ", " + noEmail[i].FullNameEN;
-                        }
-                    }
-
-                    warningContent += " because there's no email.";
-                    strBody += warningContent;
-                }
-                strBody += "</body>";
-                strBody += "</html>";
-
-                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
-                msg.Subject = strSubject;
-                msg.Body = new MessageBody(BodyType.HTML, strBody);
-                msg.IsBodyHtml = true;
-
-                clsServiceEmail.Body = strContent;
-                clsServiceEmail.Subject = strSubject;
-                clsServiceEmail.SendFrom = userDetails.Users.User_Email;
-
-                return clsApi.SendMail(clsServiceEmail);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //API Complete
-        public bool SendMail(Guid sendTo, string strSubject, string strContent, List<Guid?> sendCC = null, List<Guid?> sendBCC = null, List<string> attachPaths = null)
-        {
-            try
-            {
-                MailMessage msg = new MailMessage();
-
-                string dear = "Dear ";
-                ReceiveData receiveDatas = db.UserDetails
-                    .Where(w => w.User_Id == sendTo)
+                    ReceiveData receiveData = db.UserDetails
+                    .Where(w => w.User_Id == model.SendToId)
                     .Select(s => new ReceiveData()
                     {
                         Email = s.Users.User_Email,
@@ -250,27 +139,63 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).FirstOrDefault();
 
-                if (string.IsNullOrEmpty(receiveDatas.Email))
+                    if (receiveData == null)
+                    {
+                        return true;
+                    }
+                    else if (string.IsNullOrEmpty(receiveData.Email))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        attribute = new EmailAddressAttribute();
+                        if (attribute.IsValid(receiveData.Email))
+                        {
+                            dear += receiveData.FullNameEN;
+                            clsServiceEmail.SendTo = new string[] { receiveData.Email };
+                        }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(model.SendToStr))
+                {
+                    attribute = new EmailAddressAttribute();
+                    if (attribute.IsValid(model.SendToStr))
+                    {
+                        clsServiceEmail.SendTo = new string[] { model.SendToStr };
+                    }
+                }
+                else if (model.SendToStrs.Count > 0)
+                {
+                    List<string> EmailTos = new List<string>();
+                    foreach (var item in model.SendToStrs)
+                    {
+                        attribute = new EmailAddressAttribute();
+                        if (attribute.IsValid(item))
+                        {
+                            EmailTos.Add(item);
+                        }
+                    }
+
+                    if (EmailTos.Count > 0)
+                    {
+                        clsServiceEmail.SendTo = EmailTos.ToArray();
+                    }
+                }
+                else
                 {
                     return true;
                 }
 
-                var email = new EmailAddressAttribute();
-                if (!email.IsValid(receiveDatas.Email))
+                if (clsServiceEmail.SendTo.Length == 0)
                 {
                     return true;
                 }
 
-                //msg.To.Add(new MailAddress(receiveDatas.Email, receiveDatas.FullNameEN));
-                string[] strto = { receiveDatas.Email };
-                clsServiceEmail.SendTo = strto;
-
-                dear += receiveDatas.NameEN;
-
-                if (sendCC != null)
+                if (model.SendCCs.Count > 0)
                 {
-                    List<ReceiveData> receiveCC = db.UserDetails
-                    .Where(w => sendCC.Contains(w.User_Id))
+                    List<ReceiveData> receiveDatas = db.UserDetails
+                    .Where(w => model.SendCCs.Contains(w.User_Id))
                     .Select(s => new ReceiveData()
                     {
                         Email = s.Users.User_Email,
@@ -280,23 +205,47 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
-                    List<string> strcc = new List<string>();
-                    foreach (var item in receiveCC)
+                    List<string> EmailCCs = new List<string>();
+                    foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
-                        email = new EmailAddressAttribute();
-                        if (email.IsValid(item.Email))
+                        attribute = new EmailAddressAttribute();
+                        if (attribute.IsValid(item.Email))
                         {
-                            //msg.CC.Add(new MailAddress(item.Email, item.FullNameEN));
-                            strcc.Add(item.Email);
-                            clsServiceEmail.SendCC = strcc.ToArray();
+                            EmailCCs.Add(item.Email);
+                        }
+                    }
+                    if (EmailCCs.Count > 0)
+                    {
+                        clsServiceEmail.SendCC = EmailCCs.ToArray();
+                    }
+                }
+                else if (model.SendCC.HasValue)
+                {
+                    ReceiveData receiveData = db.UserDetails
+                    .Where(w => model.SendCCs.Contains(w.User_Id))
+                    .Select(s => new ReceiveData()
+                    {
+                        Email = s.Users.User_Email,
+                        NameEN = s.Detail_EN_FirstName,
+                        NameTH = s.Detail_TH_FirstName,
+                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
+                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
+                    }).FirstOrDefault();
+
+                    if (receiveData != null && !string.IsNullOrEmpty(receiveData.Email))
+                    {
+                        attribute = new EmailAddressAttribute();
+                        if (attribute.IsValid(receiveData.Email))
+                        {
+                            clsServiceEmail.SendCC = new string[] { receiveData.Email };
                         }
                     }
                 }
 
-                if (sendBCC != null)
+                if (model.SendBCC.Count > 0)
                 {
-                    List<ReceiveData> receiveBCC = db.UserDetails
-                    .Where(w => sendBCC.Contains(w.User_Id))
+                    List<ReceiveData> receiveDatas = db.UserDetails
+                    .Where(w => model.SendBCC.Contains(w.User_Id))
                     .Select(s => new ReceiveData()
                     {
                         Email = s.Users.User_Email,
@@ -306,29 +255,27 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
-                    List<string> strbcc = new List<string>();
-                    foreach (var item in receiveBCC)
+                    List<string> EmailBCCs = new List<string>();
+                    foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
                     {
-                        email = new EmailAddressAttribute();
-                        if (email.IsValid(item.Email))
+                        attribute = new EmailAddressAttribute();
+                        if (attribute.IsValid(item.Email))
                         {
-                            //msg.Bcc.Add(new MailAddress(item.Email, item.FullNameEN));
-                            strbcc.Add(item.Email);
-                            clsServiceEmail.SendBCC = strbcc.ToArray();
+                            EmailBCCs.Add(item.Email);
                         }
+                    }
+
+                    if (EmailBCCs.Count > 0)
+                    {
+                        clsServiceEmail.SendBCC = EmailBCCs.ToArray();
                     }
                 }
 
-                if (attachPaths != null)
+                if (model.AttachPaths.Count > 0)
                 {
-                    List<string> strfile = new List<string>();
-                    foreach (var item in attachPaths)
+                    foreach (var item in model.AttachPaths)
                     {
-                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
-                        //msg.Attachments.Add(attachment);
-
-                        strfile.Add(item);
-                        clsServiceEmail.FilePath = strfile.ToArray();
+                        clsServiceEmail.ClsFileAttaches.Add(new ClsFileAttach() { FilePath = item });
                     }
                 }
 
@@ -344,145 +291,16 @@ namespace E2E.Models
                 strBody += "<body>";
                 strBody += string.Format("<p><b>{0}</b></p>", dear);
                 strBody += sendFrom;
-                strBody += strContent;
+                strBody += model.Body;
+
                 strBody += "</body>";
                 strBody += "</html>";
 
-                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
-                msg.Subject = strSubject;
-                msg.Body = new MessageBody(BodyType.HTML, strBody);
-                msg.IsBodyHtml = true;
-
-                clsServiceEmail.Body = strContent;
-                clsServiceEmail.Subject = strSubject;
+                clsServiceEmail.Body = strBody;
+                clsServiceEmail.Subject = model.Subject;
                 clsServiceEmail.SendFrom = userDetails.Users.User_Email;
 
-                return clsApi.SendMail(clsServiceEmail);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        //API Complete
-        public bool SendMail(List<string> sendTo, string subject, string content, List<string> attachPaths = null)
-        {
-            try
-            {
-                MailMessage msg = new MailMessage();
-                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
-
-                List<string> strto = new List<string>();
-                foreach (var item in sendTo)
-                {
-                    var email = new EmailAddressAttribute();
-                    if (email.IsValid(item))
-                    {
-                        //msg.To.Add(item);
-                        strto.Add(item);
-                        clsServiceEmail.SendTo = strto.ToArray();
-                    }
-                }
-
-                msg.Subject = subject;
-
-                string strBody = "<html>";
-                strBody += "<head>";
-                strBody += "</head>";
-                strBody += "<body>";
-                strBody += content;
-                strBody += "</body>";
-                strBody += "</html>";
-
-                if (attachPaths != null)
-                {
-                    List<string> strfile = new List<string>();
-                    foreach (var item in attachPaths)
-                    {
-                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
-
-                        //msg.Attachments.Add(attachment);
-
-                        strfile.Add(item);
-                        clsServiceEmail.FilePath = strfile.ToArray();
-                    }
-                }
-
-                msg.Body = new MessageBody(BodyType.HTML, strBody);
-                msg.IsBodyHtml = true;
-
-                clsServiceEmail.Body = content;
-                clsServiceEmail.Subject = subject;
-
-                return clsApi.SendMail(clsServiceEmail);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool SendMail(List<string> sendTo, string subject, string content, Guid sendCC, List<string> attachPaths = null)
-        {
-            try
-            {
-                MailMessage msg = new MailMessage();
-
-                //msg.From = new MailAddress(ConfigurationManager.AppSettings["Mail"]);
-
-                var email = new EmailAddressAttribute();
-                List<string> strto = new List<string>();
-                foreach (var item in sendTo)
-                {
-                    email = new EmailAddressAttribute();
-                    if (email.IsValid(item))
-                    {
-                        //msg.To.Add(item);
-                        strto.Add(item);
-                        clsServiceEmail.SendTo = strto.ToArray();
-                    }
-                }
-
-                string emailCC = db.Users.Find(sendCC).User_Email;
-                email = new EmailAddressAttribute();
-                if (email.IsValid(emailCC))
-                {
-                    //msg.CC.Add(emailCC);
-                    string[] strcc = { emailCC };
-                    clsServiceEmail.SendCC = strcc;
-                }
-
-                msg.Subject = subject;
-
-                string strBody = "<html>";
-                strBody += "<head>";
-                strBody += "</head>";
-                strBody += "<body>";
-                strBody += content;
-                strBody += "</body>";
-                strBody += "</html>";
-
-                if (attachPaths != null)
-                {
-                    List<string> strfile = new List<string>();
-                    foreach (var item in attachPaths)
-                    {
-                        //System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(item, MediaTypeNames.Application.Octet);
-
-                        //msg.Attachments.Add(attachment);
-                        strfile.Add(item);
-                        clsServiceEmail.FilePath = strfile.ToArray();
-                    }
-                }
-
-                msg.Body = new MessageBody(BodyType.HTML, strBody);
-                msg.IsBodyHtml = true;
-
-                clsServiceEmail.Subject = subject;
-                clsServiceEmail.Body = content;
-
-                return clsApi.SendMail(clsServiceEmail);
+                return clsApi.SendMail(clsServiceEmail, files);
             }
             catch (Exception)
             {
