@@ -146,18 +146,22 @@ namespace E2E.Controllers
                         return View(model);
                     }
 
+                    UserDetails userDetails = db.UserDetails
+                        .Where(w => w.User_Id == users.User_Id)
+                        .FirstOrDefault();
+
                     if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
                     {
+                        if (!string.IsNullOrEmpty(userDetails.Detail_Password))
+                        {
+                            userDetails.Detail_Password = null;
+                            userDetails.Detail_ConfirmPassword = null;
+                        }
                         goto SetAuthen;
                     }
                     else
                     {
-                        string password = db.UserDetails
-                        .Where(w => w.User_Id == users.User_Id)
-                        .Select(s => s.Detail_Password)
-                        .FirstOrDefault();
-
-                        if (string.Equals(password, data.Users_Password(model.Password.Trim())))
+                        if (string.Equals(userDetails.Detail_Password, data.Users_Password(model.Password.Trim())))
                         {
                             goto SetAuthen;
                         }
