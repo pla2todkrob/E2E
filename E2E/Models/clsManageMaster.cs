@@ -476,13 +476,20 @@ namespace E2E.Models
                 {
                     users.User_Point = system_.Configuration_Point;
                 }
-                if (!string.IsNullOrEmpty(model.Users.User_Email))
+
+                string emailAd = GetEmailAD(model.Users.User_Code);
+                if (string.IsNullOrEmpty(model.Users.User_Email))
                 {
-                    users.User_Email = model.Users.User_Email.Trim();
+                    users.User_Email = emailAd;
                 }
                 else
                 {
-                    users.User_Email = GetEmailAD(model.Users.User_Code);
+                    users.User_Email = model.Users.User_Email;
+                }
+
+                if (!string.IsNullOrEmpty(users.User_Email))
+                {
+                    users.User_Email = users.User_Email.Trim();
                 }
 
                 db.Users.Add(users);
@@ -494,15 +501,18 @@ namespace E2E.Models
                     Prefix_EN_Id = model.Prefix_EN_Id
                 };
 
-                if (!string.IsNullOrEmpty(model.Detail_Password))
+                if (string.IsNullOrEmpty(emailAd))
                 {
-                    userDetails.Detail_Password = Users_Password(model.Detail_Password.Trim());
-                    userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
-                }
-                else if (string.IsNullOrEmpty(users.User_Email))
-                {
-                    userDetails.Detail_Password = Users_Password(users.User_Code.Trim());
-                    userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
+                    if (!string.IsNullOrEmpty(model.Detail_Password))
+                    {
+                        userDetails.Detail_Password = Users_Password(model.Detail_Password.Trim());
+                        userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
+                    }
+                    else if (string.IsNullOrEmpty(users.User_Email))
+                    {
+                        userDetails.Detail_Password = Users_Password(users.User_Code.Trim());
+                        userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
+                    }
                 }
 
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
@@ -556,7 +566,18 @@ namespace E2E.Models
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
                 userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
                 userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
-                userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
+                string emailAd = GetEmailAD(model.Users.User_Code);
+                if (!string.IsNullOrEmpty(emailAd))
+                {
+                    users.User_Email = emailAd;
+                    userDetails.Detail_Password = null;
+                    userDetails.Detail_ConfirmPassword = null;
+                }
+                else
+                {
+                    userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
+                }
+
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
