@@ -1,10 +1,8 @@
 ﻿using E2E.Models.Tables;
-using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net.Mail;
 using System.Web;
 
 namespace E2E.Models

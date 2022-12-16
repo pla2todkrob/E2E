@@ -1,7 +1,4 @@
-﻿using E2E.Models.Tables;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace E2E.Models
 {

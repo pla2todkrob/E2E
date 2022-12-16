@@ -2,7 +2,6 @@
 using E2E.Models.Tables;
 using E2E.Models.Views;
 using System;
-using System.Data.Entity.Validation;
 using System.Linq;
 using System.Transactions;
 using System.Web.Mvc;
