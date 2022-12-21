@@ -477,7 +477,11 @@ namespace E2E.Models
                     users.User_Point = system_.Configuration_Point;
                 }
 
-                string emailAd = GetEmailAD(model.Users.User_Code);
+                ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
+
+                users.Username = adInfo.SamAccountName;
+
+                string emailAd = adInfo.UserPrincipalName;
                 if (string.IsNullOrEmpty(model.Users.User_Email))
                 {
                     users.User_Email = emailAd;
@@ -566,7 +570,12 @@ namespace E2E.Models
                 userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
                 userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
                 userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
-                string emailAd = GetEmailAD(model.Users.User_Code);
+
+                ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
+
+                users.Username = adInfo.SamAccountName;
+
+                string emailAd = adInfo.UserPrincipalName;
                 if (!string.IsNullOrEmpty(emailAd))
                 {
                     users.User_Email = emailAd;
@@ -711,7 +720,8 @@ namespace E2E.Models
                     User_Point = s.Users.User_Point,
                     User_Name_EN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
                     User_Name_TH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName,
-                    Role = s.Users.System_Roles.Role_Name
+                    Role = s.Users.System_Roles.Role_Name,
+                    Username = s.Users.Username
                 }).ToList();
             }
             catch (Exception)
@@ -1097,6 +1107,49 @@ namespace E2E.Models
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ClsActiveDirectoryInfo GetAdInfo(string code)
+        {
+            try
+            {
+                ClsActiveDirectoryInfo res = new ClsActiveDirectoryInfo();
+                string domainName = ConfigurationManager.AppSettings["DomainName"];
+                using (var context = new PrincipalContext(ContextType.Domain, domainName))
+                {
+                    UserPrincipal user = new UserPrincipal(context)
+                    {
+                        Description = code.Trim()
+                    };
+
+                    PrincipalSearcher searcher = new PrincipalSearcher
+                    {
+                        QueryFilter = user
+                    };
+                    Principal principal = searcher.FindOne();
+                    if (principal != null)
+                    {
+                        res = new ClsActiveDirectoryInfo()
+                        {
+                            Description = principal.Description,
+                            DisplayName = principal.DisplayName,
+                            DistinguishedName = principal.DistinguishedName,
+                            Guid = principal.Guid,
+                            Name = principal.Name,
+                            SamAccountName = principal.SamAccountName,
+                            Sid = principal.Sid,
+                            StructuralObjectClass = principal.StructuralObjectClass,
+                            UserPrincipalName = principal.UserPrincipalName
+                        };
+                    }
                 }
 
                 return res;
@@ -1520,7 +1573,7 @@ namespace E2E.Models
             return db.Master_LineWorks.ToList();
         }
 
-        public bool LoginDomain(string email, string password)
+        public bool LoginDomain(string username, string password)
         {
             try
             {
@@ -1528,7 +1581,7 @@ namespace E2E.Models
                 string domainName = ConfigurationManager.AppSettings["DomainName"];
                 using (var context = new PrincipalContext(ContextType.Domain, domainName))
                 {
-                    res = context.ValidateCredentials(email, password);
+                    res = context.ValidateCredentials(username, password);
                 }
 
                 return res;

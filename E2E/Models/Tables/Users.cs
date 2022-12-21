@@ -51,6 +51,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Point")]
         public int User_Point { get; set; }
 
+        public string Username { get; set; }
         public int YearSetPoint { get; set; }
     }
 }

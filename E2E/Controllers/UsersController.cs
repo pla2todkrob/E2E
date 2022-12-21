@@ -138,7 +138,7 @@ namespace E2E.Controllers
                 {
                     Users users = new Users();
                     users = db.Users
-                        .Where(w => w.User_Code == model.Username.Trim() || w.User_Email == model.Username.Trim())
+                        .Where(w => w.User_Code == model.Username.Trim() || w.User_Email == model.Username.Trim() || w.Username == model.Username.Trim())
                         .FirstOrDefault();
                     if (users == null)
                     {
@@ -150,7 +150,13 @@ namespace E2E.Controllers
                         .Where(w => w.User_Id == users.User_Id)
                         .FirstOrDefault();
 
-                    if (data.LoginDomain(users.User_Email.Trim(), model.Password.Trim()))
+                    string userName = users.Username;
+                    if (string.IsNullOrEmpty(userName))
+                    {
+                        userName = users.User_Email;
+                    }
+
+                    if (data.LoginDomain(userName.Trim(), model.Password.Trim()))
                     {
                         if (!string.IsNullOrEmpty(userDetails.Detail_Password))
                         {
