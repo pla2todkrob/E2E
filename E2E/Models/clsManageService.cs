@@ -2,9 +2,11 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -285,14 +287,13 @@ namespace E2E.Models
         {
             try
             {
-                ClsServices clsServices = new ClsServices();
-                clsServices = db.Services
+                ClsServices clsServices = db.Services
                     .Where(w => w.Service_Id == id)
-                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new ClsServices()
+                    .GroupJoin(db.ServiceFiles, m => m.Service_Id, j => j.Service_Id, (m, gj) => new ClsServices
                     {
-                        ServiceFiles = gj.ToList(),
-                        Services = m
-                    }).FirstOrDefault();
+                        Services = m,
+                        ServiceFiles = gj.ToList()
+                    }).SingleOrDefault();
 
                 clsServices.User_Name = master.Users_GetInfomation(clsServices.Services.User_Id);
                 clsServices.Create_Name = master.Users_GetInfomation(clsServices.Services.Create_User_Id);
@@ -312,15 +313,12 @@ namespace E2E.Models
                     .OrderByDescending(o => o.Create)
                     .FirstOrDefault();
 
-                foreach (var item in ServiceTeams_IQ(id))
-                {
-                    ClsServiceTeams clsServiceTeams = new ClsServiceTeams
+                clsServices.ClsServiceTeams = ServiceTeams_IQ(id)
+                    .Select(s => new ClsServiceTeams()
                     {
-                        ServiceTeams = item,
-                        User_Name = master.Users_GetInfomation(item.User_Id)
-                    };
-                    clsServices.ClsServiceTeams.Add(clsServiceTeams);
-                }
+                        ServiceTeams = s,
+                        User_Name = master.Users_GetInfomation(s.User_Id)
+                    }).ToList();
 
                 return clsServices;
             }
@@ -1176,11 +1174,13 @@ namespace E2E.Models
         {
             try
             {
-                Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                string deptName = db.Users
-                    .Where(w => w.User_Id == id)
-                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                    .FirstOrDefault();
+                if (!Guid.TryParse(HttpContext.Current.User.Identity.Name, out Guid id))
+                {
+                    // Handle the error if the user id cannot be parsed
+                    throw new Exception("Invalid user id");
+                }
+
+                string deptName = master.GetDepartmentNameForUser(id);
 
                 IQueryable<Guid> deptIds = db.Master_Departments
                     .Where(w => w.Department_Name == deptName)
@@ -1273,22 +1273,19 @@ namespace E2E.Models
             try
             {
                 IQueryable<Services> query = db.Services
-                    .Where(w => w.Is_Commit && w.Status_Id == 1 && (w.Is_Approval || !w.Is_MustBeApproved))
-                    .OrderByDescending(o => o.Priority_Id)
-                    .ThenBy(o => new { o.Create, o.Service_DueDate });
+                    .Where(service => service.Is_Commit && service.Status_Id == 1 && (service.Is_Approval || !service.Is_MustBeApproved))
+                    .OrderByDescending(service => service.Priority_Id)
+                    .ThenBy(service => new { service.Create, service.Service_DueDate });
 
                 if (id.HasValue)
                 {
-                    string deptName = db.Users
-                        .Where(w => w.User_Id == id.Value)
-                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                        .FirstOrDefault();
+                    string departmentName = master.GetDepartmentNameForUser(id.Value);
 
-                    IQueryable<Guid> deptIds = db.Master_Departments
-                    .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id);
+                    IQueryable<Guid> departmentIds = db.Master_Departments
+                        .Where(department => department.Department_Name == departmentName)
+                        .Select(department => department.Department_Id);
 
-                    query = query.Where(w => (deptIds.Contains(w.Department_Id.Value) && !w.Action_User_Id.HasValue) || w.Action_User_Id == id);
+                    query = query.Where(service => (departmentIds.Contains(service.Department_Id.Value) && !service.Action_User_Id.HasValue) || service.Action_User_Id == id);
                 }
 
                 return query;

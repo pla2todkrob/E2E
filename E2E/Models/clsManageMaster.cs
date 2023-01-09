@@ -1160,6 +1160,14 @@ namespace E2E.Models
             }
         }
 
+        public string GetDepartmentNameForUser(Guid userId)
+        {
+            return db.Users
+                .Where(user => user.User_Id == userId)
+                .Select(user => user.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                .FirstOrDefault() ?? string.Empty;
+        }
+
         public string GetEmailAD(string code)
         {
             try
