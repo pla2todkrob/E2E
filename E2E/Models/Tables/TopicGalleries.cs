@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -10,6 +11,7 @@ namespace E2E.Models.Tables
             TopicGallery_Id = Guid.NewGuid();
         }
 
+        [Index]
         public Guid Topic_Id { get; set; }
 
         public string TopicGallery_Extension { get; set; }

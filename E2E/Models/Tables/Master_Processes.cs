@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -22,10 +23,10 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Process_Id { get; set; }
 
-        [Description("Process name"), Display(Name = "Process")]
+        [Description("Process name"), Display(Name = "Process"), StringLength(100), Index]
         public string Process_Name { get; set; }
 
-        [Display(Name = "Section")]
+        [Display(Name = "Section"), Index]
         public Guid Section_Id { get; set; }
 
         public DateTime? Update { get; set; }

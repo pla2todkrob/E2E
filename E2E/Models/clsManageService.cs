@@ -313,7 +313,7 @@ namespace E2E.Models
                     .OrderByDescending(o => o.Create)
                     .FirstOrDefault();
 
-                clsServices.ClsServiceTeams = ServiceTeams_IQ(id)
+                clsServices.ClsServiceTeams = ServiceTeams_IQ(id).ToList()
                     .Select(s => new ClsServiceTeams()
                     {
                         ServiceTeams = s,
@@ -670,7 +670,7 @@ namespace E2E.Models
                         Service_Id = model.Service_Id,
                         User_Id = item
                     };
-                    db.Entry(serviceTeams).State = System.Data.Entity.EntityState.Added;
+                    db.Entry(serviceTeams).State = EntityState.Added;
                     if (db.SaveChanges() > 0)
                     {
                         ServiceComments serviceComments = new ServiceComments
@@ -753,7 +753,7 @@ namespace E2E.Models
                 serviceTeams = db.ServiceTeams.Find(id);
                 string userName = master.Users_GetInfomation(serviceTeams.User_Id);
                 Guid serviceId = serviceTeams.Service_Id;
-                db.Entry(serviceTeams).State = System.Data.Entity.EntityState.Deleted;
+                db.Entry(serviceTeams).State = EntityState.Deleted;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -818,7 +818,7 @@ namespace E2E.Models
                 ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
                 serviceChangeDueDate.DueDateStatus_Id = 2;
                 serviceChangeDueDate.Update = DateTime.Now;
-                db.Entry(serviceChangeDueDate).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(serviceChangeDueDate).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -832,7 +832,7 @@ namespace E2E.Models
                         Services services = db.Services.Find(serviceChangeDueDate.Service_Id);
                         services.Service_DueDate = serviceChangeDueDate.DueDate_New;
                         services.Update = DateTime.Now;
-                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                        db.Entry(services).State = EntityState.Modified;
                         if (db.SaveChanges() > 0)
                         {
                             serviceComments = new ServiceComments
@@ -882,7 +882,7 @@ namespace E2E.Models
                 ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
                 serviceChangeDueDate.DueDateStatus_Id = 4;
                 serviceChangeDueDate.Update = DateTime.Now;
-                db.Entry(serviceChangeDueDate).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(serviceChangeDueDate).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -928,7 +928,7 @@ namespace E2E.Models
                 ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
                 serviceChangeDueDate.DueDateStatus_Id = 3;
                 serviceChangeDueDate.Update = DateTime.Now;
-                db.Entry(serviceChangeDueDate).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(serviceChangeDueDate).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -975,7 +975,7 @@ namespace E2E.Models
                 DateTime dateTime = DateTime.Now;
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 model.User_Id = userId;
-                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                db.Entry(model).State = EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
                     string Comment = string.Format("Request change due date from {0} to {1}", model.DueDate.ToString("d"), model.DueDate_New.Value.ToString("d"));
@@ -1038,7 +1038,7 @@ namespace E2E.Models
                         DueDate_New = s.DueDate_New,
                         DueDate_Old = s.DueDate,
                         Update = s.Update,
-                        User_Name = master.Users_GetInfomation(s.User_Id.Value),
+                        User_Name = master.Users_GetInfomation(s.User_Id),
                         Remark = s.Remark
                     })
                     .ToList();
@@ -1072,7 +1072,7 @@ namespace E2E.Models
                         DueDate_New = s.DueDate_New,
                         DueDate_Old = s.DueDate,
                         Update = s.Update,
-                        User_Name = master.Users_GetInfomation(s.User_Id.Value),
+                        User_Name = master.Users_GetInfomation(s.User_Id),
                         Remark = s.Remark
                     })
                     .ToList();
@@ -1095,8 +1095,8 @@ namespace E2E.Models
                 services = db.Services.Find(serviceFiles.Service_Id);
                 services.Service_FileCount -= 1;
                 services.Update = DateTime.Now;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
-                db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Deleted;
+                db.Entry(services).State = EntityState.Modified;
+                db.Entry(serviceFiles).State = EntityState.Deleted;
                 if (ftp.Api_DeleteFile(serviceFiles.ServiceFile_Path))
                 {
                     if (db.SaveChanges() > 0)
@@ -1135,7 +1135,7 @@ namespace E2E.Models
                 bool res = new bool();
                 model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 model.Create = DateTime.Now;
-                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                db.Entry(model).State = EntityState.Added;
                 if (files != null)
                 {
                     for (int i = 0; i < files.Count; i++)
@@ -1153,7 +1153,7 @@ namespace E2E.Models
                         serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
                         serviceCommentFiles.ServiceComment_Seq = i;
                         serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
-                        db.Entry(serviceCommentFiles).State = System.Data.Entity.EntityState.Added;
+                        db.Entry(serviceCommentFiles).State = EntityState.Added;
                     }
                 }
 
@@ -1355,7 +1355,7 @@ namespace E2E.Models
                     }
 
                     users.User_Point -= usePoint;
-                    db.Entry(users).State = System.Data.Entity.EntityState.Modified;
+                    db.Entry(users).State = EntityState.Modified;
                     db.SaveChanges();
                 }
 
@@ -1381,11 +1381,11 @@ namespace E2E.Models
                         string dir = string.Format("Service/{0}/", model.Service_Key);
                         serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
-                        db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
+                        db.Entry(serviceFiles).State = EntityState.Added;
                     }
                 }
 
-                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                db.Entry(model).State = EntityState.Added;
 
                 if (db.SaveChanges() > 0)
                 {
@@ -1404,7 +1404,7 @@ namespace E2E.Models
                         {
                             services.Status_Id = 3;
                             services.Update = DateTime.Now;
-                            db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                            db.Entry(services).State = EntityState.Modified;
                             db.SaveChanges();
 
                             serviceComments = new ServiceComments
@@ -1492,7 +1492,7 @@ namespace E2E.Models
                     serviceDocuments.ServiceDocument_Path = ftp.Ftp_UploadFileToString(dir, fileBase);
                 }
 
-                db.Entry(serviceDocuments).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(serviceDocuments).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -1536,14 +1536,14 @@ namespace E2E.Models
                             Document_Id = item.Value,
                             Service_Id = services.Service_Id
                         };
-                        db.Entry(serviceDocuments).State = System.Data.Entity.EntityState.Added;
+                        db.Entry(serviceDocuments).State = EntityState.Added;
                     }
                 }
 
                 services.Service_EstimateTime = model.Service_EstimateTime;
                 services.Status_Id = system_Statuses.Status_Id;
                 services.Update = DateTime.Now;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -1571,7 +1571,7 @@ namespace E2E.Models
                 services = db.Services.Find(model.Service_Id);
                 services.Is_Approval = true;
                 services.Update = DateTime.Now;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -1620,7 +1620,7 @@ namespace E2E.Models
 
                 services.Update = DateTime.Now;
                 services.Status_Id = system_Statuses.Status_Id;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
@@ -1666,7 +1666,7 @@ namespace E2E.Models
                         system_Statuses = db.System_Statuses.Find(4);
                         services.Status_Id = system_Statuses.Status_Id;
                         services.Update = DateTime.Now;
-                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                        db.Entry(services).State = EntityState.Modified;
                         if (db.SaveChanges() > 0)
                         {
                             ServiceComments serviceComments = new ServiceComments
@@ -1748,7 +1748,7 @@ namespace E2E.Models
                     services.Is_OverDue = true;
                 }
                 services.Status_Id = system_Statuses.Status_Id;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
@@ -1793,7 +1793,7 @@ namespace E2E.Models
                                 SendEmail_Subject = subject,
                                 User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
                             };
-                            db.Entry(log_SendEmail).State = System.Data.Entity.EntityState.Added;
+                            db.Entry(log_SendEmail).State = EntityState.Added;
 
                             Log_SendEmailTo log_SendEmailTo = new Log_SendEmailTo
                             {
@@ -1801,7 +1801,7 @@ namespace E2E.Models
                                 SendEmail_Id = log_SendEmail.SendEmail_Id,
                                 User_Id = services.User_Id
                             };
-                            db.Entry(log_SendEmailTo).State = System.Data.Entity.EntityState.Added;
+                            db.Entry(log_SendEmailTo).State = EntityState.Added;
                             if (db.SaveChanges() > 0)
                             {
                                 res = true;
@@ -1827,7 +1827,7 @@ namespace E2E.Models
                 services = db.Services.Find(id);
                 services.Is_FreePoint = true;
                 services.Update = DateTime.Now;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -1840,7 +1840,7 @@ namespace E2E.Models
                         int point = db.System_Priorities.Find(services.Priority_Id).Priority_Point;
                         Users users = db.Users.Find(services.User_Id);
                         users.User_Point += point;
-                        db.Entry(users).State = System.Data.Entity.EntityState.Modified;
+                        db.Entry(users).State = EntityState.Modified;
                         if (db.SaveChanges() > 0)
                         {
                             serviceComments = new ServiceComments
@@ -1874,7 +1874,7 @@ namespace E2E.Models
                 services.Status_Id = 1;
                 services.Service_EstimateTime = 0;
                 services.WorkRoot_Id = null;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     List<ServiceDocuments> serviceDocuments = new List<ServiceDocuments>();
@@ -1883,7 +1883,7 @@ namespace E2E.Models
                         .ToList();
                     foreach (var item in serviceDocuments)
                     {
-                        db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+                        db.Entry(item).State = EntityState.Deleted;
                         if (db.SaveChanges() > 0)
                         {
                             if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
@@ -1952,7 +1952,7 @@ namespace E2E.Models
 
                 services.Update = DateTime.Now;
                 services.Status_Id = system_Statuses.Status_Id;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
@@ -2003,11 +2003,10 @@ namespace E2E.Models
             {
                 bool res = new bool();
 
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = db.Services.Find(model.Service_Id);
                 services.Is_MustBeApproved = true;
                 services.Update = DateTime.Now;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -2061,7 +2060,7 @@ namespace E2E.Models
 
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments();
@@ -2121,7 +2120,7 @@ namespace E2E.Models
                 services.Is_Commit = false;
                 services.Department_Id = null;
                 services.WorkRoot_Id = null;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
 
                 List<ServiceDocuments> serviceDocuments = new List<ServiceDocuments>();
                 serviceDocuments = db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToList();
@@ -2129,7 +2128,7 @@ namespace E2E.Models
                 {
                     if (ftp.Api_DeleteFile(item.ServiceDocument_Path))
                     {
-                        db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+                        db.Entry(item).State = EntityState.Deleted;
                     }
                 }
                 if (db.SaveChanges() > 0)
@@ -2192,13 +2191,12 @@ namespace E2E.Models
 
                 string deptName = db.Master_Departments.Find(deptId).Department_Name;
 
-                Services services = new Services();
-                services = db.Services.Find(id);
+                Services services = db.Services.Find(id);
                 services.Department_Id = deptId;
                 services.Is_Commit = true;
                 services.Update = DateTime.Now;
                 services.Assign_User_Id = userId;
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -2225,14 +2223,13 @@ namespace E2E.Models
 
                 string deptName = db.Master_Departments.Find(deptId).Department_Name;
 
-                Services services = new Services();
-                services = db.Services.Find(id);
+                Services services = db.Services.Find(id);
                 services.Department_Id = deptId;
                 services.Action_User_Id = userId;
                 services.Is_Commit = true;
                 services.Update = DateTime.Now;
                 services.Assign_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -2282,7 +2279,7 @@ namespace E2E.Models
                 services.Action_User_Id = userId;
                 services.Update = DateTime.Now;
                 services.Assign_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(services).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     ServiceComments serviceComments = new ServiceComments
@@ -2342,11 +2339,11 @@ namespace E2E.Models
                         string dir = string.Format("Service/{0}/", model.Service_Key);
                         serviceFiles.ServiceFile_Path = ftp.Ftp_UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
-                        db.Entry(serviceFiles).State = System.Data.Entity.EntityState.Added;
+                        db.Entry(serviceFiles).State = EntityState.Added;
                     }
                 }
 
-                db.Entry(model).State = System.Data.Entity.EntityState.Modified;
+                db.Entry(model).State = EntityState.Modified;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;

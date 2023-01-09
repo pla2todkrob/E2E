@@ -57,7 +57,7 @@
                                 <blockquote class="blockquote">
                                     <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
                                     <em class="blockquote-footer small">
-                                        @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name),&nbsp;
+                                        @Html.ValueFor(m => m.Services.Users.Master_Plants.Plant_Name),&nbsp;
                                         @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
                                         @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                                     </em>
@@ -112,7 +112,7 @@
                                 <label for="plantList">
                                     Plant
                                 </label>
-                                <select class="form-control" id="plantList" onchange="getSelectOp('@Url.Action("Users_GetSelectDivisions","Masters")',this.value,'#divisionList')" required>
+                                <select class="form-control" id="plantList" required>
                                     @{
                                         foreach (var item in ViewBag.PlantList)
                                         {
@@ -126,7 +126,12 @@
                                     Division
                                 </label>
                                 <select class="form-control" id="divisionList" onchange="getSelectOp('@Url.Action("Users_GetSelectDepartments","Masters")',this.value,'#Services_Department_Id')" required>
-                                    <option value="">Select Division</option>
+                                    @{
+                                        foreach (var item in ViewBag.DivisionList)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    }
                                 </select>
                             </div>
                             <div class="form-group">

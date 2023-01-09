@@ -185,8 +185,7 @@ namespace E2E.Models
                             Master_Divisions master_Divisions = new Master_Divisions
                             {
                                 Active = true,
-                                Division_Name = "Administrative",
-                                Plant_Id = master_Plants.Plant_Id
+                                Division_Name = "Administrative"
                             };
                             db.Master_Divisions.Add(master_Divisions);
 
@@ -230,7 +229,7 @@ namespace E2E.Models
                                                 Active = true,
                                                 Grade_Id = master_Grades.Grade_Id,
                                                 Process_Id = master_Processes.Process_Id,
-
+                                                Plant_Id = master_Plants.Plant_Id,
                                                 Role_Id = 1,
                                                 User_Code = "1640488",
                                                 User_CostCenter = "41100",

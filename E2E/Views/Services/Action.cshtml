@@ -107,7 +107,7 @@
                         <blockquote class="blockquote">
                             <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
                             <em class="blockquote-footer small">
-                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name),&nbsp;
+                                @Html.ValueFor(m => m.Services.Users.Master_Plants.Plant_Name),&nbsp;
                                 @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
                                 @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                             </em>
@@ -174,7 +174,7 @@
                                 else
                                 {
 
-                                    if (Model.ServiceChangeDueDate.User_Id.Value.Equals(userId))
+                                    if (Model.ServiceChangeDueDate.User_Id.Equals(userId))
                                     {
                                         <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
                                     }
@@ -192,7 +192,7 @@
                             else
                             {
 
-                                if (Model.ServiceChangeDueDate.User_Id.Value.Equals(userId))
+                                if (Model.ServiceChangeDueDate.User_Id.Equals(userId))
                                 {
                                     <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
                                 }

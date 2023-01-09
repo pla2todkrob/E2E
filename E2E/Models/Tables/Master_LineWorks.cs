@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -23,7 +24,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid LineWork_Id { get; set; }
 
-        [Description("Line of work"), Display(Name = "Line of work"), Required]
+        [Description("Line of work"), Display(Name = "Line of work"), Required, StringLength(100), Index(IsUnique = true)]
         public string LineWork_Name { get; set; }
 
         public virtual System_Authorize System_Authorize { get; set; }

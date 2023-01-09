@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -20,10 +21,10 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Department_Id { get; set; }
 
-        [Description("Department"), Display(Name = "Department")]
+        [Description("Department"), Display(Name = "Department"), StringLength(100), Index]
         public string Department_Name { get; set; }
 
-        [Display(Name = "Division")]
+        [Display(Name = "Division"), Index]
         public Guid Division_Id { get; set; }
 
         public virtual Master_Divisions Master_Divisions { get; set; }

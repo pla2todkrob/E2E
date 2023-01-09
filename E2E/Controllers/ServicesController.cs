@@ -275,7 +275,7 @@ namespace E2E.Controllers
                     {
                         Create = s.Create,
                         Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
-                        Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                        Plant_Name = s.Users.Master_Plants.Plant_Name,
                         Priority_Class = s.System_Priorities.Priority_Class,
                         Priority_Id = s.Priority_Id,
                         Priority_Name = s.System_Priorities.Priority_Name,
@@ -419,7 +419,7 @@ namespace E2E.Controllers
             try
             {
                 ViewBag.PlantList = new ClsManageMaster().SelectListItems_Plant();
-
+                ViewBag.DivisionList = new ClsManageMaster().SelectListItems_Division();
                 ClsServices clsServices = data.ClsServices_View(id);
 
                 if (clsServices.Services.Status_Id != 1)

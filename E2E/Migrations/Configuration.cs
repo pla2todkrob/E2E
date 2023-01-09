@@ -5,7 +5,7 @@ namespace E2E.Migrations
 
     internal sealed class Configuration : DbMigrationsConfiguration<E2E.Models.ClsContext>
     {
-        protected override void Seed(E2E.Models.ClsContext context)
+        protected override void Seed(ClsContext context)
         {
             ClsDefaultSystem.Generate();
         }

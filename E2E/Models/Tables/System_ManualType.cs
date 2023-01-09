@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -17,7 +18,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Manual_Type_Id { get; set; }
 
-        [Display(Name = "Type")]
+        [Display(Name = "Type"), StringLength(100), Index(IsUnique = true)]
         public string Manual_TypeName { get; set; }
 
         public static List<System_ManualType> DefaultList()

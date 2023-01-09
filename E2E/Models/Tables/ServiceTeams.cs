@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -10,6 +11,7 @@ namespace E2E.Models.Tables
             Team_Id = Guid.NewGuid();
         }
 
+        [Index]
         public Guid Service_Id { get; set; }
 
         public virtual Services Services { get; set; }
@@ -17,6 +19,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Team_Id { get; set; }
 
+        [Index]
         public Guid User_Id { get; set; }
     }
 }

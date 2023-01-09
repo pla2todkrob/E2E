@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -17,7 +18,7 @@ namespace E2E.Models.Tables
         [Key, Display(Name = "Category")]
         public Guid Category_Id { get; set; }
 
-        [Display(Name = "Category")]
+        [Display(Name = "Category"), StringLength(100), Index(IsUnique = true)]
         public string Category_Name { get; set; }
 
         public DateTime Create { get; set; }

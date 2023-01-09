@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -19,7 +20,9 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Satisfaction_Id { get; set; }
 
+        [Index(IsUnique = true)]
         public Guid Service_Id { get; set; }
+
         public virtual Services Services { get; set; }
         public bool Unsatisfied { get; set; }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -20,13 +21,13 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Grade_Id { get; set; }
 
-        [Description("Grade"), Display(Name = "Grade")]
+        [Description("Grade"), Display(Name = "Grade"), StringLength(100), Index]
         public string Grade_Name { get; set; }
 
         [Description("Position"), Display(Name = "Position")]
         public string Grade_Position { get; set; }
 
-        [Required, Display(Name = "Line work")]
+        [Required, Display(Name = "Line work"), Index]
         public Guid LineWork_Id { get; set; }
 
         public virtual Master_LineWorks Master_LineWorks { get; set; }

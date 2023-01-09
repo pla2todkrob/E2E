@@ -185,7 +185,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         int year = DateTime.Today.Year;
-                        if (!int.Equals(users.YearSetPoint, year))
+                        if (!Equals(users.YearSetPoint, year))
                         {
                             ClsDefaultSystem.Generate();
                         }

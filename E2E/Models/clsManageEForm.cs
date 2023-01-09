@@ -501,7 +501,7 @@ namespace E2E.Models
 
         public bool IsRecognisedImageFile(string fileName)
         {
-            string targetExtension = System.IO.Path.GetExtension(fileName);
+            string targetExtension = Path.GetExtension(fileName);
             if (String.IsNullOrEmpty(targetExtension))
                 return false;
             else

@@ -42,7 +42,10 @@ namespace E2E.Models.Tables
 
         public virtual System_Prefix_EN System_Prefix_EN { get; set; }
         public virtual System_Prefix_TH System_Prefix_TH { get; set; }
+
+        [Index(IsUnique = true)]
         public Guid User_Id { get; set; }
+
         public virtual Users Users { get; set; }
     }
 }

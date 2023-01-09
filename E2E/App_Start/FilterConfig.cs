@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using E2E.Models;
+using System.Web.Mvc;
 
 namespace E2E
 {

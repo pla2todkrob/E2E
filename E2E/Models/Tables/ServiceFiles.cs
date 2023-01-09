@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -10,6 +11,7 @@ namespace E2E.Models.Tables
             ServiceFile_Id = Guid.NewGuid();
         }
 
+        [Index]
         public Guid Service_Id { get; set; }
 
         [Display(Name = "File extension")]

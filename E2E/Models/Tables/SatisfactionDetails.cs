@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -10,6 +11,7 @@ namespace E2E.Models.Tables
             SatisfactionDetail_Id = Guid.NewGuid();
         }
 
+        [Index]
         public Guid InquiryTopic_Id { get; set; }
 
         public virtual Master_InquiryTopics Master_InquiryTopics { get; set; }

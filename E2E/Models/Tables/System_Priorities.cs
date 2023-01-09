@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -12,7 +13,7 @@ namespace E2E.Models.Tables
         [Key]
         public int Priority_Id { get; set; }
 
-        [Display(Name = "Priority")]
+        [Display(Name = "Priority"), StringLength(100), Index(IsUnique = true)]
         public string Priority_Name { get; set; }
 
         public int Priority_Point { get; set; }

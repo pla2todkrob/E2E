@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -8,6 +9,7 @@ namespace E2E.Models.Tables
         [Key]
         public int Role_Id { get; set; }
 
+        [StringLength(100), Index(IsUnique = true)]
         public string Role_Name { get; set; }
 
         public static List<System_Roles> DefaultList()

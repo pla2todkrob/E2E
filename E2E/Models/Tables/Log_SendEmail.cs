@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -23,6 +24,8 @@ namespace E2E.Models.Tables
         public string SendEmail_MethodName { get; set; }
         public Guid SendEmail_Ref_Id { get; set; }
         public string SendEmail_Subject { get; set; }
+
+        [Index]
         public Guid User_Id { get; set; }
     }
 }

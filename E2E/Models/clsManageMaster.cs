@@ -85,8 +85,7 @@ namespace E2E.Models
                 Master_Divisions master_Divisions = new Master_Divisions
                 {
                     Division_Name = model.Division_Name,
-                    Active = model.Active,
-                    Plant_Id = model.Plant_Id
+                    Active = model.Active
                 };
 
                 db.Master_Divisions.Add(master_Divisions);
@@ -297,18 +296,8 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                if (!model.Active)
-                {
-                    int PlantCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Id == model.Plant_Id).Count();
 
-                    if (PlantCount > 0)
-                    {
-                        return res;
-                    }
-                }
-
-                Master_Plants master_Plants = new Master_Plants();
-                master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
+                Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
 
                 master_Plants.Plant_Name = model.Plant_Name.Trim();
                 master_Plants.Active = model.Active;
@@ -461,6 +450,7 @@ namespace E2E.Models
                 {
                     User_Code = model.Users.User_Code.Trim(),
                     Grade_Id = model.Users.Grade_Id,
+                    Plant_Id = model.Users.Plant_Id,
                     Process_Id = model.Users.Process_Id,
                     Role_Id = model.Users.Role_Id != 0 ? model.Users.Role_Id : 2,
                     User_CostCenter = model.Users.User_CostCenter.Trim(),
@@ -550,6 +540,7 @@ namespace E2E.Models
                     users.Role_Id = model.Users.Role_Id;
                 }
                 users.Grade_Id = model.Users.Grade_Id;
+                users.Plant_Id = model.Users.Plant_Id;
                 users.Process_Id = model.Users.Process_Id;
                 users.User_Code = model.Users.User_Code.Trim();
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
@@ -710,7 +701,7 @@ namespace E2E.Models
                     Grade_Name = s.Users.Master_Grades.Grade_Name,
                     Grade_Position = s.Users.Master_Grades.Grade_Position,
                     LineWork_Name = s.Users.Master_Grades.Master_LineWorks.LineWork_Name,
-                    Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Plant_Name = s.Users.Master_Plants.Plant_Name,
                     Process_Name = s.Users.Master_Processes.Process_Name,
                     Section_Name = s.Users.Master_Processes.Master_Sections.Section_Name,
                     Update = s.Users.Update,
@@ -746,7 +737,7 @@ namespace E2E.Models
                     Grade_Name = s.Users.Master_Grades.Grade_Name,
                     Grade_Position = s.Users.Master_Grades.Grade_Position,
                     LineWork_Name = s.Users.Master_Grades.Master_LineWorks.LineWork_Name,
-                    Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Plant_Name = s.Users.Master_Plants.Plant_Name,
                     Process_Name = s.Users.Master_Processes.Process_Name,
                     Section_Name = s.Users.Master_Processes.Master_Sections.Section_Name,
                     Update = s.Users.Update,
@@ -780,7 +771,7 @@ namespace E2E.Models
                     Grade_Name = s.Users.Master_Grades.Grade_Name,
                     Grade_Position = s.Users.Master_Grades.Grade_Position,
                     LineWork_Name = s.Users.Master_Grades.Master_LineWorks.LineWork_Name,
-                    Plant_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
+                    Plant_Name = s.Users.Master_Plants.Plant_Name,
                     Process_Name = s.Users.Master_Processes.Process_Name,
                     Section_Name = s.Users.Master_Processes.Master_Sections.Section_Name,
                     Update = s.Users.Update,
@@ -850,7 +841,6 @@ namespace E2E.Models
                     Create = s.Create,
                     Department_Name = s.Department_Name,
                     Division_Name = s.Master_Divisions.Division_Name,
-                    Plant_Name = s.Master_Divisions.Master_Plants.Plant_Name,
                     Update = s.Update
                 }).ToList();
         }
@@ -1009,12 +999,11 @@ namespace E2E.Models
                     Active = s.Active,
                     Create = s.Create,
                     Division_Name = s.Division_Name,
-                    Plant_Name = s.Master_Plants.Plant_Name,
                     Update = s.Update
                 }).ToList();
         }
 
-        public Guid? Division_GetId(Guid plantId, string val, bool create = false)
+        public Guid? Division_GetId(string val, bool create = false)
         {
             try
             {
@@ -1022,8 +1011,7 @@ namespace E2E.Models
             FindModel:
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions
-                    .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim() &&
-                    w.Plant_Id == plantId)
+                    .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim())
                     .FirstOrDefault();
                 if (master_Divisions != null)
                 {
@@ -1035,7 +1023,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(val))
                         {
-                            if (Division_Save_GetId(plantId, val))
+                            if (Division_Save_GetId(val))
                             {
                                 goto FindModel;
                             }
@@ -1061,7 +1049,7 @@ namespace E2E.Models
 
                 if (master_Divisions != null)
                 {
-                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Id != model.Division_Id && w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim() && w.Plant_Id == model.Plant_Id).FirstOrDefault();
+                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Id != model.Division_Id && w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim()).FirstOrDefault();
                     if (master_Divisions != null)
                     {
                         return false;
@@ -1073,7 +1061,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim() && w.Plant_Id == model.Plant_Id).FirstOrDefault();
+                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim()).FirstOrDefault();
 
                     if (master_Divisions != null)
                     {
@@ -1093,15 +1081,14 @@ namespace E2E.Models
             }
         }
 
-        public bool Division_Save_GetId(Guid plantId, string val)
+        public bool Division_Save_GetId(string val)
         {
             try
             {
                 bool res = new bool();
                 Master_Divisions master_Divisions = new Master_Divisions
                 {
-                    Division_Name = val.Trim(),
-                    Plant_Id = plantId
+                    Division_Name = val.Trim()
                 };
                 db.Master_Divisions.Add(master_Divisions);
                 if (db.SaveChanges() > 0)
@@ -1610,7 +1597,7 @@ namespace E2E.Models
             return db.Master_Plants.ToList();
         }
 
-        public Guid? Plant_GetId(string val, bool create = false)
+        public Guid Plant_GetId(string val, bool create = false)
         {
             try
             {
@@ -1638,7 +1625,7 @@ namespace E2E.Models
                     }
                 }
 
-                return res;
+                return res.Value;
             }
             catch (Exception)
             {
@@ -1651,8 +1638,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Master_Plants master_Plants = new Master_Plants();
-                master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
+                Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
 
                 if (master_Plants != null)
                 {
@@ -1716,11 +1702,10 @@ namespace E2E.Models
             ClsSaveResult res = new ClsSaveResult();
             try
             {
-                Master_Plants master_Plants = new Master_Plants();
-                master_Plants = db.Master_Plants.Where(w => w.Plant_Id == id).FirstOrDefault();
+                Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == id).FirstOrDefault();
 
                 int divisionCount = db.Master_Divisions.Where(w => w.Plant_Id == id).Count();
-                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Id == id).Count();
+                int userCount = db.Users.Where(w => w.Master_Plants.Plant_Id == id).Count();
 
                 if (userCount > 0 || divisionCount > 0)
                 {
@@ -1908,7 +1893,6 @@ namespace E2E.Models
                     Create = s.Create,
                     Department_Name = s.Master_Sections.Master_Departments.Department_Name,
                     Division_Name = s.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
-                    Plant_Name = s.Master_Sections.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
                     Process_Name = s.Process_Name,
                     Section_Name = s.Master_Sections.Section_Name,
                     Update = s.Update
@@ -2093,7 +2077,6 @@ namespace E2E.Models
                     Create = s.Create,
                     Department_Name = s.Master_Departments.Department_Name,
                     Division_Name = s.Master_Departments.Master_Divisions.Division_Name,
-                    Plant_Name = s.Master_Departments.Master_Divisions.Master_Plants.Plant_Name,
                     Section_Name = s.Section_Name,
                     Update = s.Update
                 }).ToList();
@@ -2242,24 +2225,20 @@ namespace E2E.Models
             return item;
         }
 
-        public List<SelectListItem> SelectListItems_Division(Guid? plantId)
+        public List<SelectListItem> SelectListItems_Division()
         {
             List<SelectListItem> item = new List<SelectListItem>
             {
                 new SelectListItem() { Text = "Select Division", Value = "" }
             };
 
-            if (plantId.HasValue)
-            {
-                item.AddRange(db.Master_Divisions
-                .Where(w => w.Active &&
-                w.Plant_Id == plantId.Value)
+            item.AddRange(db.Master_Divisions
+                .Where(w => w.Active)
                 .Select(s => new SelectListItem()
                 {
                     Value = s.Division_Id.ToString(),
                     Text = s.Division_Name
                 }).OrderBy(o => o.Text).ToList());
-            }
 
             return item;
         }

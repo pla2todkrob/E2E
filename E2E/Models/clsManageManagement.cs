@@ -20,7 +20,7 @@ namespace E2E.Models
                 Master_Documents master_Documents = new Master_Documents();
                 Master_DocumentVersions master_DocumentVersions = new Master_DocumentVersions();
 
-                Guid userId = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 master_Documents.Document_Name = model.Master_Documents.Document_Name;
                 master_Documents.Active = true;
@@ -78,7 +78,7 @@ namespace E2E.Models
                 Master_Documents master_Documents = new Master_Documents();
                 Master_DocumentVersions master_DocumentVersions = new Master_DocumentVersions();
 
-                Guid userId = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 master_Documents = db.Master_Documents
                     .Where(w => w.Document_Id == model.Master_Documents.Document_Id)

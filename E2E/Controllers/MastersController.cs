@@ -232,7 +232,7 @@ namespace E2E.Controllers
         public ActionResult Departments_Form(Guid? id)
         {
             ViewBag.PlantList = data.SelectListItems_Plant();
-            ViewBag.DivisionsList = new List<SelectListItem>();
+            ViewBag.DivisionsList = data.SelectListItems_Division();
 
             bool isNew = true;
             Master_Departments master_Departments = new Master_Departments();
@@ -240,7 +240,7 @@ namespace E2E.Controllers
             {
                 master_Departments = data.Department_Get(id.Value);
                 isNew = false;
-                ViewBag.DivisionsList = data.SelectListItems_Division(master_Departments.Master_Divisions.Plant_Id);
+                ViewBag.DivisionsList = data.SelectListItems_Division();
             }
 
             ViewBag.IsNew = isNew;
@@ -363,8 +363,6 @@ namespace E2E.Controllers
 
         public ActionResult Divisions_Form(Guid? id)
         {
-            ViewBag.PlantList = data.SelectListItems_Plant();
-
             bool isNew = true;
             Master_Divisions master_Divisions = new Master_Divisions();
             if (id.HasValue)
@@ -1026,7 +1024,6 @@ namespace E2E.Controllers
 
         public ActionResult Processes_Form(Guid? id)
         {
-            ViewBag.PlantsList = data.SelectListItems_Plant();
             ViewBag.DivisionsList = new List<SelectListItem>();
             ViewBag.DepartmentsList = new List<SelectListItem>();
             ViewBag.SectionsList = new List<SelectListItem>();
@@ -1038,7 +1035,7 @@ namespace E2E.Controllers
                 master_Processes = data.Process_Get(id.Value);
                 isNew = false;
 
-                ViewBag.DivisionsList = data.SelectListItems_Division(master_Processes.Master_Sections.Master_Departments.Master_Divisions.Plant_Id);
+                ViewBag.DivisionsList = data.SelectListItems_Division();
                 ViewBag.DepartmentsList = data.SelectListItems_Department(master_Processes.Master_Sections.Master_Departments.Division_Id);
                 ViewBag.SectionsList = data.SelectListItems_Section(master_Processes.Master_Sections.Department_Id);
             }
@@ -1163,7 +1160,6 @@ namespace E2E.Controllers
 
         public ActionResult Sections_Form(Guid? id)
         {
-            ViewBag.PlantsList = data.SelectListItems_Plant();
             ViewBag.DepartmentsList = new List<SelectListItem>();
             ViewBag.DivisionsList = new List<SelectListItem>();
 
@@ -1174,7 +1170,7 @@ namespace E2E.Controllers
                 master_Sections = data.Section_Get(id.Value);
                 isNew = false;
                 ViewBag.DepartmentsList = data.SelectListItems_Department(master_Sections.Master_Departments.Division_Id);
-                ViewBag.DivisionsList = data.SelectListItems_Division(master_Sections.Master_Departments.Master_Divisions.Plant_Id);
+                ViewBag.DivisionsList = data.SelectListItems_Division();
             }
 
             ViewBag.IsNew = isNew;
@@ -1301,7 +1297,7 @@ namespace E2E.Controllers
             ViewBag.LineWorkList = data.SelectListItems_LineWork();
             ViewBag.GradeList = new List<SelectListItem>();
             ViewBag.PlantList = data.SelectListItems_Plant();
-            ViewBag.DivisionList = new List<SelectListItem>();
+            ViewBag.DivisionList = data.SelectListItems_Division();
             ViewBag.DepartmentList = new List<SelectListItem>();
             ViewBag.SectionList = new List<SelectListItem>();
             ViewBag.ProcessList = new List<SelectListItem>();
@@ -1318,7 +1314,7 @@ namespace E2E.Controllers
             {
                 userDetails = data.UserDetails_Get(id.Value);
                 ViewBag.GradeList = data.SelectListItems_Grade(userDetails.Users.Master_Grades.LineWork_Id);
-                ViewBag.DivisionList = data.SelectListItems_Division(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Plant_Id);
+                ViewBag.DivisionList = data.SelectListItems_Division();
                 ViewBag.DepartmentList = data.SelectListItems_Department(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Id);
                 ViewBag.SectionList = data.SelectListItems_Section(userDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Id);
                 ViewBag.ProcessList = data.SelectListItems_Process(userDetails.Users.Master_Processes.Master_Sections.Section_Id);
@@ -1392,9 +1388,9 @@ namespace E2E.Controllers
             return Json(data.SelectListItems_Department(id), JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Users_GetSelectDivisions(Guid? id)
+        public ActionResult Users_GetSelectDivisions()
         {
-            return Json(data.SelectListItems_Division(id), JsonRequestBehavior.AllowGet);
+            return Json(data.SelectListItems_Division(), JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Users_GetSelectGrades(Guid? id)
@@ -1490,8 +1486,8 @@ namespace E2E.Controllers
                                                         };
                                                         Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
                                                         userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                                        Guid? plantId = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
-                                                        Guid? divisionId = data.Division_GetId(plantId.Value, sheet.Cells[row, 14].Text, true);
+                                                        userDetails.Users.Plant_Id = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
+                                                        Guid? divisionId = data.Division_GetId(sheet.Cells[row, 14].Text, true);
                                                         Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
                                                         Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
                                                         if (sheet.Cells[row, 16].Text.Contains("Application"))

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
@@ -22,7 +23,10 @@ namespace E2E.Models.Tables
         public int EForm_Gallery_Seq { get; set; }
 
         public string EForm_Gallery_Thumbnail { get; set; }
+
+        [Index]
         public Guid EForm_Id { get; set; }
+
         public virtual EForms EForms { get; set; }
     }
 }
