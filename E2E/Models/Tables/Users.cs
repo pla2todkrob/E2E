@@ -26,6 +26,7 @@ namespace E2E.Models.Tables
         public virtual Master_Plants Master_Plants { get; set; }
         public virtual Master_Processes Master_Processes { get; set; }
 
+        [Required]
         [Display(Name = "Plant"), Index]
         public Guid Plant_Id { get; set; }
 
