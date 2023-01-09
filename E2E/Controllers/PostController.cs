@@ -121,7 +121,7 @@ namespace E2E.Controllers
                     string passEncrypt = new ClsManageMaster().Users_Password(model.Password);
                     Users users = new Users();
                     users = db.Users
-                        .Where(w => w.User_Code == model.Username || w.User_Email == model.Username)
+                        .Where(w => w.User_Code == model.Username || w.User_Email == model.Username || w.Username == model.Username)
                         .FirstOrDefault();
                     if (users != null)
                     {
