@@ -1705,6 +1705,7 @@ namespace E2E.Models
                 Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == id).FirstOrDefault();
 
                 int divisionCount = db.Master_Divisions.Where(w => w.Plant_Id == id).Count();
+                //int userCount = db.Users.Count();
                 int userCount = db.Users.Where(w => w.Master_Plants.Plant_Id == id).Count();
 
                 if (userCount > 0 || divisionCount > 0)

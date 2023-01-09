@@ -20,7 +20,7 @@ namespace E2E.Models.Tables
         [Key]
         public Guid Satisfaction_Id { get; set; }
 
-        [Index(IsUnique = true)]
+        [Index]
         public Guid Service_Id { get; set; }
 
         public virtual Services Services { get; set; }

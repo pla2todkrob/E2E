@@ -53,6 +53,7 @@ namespace E2E.Controllers
                                     Division_Id = divisionId
                                 };
                                 db.Entry(department).State = System.Data.Entity.EntityState.Added;
+                                db.SaveChanges();
                             }
 
                             Master_Sections section = db.Master_Sections
@@ -67,6 +68,7 @@ namespace E2E.Controllers
                                     Section_Name = users.Master_Processes.Master_Sections.Section_Name
                                 };
                                 db.Entry(section).State = System.Data.Entity.EntityState.Added;
+                                db.SaveChanges();
                             }
 
                             Master_Processes process = db.Master_Processes
@@ -81,9 +83,14 @@ namespace E2E.Controllers
                                     Section_Id = section.Section_Id
                                 };
                                 db.Entry(process).State = System.Data.Entity.EntityState.Added;
+                                db.SaveChanges();
                             }
 
                             users.Process_Id = process.Process_Id;
+                        }
+                        if (db.SaveChanges() > 0)
+                        {
+                            continue;
                         }
                     }
 
@@ -95,17 +102,20 @@ namespace E2E.Controllers
                             .Select(s => s.Section_Id)
                             .FirstOrDefault();
                         db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        if (db.SaveChanges() > 0)
+                        {
+                            continue;
+                        }
                     }
                     if (!Equals(db.Master_Divisions.Count(), divisionList.Count()))
                     {
-                        db.Master_Divisions.RemoveRange(db.Master_Divisions.Where(w => divisionList.Values.Contains(w.Division_Id)).ToList());
+                        List<Master_Divisions> delDivision = db.Master_Divisions.Where(w => !divisionList.Values.Contains(w.Division_Id)).ToList();
+                        db.Master_Divisions.RemoveRange(delDivision);
+                        db.SaveChanges();
                     }
 
-                    if (db.SaveChanges() > 0)
-                    {
-                        scope.Complete();
-                        RedirectToAction("Index", "Home");
-                    }
+                    scope.Complete();
+                    RedirectToAction("Index", "Home");
                 }
                 catch (Exception)
                 {
