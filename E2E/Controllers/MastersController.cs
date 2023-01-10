@@ -1438,7 +1438,6 @@ namespace E2E.Controllers
                 try
                 {
                     var files = Request.Files;
-                    List<string> userCodeList = new List<string>();
                     foreach (string item in files.AllKeys)
                     {
                         HttpPostedFileBase file = files[item];
@@ -1457,79 +1456,22 @@ namespace E2E.Controllers
                             db.Entry(userUploadHistories).State = System.Data.Entity.EntityState.Added;
                             if (db.SaveChanges() > 0)
                             {
-                                using (HttpClient client = new HttpClient())
+                                if (data.Users_AdjustMissing(data.Users_ReadFile(userUploadHistories.UserUploadHistoryFile)))
                                 {
-                                    using (Stream stream = client.GetStreamAsync(userUploadHistories.UserUploadHistoryFile).Result)
-                                    {
-                                        using (ExcelPackage package = new ExcelPackage(stream))
-                                        {
-                                            foreach (var sheet in package.Workbook.Worksheets)
-                                            {
-                                                for (int row = 1; row <= sheet.Dimension.End.Row; row++)
-                                                {
-                                                    var recNo = sheet.Cells[row, 1].Text;
-                                                    if (int.TryParse(recNo, out int startData))
-                                                    {
-                                                        if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
-                                                        {
-                                                            goto EndProcess;
-                                                        }
-                                                        UserDetails userDetails = new UserDetails
-                                                        {
-                                                            Detail_EN_FirstName = sheet.Cells[row, 4].Text,
-                                                            Detail_EN_LastName = sheet.Cells[row, 5].Text,
-                                                            Prefix_EN_Id = data.Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value,
-                                                            Detail_TH_FirstName = sheet.Cells[row, 7].Text,
-                                                            Detail_TH_LastName = sheet.Cells[row, 8].Text,
-                                                            Prefix_TH_Id = data.Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value,
-                                                            Users = new Users()
-                                                        };
-                                                        Guid? lineworkId = data.LineWork_GetId(sheet.Cells[row, 10].Text, true);
-                                                        userDetails.Users.Grade_Id = data.Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                                        userDetails.Users.Plant_Id = data.Plant_GetId(sheet.Cells[row, 13].Text, true);
-                                                        Guid? divisionId = data.Division_GetId(sheet.Cells[row, 14].Text, true);
-                                                        Guid? departmentId = data.Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
-                                                        Guid? sectionId = data.Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
-                                                        if (sheet.Cells[row, 16].Text.Contains("Application"))
-                                                        {
-                                                            userDetails.Users.Role_Id = 1;
-                                                        }
-                                                        userDetails.Users.Process_Id = data.Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
-                                                        userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
-                                                        userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
-                                                        if (data.Users_Save(userDetails))
-                                                        {
-                                                            userCodeList.Add(userDetails.Users.User_Code);
-                                                        }
-                                                        else
-                                                        {
-                                                            goto EndProcess;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    scope.Complete();
+                                    swal.Icon = "success";
+                                    swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                                    swal.Title = "Successful";
+                                    swal.DangerMode = false;
+                                }
+                                else
+                                {
+                                    swal.Icon = "warning";
+                                    swal.Text = "กรุณาตรวจสอบข้อมูลอีกครั้ง";
+                                    swal.Title = "Warning";
                                 }
                             }
                         }
-                    }
-
-                EndProcess:
-                    if (data.Users_AdjustMissing(userCodeList))
-                    {
-                        scope.Complete();
-                        swal.Icon = "success";
-                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                        swal.DangerMode = false;
-                    }
-                    else
-                    {
-                        scope.Dispose();
-                        swal.Icon = "warning";
-                        swal.Text = "กรุณาตรวจสอบข้อมูลอีกครั้ง";
-                        swal.Title = "Warning";
                     }
                 }
                 catch (Exception ex)

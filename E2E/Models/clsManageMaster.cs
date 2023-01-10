@@ -1,10 +1,13 @@
 ﻿using E2E.Models.Tables;
 using E2E.Models.Views;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.DirectoryServices.AccountManagement;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
@@ -502,7 +505,7 @@ namespace E2E.Models
                         userDetails.Detail_Password = Users_Password(model.Detail_Password.Trim());
                         userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                     }
-                    else if (string.IsNullOrEmpty(users.User_Email))
+                    else
                     {
                         userDetails.Detail_Password = Users_Password(users.User_Code.Trim());
                         userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
@@ -575,6 +578,10 @@ namespace E2E.Models
                 }
                 else
                 {
+                    if (string.IsNullOrEmpty(userDetails.Detail_Password))
+                    {
+                        userDetails.Detail_Password = Users_Password(users.User_Code);
+                    }
                     userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
                 }
 
@@ -2585,6 +2592,70 @@ namespace E2E.Models
                     }
                 }
                 return res.ToString();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<string> Users_ReadFile(string fileUrl)
+        {
+            try
+            {
+                List<string> userCodeList = new List<string>();
+                using (HttpClient client = new HttpClient())
+                {
+                    using (Stream stream = client.GetStreamAsync(fileUrl).Result)
+                    {
+                        using (ExcelPackage package = new ExcelPackage(stream))
+                        {
+                            foreach (var sheet in package.Workbook.Worksheets)
+                            {
+                                for (int row = 1; row <= sheet.Dimension.End.Row; row++)
+                                {
+                                    var recNo = sheet.Cells[row, 1].Text;
+                                    if (int.TryParse(recNo, out int startData))
+                                    {
+                                        if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
+                                        {
+                                            throw new Exception("Data not found");
+                                        }
+                                        UserDetails userDetails = new UserDetails
+                                        {
+                                            Detail_EN_FirstName = sheet.Cells[row, 4].Text,
+                                            Detail_EN_LastName = sheet.Cells[row, 5].Text,
+                                            Prefix_EN_Id = Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value,
+                                            Detail_TH_FirstName = sheet.Cells[row, 7].Text,
+                                            Detail_TH_LastName = sheet.Cells[row, 8].Text,
+                                            Prefix_TH_Id = Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value,
+                                            Users = new Users()
+                                        };
+                                        Guid? lineworkId = LineWork_GetId(sheet.Cells[row, 10].Text, true);
+                                        userDetails.Users.Grade_Id = Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
+                                        userDetails.Users.Plant_Id = Plant_GetId(sheet.Cells[row, 13].Text, true);
+                                        Guid? divisionId = Division_GetId(sheet.Cells[row, 14].Text, true);
+                                        Guid? departmentId = Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
+                                        Guid? sectionId = Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
+                                        if (sheet.Cells[row, 16].Text.Contains("Application"))
+                                        {
+                                            userDetails.Users.Role_Id = 1;
+                                        }
+                                        userDetails.Users.Process_Id = Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
+                                        userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
+                                        userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
+                                        if (Users_Save(userDetails))
+                                        {
+                                            userCodeList.Add(userDetails.Users.User_Code);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return userCodeList;
             }
             catch (Exception)
             {

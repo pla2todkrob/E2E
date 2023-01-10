@@ -19,7 +19,7 @@ namespace E2E.Controllers
             return View();
         }
 
-        public void MovePlant2User()
+        public ActionResult MovePlant2User()
         {
             using (TransactionScope scope = new TransactionScope())
             {
@@ -115,12 +115,38 @@ namespace E2E.Controllers
                     }
 
                     scope.Complete();
-                    RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home");
                 }
                 catch (Exception)
                 {
                     throw;
                 }
+            }
+        }
+
+        public ActionResult ReReadFile()
+        {
+            try
+            {
+                TransactionOptions options = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.MaxValue
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                {
+                    ClsManageMaster cls = new ClsManageMaster();
+                    string lastFile = db.UserUploadHistories.OrderByDescending(o => o.Create).Select(s => s.UserUploadHistoryFile).FirstOrDefault();
+                    if (cls.Users_AdjustMissing(cls.Users_ReadFile(lastFile)))
+                    {
+                        scope.Complete();
+                    }
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
