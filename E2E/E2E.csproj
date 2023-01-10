@@ -278,9 +278,14 @@
     <Compile Include="Models\ClsServiceEmail.cs" />
     <Compile Include="Models\ClsServiceFile.cs" />
     <Compile Include="Models\ClsServiceFTP.cs" />
+    <Compile Include="Models\Filter\ClearCacheFilterAttribute.cs" />
+    <Compile Include="Models\Filter\CompressionFilterAttribute.cs" />
+    <Compile Include="Models\Filter\ExceptionFilterAttribute.cs" />
+    <Compile Include="Models\Filter\TimingFilterAttribute.cs" />
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
+    <Compile Include="Models\Tables\Log_Exception.cs" />
     <Compile Include="Models\Tables\Log_Login.cs" />
     <Compile Include="Models\Tables\Log_SendEmail.cs" />
     <Compile Include="Models\Tables\Log_SendEmailTo.cs" />
