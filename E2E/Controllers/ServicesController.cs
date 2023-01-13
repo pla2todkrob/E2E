@@ -148,6 +148,7 @@ namespace E2E.Controllers
             }
         }
 
+        [HttpDelete]
         public ActionResult _DeleteTeam(Guid id)
         {
             ClsSwal swal = new ClsSwal();
@@ -730,6 +731,43 @@ namespace E2E.Controllers
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpDelete]
+        public ActionResult Form_Delete(Guid id)
+        {
+            ClsSwal swal = new ClsSwal();
+            using (var scope = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    Services services = db.Services.Find(id);
+                    db.Entry(services).State = System.Data.Entity.EntityState.Deleted;
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Commit();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    scope.Rollback();
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult Form_Forward(Guid id)

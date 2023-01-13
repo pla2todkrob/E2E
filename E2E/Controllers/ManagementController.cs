@@ -236,7 +236,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
+        [HttpDelete]
         public ActionResult DocumentControl_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -318,7 +318,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult WorkRoot_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())

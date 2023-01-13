@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
@@ -13,6 +10,8 @@ namespace E2E.Models.Tables
         public string ControllerName { get; set; }
 
         public string ExceptionMessage { get; set; }
+        public string ExceptionStackTrace { get; set; }
+        public string ExceptionType { get; set; }
 
         [Key]
         public int Id { get; set; }

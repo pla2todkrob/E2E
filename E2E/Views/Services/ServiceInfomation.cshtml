@@ -198,7 +198,7 @@
                             {
                                 if (Model.Services.Action_User_Id.Equals(userId))
                                 {
-                                    <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                                    <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
                                 }
                             }
                         }
@@ -310,7 +310,7 @@
                                 <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
                                 <div class="ml-auto">
                                     <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
-                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })',false)">Complete</button>
+                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
                                 </div>
 
                             }

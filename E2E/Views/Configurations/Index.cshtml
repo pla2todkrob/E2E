@@ -12,14 +12,12 @@
 
         $(document).on('submit', '#SaveConfig', function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("Configurations_Table", "Configurations")', this);
+            callSubmitPage('@Url.Action("Table", "Configurations")', this);
             return false;
         });
 
         function reloadTable() {
-            callTable_NoSort('@Url.Action("Configurations_Table", "Configurations")', true, [0]).then(function () {
-
-            });
+            callTable_NoSort('@Url.Action("Table", "Configurations")', true, [0]);
         }
     </script>
 }

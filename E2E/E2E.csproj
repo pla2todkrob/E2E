@@ -285,6 +285,8 @@
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
+    <Compile Include="Models\Tables\Log_DbChange.cs" />
+    <Compile Include="Models\Tables\Log_DbDelete.cs" />
     <Compile Include="Models\Tables\Log_Exception.cs" />
     <Compile Include="Models\Tables\Log_Login.cs" />
     <Compile Include="Models\Tables\Log_SendEmail.cs" />
@@ -1027,6 +1029,7 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\Configurations\Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

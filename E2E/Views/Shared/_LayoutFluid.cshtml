@@ -15,7 +15,7 @@
     @RenderSection("css", required: false)
 </head>
 <body>
-    <nav class="navbar navbar-expand-xl navbar-light bg-light">
+    <nav class="navbar sticky-top navbar-expand-xl navbar-light bg-light">
         <div class="container-fluid">
             @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_top" aria-controls="navbar_top" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,6 @@
 
     @Scripts.Render("~/bundles/jquery")
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-
     @Scripts.Render("~/bundles/js")
     @RenderSection("scripts", required: false)
     <script>

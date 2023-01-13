@@ -102,7 +102,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-
+        [HttpDelete]
         public ActionResult Categories_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -190,7 +190,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Departments_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -322,7 +322,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Divisions_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -450,7 +450,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Grades_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -585,7 +585,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult InquiryTopic_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -725,7 +725,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult LineWorks_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -855,7 +855,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Plants_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -983,7 +983,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Processes_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -1119,7 +1119,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Sections_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())
@@ -1252,7 +1252,7 @@ namespace E2E.Controllers
         {
             return View();
         }
-
+        [HttpDelete]
         public ActionResult Users_Delete(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())

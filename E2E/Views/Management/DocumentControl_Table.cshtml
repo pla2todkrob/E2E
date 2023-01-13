@@ -27,26 +27,26 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td class="fit">
-                <button id="Edits" onclick="callModal('@Url.Action("DocumentControl_Create", "Management", new { id = Html.ValueFor(m => item.Document_Id) })',true)" class="btn btn-outline-warning"><i class="fa fa-pencil"></i></button>
-            </td>
-            <td class="fit">
-                @Html.DisplayFor(i => item.Create, new { @class = "form-control" })
-            </td>
-            <td>
-                @Html.DisplayFor(i => item.Document_Name)
-            </td>
-            <td class="fit text-center">
-                @Html.DisplayFor(i => item.Required)
-            </td>
-            <td class="fit">
-                @Html.DisplayFor(i => item.Update)
-            </td>
-            <td class="fit text-center">
-                @Html.DisplayFor(i => item.Active)
-            </td>
-        </tr>
+            <tr>
+                <td class="fit">
+                    <button id="Edits" onclick="callModal('@Url.Action("DocumentControl_Create", "Management", new { id = Html.ValueFor(m => item.Document_Id) })', {bigSize:true})" class="btn btn-outline-warning"><i class="fa fa-pencil"></i></button>
+                </td>
+                <td class="fit">
+                    @Html.DisplayFor(i => item.Create, new { @class = "form-control" })
+                </td>
+                <td>
+                    @Html.DisplayFor(i => item.Document_Name)
+                </td>
+                <td class="fit text-center">
+                    @Html.DisplayFor(i => item.Required)
+                </td>
+                <td class="fit">
+                    @Html.DisplayFor(i => item.Update)
+                </td>
+                <td class="fit text-center">
+                    @Html.DisplayFor(i => item.Active)
+                </td>
+            </tr>
         }
     </tbody>
 </table>

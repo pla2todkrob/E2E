@@ -3,14 +3,16 @@
 
 //For local
 const baseUrl = '';
+
 let chat;
 
 $(function () {
     let classEmpty = true;
-    const url = window.location.pathname,
-        urlRegExp = new RegExp(url.replace(/\/$/, '') + '$');
-
-    $('#navbar_top').find('ul.navbar-nav').each(function () {
+    const urlPathName = window.location.pathname,
+        urlRegExp = new RegExp(urlPathName.replace(/\/$/, '') + '$');
+    const $navbarTop = $('#navbar_top');
+    const $navbarTopUl = $navbarTop.find('ul.navbar-nav');
+    $navbarTopUl.each(function () {
         $(this).find('li.nav-item a').each(function () {
             if (classEmpty) {
                 if (urlRegExp.test(this.href.replace(/\/$/, ''))) {
@@ -41,11 +43,13 @@ $(document).ajaxStart(function () {
 });
 
 async function reloadCount() {
-    await $('#nav_service').load(baseUrl + '/Configurations/_NavService');
-    await $('#nav_department').load(baseUrl + '/Configurations/_NavDepartment');
-    await $('#nav_Newtopic').load(baseUrl + '/Topics/_Newtopic');
-    await $('._reloadCountA').load(baseUrl + '/Topics/_SortTopicAnnounce');
-    await $('._reloadCountN').load(baseUrl + '/Topics/_SortTopicNew');
+    const navService = $('#nav_service').load(`${baseUrl}/Configurations/_NavService`);
+    const navDepartment = $('#nav_department').load(`${baseUrl}/Configurations/_NavDepartment`);
+    const navNewTopic = $('#nav_Newtopic').load(`${baseUrl}/Topics/_Newtopic`);
+    const reloadCountA = $('._reloadCountA').load(`${baseUrl}/Topics/_SortTopicAnnounce`);
+    const reloadCountN = $('._reloadCountN').load(`${baseUrl}/Topics/_SortTopicNew`);
+
+    await Promise.all([navService, navDepartment, navNewTopic, reloadCountA, reloadCountN]);
 }
 async function callSpin(active) {
     const opts = {
@@ -72,173 +76,183 @@ async function callSpin(active) {
     const spinner = await new Spinner(opts).spin(target);
 
     if (active) {
-        await target.appendChild(spinner.el);
+        document.querySelector("body").classList.add("disabled");
+        target.appendChild(spinner.el);
     }
     else {
-        await $(target).empty();
+        document.querySelector("body").classList.remove("disabled");
+        $(target).empty();
     }
 }
 
 function getQueryString() {
+    if (window.location.search === "") {
+        return '{}'
+    }
     let pairs = window.location.search.substring(1).split('&'),
-        obj = {},
-        pair,
-        i;
-
-    for (i in pairs) {
-        if (pairs[i] === '') continue;
-
-        pair = pairs[i].split('=');
+        obj = {};
+    pairs.forEach(function (element) {
+        if (element === '') return;
+        pair = element.split('=');
         obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+    });
+    return JSON.stringify(obj)
+}
+
+function getQueryStringName(param) {
+    const urlSplit = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    const queryString = urlSplit.find(ele => ele.split('=')[0] === param);
+    if (queryString) {
+        return queryString.split('=')[1]
     }
-
-    return JSON.stringify(obj);
-}
-
-async function getQueryStringName(param) {
-    const url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-
-    for (let i = 0; i < url.length; i++) {
-        let urlparam = url[i].split('=');
-        if (urlparam[0] == param) {
-            return urlparam[1];
-        }
+    else {
+        return 'empty'
     }
-
-    return 'empty';
 }
 
-async function clearQueryString() {
-    await history.pushState({}, null, location.href.split('?')[0]);
-    return location.reload();
+function clearQueryString() {
+    history.pushState({}, null, location.href.split('?')[0]);
+    location.reload();
 }
 
+// Helper function for creating a DataTable with the given options
+async function createDataTable(tableId, options) {
+    return await $(tableId).DataTable(options);
+}
+
+// Function for fetching and displaying data in a table
 async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = [], blockId = '#datalist') {
-    return $.ajax({
-        url: urlAjax,
-        async: true,
-        data: {
-            filter: getQueryString()
-        },
-        success: function (res) {
-            $(blockId).html(res);
-            $(blockId).find('select').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
-                });
+    // move the filter parameter to the query string of the URL
+    const url = urlAjax + "?filter=" + getQueryString();
+
+    try {
+        // Make the GET request using the async/await pattern
+        const res = await $.ajax({
+            url: url,
+            method: 'GET',
+        });
+        // append the data to blockId
+        $(blockId).html(res);
+        $(blockId).find('select').each(function () {
+            $(this).select2({
+                theme: 'bootstrap4',
+                width: '100%'
             });
-
-            let targetArr = [];
-            let targetObj = {};
-
+        });
+        let targetArr = [];
+        let targetObj = {};
+        if (hasDate) {
             $.each(dateCol, function (key, val) {
                 targetObj = {};
                 targetObj.targets = val;
                 targetObj.type = 'date';
                 targetArr.push(targetObj);
             });
-
-            $(blockId).find('table').each(function () {
-                if (hasDate && hasButton) {
-                    targetObj = {};
-                    targetObj.targets = 0;
-                    targetObj.orderable = false;
-                    targetArr.push(targetObj);
-
-                    $(this).DataTable({
-                        'columnDefs': targetArr,
-                        'order': [[dateCol[0], 'desc']],
-                        'scrollX': true
-                    });
-                }
-                else if (hasDate) {
-                    $(this).DataTable({
-                        'columnDefs': targetArr,
-                        'order': [[dateCol[0], 'desc']],
-                        'scrollX': true
-                    });
-                }
-                else if (hasButton) {
-                    $(this).DataTable({
-                        'columnDefs': [{ 'targets': 0, 'orderable': false }],
-                        'scrollX': true
-                    });
-                }
-                else {
-                    $(this).DataTable({
-                        'scrollX': true
-                    });
-                }
-            });
         }
-    });
-}
-async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId = '#datalist') {
-    return $.ajax({
-        url: urlAjax,
-        async: true,
-        data: {
-            filter: getQueryString()
-        },
-        success: function (res) {
-            $(blockId).html(res);
-            $(blockId).find('select').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
+        if (hasButton) {
+            targetObj = {};
+            targetObj.targets = 0;
+            targetObj.orderable = false;
+            targetArr.push(targetObj);
+        }
+
+        // create datatable with options
+        $(blockId).find('table').each(async function (i, v) {
+            if (hasDate || hasButton) {
+                await createDataTable(v, {
+                    'columnDefs': targetArr,
+                    'order': [[dateCol[0], 'desc']],
+                    'scrollX': true
                 });
-            });
-            let table;
-            $(blockId).find('table').each(function (i, v) {
-                if (hasDate) {
-                    let targetArr = [];
-                    let targetObj = {};
+            } else {
+                await createDataTable(v, {
+                    'scrollX': true
+                });
+            }
+        });
+    } catch (error) {
+        // Handle the error
+        console.error(error);
+    }
+}
 
-                    $.each(dateCol, function (key, val) {
-                        targetObj = {};
-                        targetObj.targets = val;
-                        targetObj.type = 'date';
-                        targetArr.push(targetObj);
-                    });
+async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId = '#datalist') {
+    // move the filter parameter to the query string of the URL
+    const url = urlAjax + "?filter=" + getQueryString();
 
-                    table = $(this).DataTable({
-                        'columnDefs': targetArr,
-                        'ordering': false,
-                        'scrollX': true
-                    });
-                }
-                else {
-                    table = $(this).DataTable({
-                        'ordering': false,
-                        'scrollX': true
-                    });
-                }
+    try {
+        // Make the GET request using the async/await pattern
+        const res = await $.ajax({
+            url: url,
+            method: 'GET'
+        });
+        // append the data to blockId
+        $(blockId).html(res);
+        $(blockId).find('select').each(function () {
+            $(this).select2({
+                theme: 'bootstrap4',
+                width: '100%'
             });
-            table.columns.adjust();
-        }
-    });
+        });
+
+        let table;
+        // create datatable with no sort
+        $(blockId).find('table').each(async function (i, v) {
+            if (hasDate) {
+                let targetArr = [];
+                let targetObj = {};
+
+                // Create an array of columnDefs for date columns
+                $.each(dateCol, function (key, val) {
+                    targetObj = {};
+                    targetObj.targets = val;
+                    targetObj.type = 'date';
+                    targetArr.push(targetObj);
+                });
+                table = await createDataTable(v, {
+                    'columnDefs': targetArr,
+                    'ordering': false,
+                    'scrollX': true
+                });
+            } else {
+                table = await createDataTable(v, {
+                    'ordering': false,
+                    'scrollX': true
+                });
+            }
+        });
+    } catch (error) {
+        // Handle the error
+        console.error(error);
+    }
 }
 
 async function callFilter(urlAjax, blockId = '#filter') {
-    return $.ajax({
-        url: urlAjax,
-        async: true,
-        cache: false,
-        contentType: 'application/json',
-        data: {
-            filter: getQueryString()
-        },
-        success: function (res) {
-            $(blockId).html(res).fadeIn(500);
-            $(blockId).find('select').each(function () {
-                $(this).select2({
-                    width: '100%',
-                    theme: 'bootstrap4'
-                });
-            });
+    try {
+        // Make the GET request using the fetch API
+        const res = await fetch(`${urlAjax}?filter=${getQueryString()}`, {
+            method: 'GET'
+        });
+        if (!res.ok) {
+            // Handle non 200 status code
+            throw new Error(`Failed to fetch data, status code: ${res.status}`);
         }
-    });
+        const data = await res.text();
+
+        const block = document.querySelector(blockId);
+        block.innerHTML = data;
+        block.style.display = 'block';
+        block.style.opacity = 0;
+        block.style.transition = "opacity 500ms";
+
+        block.style.opacity = 1;
+        const selects = block.querySelectorAll('select');
+        for (const select of selects) {
+            select.style.width = '100%';
+        }
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 async function setTable_File(tableId, bOrder = false, bSearch = false) {
@@ -255,205 +269,198 @@ async function setDropdown_Form() {
         });
     });
 }
-async function callModal(urlAjax, bigSize = false, callback = null) {
-    return $.ajax({
-        url: urlAjax,
-        async: true,
-        success: function (res) {
-            if (bigSize) {
-                $('#modalContent').parent().addClass('modal-lg');
-            }
-            else {
-                $('#modalContent').parent().removeClass('modal-lg');
-            }
 
-            $('#modalContent').html(res);
-            $('#modalContent').find('select').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
-                });
-            });
-            if (callback != null) {
-                callback();
-            }
-            $('#modalArea').modal('show');
-        }
-    });
-}
-async function callModalTable(urlAjax, bigSize = false) {
-    return $.ajax({
-        url: urlAjax,
-        async: true,
-        success: function (res) {
-            if (bigSize) {
-                $('#modalContent').parent().addClass('modal-lg');
-            }
-            else {
-                $('#modalContent').parent().removeClass('modal-lg');
-            }
+async function callModal(urlAjax, options = { bigSize: false, callback: null }) {
+    try {
+        const res = await $.ajax({
+            url: urlAjax,
+            async: true,
+        });
 
-            $('#modalContent').html(res);
-            $('#modalContent').find('select').each(function () {
-                $(this).select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
-                });
-            });
-            $('#modalContent').find('table').each(function () {
-                $(this).DataTable();
-            });
-            $('#modalArea').modal('show');
+        if (options.bigSize) {
+            $('#modalContent').parent().addClass('modal-lg');
+        } else {
+            $('#modalContent').parent().removeClass('modal-lg');
         }
-    });
+
+        $('#modalContent').html(res);
+        $('#modalContent').find('select').each(function () {
+            $(this).select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+        });
+        if (options.callback) {
+            options.callback();
+        }
+        $('#modalArea').modal('show');
+    } catch (error) {
+        console.error(error);
+    }
 }
+
 async function callSubmitModal(urlAjax, form) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'This information is saved to the database.',
-        buttons: true,
-        icon: 'warning'
-    }).then(function (cf) {
-        if (cf) {
+    try {
+        const confirmed = await swal({
+            title: 'Are you sure?',
+            text: 'This information will be saved to the database.',
+            buttons: true,
+            icon: 'warning'
+        });
+
+        if (confirmed) {
             const fd = new FormData(form);
-            $.ajax({
-                url: urlAjax,
+            const res = await fetch(urlAjax, {
                 method: 'POST',
-                async: true,
-                data: fd,
-                processData: false,
-                contentType: false,
-                traditional: true,
-                success: function (res) {
-                    swal({
-                        title: res.Title,
-                        text: res.Text,
-                        icon: res.Icon,
-                        button: res.Button,
-                        dangerMode: res.DangerMode
-                    }).then(function (e) {
-                        if (res.Icon == 'success') {
-                            $('#modalArea').modal('hide');
-                            reloadCount().then(function () {
-                                reloadTable();
-                            });
-                        }
-                    });
-                }
+                body: fd
             });
+            const json = await res.json();
+
+            await swal({
+                title: json.Title,
+                text: json.Text,
+                icon: json.Icon,
+                button: json.Button,
+                dangerMode: json.DangerMode
+            });
+
+            if (json.Icon === 'success') {
+                $('#modalArea').modal('hide');
+                await reloadCount();
+                reloadTable();
+            }
         }
-    });
+    } catch (error) {
+        console.error(error);
+        swal({
+            title: 'Error',
+            text: 'An error occured while submitting the form.',
+            icon: 'error'
+        });
+    }
 }
 
 async function callSubmitPage(urlAjax, form) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'This information is saved to the database.',
-        buttons: true,
-        icon: 'warning'
-    }).then(function (cf) {
-        if (cf) {
-            const fd = new FormData(form);
+    try {
+        const confirmed = await swal({
+            title: 'Are you sure?',
+            text: 'This information will be saved to the database.',
+            buttons: true,
+            icon: 'warning'
+        });
 
-            $.ajax({
-                url: urlAjax,
+        if (confirmed) {
+            const fd = new FormData(form);
+            const res = await fetch(urlAjax, {
                 method: 'POST',
-                async: true,
-                data: fd,
-                processData: false,
-                contentType: false,
-                traditional: true,
-                success: function (res) {
-                    swal({
-                        title: res.Title,
-                        text: res.Text,
-                        icon: res.Icon,
-                        button: res.Button,
-                        dangerMode: res.DangerMode
-                    }).then(function (e) {
-                        if (res.Icon == 'success') {
-                            window.location.reload();
-                        }
-                    });
-                }
+                body: fd
             });
+            const json = await res.json();
+
+            await swal({
+                title: json.Title,
+                text: json.Text,
+                icon: json.Icon,
+                button: json.Button,
+                dangerMode: json.DangerMode
+            });
+
+            if (json.Icon === 'success') {
+                window.location.reload();
+            }
         }
-    });
+    } catch (error) {
+        console.error(error);
+        swal({
+            title: 'Error',
+            text: 'An error occured while submitting the form.',
+            icon: 'error'
+        });
+    }
 }
+
 async function callSubmitRedirect(urlAjax, form, urlRedirect) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'This information is saved to the database.',
-        buttons: true,
-        icon: 'warning'
-    }).then((cf) => {
-        if (cf) {
+    try {
+        const confirmed = await swal({
+            title: 'Are you sure?',
+            text: 'This information will be saved to the database.',
+            buttons: true,
+            icon: 'warning'
+        });
+
+        if (confirmed) {
             const fd = new FormData(form);
-
-            $.ajax({
-                url: urlAjax,
+            const res = await fetch(urlAjax, {
                 method: 'POST',
-                async: true,
-                data: fd,
-                processData: false,
-                contentType: false,
-                traditional: true,
-                success: function (res) {
-                    swal({
-                        title: res.Title,
-                        text: res.Text,
-                        icon: res.Icon,
-                        button: res.Button,
-                        dangerMode: res.DangerMode
-                    }).then(function (e) {
-                        if (res.Icon == 'success') {
-                            if (res.Option != null) {
-                                urlRedirect += '/' + res.Option;
-                            }
+                body: fd
+            });
+            const json = await res.json();
+            await swal({
+                title: json.Title,
+                text: json.Text,
+                icon: json.Icon,
+                button: json.Button,
+                dangerMode: json.DangerMode
+            });
+            if (json.Icon === 'success') {
+                if (json.Option != null) {
+                    urlRedirect += '/' + json.Option;
+                }
+                window.location.href = urlRedirect;
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        swal({
+            title: 'Error',
+            text: 'An error occured while submitting the form.',
+            icon: 'error'
+        });
+    }
+}
 
-                            window.location.href = urlRedirect;
-                        }
-                    });
-                }
-            });
-        }
-    });
-}
 async function callDeleteItem(urlAjax, reloadPage = false) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'Once you delete this information, you cannot recover it.',
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true,
-    }).then((cf) => {
-        if (cf) {
-            $.ajax({
-                url: urlAjax,
-                async: true,
-                success: function (res) {
-                    swal({
-                        title: res.Title,
-                        text: res.Text,
-                        icon: res.Icon,
-                        button: res.Button,
-                        dangerMode: res.DangerMode
-                    }).then(function () {
-                        if (res.Icon == 'success') {
-                            $('#modalArea').modal('hide');
-                            if (reloadPage) {
-                                location.reload();
-                            }
-                            else {
-                                reloadTable();
-                            }
-                        }
-                    });
-                }
+    try {
+        const confirmed = await swal({
+            title: 'Are you sure?',
+            text: 'Once you delete this information, you cannot recover it.',
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true
+        });
+
+        if (confirmed) {
+            const res = await fetch(urlAjax, {
+                method: 'DELETE'
             });
+            const json = await res.json();
+
+            await swal({
+                title: json.Title,
+                text: json.Text,
+                icon: json.Icon,
+                button: json.Button,
+                dangerMode: json.DangerMode
+            });
+            if (json.Icon === 'success') {
+                $('#modalArea').modal('hide');
+                if (reloadPage) {
+                    location.reload();
+                } else {
+                    reloadTable();
+                }
+            }
         }
-    });
+    } catch (error) {
+        console.error(error);
+        swal({
+            title: 'Error',
+            text: 'An error occured while deleting the item.',
+            icon: 'error'
+        });
+    }
 }
+
 async function notifySignout(url) {
     return swal({
         title: 'Are you sure?',
@@ -467,211 +474,74 @@ async function notifySignout(url) {
         }
     });
 }
-async function getSelectOp(urlAjax, val, desSelectId) {
+async function getSelectOp(url, val, desSelectId) {
     const eSelect = $(desSelectId);
     eSelect.empty();
-    return $.ajax({
-        url: urlAjax,
-        data: {
-            id: val
-        },
-        async: true,
-        success: function (res) {
-            $.each(res, function (i, v) {
-                eSelect.append(new Option(v.Text, v.Value));
-            });
+    try {
+        const res = await fetch(url, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: val }),
+        });
+        if (!res.ok) {
+            throw new Error(`Request failed with status code ${res.status}`);
         }
+        const data = await res.json();
+        appendOptions(eSelect, data);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function appendOptions(eSelect, options) {
+    options.forEach(option => {
+        eSelect.append(new Option(option.Text, option.Value));
     });
 }
-async function setSuccessByIdRePage(urlAjax) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'If is confirmed, it cannot be reversed.',
-        icon: 'warning',
-        buttons: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            if (res.Icon == 'success') {
-                                location.reload();
-                            }
-                        });
-                    }
-                });
+
+const warningConfirm = {
+    title: 'Are you sure?',
+    text: 'If is confirmed, it cannot be reversed.',
+    icon: 'warning',
+    buttons: true,
+    dangerMode: false
+};
+
+async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedirect: '', isDangerous: false }) {
+    warningConfirm.dangerMode = option.isDangerous;
+    const confirm = await swal(warningConfirm);
+    if (confirm) {
+        try {
+            const res = await $.ajax({
+                url: urlAjax,
+                async: true,
+            });
+            swal({
+                title: res.Title,
+                text: res.Text,
+                icon: res.Icon,
+                button: res.Button,
+                dangerMode: res.DangerMode
+            });
+            if (res.Icon === 'success') {
+                switch (action) {
+                    case 'reloadPage':
+                        location.reload();
+                        break;
+                    case 'reloadTable':
+                        reloadTable();
+                        break;
+                    case 'redirect':
+                        window.location.href = option.urlRedirect;
+                        break;
+                    default:
+                        console.log("Invalid Action type")
+                }
             }
-        });
-}
-
-async function setDangerByIdRePage(urlAjax) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'If is confirmed, it cannot be reversed.',
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            if (res.Icon == 'success') {
-                                location.reload();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-}
-
-async function setSuccessByIdReTable(urlAjax) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'If is confirmed, it cannot be reversed.',
-        icon: 'warning',
-        buttons: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            if (res.Icon == 'success') {
-                                reloadTable();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-}
-
-async function setDangerByIdReTable(urlAjax) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'If is confirmed, it cannot be reversed.',
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            if (res.Icon == 'success') {
-                                reloadTable();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-}
-
-async function setSuccessByIdReDirect(urlAjax, urlRedirect) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'If is confirmed, it cannot be reversed.',
-        icon: 'warning',
-        buttons: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            if (res.Icon == 'success') {
-                                if (res.Option != null) {
-                                    urlRedirect += '/' + res.Option;
-                                }
-
-                                window.location.href = urlRedirect;
-                            }
-                        });
-                    }
-                });
-            }
-        });
-}
-
-async function setDangerByIdReDirect(urlAjax, urlRedirect) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'If is confirmed, it cannot be reversed.',
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            if (res.Icon == 'success') {
-                                if (res.Option != null) {
-                                    urlRedirect += '/' + res.Option;
-                                }
-
-                                window.location.href = urlRedirect;
-                            }
-                        });
-                    }
-                });
-            }
-        });
+        } catch (error) {
+            console.error(error);
+        }
+    }
 }
 
 async function callDeleteIMG_SC(urlAjax) {
@@ -707,15 +577,38 @@ async function callDeleteIMG_SC(urlAjax) {
     });
 }
 
-// When the user scrolls down 20px from the top of the document, show the button
-window.onscroll = function () { scrollFunction() };
+let lastScrollTop = window.pageYOffset;
+const eleNav = document.querySelector('nav.navbar');
+const topButton = document.getElementById('btnToTop');
+window.addEventListener("scroll", debounce(scrollFunction, 50));
 
-async function scrollFunction() {
-    const top = $('#btnToTop');
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        return top.fadeIn();
+function scrollFunction() {
+    let totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+    totalScroll = totalScroll / 5;
+
+    let scrollTop = window.pageYOffset;
+
+    if (scrollTop > lastScrollTop) {
+        eleNav.style.top = `-${eleNav.offsetHeight}px`;
+    }
+    else {
+        eleNav.style.top = '0';
+    }
+
+    if (scrollTop > totalScroll) {
+        topButton.style.display = 'block';
     } else {
-        return top.fadeOut();
+        topButton.style.display = 'none';
+    }
+
+    lastScrollTop = scrollTop;
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(func, wait);
     }
 }
 

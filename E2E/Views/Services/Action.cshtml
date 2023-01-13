@@ -90,7 +90,7 @@
                                     {
                                         if (Model.Services.Action_User_Id.Equals(userId))
                                         {
-                                            <button class="btn btn-outline-primary" type="button" onclick="setSuccessByIdRePage('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })')">Free point</button>
+                                            <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
                                         }
                                     }
                                 }
@@ -176,7 +176,7 @@
 
                                     if (Model.ServiceChangeDueDate.User_Id.Equals(userId))
                                     {
-                                        <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
+                                        <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })', 'reloadPage', { isDangerous: true })">Cancel due date change</button>
                                     }
                                 }
                             }
@@ -194,7 +194,7 @@
 
                                 if (Model.ServiceChangeDueDate.User_Id.Equals(userId))
                                 {
-                                    <button class="btn btn-outline-danger" onclick="setDangerByIdRePage('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })')">Cancel due date change</button>
+                                    <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Cancel","Services",new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })', 'reloadPage', { isDangerous: true })">Cancel due date change</button>
                                 }
                             }
                         }

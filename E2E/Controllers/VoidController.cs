@@ -1,5 +1,6 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
+using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,6 +127,7 @@ namespace E2E.Controllers
 
         public ActionResult ReReadFile()
         {
+            ClsSwal swal = new ClsSwal();
             try
             {
                 TransactionOptions options = new TransactionOptions
@@ -140,14 +142,32 @@ namespace E2E.Controllers
                     if (cls.Users_AdjustMissing(cls.Users_ReadFile(lastFile)))
                     {
                         scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "รีโหลดข้อมูลสำเร็จแล้ว";
+                        swal.Title = "Successful";
                     }
-                    return RedirectToAction("Index", "Home");
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "รีโหลดข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                swal.Title = ex.Source;
+                swal.Text = ex.Message;
+                Exception inner = ex.InnerException;
+                while (inner != null)
+                {
+                    swal.Title = inner.Source;
+                    swal.Text += string.Format("\n{0}", inner.Message);
+                    inner = inner.InnerException;
+                }
             }
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
     }
 }

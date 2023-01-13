@@ -249,15 +249,61 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Configurations_Table()
+        [HttpDelete]
+        public ActionResult Deletelogo()
         {
-            var system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).ToList();
-            system_Configurations.ForEach(f => f.Users.User_Code = master.Users_GetInfomation(f.User_Id));
-            return View(system_Configurations);
+            ClsSwal swal = new ClsSwal();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    System_Configurations system_Configurations = new System_Configurations();
+
+                    system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
+
+                    system_Configurations.Configuration_Brand = string.Empty;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Complete();
+
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "ลบข้อมูลเรียบร้อย";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "ลบข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        [Authorize]
+        public ActionResult Index()
+        {
+            return View();
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Configurations_Table(System_Configurations model)
+        public ActionResult Table(System_Configurations model)
         {
             ClsSwal swal = new ClsSwal();
             bool res = new bool();
@@ -363,56 +409,27 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Deletelogo()
+        public ActionResult Table()
         {
-            ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            try
             {
                 try
                 {
-                    System_Configurations system_Configurations = new System_Configurations();
-
-                    system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
-
-                    system_Configurations.Configuration_Brand = string.Empty;
-
-                    if (db.SaveChanges() > 0)
-                    {
-                        scope.Complete();
-
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อย";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Icon = "warning";
-                        swal.Text = "ลบข้อมูลไม่สำเร็จ";
-                        swal.Title = "Warning";
-                    }
+                    List<System_Configurations> system_Configurations = db.System_Configurations
+                        .OrderByDescending(o => o.CreateDateTime)
+                        .ToList();
+                    system_Configurations.ForEach(f => f.Users.User_Code = master.Users_GetInfomation(f.User_Id));
+                    return View(system_Configurations);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    throw;
                 }
             }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
-        [Authorize]
-        public ActionResult Index()
-        {
-            return View();
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

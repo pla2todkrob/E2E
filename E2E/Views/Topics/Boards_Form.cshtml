@@ -195,7 +195,7 @@ $(document).on('submit', '#SaveReply', function (e) {
             <div class="ml-auto">
                 @if (userId.HasValue)
                 {
-                    <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',true)"><i class="fa fa-commenting-o"></i></button>@*comment*@
+                    <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_Comment","Topics",new { id = Model.Topics.Topic_Id})',{bigSize:true})"><i class="fa fa-commenting-o"></i></button>@*comment*@
                 }
             </div>
         </div>
@@ -234,10 +234,10 @@ $(document).on('submit', '#SaveReply', function (e) {
                                             @{
                                                 if (Guid.Equals(item.User_Id, userId))
                                                 {
-                                                    <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit*@
+                                                    <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Comment","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item.TopicComment_Id)})',{bigSize:true})"><i class="fa fa-pencil"></i></button>@*Edit*@
                                                 }
                                             }
-                                            <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item.TopicComment_Id})',true)"><i class="fa fa-flag"></i></button>@*ReportComment*@
+                                            <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item.TopicComment_Id})',{bigSize:true})"><i class="fa fa-flag"></i></button>@*ReportComment*@
                                         </div>
                                     }
                                 </div>
@@ -270,9 +270,9 @@ $(document).on('submit', '#SaveReply', function (e) {
                                                 {
                                                     if (Guid.Equals(item2.User_Id, userId))
                                                     {
-                                                        <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',true)"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
+                                                        <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new {  id=Html.ValueFor(w=>item.Topic_Id),comment_id = Html.ValueFor(w=>item2.TopicComment_Id)})',{bigSize:true})"><i class="fa fa-pencil"></i></button>@*Edit Reply*@
                                                     }
-                                                    <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item2.TopicComment_Id})',true)"><i class="fa fa-flag"></i></button>@*ReportComment*@
+                                                    <button class="btn btn-light" onclick="callModal('@Url.Action("Boards_ReportComment","Topics",new { id = item2.TopicComment_Id})',{bigSize:true})"><i class="fa fa-flag"></i></button>@*ReportComment*@
                                                 }
 
                                             }

@@ -118,7 +118,7 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
+        [HttpDelete]
         public ActionResult Delete_EForm(Guid id)
         {
             using (TransactionScope scope = new TransactionScope())

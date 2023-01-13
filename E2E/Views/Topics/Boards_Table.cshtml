@@ -13,59 +13,59 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
+            <tr>
+                <td>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            @Html.ActionLink(item.Topic_Title, "Boards_Form", new { id = item.Topic_Id }) &nbsp;
 
-                        @{
+                            @{
                                 if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
                                 {
-                            <button onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
+                                    <button onclick="callModalTopics('@Url.Action("Boards_Create","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })','@Url.Action("_FileCollection","Topics",new { id=item.Topic_Id })',true)" class="btn"><i class="fa fa-pencil"></i></button>
                                 }
-                        }
-                    </div>
-                    <div class="col-md-9 col-6">
-                        <div class="d-flex justify-content-between flex-wrap">
-                            <small>
-                                <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)
-                            </small>
-                            <small>
-                                @{
+                            }
+                        </div>
+                        <div class="col-md-9 col-6">
+                            <div class="d-flex justify-content-between flex-wrap">
+                                <small>
+                                    <b>Create by:</b> @Html.DisplayFor(i => item.Users.User_Code)
+                                </small>
+                                <small>
+                                    @{
                                         if (item.Update.HasValue)
                                         {
-                                    <b>@Html.DisplayNameFor(m => m.Update):</b>  @Html.DisplayFor(i => item.Update)
+                                            <b>@Html.DisplayNameFor(m => m.Update):</b> @Html.DisplayFor(i => item.Update)
                                         }
                                         else
                                         {
-                                    <b>@Html.DisplayNameFor(m => m.Create):</b>  @Html.DisplayFor(i => item.Create)
+                                            <b>@Html.DisplayNameFor(m => m.Create):</b> @Html.DisplayFor(i => item.Create)
                                         }
-                                }
-                            </small>
+                                    }
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-6">
-                        <div class="d-flex justify-content-around">
-                            @{
-                                if(string.Equals(item.Users.User_Code, ViewBag.Usercode))
-                                {
-                                <a class="small" href="javascript:callModal('@Url.Action("Boards_View","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })',true)"><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_View)</a>
+                        <div class="col-md-3 col-6">
+                            <div class="d-flex justify-content-around">
+                                @{
+                                    if (string.Equals(item.Users.User_Code, ViewBag.Usercode))
+                                    {
+                                        <a class="small" href="javascript:callModal('@Url.Action("Boards_View","Topics",new { id = Html.ValueFor(m => item.Topic_Id) })',{bigSize:true})"><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_View)</a>
+                                    }
+                                    else
+                                    {
+                                        <small><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_View)</small>
+                                    }
                                 }
-                                else
-                                {
-                                <small><i class="fa fa-eye" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_View)</small>
-                                }
-                            }
 
-                            <small><i class="fa fa-commenting-o" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_Comment)</small>
-                            <small><i class="fa fa-picture-o" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Topic_GalleryCount)</small>
-                            <small><i class="fa fa-paperclip" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Topic_FileCount)</small>
+                                <small><i class="fa fa-commenting-o" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Count_Comment)</small>
+                                <small><i class="fa fa-picture-o" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Topic_GalleryCount)</small>
+                                <small><i class="fa fa-paperclip" aria-hidden="true"></i>&nbsp;@Html.DisplayFor(i => item.Topic_FileCount)</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </td>
-        </tr>
+                </td>
+            </tr>
         }
     </tbody>
 </table>

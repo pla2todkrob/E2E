@@ -1,8 +1,5 @@
 ﻿using E2E.Models.Tables;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Models.Filter
@@ -18,6 +15,8 @@ namespace E2E.Models.Filter
                     ExceptionMessage = exception.Message,
                     ControllerName = filterContext.RouteData.Values["controller"].ToString(),
                     ActionName = filterContext.RouteData.Values["action"].ToString(),
+                    ExceptionStackTrace = exception.StackTrace,
+                    ExceptionType = exception.GetType().Name,
                     TimeStamp = DateTime.Now
                 };
 

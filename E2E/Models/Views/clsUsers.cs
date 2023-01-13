@@ -71,6 +71,7 @@ namespace E2E.Models.Views
 
         [Display(Name = "Point")]
         public int User_Point { get; set; }
+
         public string Username { get; set; }
 
         public void RemoveCookie()

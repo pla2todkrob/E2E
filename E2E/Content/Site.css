@@ -1,64 +1,28 @@
-﻿body {
-    font-family: 'Roboto';
-}
+﻿body { font-family: 'Roboto'; }
 
-.fit {
-    width: 1%;
-    white-space: nowrap;
-}
+.fit { width: 1%; white-space: nowrap; }
 
-.img-table {
-    max-height: 192px;
-}
+.img-table { max-height: 192px; }
 
-img#img-table {
-    height: 108px;
-    width: 192px;
-}
+img#img-table { height: 108px; width: 192px; }
 
-#serviceInfo {
-    min-height: 480px;
-}
+#serviceInfo { min-height: 480px; }
 
-.PreLine {
-    white-space: pre-line;
-}
+.PreLine { white-space: pre-line; }
 
-.logo {
-    max-height: calc(3rem - .3125rem - .3125rem);
-}
+.logo { max-height: calc(3rem - .3125rem - .3125rem); }
 
-.section_video {
-    object-fit: contain;
-}
+.section_video { object-fit: contain; }
 
-.row-card {
-    margin-left: -20px;
-    margin-right: -20px;
-}
+.row-card { margin-left: -20px; margin-right: -20px; }
 
-#btnToTop {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 30px;
-    z-index: 99;
-    font-size: 18px;
-    border: none;
-    outline: none;
-    background-color: #0094ff;
-    color: white;
-    cursor: pointer;
-    padding: 15px;
-    border-radius: 4px;
-    line-height: 1px;
-    opacity: 0.6;
-}
+#btnToTop { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; font-size: 18px; border: none; outline: none; background-color: #0094ff; color: white; cursor: pointer; padding: 15px; border-radius: 4px; line-height: 1px; opacity: 0.6; }
 
-    #btnToTop:hover, #btnToTop:active {
-        opacity: 1;
-    }
+    #btnToTop:hover, #btnToTop:active { opacity: 1; }
 
-        #btnToTop:active:after {
-            opacity: 0.6;
-        }
+        #btnToTop:active:after { opacity: 0.6; }
+
+/* CSS code to define the "nav-hide" class */
+nav.navbar { transition: top 0.5s ease; }
+
+.disabled { pointer-events: none; }

@@ -39,8 +39,8 @@
 {
     <div class="d-flex mb-3">
         <div class="ml-auto">
-            <input type="button" name="Cancel" id="Cancel" class="btn btn-warning" value="Cancel" onclick="setDangerByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = false } )', '@Url.Action("Approve", "EForms")')" />
-            <input type="button" name="Approve" id="Approve" class="btn btn-success" value="Approve" onclick="setSuccessByIdReDirect('@Url.Action("Approve_Forms", "EForms", new { res = true } )', '@Url.Action("Approve", "EForms")')" />
+            <input type="button" name="Cancel" id="Cancel" class="btn btn-warning" value="Cancel" onclick="confirmAndPerformAjaxRequest('@Url.Action("Approve_Forms", "EForms", new { res = false } )', 'redirect', { urlRedirect: '@Url.Action("Approve", "EForms")', isDangerous:true })" />
+            <input type="button" name="Approve" id="Approve" class="btn btn-success" value="Approve" onclick="confirmAndPerformAjaxRequest('@Url.Action("Approve_Forms", "EForms", new { res = true } )', 'redirect', { urlRedirect:'@Url.Action("Approve", "EForms")' })" />
         </div>
     </div>
 }

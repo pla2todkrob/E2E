@@ -26,8 +26,8 @@
                 <th>
                     @if (!item.Update.HasValue)
                     {
-                        <button class="btn btn-outline-danger" onclick="setDangerByIdReTable('@Url.Action("RequestChangeDue_Reject","Services",new { id=item.ChangeDueDate_Id })')">Reject</button>
-                        <button class="btn btn-success" onclick="setSuccessByIdReTable('@Url.Action("RequestChangeDue_Accept","Services",new { id=item.ChangeDueDate_Id })')">Accept</button>
+                        <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Reject","Services",new { id=item.ChangeDueDate_Id })', 'reloadTable', { isDangerous: true })">Reject</button>
+                        <button class="btn btn-success" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Accept","Services",new { id=item.ChangeDueDate_Id })','reloadTable')">Accept</button>
                     }
                 </th>
                 <td>@Html.DisplayFor(i => item.Create)</td>

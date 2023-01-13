@@ -22,6 +22,7 @@
         @{ Html.RenderAction("UploadHistory", "Users"); }
     </div>
     <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary mr-auto" onclick="confirmAndPerformAjaxRequest('@Url.Action("ReReadFile","Void")','reloadPage')"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Reload</button>
         <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
     </div>
 }
