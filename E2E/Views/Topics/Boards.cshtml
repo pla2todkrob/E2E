@@ -37,8 +37,8 @@
 
         function reloadTable() {
             callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=1})').then(function () {
-                callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})', false, [], '#datalist2').then(function () {
-                    callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=3})', false, [], '#datalist3');
+                callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})',  '#datalist2').then(function () {
+                    callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=3})', '#datalist3');
                 });
             });
         }

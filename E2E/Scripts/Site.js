@@ -122,8 +122,13 @@ async function createDataTable(tableId, options) {
 
 // Function for fetching and displaying data in a table
 async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = [], blockId = '#datalist') {
-    // move the filter parameter to the query string of the URL
-    const url = urlAjax + "?filter=" + getQueryString();
+    let url = urlAjax;
+    // check if urlAjax already has query string
+    if (urlAjax.indexOf("?") === -1) {
+        url += "?filter=" + getQueryString();
+    } else {
+        url += "&filter=" + getQueryString();
+    }
 
     try {
         // Make the GET request using the async/await pattern
@@ -176,9 +181,14 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
     }
 }
 
-async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId = '#datalist') {
-    // move the filter parameter to the query string of the URL
-    const url = urlAjax + "?filter=" + getQueryString();
+async function callTable_NoSort(urlAjax, blockId = '#datalist') {
+    let url = urlAjax;
+    // check if urlAjax already has query string
+    if (urlAjax.indexOf("?") === -1) {
+        url += "?filter=" + getQueryString();
+    } else {
+        url += "&filter=" + getQueryString();
+    }
 
     try {
         // Make the GET request using the async/await pattern
@@ -198,28 +208,10 @@ async function callTable_NoSort(urlAjax, hasDate = false, dateCol = [], blockId 
         let table;
         // create datatable with no sort
         $(blockId).find('table').each(async function (i, v) {
-            if (hasDate) {
-                let targetArr = [];
-                let targetObj = {};
-
-                // Create an array of columnDefs for date columns
-                $.each(dateCol, function (key, val) {
-                    targetObj = {};
-                    targetObj.targets = val;
-                    targetObj.type = 'date';
-                    targetArr.push(targetObj);
-                });
-                table = await createDataTable(v, {
-                    'columnDefs': targetArr,
-                    'ordering': false,
-                    'scrollX': true
-                });
-            } else {
-                table = await createDataTable(v, {
-                    'ordering': false,
-                    'scrollX': true
-                });
-            }
+            table = await createDataTable(v, {
+                'ordering': false,
+                'scrollX': true
+            });
         });
     } catch (error) {
         // Handle the error

@@ -19,10 +19,10 @@
 
         function reloadTable() {
             if (@ViewBag.AuthorizeIndex != 3) {
-                callTable_NoSort( '@Url.Action("Index_Table_WaitCommit", "Services")', true, [0, 3, 4], '#waitingCommit');
+                callTable_NoSort( '@Url.Action("Index_Table_WaitCommit", "Services")', '#waitingCommit');
             }
 
-            callTable_NoSort( '@Url.Action("Index_Table_WaitAction", "Services")', true, [0, 3], '#waitingAction');
+            callTable_NoSort( '@Url.Action("Index_Table_WaitAction", "Services")', '#waitingAction');
         }
     </script>
 }
