@@ -1607,7 +1607,6 @@ namespace E2E.Models
                 string domainName = ConfigurationManager.AppSettings["DomainName"];
                 using (var context = new PrincipalContext(ContextType.Domain, domainName))
                 {
-                    UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.EmailAddress, username);
                     res = context.ValidateCredentials(username, password);
                 }
 
