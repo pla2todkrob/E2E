@@ -130,26 +130,23 @@ namespace E2E.Controllers
                                 .Select(s => s.Detail_Password)
                                 .FirstOrDefault();
 
-                        if (!string.IsNullOrEmpty(users.User_Email))
+                        if (!string.IsNullOrEmpty(users.Username))
                         {
-                            if (master.LoginDomain(users.User_Email, model.Password))
+                            if (master.HaveAD(users.Username))
                             {
-                                loginPass = true;
-                            }
-                            else
-                            {
-                                if (string.Equals(password, passEncrypt))
+                                if (master.LoginDomain(users.User_Email, model.Password))
+                                {
+                                    loginPass = true;
+                                }
+                                else if (master.LoginDomain(users.Username, model.Password))
                                 {
                                     loginPass = true;
                                 }
                             }
                         }
-                        else
+                        else if (string.Equals(password, passEncrypt))
                         {
-                            if (string.Equals(password, passEncrypt))
-                            {
-                                loginPass = true;
-                            }
+                            loginPass = true;
                         }
                     }
                     else

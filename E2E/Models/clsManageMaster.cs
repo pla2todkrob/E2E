@@ -1338,6 +1338,30 @@ namespace E2E.Models
                 }).ToList();
         }
 
+        public bool HaveAD(string username)
+        {
+            try
+            {
+                bool res = new bool();
+
+                string domainName = ConfigurationManager.AppSettings["DomainName"];
+                using (var context = new PrincipalContext(ContextType.Domain, domainName))
+                {
+                    UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
+                    if (user != null)
+                    {
+                        res = true;
+                    }
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ClsSaveResult InquiryTopic_Delete(Guid id)
         {
             ClsSaveResult res = new ClsSaveResult();
@@ -1583,6 +1607,7 @@ namespace E2E.Models
                 string domainName = ConfigurationManager.AppSettings["DomainName"];
                 using (var context = new PrincipalContext(ContextType.Domain, domainName))
                 {
+                    UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.EmailAddress, username);
                     res = context.ValidateCredentials(username, password);
                 }
 
