@@ -1,0 +1,50 @@
+[
+  {
+    "outputFileName": "Content/css/select2-bootstrap4.min.css",
+    "inputFiles": [
+      "Content/css/select2-bootstrap4.css"
+    ]
+  },
+  {
+    "outputFileName": "Content/Site.min.css",
+    "inputFiles": [
+      "Content/Site.css"
+    ]
+  },
+  {
+    "outputFileName": "Scripts/Site.min.js",
+    "inputFiles": [
+      "Scripts/Site.js"
+    ]
+  },
+  {
+    "outputFileName": "Asset/Master.min.js",
+    "inputFiles": [
+      "Asset/Master.js"
+    ]
+  },
+  {
+    "outputFileName": "Asset/Service.min.js",
+    "inputFiles": [
+      "Asset/Service.js"
+    ]
+  },
+  {
+    "outputFileName": "Asset/Topic.min.js",
+    "inputFiles": [
+      "Asset/Topic.js"
+    ]
+  },
+  {
+    "outputFileName": "Asset/EForm.min.js",
+    "inputFiles": [
+      "Asset/EForm.js"
+    ]
+  },
+  {
+    "outputFileName": "Content/colorbox.min.css",
+    "inputFiles": [
+      "Content/colorbox.css"
+    ]
+  }
+]

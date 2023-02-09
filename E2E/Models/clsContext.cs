@@ -22,7 +22,6 @@ namespace E2E.Models
         {
         }
 
-        public DbSet<ChatGPT> ChatGPTs { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
 
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }

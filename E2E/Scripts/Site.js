@@ -1,8 +1,8 @@
 ﻿//For external
-//const baseUrl = '/E2E';
+const baseUrl = '/E2E';
 
 //For local
-const baseUrl = '';
+/*const baseUrl = '';*/
 
 let chat;
 
@@ -118,22 +118,6 @@ function clearQueryString() {
 // Helper function for creating a DataTable with the given options
 async function createDataTable(tableId, options) {
     return await $(tableId).DataTable(options);
-}
-
-function getCookie(cname) {
-    var name = cname + "=";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return "";
 }
 
 // Function for fetching and displaying data in a table

@@ -26,4 +26,3 @@ img#img-table { height: 108px; width: 192px; }
 nav.navbar { transition: top 0.5s ease; }
 
 .disabled { pointer-events: none; }
-.text-prewrap{white-space:pre-wrap;}

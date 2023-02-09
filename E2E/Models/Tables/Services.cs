@@ -12,7 +12,7 @@ namespace E2E.Models.Tables
             Create = DateTime.Now;
         }
 
-        [Index]
+        [Display(Name = "Action by"), Index]
         public Guid? Action_User_Id { get; set; }
 
         [Index]
@@ -20,7 +20,7 @@ namespace E2E.Models.Tables
 
         public DateTime Create { get; set; }
 
-        [Index]
+        [Display(Name = "Requester"), Index]
         public Guid Create_User_Id { get; set; }
 
         [Display(Name = "Department"), Index]
