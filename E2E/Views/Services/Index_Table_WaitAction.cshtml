@@ -1,46 +1,75 @@
-﻿@model IEnumerable<E2E.Models.Tables.Services>
+﻿@model E2E.Models.Views.ClsServiceUserActionName
 
 @{
-    Layout = null;
-    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+	Layout = null;
 }
 
 <table class="table table-bordered table-hover nowrap w-100">
-    <thead>
-        <tr>
-            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+	<thead>
+		<tr>
+			<th class="fit">@Html.DisplayNameFor(m => m.services.FirstOrDefault().Update)</th>
 
-            <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
+			<th>@Html.DisplayNameFor(m => m.services.FirstOrDefault().Service_Subject)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.services.FirstOrDefault().Action_User_Id)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.services.FirstOrDefault().System_Priorities.Priority_Name)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.services.FirstOrDefault().Service_DueDate)</th>
 
-            @*<th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>*@
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-        <tr>
-            <td>@Html.DisplayFor(i => item.Update)</td>
+			@*<th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>*@
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model.services)
+		{
+		<tr>
+			<td>@Html.DisplayFor(i => item.Update)</td>
 
-            <td class="text-wrap">
-                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
-                <a href="@Url.Action("Action","Services",new { id=item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                @{
-                    if (item.Action_User_Id.HasValue)
-                    {
-                        if (Guid.Equals(item.Action_User_Id.Value, userId))
-                        {
-                    <span class="badge badge-danger">MY TASK</span>
-                        }
-                    }
-                }
-            </td>
-            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+			<td class="text-wrap">
+				<small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+				<a href="@Url.Action("Action", "Services", new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+				@{
+					if (item.Action_User_Id.HasValue)
+					{
+						if (Guid.Equals(item.Action_User_Id.Value, Model.UserId))
+						{
+							<span class="badge badge-danger">MY TASK</span>
+						}
+					}
+				}
+			</td>
+			@{
+				string MyName = " ";
+				if (Model.serviceChangeDueDates.Any(a => a.Service_Id == item.Service_Id))
+				{
 
-            <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
-            @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
-        </tr>
-        }
-    </tbody>
+					Guid UserChangeDue = Model.serviceChangeDueDates.Where(w => w.Service_Id == item.Service_Id).Select(s => s.User_Id).FirstOrDefault();
+
+					MyName = Model.UserDetails.Where(w => w.User_Id == UserChangeDue).Select(s => s.Detail_EN_FirstName).FirstOrDefault();
+
+					<td class="text-center">@Html.DisplayFor(i => MyName)</td>
+
+				}
+				else
+				{
+					if (item.Action_User_Id.HasValue)
+					{
+						if (Guid.Equals(item.Action_User_Id.Value, Model.UserId))
+						{
+							MyName = Model.UserDetails.Where(w => w.User_Id == Model.UserId).Select(s => s.Detail_EN_FirstName).FirstOrDefault();
+						}
+						else
+						{
+							MyName = Model.UserDetails.Where(w => w.User_Id == item.Action_User_Id).Select(s => s.Detail_EN_FirstName).FirstOrDefault();
+						}
+					}
+					<td class="text-center">@Html.DisplayFor(i => MyName)</td>
+				}
+			}
+
+			<td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+
+			<td>@Html.DisplayFor(i => item.Service_DueDate)</td>
+			@*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
+		</tr>
+		}
+	</tbody>
 </table>

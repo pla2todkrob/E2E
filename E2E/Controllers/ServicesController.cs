@@ -323,7 +323,14 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.Services_GetAllTask_IQ().ToList());
+                ClsServiceUserActionName clsServiceUserActionName = new ClsServiceUserActionName();
+                clsServiceUserActionName.services = data.Services_GetAllTask_IQ().ToList();
+                clsServiceUserActionName.UserDetails = db.UserDetails.ToList();
+                clsServiceUserActionName.serviceChangeDueDates = db.ServiceChangeDueDates.ToList();
+                clsServiceUserActionName.UserId = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+
+
+                return View(clsServiceUserActionName);
             }
             catch (Exception)
             {
@@ -915,7 +922,12 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.Services_GetWaitAction_IQ(Guid.Parse(HttpContext.User.Identity.Name)));
+                ClsServiceUserActionName clsServiceUserActionName = new ClsServiceUserActionName();
+                clsServiceUserActionName.services = data.Services_GetWaitAction_IQ(Guid.Parse(HttpContext.User.Identity.Name)).ToList();
+                clsServiceUserActionName.UserDetails = db.UserDetails.ToList();
+                clsServiceUserActionName.serviceChangeDueDates = db.ServiceChangeDueDates.ToList();
+                clsServiceUserActionName.UserId = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                return View(clsServiceUserActionName);
             }
             catch (Exception)
             {

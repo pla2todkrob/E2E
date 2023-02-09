@@ -356,6 +356,7 @@
     <Compile Include="Models\Views\ClsServiceComments.cs" />
     <Compile Include="Models\Views\ClsServices.cs" />
     <Compile Include="Models\Views\ClsServiceTeams.cs" />
+    <Compile Include="Models\Views\ClsServiceUserActionName.cs" />
     <Compile Include="Models\Views\ClsSwal.cs" />
     <Compile Include="Models\Views\ClsTopic.cs" />
     <Compile Include="Models\Views\ClsTopicView.cs" />
