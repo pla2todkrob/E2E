@@ -1,0 +1,23 @@
+﻿@model E2E.Models.ClsOpenAI
+
+@{
+    ViewBag.Title = "Question";
+    Layout = null;
+}
+
+@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveQuestion", @class = "was-validated" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+    @Html.LabelFor(m => m.Question)
+    @Html.HiddenFor(m => m.Answer)
+    @Html.HiddenFor(m => m.AnswerDateTime)
+    @Html.HiddenFor(m => m.QuestionDateTime)
+    <div class="input-group">
+        @Html.TextAreaFor(m => m.Question, new { @class = "form-control", required = "required" })
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <small>Credit:&nbsp;<a href="https://openai.com/" target="_blank">https://openai.com/</a></small>
+}

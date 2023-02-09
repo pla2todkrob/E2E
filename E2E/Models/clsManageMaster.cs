@@ -2591,7 +2591,7 @@ namespace E2E.Models
                     .Select(s => s.Data)
                     .FirstOrDefault();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
