@@ -2,8 +2,8 @@
 
 @{ Layout = null; }
 
-@if (Model.Authorize_Id != 3)
-{
+@*@if (Model.Authorize_Id != 3)
+{*@
     <div class="card shadow mb-5">
         <div class="card-header">
             <h5 class="card-title">Overview</h5>
@@ -12,16 +12,18 @@
             <div class="row">
                 <table class="display table table-bordered table-hover nowrap w-100 mb-5 disabledOption">
                     <thead>
-                        <tr>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Total)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Inprogress_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Complete_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Close_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OnTime_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OnTime_Percent)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OverDue_Count)</th>
-                            <th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Pending_Count)</th>
-                        </tr>
+						<tr>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Total)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Inprogress_Count)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Complete_Count)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Close_Count)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OnTime_Count)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OnTime_Percent)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.OverDue_Count)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Satisfied_Percent)</th>
+							<th>@Html.DisplayNameFor(m => m.ReportKPI_Overview.Pending_Count)</th>
+
+						</tr>
                     </thead>
                     <tbody>
                         <tr>
@@ -32,6 +34,7 @@
                             <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OnTime_Count)</td>
                             <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OnTime_Percent)</td>
                             <td>@Html.DisplayFor(m => m.ReportKPI_Overview.OverDue_Count)</td>
+                            <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Satisfied_Percent)</td>
                             <td>@Html.DisplayFor(m => m.ReportKPI_Overview.Pending_Count)</td>
                         </tr>
                     </tbody>
@@ -40,7 +43,7 @@
         </div>
     </div>
 
-}
+@*}*@
 <div class="card shadow">
     <div class="card-header">
         <h5 class="card-title">Individual</h5>

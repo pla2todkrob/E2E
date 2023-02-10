@@ -156,8 +156,9 @@ namespace E2E.Controllers
                     {
                         userName = users.User_Email;
                     }
+                    string CHK_login = data.LoginDomain(userName.Trim(), model.Password.Trim());
 
-                    if (data.LoginDomain(userName.Trim(), model.Password.Trim()))
+                    if (string.IsNullOrEmpty(CHK_login))
                     {
                         if (!string.IsNullOrEmpty(userDetails.Detail_Password))
                         {
@@ -174,7 +175,7 @@ namespace E2E.Controllers
                         }
                         else
                         {
-                            ModelState.AddModelError("Password", "The password is incorrect.");
+                            ModelState.AddModelError("Password", CHK_login);
                             return View(model);
                         }
                     }
