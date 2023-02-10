@@ -1599,20 +1599,34 @@ namespace E2E.Models
             return db.Master_LineWorks.ToList();
         }
 
-        public bool LoginDomain(string username, string password)
+        public string LoginDomain(string username, string password)
         {
             try
             {
-                bool res = new bool();
+                string res = string.Empty;
                 string domainName = ConfigurationManager.AppSettings["DomainName"];
                 using (var context = new PrincipalContext(ContextType.Domain, domainName))
                 {
-                    res = context.ValidateCredentials(username, password);
+                    if (!context.ValidateCredentials(username, password))
+                    {
+                        using (var searcher = new PrincipalSearcher(new UserPrincipal(context)))
+                        {
+                            dynamic select = searcher.FindAll().Where(w => w.SamAccountName == username).FirstOrDefault() ;
+
+                            res = string.Format("Invalid Password {0}/5", select.BadLogonCount);
+
+                            if (select.BadLogonCount == 5)
+                            {
+                                res = string.Format("Account is currently locked out\n Please contact IT");
+                            }
+
+                        }
+                    }
                 }
 
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

@@ -140,7 +140,7 @@ namespace E2E.Models
                     query = query.Where(w => w.Create <= filter.Date_To);
                 }
 
-                if (res.Authorize_Id != 3)
+                if (res.Authorize_Id /*!= 3*/ > 0)
                 {
                     foreach (var item in userIds)
                     {
@@ -966,6 +966,17 @@ namespace E2E.Models
             }
         }
 
+        public void SaveUserActionChangeDue(Guid Service_ID)
+        {
+            Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            var Services = db.Services.Find(Service_ID);
+            Services.Action_User_Id = userId;
+
+
+            db.SaveChanges();
+
+        }
+
         public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model, string methodName)
         {
             try
@@ -989,6 +1000,7 @@ namespace E2E.Models
                     {
                         Services services = new Services();
                         services = db.Services.Find(model.Service_Id);
+                        SaveUserActionChangeDue(model.Service_Id);
 
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "RequestChangeDue");

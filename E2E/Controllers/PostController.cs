@@ -134,13 +134,14 @@ namespace E2E.Controllers
                         {
                             if (master.HaveAD(users.Username))
                             {
-                                if (master.LoginDomain(users.User_Email, model.Password))
+                                var chk = master.LoginDomain(users.Username, model.Password);
+                                if (string.IsNullOrEmpty(chk))
                                 {
                                     loginPass = true;
                                 }
-                                else if (master.LoginDomain(users.Username, model.Password))
+                                else
                                 {
-                                    loginPass = true;
+                                    clsApi.Message = chk;
                                 }
                             }
                         }
@@ -170,11 +171,6 @@ namespace E2E.Controllers
 
                         clsApi.Value = responseUser;
                         clsApi.IsSuccess = true;
-                    }
-                    else
-                    {
-                        clsApi.Message = "Invalid password";
-                        return clsApi;
                     }
                 }
                 catch (Exception ex)

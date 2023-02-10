@@ -238,6 +238,7 @@ namespace E2E.Controllers
 
         public ActionResult Action(Guid id)
         {
+
             try
             {
                 ViewBag.Is_MustBeApproved = db.Services.Where(w => w.Service_Id == id).Select(s => s.Is_MustBeApproved).FirstOrDefault();
@@ -246,6 +247,8 @@ namespace E2E.Controllers
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
+
+
                 ClsServices clsServices = data.ClsServices_View(id);
 
                 if (clsServices.Services.Status_Id != 1)
@@ -323,12 +326,25 @@ namespace E2E.Controllers
         {
             try
             {
-                ClsServiceUserActionName clsServiceUserActionName = new ClsServiceUserActionName();
-                clsServiceUserActionName.services = data.Services_GetAllTask_IQ().ToList();
-                clsServiceUserActionName.UserDetails = db.UserDetails.ToList();
-                clsServiceUserActionName.serviceChangeDueDates = db.ServiceChangeDueDates.ToList();
-                clsServiceUserActionName.UserId = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
 
+                List<ClsServiceUserActionName> clsServiceUserActionName = data.Services_GetAllTask_IQ()
+                    .AsEnumerable()
+                    .Select(s => new ClsServiceUserActionName()
+                    {
+                        ActionBy = s.Action_User_Id.HasValue ? master.Users_GetInfomation(s.Action_User_Id.Value) : "",
+                        Create = s.Create,
+                        Subject = s.Service_Subject,
+                        Duedate = s.Service_DueDate,
+                        Estimate_time = s.Service_EstimateTime,
+                        Key = s.Service_Key,
+                        Requester = master.Users_GetInfomation(s.User_Id),
+                        Update = s.Update,
+                        ServiceId = s.Service_Id,
+                        System_Priorities = s.System_Priorities,
+                        System_Statuses = s.System_Statuses,
+                        Is_OverDue = s.Is_OverDue
+
+                    }).ToList();
 
                 return View(clsServiceUserActionName);
             }
@@ -922,11 +938,23 @@ namespace E2E.Controllers
         {
             try
             {
-                ClsServiceUserActionName clsServiceUserActionName = new ClsServiceUserActionName();
-                clsServiceUserActionName.services = data.Services_GetWaitAction_IQ(Guid.Parse(HttpContext.User.Identity.Name)).ToList();
-                clsServiceUserActionName.UserDetails = db.UserDetails.ToList();
-                clsServiceUserActionName.serviceChangeDueDates = db.ServiceChangeDueDates.ToList();
-                clsServiceUserActionName.UserId = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+                List<ClsServiceUserActionName> clsServiceUserActionName = data.Services_GetWaitAction_IQ(Guid.Parse(HttpContext.User.Identity.Name))
+                    .AsEnumerable()
+                     .Select(s => new ClsServiceUserActionName()
+                     {
+                         ActionBy = s.Action_User_Id.HasValue ? master.Users_GetInfomation(s.Action_User_Id.Value) : "",
+                         Create = s.Create,
+                         Subject = s.Service_Subject,
+                         Duedate = s.Service_DueDate,
+                         Estimate_time = s.Service_EstimateTime,
+                         Key = s.Service_Key,
+                         Requester = master.Users_GetInfomation(s.User_Id),
+                         Update = s.Update,
+                         ServiceId = s.Service_Id,
+                         System_Priorities = s.System_Priorities,
+                         System_Statuses = s.System_Statuses
+
+                     }).ToList();
                 return View(clsServiceUserActionName);
             }
             catch (Exception)
