@@ -331,13 +331,13 @@ namespace E2E.Controllers
                     .AsEnumerable()
                     .Select(s => new ClsServiceUserActionName()
                     {
-                        ActionBy = s.Action_User_Id.HasValue ? master.Users_GetInfomation(s.Action_User_Id.Value) : "",
+                        ActionBy = s.Action_User_Id.HasValue ? Users_GetName(s.Action_User_Id.Value) : "",
                         Create = s.Create,
                         Subject = s.Service_Subject,
                         Duedate = s.Service_DueDate,
                         Estimate_time = s.Service_EstimateTime,
                         Key = s.Service_Key,
-                        Requester = master.Users_GetInfomation(s.User_Id),
+                        Requester = Users_GetName(s.User_Id),
                         Update = s.Update,
                         ServiceId = s.Service_Id,
                         System_Priorities = s.System_Priorities,
@@ -353,6 +353,23 @@ namespace E2E.Controllers
                 throw;
             }
         }
+
+        public string Users_GetName(Guid id)
+        {
+            try
+            {
+                return db.UserDetails
+                    .Where(w => w.User_Id == id)
+                    .Select(s => new { Data = s.Detail_EN_FirstName })
+                    .Select(s => s.Data)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
         public ActionResult Approve()
         {
@@ -942,13 +959,13 @@ namespace E2E.Controllers
                     .AsEnumerable()
                      .Select(s => new ClsServiceUserActionName()
                      {
-                         ActionBy = s.Action_User_Id.HasValue ? master.Users_GetInfomation(s.Action_User_Id.Value) : "",
+                         ActionBy = s.Action_User_Id.HasValue ? Users_GetName(s.Action_User_Id.Value) : "",
                          Create = s.Create,
                          Subject = s.Service_Subject,
                          Duedate = s.Service_DueDate,
                          Estimate_time = s.Service_EstimateTime,
                          Key = s.Service_Key,
-                         Requester = master.Users_GetInfomation(s.User_Id),
+                         Requester = Users_GetName(s.User_Id),
                          Update = s.Update,
                          ServiceId = s.Service_Id,
                          System_Priorities = s.System_Priorities,
@@ -1135,6 +1152,20 @@ namespace E2E.Controllers
             }
         }
 
+        public ActionResult Report_KPI_Unsatisfied(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(data.ClsReport_KPI_Unsatisfied(_Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult Report_KPI_View(Guid id, string filter)
         {
             try
@@ -1157,11 +1188,12 @@ namespace E2E.Controllers
         public ActionResult RequestChangeDue_Accept(Guid id)
         {
             ClsSwal swal = new ClsSwal();
+            MethodBase methodBase = MethodBase.GetCurrentMethod();
             using (TransactionScope scope = new TransactionScope())
             {
                 try
                 {
-                    if (data.ServiceChangeDueDate_Accept(id))
+                    if (data.ServiceChangeDueDate_Accept(id, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1278,11 +1310,12 @@ namespace E2E.Controllers
         public ActionResult RequestChangeDue_Reject(Guid id)
         {
             ClsSwal swal = new ClsSwal();
+            MethodBase methodBase = MethodBase.GetCurrentMethod();
             using (TransactionScope scope = new TransactionScope())
             {
                 try
                 {
-                    if (data.ServiceChangeDueDate_Reject(id))
+                    if (data.ServiceChangeDueDate_Reject(id, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;

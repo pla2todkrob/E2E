@@ -25,8 +25,5 @@ namespace E2E.Models.Views
         public string Key { get; set; }
         public Guid ServiceId { get; set; }
         public bool Is_OverDue { get; set; }
-
-
-
     }
 }

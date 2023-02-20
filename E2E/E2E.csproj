@@ -1037,6 +1037,7 @@
     <Content Include="Views\OpenAI\History.cshtml" />
     <Content Include="Views\OpenAI\Index.cshtml" />
     <Content Include="Views\OpenAI\Question.cshtml" />
+    <Content Include="Views\Services\Report_KPI_Unsatisfied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

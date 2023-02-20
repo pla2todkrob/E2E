@@ -1,0 +1,47 @@
+﻿@model List<E2E.Models.Views.ClsServiceUserActionName>
+
+@{
+	Layout = null;
+}
+
+<div class="modal-header">
+	<h5 class="modal-title">Total Unsatisfied: @Model.Count() tasks.</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div class="modal-body">
+	<div class="row">
+		<table class="display table table-bordered table-hover nowrap w-100">
+			<thead>
+				<tr>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().Create)</th>
+					<th>@Html.DisplayNameFor(m => m.FirstOrDefault().Subject)</th>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().Requester)</th>
+					<th>@Html.DisplayNameFor(m => m.FirstOrDefault().ActionBy)</th>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().Update)</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model)
+				{
+					string txtColor = "";
+					if (item.Is_OverDue)
+					{
+						txtColor = "text-danger";
+					}
+				<tr class="@txtColor">
+					<td>@Html.DisplayFor(i => item.Create)</td>
+					<td class="text-wrap">
+						<small class="font-weight-bold">[@Html.DisplayFor(i => item.Key)]</small><br />
+						<a target="_blank" href="@Url.Action("ServiceInfomation","Services",new { id = item.ServiceId })">@Html.DisplayFor(i => item.Subject)</a>
+					</td>
+					<td>@Html.DisplayFor(i => item.Requester)</td>
+					<td>@Html.DisplayFor(i => item.ActionBy)</td>
+					<td>@Html.DisplayFor(i => item.Update)</td>
+				</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
