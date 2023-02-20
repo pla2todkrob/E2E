@@ -1,8 +1,8 @@
 ﻿//For external
-/*const baseUrl = '/E2E';*/
+const baseUrl = '/E2E';
 
 //For local
-const baseUrl = '';
+/*const baseUrl = '';*/
 
 let chat;
 
@@ -175,6 +175,36 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                 });
             }
         });
+    } catch (error) {
+        // Handle the error
+        console.error(error);
+    }
+}
+
+async function callTable_Normal(urlAjax, blockId = '#datalist') {
+    let url = urlAjax;
+    // check if urlAjax already has query string
+    if (urlAjax.indexOf("?") === -1) {
+        url += "?filter=" + getQueryString();
+    } else {
+        url += "&filter=" + getQueryString();
+    }
+
+    try {
+        // Make the GET request using the async/await pattern
+        const res = await $.ajax({
+            url: url,
+            method: 'GET',
+        });
+        // append the data to blockId
+        $(blockId).html(res);
+        $(blockId).find('select').each(function () {
+            $(this).select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+        });
+        
     } catch (error) {
         // Handle the error
         console.error(error);

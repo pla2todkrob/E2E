@@ -2,6 +2,7 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -114,16 +115,11 @@ namespace E2E.Models
 
                 int[] finishIds = { 3, 4 };
 
-                string deptName = db.Users
-                        .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                        .FirstOrDefault();
-                List<Guid> deptIds = db.Master_Departments
-                    .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id)
-                    .ToList();
+
+                Guid DeptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
+
                 userIds = db.Users
-                    .Where(w => deptIds.Contains(w.Master_Processes.Master_Sections.Department_Id))
+                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId)
                     .OrderBy(o => o.User_Code)
                     .Select(s => s.User_Id);
 
@@ -253,7 +249,75 @@ namespace E2E.Models
                 double ontimePercent = Convert.ToDouble(ontimeCount) / Convert.ToDouble(res.ReportKPI_Overview.Total);
                 res.ReportKPI_Overview.OnTime_Percent = ontimePercent;
 
+                var UnsatCount = db.Satisfactions.Where(w => w.Unsatisfied);
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        UnsatCount = UnsatCount.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    UnsatCount = UnsatCount.Where(w => w.Create <= filter.Date_To);
+                    res.ReportKPI_Overview.Unsatisfied_Count = UnsatCount.Count();
+                }
+
+                res.ReportKPI_Overview.Satisfied_Percent = Math.Abs(1 - (res.ReportKPI_Overview.Unsatisfied_Count / (double)res.ReportKPI_Overview.Close_Count));
+
+                //double averageScore = res.ReportKPI_Users.Where(w => w.Average_Score.HasValue).Sum(s => s.Average_Score.Value) / res.ReportKPI_Users.Where(w => w.Average_Score.HasValue).Count();
+                //int fullScore = string.IsNullOrEmpty(ConfigurationManager.AppSettings["FullScore"]) ? 5 : Convert.ToInt32(ConfigurationManager.AppSettings["FullScore"]);
+
+
                 return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<ClsServiceUserActionName> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
+        {
+            try
+            {
+                var JobUnsat = db.Satisfactions.Where(w => w.Unsatisfied);
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    JobUnsat = JobUnsat.Where(w => w.Create <= filter.Date_To);
+
+                    var ServiceId = JobUnsat.Select(s => s.Service_Id).ToList();
+                    var services = db.Services.Where(w => ServiceId.Contains(w.Service_Id))
+                   .Select(item => new ClsServiceUserActionName
+                   {
+
+                       ActionBy = db.UserDetails
+                       .Where(w => w.User_Id == item.Action_User_Id)
+                       .Select(s => s.Detail_EN_FirstName)
+                       .FirstOrDefault(),
+                       Create = item.Create,
+                       Update = item.Update,
+                       Subject = item.Service_Subject,
+                       Key = item.Service_Key,
+                       ServiceId = item.Service_Id,
+                       Requester = db.UserDetails
+                       .Where(w => w.User_Id == item.Create_User_Id)
+                       .Select(s => s.Detail_EN_FirstName)
+                       .FirstOrDefault()
+
+                   }).ToList();
+
+                    return services;
+                }
+                else
+                {
+                    return new List<ClsServiceUserActionName>();
+                }
             }
             catch (Exception)
             {
@@ -486,7 +550,8 @@ namespace E2E.Models
                 Satisfactions satisfactions = new Satisfactions
                 {
                     Service_Id = id,
-                    Satisfaction_Average = average
+                    Satisfaction_Average = average,
+                    Unsatisfied = score.Any(w => w.Score < 3)
                 };
                 db.Satisfactions.Add(satisfactions);
 
@@ -808,7 +873,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Accept(Guid id)
+        public bool ServiceChangeDueDate_Accept(Guid id,string methodName)
         {
             try
             {
@@ -846,10 +911,7 @@ namespace E2E.Models
 
                             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
 
-                            string[] cut = linkUrl.Split('/');
-
-                            linkUrl = linkUrl.Replace("RequestChangeDue_Accept/" + cut[5], "Action");
-                            linkUrl += "/" + serviceComments.Service_Id;
+                            linkUrl = linkUrl.Replace(methodName + "/" + serviceChangeDueDate.ChangeDueDate_Id, "Action/" + serviceComments.Service_Id);
 
                             string subject = string.Format("[Accept Request change due] {0} - {1}", services.Service_Key, services.Service_Subject);
                             string content = string.Format("<p><b>Comment: </b> {0}<br />", serviceComments.Comment_Content);
@@ -918,7 +980,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Reject(Guid id)
+        public bool ServiceChangeDueDate_Reject(Guid id, string methodName)
         {
             try
             {
@@ -942,10 +1004,7 @@ namespace E2E.Models
 
                     var linkUrl = HttpContext.Current.Request.Url.OriginalString;
 
-                    string[] cut = linkUrl.Split('/');
-
-                    linkUrl = linkUrl.Replace("RequestChangeDue_Reject/" + cut[5], "Action");
-                    linkUrl += "/" + serviceComments.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName + "/" + serviceChangeDueDate.ChangeDueDate_Id, "Action/" + serviceComments.Service_Id);
 
                     string subject = string.Format("[Reject Request change due] {0} - {1}", Sendto.Services.Service_Key, Sendto.Services.Service_Subject);
                     string content = string.Format("<p><b>Comment: </b> {0}<br />", "Reject due date change request");

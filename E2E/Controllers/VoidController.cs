@@ -169,5 +169,14 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult SetupSat()
+        {
+            List<Guid> SatId = db.SatisfactionDetails.Where(w => w.Point < 3).Select(s => s.Satisfaction_Id).Distinct().ToList();
+
+            db.Satisfactions.Where(w => SatId.Contains(w.Satisfaction_Id)).ToList().ForEach(f => f.Unsatisfied = true);
+            db.SaveChanges();
+            return RedirectToAction("Index","Home");
+        }
     }
 }
