@@ -29,7 +29,7 @@
 			<td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
 			<td class="text-wrap">
 				<small class="font-weight-bold">[@Html.DisplayFor(i => item.Key)]</small><br />
-				<a href="@Url.Action("ServiceInfomation", "Services", new { id = item.Key })">@Html.DisplayFor(i => item.Subject)</a>
+				<a href="@Url.Action("ServiceInfomation", "Services", new { id = item.ServiceId })">@Html.DisplayFor(i => item.Subject)</a>
 			</td>
 
 			<td class="text-center">@Html.DisplayFor(i => item.ActionBy)</td>
