@@ -178,5 +178,22 @@ namespace E2E.Controllers
             db.SaveChanges();
             return RedirectToAction("Index","Home");
         }
+
+        public ActionResult SetUpActionBy()
+        {
+
+            List<Guid> ServiceId = db.Services.Where(w => !w.Action_User_Id.HasValue).Select(s => s.Service_Id).ToList();
+
+            var ActionChangeDue = db.ServiceChangeDueDates.Where(w => ServiceId.Contains(w.Service_Id)).Select(s => new { s.Service_Id, s.User_Id }).ToList();
+
+            foreach (var item in ActionChangeDue)
+            {
+                db.Services.Find(item.Service_Id).Action_User_Id = item.User_Id;
+            }
+
+            db.SaveChanges();
+
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
