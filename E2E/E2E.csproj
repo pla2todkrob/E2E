@@ -383,9 +383,6 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\colorbox.css" />
-    <Content Include="Content\colorbox.min.css">
-      <DependentUpon>colorbox.css</DependentUpon>
-    </Content>
     <Content Include="Content\css\select2-bootstrap4.css" />
     <Content Include="Content\css\select2-bootstrap4.min.css">
       <DependentUpon>select2-bootstrap4.css</DependentUpon>
