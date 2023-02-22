@@ -373,21 +373,9 @@
     <Content Include="android-chrome-512x512.png" />
     <Content Include="apple-touch-icon.png" />
     <Content Include="Asset\EForm.js" />
-    <Content Include="Asset\EForm.min.js">
-      <DependentUpon>EForm.js</DependentUpon>
-    </Content>
     <Content Include="Asset\Master.js" />
-    <Content Include="Asset\Master.min.js">
-      <DependentUpon>Master.js</DependentUpon>
-    </Content>
     <Content Include="Asset\Service.js" />
-    <Content Include="Asset\Service.min.js">
-      <DependentUpon>Service.js</DependentUpon>
-    </Content>
     <Content Include="Asset\Topic.js" />
-    <Content Include="Asset\Topic.min.js">
-      <DependentUpon>Topic.js</DependentUpon>
-    </Content>
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-reboot.css" />
@@ -566,9 +554,6 @@
     <Content Include="Content\images\controls.png" />
     <Content Include="Content\images\loading.gif" />
     <Content Include="Content\justifiedGallery.min.css" />
-    <Content Include="Content\Site.min.css">
-      <DependentUpon>Site.css</DependentUpon>
-    </Content>
     <Content Include="External_Dll\Microsoft.Exchange.WebServices.dll" />
     <Content Include="favicon-16x16.png" />
     <Content Include="favicon-32x32.png" />
@@ -576,7 +561,6 @@
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <None Include="bundleconfig.json" />
     <Content Include="Content\DataTables\css\semanticui.scss" />
     <Content Include="Content\DataTables\css\mixins.scss" />
     <Content Include="Content\DataTables\css\common.scss" />
@@ -794,9 +778,6 @@
     <Content Include="Scripts\select2.js" />
     <Content Include="Scripts\select2.min.js" />
     <Content Include="Scripts\Site.js" />
-    <Content Include="Scripts\Site.min.js">
-      <DependentUpon>Site.js</DependentUpon>
-    </Content>
     <Content Include="Scripts\spin.js" />
     <Content Include="Scripts\spin.min.js" />
     <Content Include="Scripts\src\index.js" />
