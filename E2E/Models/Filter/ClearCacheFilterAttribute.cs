@@ -9,7 +9,7 @@ namespace E2E.Models.Filter
         public override void OnResultExecuting(ResultExecutingContext filterContext)
         {
             filterContext.HttpContext.Response.Cache.SetCacheability(HttpCacheability.NoCache);
-            filterContext.HttpContext.Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
+            filterContext.HttpContext.Response.Cache.SetExpires(DateTime.UtcNow.AddYears(-1));
             filterContext.HttpContext.Response.Cache.SetNoStore();
         }
     }
