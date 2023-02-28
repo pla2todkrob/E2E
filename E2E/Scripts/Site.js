@@ -496,23 +496,22 @@ async function notifySignout(url) {
         }
     });
 }
-async function getSelectOp(url, val, desSelectId) {
+
+function getSelectOp(url, val, desSelectId) {
     const eSelect = $(desSelectId);
     eSelect.empty();
-    try {
-        const res = await fetch(url, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: val }),
-        });
-        if (!res.ok) {
-            throw new Error(`Request failed with status code ${res.status}`);
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: { id: val },
+        dataType: 'json',
+        success: function (data) {
+            appendOptions(eSelect, data);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.error(`Request failed with status code ${xhr.status}`);
         }
-        const data = await res.json();
-        appendOptions(eSelect, data);
-    } catch (err) {
-        console.error(err);
-    }
+    });
 }
 
 function appendOptions(eSelect, options) {

@@ -1,9 +1,9 @@
 ﻿@{
-    ViewBag.Title = "Index";
+	ViewBag.Title = "Index";
 }
 
 @section scripts{
-    <script>
+	<script>
         const apiKey = getCookie("OpenAI_Key");
         let chatHistory, chatLength, areaText;
         $(function () {
@@ -37,7 +37,7 @@
             small.innerHTML = new Date().toLocaleString();
 
             if (ul.children.length === 0) {
-                p.classList.add('bg-primary');
+                p.classList.add('bg-info');
                 p.classList.add('text-white');
                 p.innerHTML = inputText;
                 li.appendChild(small);
@@ -52,6 +52,7 @@
                 li.classList.add("pr-5");
             }
             ul.appendChild(li);
+            areaText.val('');
         }
 
         function loadQuestion() {
@@ -77,44 +78,48 @@
 
         $(document).on('submit', '#SaveQuestion', function (e) {
             e.preventDefault();
-            appendChatHistory(areaText.val()).then(function () {
-                $('#Question').val(areaText.val());
+            let txtRequest = areaText.val();
+			appendChatHistory(txtRequest).then(function () {
+
+				$('#Question').val(txtRequest);
+				$('#Question_Hidden').val(txtRequest);
                 $('#QuestionDateTime').val(new Date().toISOString());
 
                 $.ajax({
                     type: "POST",
-                    url: "https://api.openai.com/v1/engines/text-davinci-003/completions",
+                    url: "https://api.openai.com/v1/completions",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${apiKey}`
                     },
                     async: true,
                     data: JSON.stringify({
-                        prompt: areaText.val(),
+                        prompt: txtRequest,
+                        temperature: 0,
+                        model: "text-davinci-003",
                         max_tokens: 250,
-                        stop: null,
-                        temperature: 0.5
+						stop: null
                     }),
                     success: function (res) {
-                        console.log(res);
-                        appendChatHistory(res.choices[0].text).then(function () {
-                            $('#Answer').val(res.choices[0].text);
+                        let txtResponse = res.choices[0].text;
+						appendChatHistory(txtResponse).then(function () {
+							$('#Answer').val(txtResponse);
                             $('#AnswerDateTime').val(new Date().toISOString());
-                            $.ajax({
-                                url: '@Url.Action("Question","OpenAI")',
-                                type: 'POST',
-                                async: true,
-                                processData: false,
-                                contentType: false,
-                                data: new FormData(document.getElementById('SaveQuestion')),
-                                success: function (res2) {
-                                    console.log(res2);
-                                    loadQuestion();
-                                },
-                                error: function (error2) {
-                                    console.error(error2);
-                                }
-                            });
+
+fetch('@Url.Action("Question","OpenAI")', {
+  method: 'POST',
+  body: new FormData(document.getElementById('SaveQuestion')),
+})
+  .then(response => response.json())
+  .then(res2 => {
+    console.log(res2);
+    loadQuestion();
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+
                         });
                     },
                     error: function (error) {
@@ -138,22 +143,23 @@
                 loadQuestion();
             });
         }
-    </script>
+	</script>
 }
 
 @section breadcrumb{
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-            <li class="breadcrumb-item ">Chat bot</li>
-        </ol>
-    </nav>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+			<li class="breadcrumb-item ">OpenAI</li>
+			<li class="breadcrumb-item ">Chat GPT</li>
+		</ol>
+	</nav>
 }
 
 <div class="card">
-    <div class="card-header">
-        <h4 class="card-title">Open AI</h4>
-    </div>
-    <div class="card-body" id="historySection"></div>
-    <div class="card-footer" id="questionSection"></div>
+	<div class="card-header">
+		<h4 class="card-title">Open AI</h4>
+	</div>
+	<div class="card-body" id="historySection"></div>
+	<div class="card-footer" id="questionSection"></div>
 </div>
