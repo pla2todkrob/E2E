@@ -10,6 +10,8 @@
     @Html.AntiForgeryToken()
     @Html.ValidationSummary(false, "", new { @class = "text-danger" })
     @Html.LabelFor(m => m.Question)
+
+    @Html.HiddenFor(m => m.Question_Hidden)
     @Html.HiddenFor(m => m.Answer)
     @Html.HiddenFor(m => m.AnswerDateTime)
     @Html.HiddenFor(m => m.QuestionDateTime)

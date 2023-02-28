@@ -1,0 +1,38 @@
+﻿@model E2E.Models.Views.ClsGPT_Sum
+
+@{
+	Layout = null;
+}
+
+<table class="table table-bordered table-hover bg-white w-100">
+	<thead>
+		<tr>
+			<th>@Html.DisplayNameFor(m => m.ClsGPTs.FirstOrDefault().UserName)
+			<th>@Html.DisplayNameFor(m => m.ClsGPTs.FirstOrDefault().Amount)</th>
+			<th>@Html.DisplayNameFor(m => m.ClsGPTs.FirstOrDefault().Tokens)</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model.ClsGPTs)
+		{
+			<tr>
+				<td><span class="btn btn-link" onclick="callUsageDetailModal('@item.UserID')">@Html.DisplayFor(i => item.UserName)</span></td>
+				<td>@Html.DisplayFor(i => item.Amount)</td>
+				<td>@Html.DisplayFor(i => item.Tokens)</td>
+			</tr>
+		}
+	</tbody>
+	<tfoot>
+		<tr>
+			<th class="text-right">
+				Total
+			</th>
+			<th>
+				@Html.DisplayFor(i => Model.TotalAmount)
+			</th>
+			<th>
+				@Html.DisplayFor(i => Model.TotalToken)
+			</th>
+		</tr>
+	</tfoot>
+</table>

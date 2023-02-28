@@ -231,6 +231,9 @@
     </Reference>
     <Reference Include="System.Net.Http.WebRequest">
     </Reference>
+    <Reference Include="ThaiStringTokenizer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ThaiStringTokenizer.1.0.1\lib\netstandard2.0\ThaiStringTokenizer.dll</HintPath>
+    </Reference>
     <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
       <HintPath>..\packages\WebActivatorEx.2.0\lib\net40\WebActivatorEx.dll</HintPath>
     </Reference>
@@ -344,6 +347,7 @@
     <Compile Include="Models\Views\ClsDocuments.cs" />
     <Compile Include="Models\Views\ClsEForm.cs" />
     <Compile Include="Models\Views\ClsEFormApprover.cs" />
+    <Compile Include="Models\Views\ClsGPT.cs" />
     <Compile Include="Models\Views\ClsGrades.cs" />
     <Compile Include="Models\Views\ClsHome.cs" />
     <Compile Include="Models\Views\ClsImage.cs" />
@@ -1016,6 +1020,9 @@
     <Content Include="Views\OpenAI\Index.cshtml" />
     <Content Include="Views\OpenAI\Question.cshtml" />
     <Content Include="Views\Services\Report_KPI_Unsatisfied.cshtml" />
+    <Content Include="Views\OpenAI\Usage.cshtml" />
+    <Content Include="Views\OpenAI\Usage_Table.cshtml" />
+    <Content Include="Views\OpenAI\Usage_Detail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,46 +1,47 @@
 ﻿@model E2E.Models.Views.ClsCountNavbar
 
 @{
-    Layout = null;
+	Layout = null;
 }
 
 <div class="collapse navbar-collapse" id="navbar_top">
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-            <a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@*@{ Html.RenderAction("_NavService", "Configurations"); }*@</a>
-        </li>
+	<ul class="navbar-nav mr-auto">
+		<li class="nav-item">
+			<a class="nav-link" href="@Url.Action("Index","Services")" id="nav_service">@*@{ Html.RenderAction("_NavService", "Configurations"); }*@</a>
+		</li>
 
-        <li class="nav-item dropdown" id="nav_department">
-            @*@{ Html.RenderAction("_NavDepartment", "Configurations"); }*@
-        </li>
-    </ul>
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-            <a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@*@{ Html.RenderAction("_Newtopic", "Topics"); }*@ </a>
-        </li>
+		<li class="nav-item dropdown" id="nav_department">
+			@*@{ Html.RenderAction("_NavDepartment", "Configurations"); }*@
+		</li>
+	</ul>
+	<ul class="navbar-nav ml-auto">
+		<li class="nav-item">
+			<a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@*@{ Html.RenderAction("_Newtopic", "Topics"); }*@ </a>
+		</li>
 
-        <li class="nav-item dropdown">
-            @{ Html.RenderAction("_NavEForms", "Configurations"); }
-        </li>
+		<li class="nav-item dropdown">
+			@{ Html.RenderAction("_NavEForms", "Configurations"); }
+		</li>
 
-        @if (Model.Admin.HasValue)
-        {
-            if (Model.Admin == 1)
-            {
-                Html.RenderPartial("_NavbarAdmin");
-            }
+		@if (Model.Admin.HasValue)
+		{
+			if (Model.Admin == 1)
+			{
+				Html.RenderPartial("_NavbarAdmin");
+			}
 
-            Html.RenderAction("_NavManagement", "Configurations");
+			Html.RenderAction("_NavManagement", "Configurations");
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    @{ Html.RenderAction("_Profile", "Configurations"); }
+			<li class="nav-item dropdown">
 
-                    @if (Model.ChangeDue.Value > 0)
-                    {
-                        <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
-                    }
-                </a>
+				<a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					@{ Html.RenderAction("_Profile", "Configurations"); }
+
+					@if (Model.ChangeDue.Value > 0)
+					{
+						<span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
+					}
+				</a>
 				<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_profile">
 					<a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
 					<a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
@@ -52,18 +53,32 @@
 							<span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
 						}
 					</a>
-					<a class="dropdown-item" href="@Url.Action("Index", "OpenAI")">ChatGPT</a>
+
+					<!-- เพิ่ม sub-menu ใหม่ -->
+					<a id="Dropdowngpt" class="dropdown-toggle dropdown-item " href="#" data-toggle="dropdown">
+						OpenAI
+					</a>
+
+					<div class="dropdown-submenu">
+						<div class="dropdown-menu dropdown-menu-right" aria-labelledby="Dropdowngpt">
+							<a class="dropdown-item" href="@Url.Action("Index", "OpenAI")">Chat GPT</a>
+							<a class="dropdown-item" href="@Url.Action("Usage", "OpenAI")">Usage</a>
+						</div>
+					</div>
+
+					<!-- สิ้นสุด sub-menu -->
+
 					<div class="dropdown-divider"></div>
 					@{ Html.RenderAction("ShowChangePassword", "Users"); }
 					<a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
 				</div>
-            </li>
-        }
-        else
-        {
-            <li class="nav-item">
-                <a class="nav-link" href="@FormsAuthentication.LoginUrl">Login</a>
-            </li>
-        }
-    </ul>
+			</li>
+		}
+		else
+		{
+			<li class="nav-item">
+				<a class="nav-link" href="@FormsAuthentication.LoginUrl">Login</a>
+			</li>
+		}
+	</ul>
 </div>
