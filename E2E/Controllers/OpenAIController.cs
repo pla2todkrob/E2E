@@ -15,7 +15,7 @@ namespace E2E.Controllers
         private ClsOpenAI clsOpenAI = new ClsOpenAI();
         private ClsContext db = new ClsContext();
         private ClsManageMaster master = new ClsManageMaster();
-        private ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
+        private SearchFilter  searchFilter = new SearchFilter();
 
         public ActionResult History()
         {
@@ -23,7 +23,7 @@ namespace E2E.Controllers
             if (Guid.TryParse(HttpContext.User.Identity.Name, out Guid userId))
             {
                 clsOpenAIs = db.ChatGPTs
-                .Where(w => w.User_Id.Equals(userId))
+                .Where(w => w.User_Id.Equals(userId) && w.Display == false)
                 .OrderBy(o => o.Create)
                 .Select(s => new ClsOpenAI()
                 {
@@ -62,6 +62,9 @@ namespace E2E.Controllers
 
         public ActionResult Question()
         {
+            var userID = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+            ViewBag.History = db.ChatGPTs.Where(w => w.User_Id == userID  && w.Display == false).Count();
+
             return View(new ClsOpenAI());
         }
 
@@ -78,14 +81,14 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Usage(ReportKPI_Filter filter)
+        public ActionResult Usage(SearchFilter filter)
         {
             return View(filter);
         }
 
         public ActionResult Usage_Table(string filter)
         {
-            ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+            SearchFilter _Filter = searchFilter.DeserializeFilter(filter);
 
 
             Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
@@ -128,29 +131,42 @@ namespace E2E.Controllers
             ClsGPT_Sum clsGPT_Sum = new ClsGPT_Sum();
             foreach (var item in userIds.Distinct())
             {
-                ClsGPT clsGPT = db.ChatGPTs
-                    .Where(w => w.User_Id == item)
-                    .AsEnumerable()
-                    .Select(s => new ClsGPT()
-                    {
-                        UserID = s.User_Id,
-                        UserName = master.Users_GetInfomation(s.User_Id),
-                        Amount = db.ChatGPTs.Where(w => w.User_Id == s.User_Id).Count(),
-                        Tokens = db.ChatGPTs.Where(w => w.User_Id == s.User_Id).Sum(s2 => s2.Tokens)
-                    }).FirstOrDefault();
+                List<ChatGPT> ChatGPTs = chatGPTs.Where(w => w.User_Id == item).ToList();
 
-                clsGPT_Sum.ClsGPTs.Add(clsGPT);
-                clsGPT_Sum.TotalAmount += clsGPT.Amount;
-                clsGPT_Sum.TotalToken += clsGPT.Tokens;
+                if (ChatGPTs.Count > 0)
+                {
+                    ClsGPT clsGPT = new ClsGPT();
+                    clsGPT.Amount = ChatGPTs.Count();
+                    clsGPT.Tokens = ChatGPTs.Sum(s => s.Tokens);
+                    clsGPT.UserID = item;
+                    clsGPT.UserName = master.Users_GetInfomation(item);
+
+                    clsGPT_Sum.ClsGPTs.Add(clsGPT);
+                    clsGPT_Sum.TotalAmount += clsGPT.Amount;
+                    clsGPT_Sum.TotalToken += clsGPT.Tokens;
+                }
+
+                
 
             }
 
             return View(clsGPT_Sum);
         }
 
+        public void ClearTxt()
+        {
+            Guid UserID = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+            db.ChatGPTs
+                .Where(w => w.User_Id == UserID && w.Display == false)
+                .ToList()
+                .ForEach(f => f.Display = true);
+
+            db.SaveChanges();
+        }
+
         public ActionResult Usage_Detail(Guid id,string filter)
         {
-            ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+            SearchFilter _Filter = searchFilter.DeserializeFilter(filter);
             var Date_To = _Filter.Date_To.AddDays(1);
 
            var chatGPTs = db.ChatGPTs.Where(w=>w.User_Id == id &&  w.Create >= _Filter.Date_From && w.Create <= Date_To).ToList();

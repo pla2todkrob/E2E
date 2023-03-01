@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Views.ReportKPI_Filter
+﻿@model E2E.Models.Views.SearchFilter
 
 @{
 	ViewBag.Title = "Usage";
@@ -90,10 +90,10 @@
 			<div class="ml-auto form-group">
 
 				@Html.LabelFor(m => m.Date_From, new { @class = "mr-1" })
-				@Html.TextBoxFor(m => m.Date_From, "0:yyyy-MM-dd", new { @class = "mr-1 form-control", type = "date" })
+				@Html.TextBoxFor(m => m.Date_From, "{0:yyyy-MM-dd}", new { @class = "mr-1 form-control", type = "date" })
 
 				@Html.LabelFor(m => m.Date_To, new { @class = "mr-1" })
-				@Html.TextBoxFor(m => m.Date_To, "0:yyyy-MM-dd", new { @class = "mr-1 form-control", type = "date", required = "required", onchange = "adjustMaxMin()" })
+				@Html.TextBoxFor(m => m.Date_To, "{0:yyyy-MM-dd}", new { @class = "mr-1 form-control", type = "date", required = "required", onchange = "adjustMaxMin()" })
 
 
 				<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>

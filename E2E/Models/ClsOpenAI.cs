@@ -24,6 +24,7 @@ namespace E2E.Models
         public DateTime QuestionDateTime { get; set; }
         public bool Display { get; set; }
         public string Question_Hidden { get; set; }
+        public int Tokens_Hidden { get; set; }
 
         public ClsOpenAI Response(ClsOpenAI model)
         {
@@ -40,8 +41,8 @@ namespace E2E.Models
                             Question = model.Question_Hidden.Trim(),
                             QuestionDateTime = model.QuestionDateTime,
                             User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name),
-                            Display = true,
-                            Tokens = CountTokens(model.Question_Hidden),
+                            Display = false,
+                            Tokens = model.Tokens_Hidden
                         };
                         db.Entry(chatGPT).State = System.Data.Entity.EntityState.Added;
                         if (db.SaveChanges() > 0)
@@ -62,6 +63,8 @@ namespace E2E.Models
             public string text { get; set; }
         }
 
+
+        //ไม่ใช้แล้ว เป็น API สำหรับ คำนวน Token ChatGPT
         public static int CountTokens(string sentence)
         {
             // กำหนดข้อความที่ต้องการส่งไปให้ GPT
