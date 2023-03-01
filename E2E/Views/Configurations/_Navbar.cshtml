@@ -32,7 +32,20 @@
 
 			Html.RenderAction("_NavManagement", "Configurations");
 
+
 			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="dropdown_openAI" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					OpenAI
+				</a>
+				<div class="dropdown-menu" aria-labelledby="dropdown_openAI">
+					<a class="dropdown-item" href="@Url.Action("Index", "OpenAI")">Chat GPT</a>
+					<a class="dropdown-item" href="@Url.Action("Usage", "OpenAI")">Usage</a>
+				</div>
+			</li>
+
+
+			<li class="nav-item dropdown">
+
 
 				<a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					@{ Html.RenderAction("_Profile", "Configurations"); }
@@ -53,20 +66,6 @@
 							<span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
 						}
 					</a>
-
-					<!-- เพิ่ม sub-menu ใหม่ -->
-					<a id="Dropdowngpt" class="dropdown-toggle dropdown-item " href="#" data-toggle="dropdown">
-						OpenAI
-					</a>
-
-					<div class="dropdown-submenu">
-						<div class="dropdown-menu dropdown-menu-right" aria-labelledby="Dropdowngpt">
-							<a class="dropdown-item" href="@Url.Action("Index", "OpenAI")">Chat GPT</a>
-							<a class="dropdown-item" href="@Url.Action("Usage", "OpenAI")">Usage</a>
-						</div>
-					</div>
-
-					<!-- สิ้นสุด sub-menu -->
 
 					<div class="dropdown-divider"></div>
 					@{ Html.RenderAction("ShowChangePassword", "Users"); }

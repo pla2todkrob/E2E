@@ -11,6 +11,7 @@
         });
 
         async function appendChatHistory(inputText) {
+			
             inputText = inputText.trim();
             let newItem = document.createElement("li");
             newItem.id = "qa-" + chatLength;
@@ -52,7 +53,8 @@
                 li.classList.add("pr-5");
             }
             ul.appendChild(li);
-            areaText.val('');
+            return areaText.val('');
+            
         }
 
         function loadQuestion() {
@@ -60,7 +62,7 @@
                     url: '@Url.Action("Question","OpenAI")',
                     async: true,
                     method: 'GET'
-                }).done(d2 => {
+            }).done(d2 => {
                     $('#questionSection').html(d2);
                     areaText = $('#Question');
                     areaText.focus();
@@ -79,9 +81,8 @@
         $(document).on('submit', '#SaveQuestion', function (e) {
             e.preventDefault();
             let txtRequest = areaText.val();
+			
 			appendChatHistory(txtRequest).then(function () {
-
-				$('#Question').val(txtRequest);
 				$('#Question_Hidden').val(txtRequest);
                 $('#QuestionDateTime').val(new Date().toISOString());
 
@@ -101,9 +102,11 @@
 						stop: null
                     }),
                     success: function (res) {
+                        console.log(res);
                         let txtResponse = res.choices[0].text;
 						appendChatHistory(txtResponse).then(function () {
-							$('#Answer').val(txtResponse);
+                            $('#Answer').val(txtResponse);
+							$('#Tokens_Hidden').val(res.usage.prompt_tokens);
                             $('#AnswerDateTime').val(new Date().toISOString());
 
 fetch('@Url.Action("Question","OpenAI")', {
@@ -130,6 +133,29 @@ fetch('@Url.Action("Question","OpenAI")', {
 
             return false;
         });
+
+
+
+function clearTxt() {
+    swal({
+        title: "Are you sure?",
+        text: "Once cleared, you will not be able to recover the text!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+    .then((willClear) => {
+        if (willClear) {
+            $.ajax({
+                url: '@Url.Action("ClearTxt","OpenAI")',
+                method: 'GET'
+            })
+            .done(function () {
+                window.location.reload();
+            });
+        }
+    });
+}
 
         function reloadChatGPT() {
             $.ajax({
