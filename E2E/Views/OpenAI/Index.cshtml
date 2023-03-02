@@ -4,6 +4,9 @@
 
 @section scripts{
 	<script>
+
+        var count = true;
+
         const apiKey = getCookie("OpenAI_Key");
         let chatHistory, chatLength, areaText;
         $(function () {
@@ -11,7 +14,7 @@
         });
 
         async function appendChatHistory(inputText) {
-			
+
             inputText = inputText.trim();
             let newItem = document.createElement("li");
             newItem.id = "qa-" + chatLength;
@@ -26,35 +29,57 @@
                 ul = chatHistory.lastElementChild.children[0];
             }
 
+
             let li = document.createElement("li");
 
             let p = document.createElement("p");
-            p.classList.add('text-prewrap');
-            p.classList.add('p-2');
-            p.classList.add('rounded');
+			p.classList.add('text-prewrap');
+			p.classList.add('d-inline-block');
+			p.classList.add('p-2');
+			p.classList.add('rounded');
             p.classList.add('mt-1');
 
-            let small = document.createElement("small");
-            small.innerHTML = new Date().toLocaleString();
+			const elements = document.querySelectorAll('[name="pHistory"]');
+            const elementArray = Array.from(elements); // แปลง NodeList เป็น Array
+            const foundElement = elementArray.find(element => element.textContent == '@DateTime.Now.ToString("d")');
+
+                if (!foundElement) {
+					if (count) {
+						let p_Center = document.createElement("p");
+						p_Center.innerHTML = '@DateTime.Now.ToString("d")';
+						p_Center.classList.add('text-center')
+                        li.appendChild(p_Center);
+
+                        count = false;
+					}
+
+                }
+
+
+            let p_small = document.createElement("p");
+            p_small.innerHTML = new Date().toLocaleTimeString();
+            p_small.classList.add('small')
+            p_small.classList.add('mb-0')
+
 
             if (ul.children.length === 0) {
-                p.classList.add('bg-info');
-                p.classList.add('text-white');
-                p.innerHTML = inputText;
-                li.appendChild(small);
-                li.appendChild(p);
+				p.classList.add('bg-info');
+				p.classList.add('text-white');
+				p.innerHTML = inputText;
+                li.appendChild(p_small);
+				li.appendChild(p);
                 li.classList.add("text-right");
                 li.classList.add("pl-5");
             } else {
-                p.classList.add('bg-light');
-                p.innerHTML = inputText;
-                li.appendChild(small);
-                li.appendChild(p);
+				p.classList.add('bg-light');
+				p.innerHTML = inputText;
+                li.appendChild(p_small);
+				li.appendChild(p);
                 li.classList.add("pr-5");
             }
             ul.appendChild(li);
             return areaText.val('');
-            
+
         }
 
         function loadQuestion() {
@@ -81,7 +106,7 @@
         $(document).on('submit', '#SaveQuestion', function (e) {
             e.preventDefault();
             let txtRequest = areaText.val();
-			
+
 			appendChatHistory(txtRequest).then(function () {
 				$('#Question_Hidden').val(txtRequest);
                 $('#QuestionDateTime').val(new Date().toISOString());
