@@ -13,6 +13,31 @@ namespace E2E.Models
 {
     public class ClsContext : DbContext
     {
+        protected Guid GetUserId(DbPropertyValues propertyValues)
+        {
+            try
+            {
+                Guid res = Guid.Empty;
+                if (HttpContext.Current.User.Identity.IsAuthenticated)
+                {
+                    res = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                }
+                else
+                {
+                    string propUserId = propertyValues.PropertyNames.Where(w => w.Contains("User_Id")).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(propUserId))
+                    {
+                        res = Guid.Parse(propertyValues[propUserId].ToString());
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -21,6 +46,7 @@ namespace E2E.Models
         public ClsContext() : base(ConfigurationManager.AppSettings["NameConn"])
         {
         }
+
         public DbSet<ChatGPT> ChatGPTs { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
 
@@ -132,10 +158,11 @@ namespace E2E.Models
                     var tableName = entry.Entity.GetType().Name;
                     var originalValues = entry.OriginalValues;
                     var currentValues = entry.CurrentValues;
+                    Guid userId = GetUserId(originalValues);
 
                     foreach (var propName in originalValues.PropertyNames)
                     {
-                        if (propName.Contains("update"))
+                        if (propName.ToLower().Contains("update"))
                         {
                             var propType = entry.Entity.GetType().GetProperty(propName).PropertyType;
                             if (propType == typeof(DateTime))
@@ -143,6 +170,7 @@ namespace E2E.Models
                                 continue;
                             }
                         }
+
                         var originalValue = originalValues[propName];
                         var currentValue = currentValues[propName];
                         if (!Equals(originalValue, currentValue))
@@ -153,7 +181,7 @@ namespace E2E.Models
                                 ColumnName = propName,
                                 OriginalValue = originalValue?.ToString(),
                                 CurrentValue = currentValue?.ToString(),
-                                User_Id = HttpContext.Current.User.Identity.IsAuthenticated ? Guid.Parse(HttpContext.Current.User.Identity.Name) : Guid.Empty,
+                                User_Id = userId,
                                 IP_Address = HttpContext.Current.Request.UserHostAddress,
                             };
                             Log_DbChanges.Add(log);
@@ -168,6 +196,7 @@ namespace E2E.Models
 
                 foreach (var entry in deletedEntries)
                 {
+                    Guid userId = GetUserId(entry.OriginalValues);
                     var entityType = entry.Entity.GetType();
                     var tableName = entityType.Name;
                     var primaryKey = entityType.GetProperties().Where(p => p.GetCustomAttributes(typeof(KeyAttribute), false).Count() > 0).First();
@@ -176,7 +205,7 @@ namespace E2E.Models
                     {
                         TableName = tableName,
                         KeyValues = keyValues,
-                        User_Id = HttpContext.Current.User.Identity.IsAuthenticated ? Guid.Parse(HttpContext.Current.User.Identity.Name) : Guid.Empty,
+                        User_Id = userId,
                         IP_Address = HttpContext.Current.Request.UserHostAddress,
                     };
                     Log_DbDeletes.Add(log);

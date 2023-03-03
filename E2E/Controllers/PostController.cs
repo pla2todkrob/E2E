@@ -78,8 +78,8 @@ namespace E2E.Controllers
 
                     while (inner != null)
                     {
-                        inner = inner.InnerException;
                         clsApi.Message += "\n" + inner.Message;
+                        inner = inner.InnerException;
                     }
                 }
             }
@@ -125,6 +125,20 @@ namespace E2E.Controllers
                         .FirstOrDefault();
                     if (users != null)
                     {
+                        if (string.IsNullOrEmpty(users.Username))
+                        {
+                            ClsActiveDirectoryInfo adInfo = new ClsManageMaster().GetAdInfo(users.User_Code);
+                            if (!string.IsNullOrEmpty(adInfo.SamAccountName))
+                            {
+                                users.Username = adInfo.SamAccountName;
+                                users.User_Email = adInfo.UserPrincipalName;
+                                UserDetails userDetails = db.UserDetails.Where(w => w.User_Id == users.User_Id).FirstOrDefault();
+                                userDetails.Detail_Password = string.Empty;
+                                userDetails.Detail_ConfirmPassword = string.Empty;
+                                db.SaveChanges();
+                            }
+                        }
+
                         string password = db.UserDetails
                                 .Where(w => w.User_Id == users.User_Id)
                                 .Select(s => s.Detail_Password)
@@ -148,6 +162,10 @@ namespace E2E.Controllers
                         else if (string.Equals(password, passEncrypt))
                         {
                             loginPass = true;
+                        }
+                        else
+                        {
+                            clsApi.Message = "Password is incorrect";
                         }
                     }
                     else
@@ -180,8 +198,8 @@ namespace E2E.Controllers
 
                     while (inner != null)
                     {
-                        inner = inner.InnerException;
                         clsApi.Message += "\n" + inner.Message;
+                        inner = inner.InnerException;
                     }
                 }
             }

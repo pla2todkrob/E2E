@@ -1,8 +1,8 @@
 ﻿//For external
-const baseUrl = '/E2E';
+//const baseUrl = '/E2E';
 
 //For local
-/*const baseUrl = '';*/
+const baseUrl = '';
 
 let chat;
 
@@ -204,7 +204,6 @@ async function callTable_Normal(urlAjax, blockId = '#datalist') {
                 width: '100%'
             });
         });
-        
     } catch (error) {
         // Handle the error
         console.error(error);
@@ -637,7 +636,6 @@ function debounce(func, wait) {
 async function topFunction() {
     await window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 
 function getCookie(cname) {
     var name = cname + "=";
