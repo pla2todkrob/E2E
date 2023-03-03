@@ -1,5 +1,5 @@
 ﻿//For external
-//const baseUrl = '/E2E';
+/*const baseUrl = '/E2E';*/
 
 //For local
 const baseUrl = '';

@@ -1611,7 +1611,7 @@ namespace E2E.Models
                     {
                         using (var searcher = new PrincipalSearcher(new UserPrincipal(context)))
                         {
-                            dynamic select = searcher.FindAll().Where(w => w.SamAccountName == username).FirstOrDefault() ;
+                            dynamic select = searcher.FindAll().Where(w => w.SamAccountName == username).FirstOrDefault();
 
                             res = string.Format("Invalid Password {0}/5", select.BadLogonCount);
 
@@ -1619,7 +1619,6 @@ namespace E2E.Models
                             {
                                 res = string.Format("Account is currently locked out\n Please contact IT");
                             }
-
                         }
                     }
                 }
@@ -2605,7 +2604,7 @@ namespace E2E.Models
                     .Select(s => s.Data)
                     .FirstOrDefault();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

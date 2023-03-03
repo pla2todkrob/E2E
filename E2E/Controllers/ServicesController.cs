@@ -238,7 +238,6 @@ namespace E2E.Controllers
 
         public ActionResult Action(Guid id)
         {
-
             try
             {
                 ViewBag.Is_MustBeApproved = db.Services.Where(w => w.Service_Id == id).Select(s => s.Is_MustBeApproved).FirstOrDefault();
@@ -247,7 +246,6 @@ namespace E2E.Controllers
                 .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
                 .FirstOrDefault();
-
 
                 ClsServices clsServices = data.ClsServices_View(id);
 
@@ -326,7 +324,6 @@ namespace E2E.Controllers
         {
             try
             {
-
                 List<ClsServiceUserActionName> clsServiceUserActionName = data.Services_GetAllTask_IQ()
                     .AsEnumerable()
                     .Select(s => new ClsServiceUserActionName()
@@ -343,7 +340,6 @@ namespace E2E.Controllers
                         System_Priorities = s.System_Priorities,
                         System_Statuses = s.System_Statuses,
                         Is_OverDue = s.Is_OverDue
-
                     }).ToList();
 
                 return View(clsServiceUserActionName);
@@ -353,23 +349,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
-        public string Users_GetName(Guid id)
-        {
-            try
-            {
-                return db.UserDetails
-                    .Where(w => w.User_Id == id)
-                    .Select(s => new { Data = s.Detail_EN_FirstName })
-                    .Select(s => s.Data)
-                    .FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
 
         public ActionResult Approve()
         {
@@ -970,7 +949,6 @@ namespace E2E.Controllers
                          ServiceId = s.Service_Id,
                          System_Priorities = s.System_Priorities,
                          System_Statuses = s.System_Statuses
-
                      }).ToList();
                 return View(clsServiceUserActionName);
             }
@@ -2282,6 +2260,22 @@ namespace E2E.Controllers
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public string Users_GetName(Guid id)
+        {
+            try
+            {
+                return db.UserDetails
+                    .Where(w => w.User_Id == id)
+                    .Select(s => new { Data = s.Detail_EN_FirstName })
+                    .Select(s => s.Data)
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

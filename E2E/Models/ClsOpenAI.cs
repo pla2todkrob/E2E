@@ -20,11 +20,55 @@ namespace E2E.Models
     {
         public string Answer { get; set; }
         public DateTime AnswerDateTime { get; set; }
-        public string Question { get; set; }
-        public DateTime QuestionDateTime { get; set; }
         public bool Display { get; set; }
+        public string Question { get; set; }
         public string Question_Hidden { get; set; }
+        public DateTime QuestionDateTime { get; set; }
         public int Tokens_Hidden { get; set; }
+
+        //ไม่ใช้แล้ว เป็น API สำหรับ คำนวน Token ChatGPT
+        public static int CountTokens(string sentence)
+        {
+            // กำหนดข้อความที่ต้องการส่งไปให้ GPT
+            string prompt = sentence;
+
+            // กำหนด API key ของคุณ
+            string apiKey = ConfigurationManager.AppSettings["OpenAI_Key"];
+
+            // กำหนด URL ของ API endpoint
+            string apiUrl = "https://api.openai.com/v1/engines/davinci-codex/completions";
+
+            // กำหนดจำนวน tokens ที่ต้องการให้ GPT สร้าง
+            int maxTokens = 2000;
+
+            // สร้าง JSON payload สำหรับส่งข้อมูลไปยัง API endpoint
+            var payload = new
+            {
+                prompt = prompt,
+                max_tokens = maxTokens
+            };
+            string jsonPayload = JsonConvert.SerializeObject(payload);
+
+            // ส่ง HTTP request ไปยัง API endpoint
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            var content = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
+            var response = client.PostAsync(apiUrl, content).Result;
+            var jsonResponse = response.Content.ReadAsStringAsync().Result;
+
+            // แปลง JSON response เป็น GptResponse object
+            dynamic gptResponse = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
+
+            int numTokens = 0;
+
+            // นับจำนวน token จาก response text
+            if (gptResponse.usage.prompt_tokens != null)
+            {
+                numTokens = Convert.ToInt32(gptResponse.usage.prompt_tokens);
+            }
+
+            return numTokens;
+        }
 
         public ClsOpenAI Response(ClsOpenAI model)
         {
@@ -51,62 +95,17 @@ namespace E2E.Models
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     throw;
                 }
             }
             return model;
         }
+
         public class GptResponse
         {
             public string text { get; set; }
-        }
-
-
-        //ไม่ใช้แล้ว เป็น API สำหรับ คำนวน Token ChatGPT
-        public static int CountTokens(string sentence)
-        {
-            // กำหนดข้อความที่ต้องการส่งไปให้ GPT
-            string prompt = sentence;
-
-            // กำหนด API key ของคุณ
-            string apiKey = ConfigurationManager.AppSettings["OpenAI_Key"];
-
-            // กำหนด URL ของ API endpoint
-            string apiUrl = "https://api.openai.com/v1/engines/davinci-codex/completions";
-
-            // กำหนดจำนวน tokens ที่ต้องการให้ GPT สร้าง
-            int maxTokens = 2000;
-            
-            // สร้าง JSON payload สำหรับส่งข้อมูลไปยัง API endpoint
-            var payload = new
-            {
-                prompt = prompt,
-                max_tokens = maxTokens
-            };
-            string jsonPayload = JsonConvert.SerializeObject(payload);
-
-            // ส่ง HTTP request ไปยัง API endpoint
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            var content = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
-            var response = client.PostAsync(apiUrl, content).Result;
-            var jsonResponse = response.Content.ReadAsStringAsync().Result;
-
-            // แปลง JSON response เป็น GptResponse object
-            dynamic gptResponse = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
-
-            int numTokens = 0;
-
-            // นับจำนวน token จาก response text
-            if (gptResponse.usage.prompt_tokens != null)
-            {
-                 numTokens = Convert.ToInt32(gptResponse.usage.prompt_tokens);
-            }
-
-
-            return numTokens;
         }
     }
 }
