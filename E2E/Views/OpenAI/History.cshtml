@@ -25,11 +25,11 @@
 		<li id="qa-@i">
 			<ul class="list-unstyled">
 				<li class="text-right pl-5 p-2">
-					<p class="small mb-0">@Model.ElementAt(i).QuestionDateTime.ToString("t")</p>
+					<p class="small mb-0">@Model.ElementAt(i).QuestionDateTime.ToString("h:mm tt")</p>
 					<p class="text-prewrap rounded d-inline-block p-2 mt-1 text-white bg-info">@Html.DisplayFor(m => Model.ElementAt(i).Question)</p>
 				</li>
 				<li class="pr-5">
-					<p class="small mb-0">@Model.ElementAt(i).AnswerDateTime.ToString("t")</p>
+					<p class="small mb-0">@Model.ElementAt(i).AnswerDateTime.ToString("h:mm tt")</p>
 					<p class="text-prewrap rounded d-inline-block p-2 mt-1 bg-light ">@Html.DisplayFor(m => Model.ElementAt(i).Answer)</p>
 				</li>
 			</ul>
