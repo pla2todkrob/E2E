@@ -31,7 +31,7 @@
         @RenderBody()
     </div>
 
-    <button onclick="topFunction()" id="btnToTop" title="Go to top" class=""><i class="fa fa-arrow-circle-up "></i></button>
+    <button onclick="topFunction()" id="btnToTop" title="Go to top" class="btn btn-outline-primary position-fixed m-3 rounded-circle"><i class="fa fa-arrow-up fa-2x" aria-hidden="true"></i></button>
 
     <footer class="mt-3">
         <small>&copy;&nbsp;@{ Html.RenderAction("_Copyright", "Configurations"); }</small>
@@ -47,6 +47,7 @@
     @Scripts.Render("~/bundles/jquery")
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     @Scripts.Render("~/bundles/js")
+
     @RenderSection("scripts", required: false)
     <script>
         $(document).on('submit', '#SaveChangePassword', function (e) {

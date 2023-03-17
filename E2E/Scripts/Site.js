@@ -1,8 +1,5 @@
-﻿//For external
-/*const baseUrl = '/E2E';*/
-
-//For local
-const baseUrl = '';
+﻿const siteName = 'E2E';
+const baseUrl = window.location.pathname.search(siteName) < 0 ? '' : `/${siteName}`;
 
 let chat;
 
@@ -600,14 +597,13 @@ async function callDeleteIMG_SC(urlAjax) {
 let lastScrollTop = window.pageYOffset;
 const eleNav = document.querySelector('nav.navbar');
 const topButton = document.getElementById('btnToTop');
-window.addEventListener("scroll", debounce(scrollFunction, 50));
+window.addEventListener("scroll", debounce(scrollFunction));
 
 function scrollFunction() {
     let totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-    totalScroll = totalScroll / 5;
+    totalScroll = totalScroll * 0.25;
 
     let scrollTop = window.pageYOffset;
-
     if (scrollTop > lastScrollTop) {
         eleNav.style.top = `-${eleNav.offsetHeight}px`;
     }
@@ -616,15 +612,15 @@ function scrollFunction() {
     }
 
     if (scrollTop > totalScroll) {
-        topButton.style.display = 'block';
+        topButton.style.bottom = '0';
     } else {
-        topButton.style.display = 'none';
+        topButton.style.bottom = '-100%';
     }
-
+    
     lastScrollTop = scrollTop;
 }
 
-function debounce(func, wait) {
+function debounce(func, wait = 50) {
     let timeout;
     return function () {
         clearTimeout(timeout);
@@ -651,4 +647,10 @@ function getCookie(cname) {
         }
     }
     return "";
+}
+function setCookie(name, value, expires = 1) {
+    var date = new Date();
+    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
