@@ -50,6 +50,7 @@ namespace E2E.Models
                         break;
 
                     default:
+                        res = ConfigurationManager.AppSettings["UrlDev"];
                         break;
                 }
 
@@ -78,7 +79,7 @@ namespace E2E.Models
                         return ConfigurationManager.AppSettings["TokenDev"];
 
                     default:
-                        return string.Empty;
+                        return ConfigurationManager.AppSettings["TokenDev"];
                 }
             }
             catch (Exception)
