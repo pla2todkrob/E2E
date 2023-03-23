@@ -252,6 +252,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\BusinessCardsController.cs" />
     <Compile Include="Controllers\ConfigurationsController.cs" />
     <Compile Include="Controllers\EFormsController.cs" />
     <Compile Include="Controllers\GetController.cs" />
@@ -274,6 +275,7 @@
     <Compile Include="Models\ClsContext.cs" />
     <Compile Include="Models\ClsDefaultSystem.cs" />
     <Compile Include="Models\ClsMail.cs" />
+    <Compile Include="Models\ClsManageBusinessCard.cs" />
     <Compile Include="Models\ClsManageEForm.cs" />
     <Compile Include="Models\ClsManageManagement.cs" />
     <Compile Include="Models\ClsManageMaster.cs" />
@@ -287,10 +289,12 @@
     <Compile Include="Models\Filter\CompressionFilterAttribute.cs" />
     <Compile Include="Models\Filter\ExceptionFilterAttribute.cs" />
     <Compile Include="Models\Filter\TimingFilterAttribute.cs" />
+    <Compile Include="Models\Tables\BusinessCards.cs" />
     <Compile Include="Models\Tables\ChatGPT.cs" />
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
     <Compile Include="Models\Tables\EForm_Galleries.cs" />
+    <Compile Include="Models\Tables\Log_BusinessCards.cs" />
     <Compile Include="Models\Tables\Log_DbChange.cs" />
     <Compile Include="Models\Tables\Log_DbDelete.cs" />
     <Compile Include="Models\Tables\Log_Exception.cs" />
@@ -340,6 +344,7 @@
     <Compile Include="Models\Tables\WorkRootDocuments.cs" />
     <Compile Include="Models\Tables\WorkRoots.cs" />
     <Compile Include="Models\Views\ClsAuditReport.cs" />
+    <Compile Include="Models\Views\ClsBusinessCard.cs" />
     <Compile Include="Models\Views\ClsChangeDueDates.cs" />
     <Compile Include="Models\Views\ClsCountNavbar.cs" />
     <Compile Include="Models\Views\ClsDepartments.cs" />
@@ -1015,6 +1020,12 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\BusinessCards\Index.cshtml" />
+    <Content Include="Views\BusinessCards\Table_MyRequest.cshtml" />
+    <Content Include="Views\BusinessCards\Table_AllTask.cshtml" />
+    <Content Include="Views\BusinessCards\Table_Approval.cshtml" />
+    <Content Include="Views\BusinessCards\BusinessCard_Detail.cshtml" />
+    <Content Include="Views\BusinessCards\BusinessCard_Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

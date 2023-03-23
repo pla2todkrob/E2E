@@ -281,14 +281,12 @@ namespace E2E.Models
 
                 UserDetails userDetails = new UserDetails();
                 userDetails = db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefault();
-                string sendFrom = string.Format("<p>Send from: <a href='mailto:{0}'>{1} {2} <{3}></a></p>", userDetails.Users.User_Email, userDetails.Detail_EN_FirstName, userDetails.Detail_EN_LastName, userDetails.Users.User_Email);
 
                 string strBody = "<html>";
                 strBody += "<head>";
                 strBody += "</head>";
                 strBody += "<body>";
                 strBody += string.Format("<p><b>{0}</b></p>", dear);
-                strBody += sendFrom;
                 strBody += model.Body;
 
                 strBody += "</body>";
