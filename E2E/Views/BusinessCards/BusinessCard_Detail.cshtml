@@ -1,0 +1,131 @@
+﻿@model E2E.Models.Views.ClsBusinessCard
+
+
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section breadcrumb{
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+			<li class="breadcrumb-item"><a href="@Url.Action("Index","BusinessCards")">Business card</a></li>
+			<li class="breadcrumb-item ">Task detail</li>
+		</ol>
+	</nav>
+}
+
+
+@section scripts{
+
+	<script>
+
+	function ManagerUserApprove(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to approve this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("ManagerUserApprove", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: { id: id },
+				success: function (res) {
+					swal("Success!", "Approved", "success").then(() => {
+						location.reload();
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Approval cancelled!");
+			}
+		});
+	}
+	</script>
+}
+
+<div class="container">
+
+	<div class="modal-body">
+
+		<div class="form-row">
+			<div class="form-group col-6">
+				@Html.Label("Name(TH):")
+				@Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName)
+
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Surname(TH):")
+				@Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Name(EN):")
+				@Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Surname(EN):")
+				@Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Department:")
+				@Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Position:")
+				@Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position)
+			</div>
+
+			<div class="form-group col-12">
+				@Html.Label("Both Sided:")
+				@Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Location:")
+				@Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Tel:")
+				@Html.DisplayFor(m => m.Tel_Internal)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Mobile:")
+				@Html.DisplayFor(m => m.Tel_External)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Email:")
+				@Html.DisplayFor(m => m.UserDetails.Users.User_Email)
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Amount:")
+				@Html.DisplayFor(m => m.Amount, new { type = "number" })
+
+			</div>
+
+		</div>
+
+	</div>
+	@if (ViewBag.authorized == 2 && ViewBag.StatusId != 7)
+	{
+			<button id="Mgu_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
+			<button id="Mgu_Reject" class="btn btn-danger" type="button" onclick="'@Url.Action("ManagerUserReject", "BusinessCards")'">Reject</button>
+	}
+
+</div>

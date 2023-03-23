@@ -13,17 +13,21 @@ namespace E2E.Models.Tables
 
         [Display(Name = "Status"), StringLength(100), Index(IsUnique = true)]
         public string Status_Name { get; set; }
+        public int OrderBusinessCard { get; set; }
 
         public static List<System_Statuses> DefaultList()
         {
             List<System_Statuses> list = new List<System_Statuses>
             {
-                new System_Statuses() { Status_Name = "Pending", Status_Class = "badge badge-secondary" },
-                new System_Statuses() { Status_Name = "In progress", Status_Class = "badge badge-warning" },
-                new System_Statuses() { Status_Name = "Completed", Status_Class = "badge badge-success" },
-                new System_Statuses() { Status_Name = "Closed", Status_Class = "badge badge-light" },
-                new System_Statuses() { Status_Name = "Rejected", Status_Class = "badge badge-danger" },
-                new System_Statuses() { Status_Name = "Cancel", Status_Class = "badge badge-danger" }
+                new System_Statuses() { Status_Name = "Pending", Status_Class = "badge badge-secondary",OrderBusinessCard = 1},
+                new System_Statuses() { Status_Name = "In progress", Status_Class = "badge badge-warning" ,OrderBusinessCard=4},
+                new System_Statuses() { Status_Name = "Completed", Status_Class = "badge badge-success" ,OrderBusinessCard=6},
+                new System_Statuses() { Status_Name = "Closed", Status_Class = "badge badge-light" ,OrderBusinessCard=7},
+                new System_Statuses() { Status_Name = "Rejected", Status_Class = "badge badge-danger" ,OrderBusinessCard=9},
+                new System_Statuses() { Status_Name = "Cancel", Status_Class = "badge badge-danger" ,OrderBusinessCard=8},
+                new System_Statuses() { Status_Name = "Approved", Status_Class = "badge badge-success",OrderBusinessCard=2 },
+                new System_Statuses() { Status_Name = "Assigned", Status_Class = "badge badge-secondary" ,OrderBusinessCard=3},
+                new System_Statuses() { Status_Name = "Confirmed", Status_Class = "badge badge-success",OrderBusinessCard=5 },
             };
 
             return list;

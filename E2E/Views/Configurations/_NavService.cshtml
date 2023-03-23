@@ -1,13 +1,21 @@
 ﻿@model int?
 
 @{
-    Layout = null;
+	Layout = null;
 }
-<span>Service</span>
-@if (Model.HasValue)
-{
-    if (Model.Value > 0)
-    {
-<span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
-    }
-}
+<a class="nav-link dropdown-toggle" href="#" id="dropdown_request" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	<span>Request</span>
+	@if (Model.HasValue)
+	{
+		if (Model.Value > 0)
+		{
+			<span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
+		}
+	}
+
+</a>
+
+<div class="dropdown-menu" aria-labelledby="dropdown_request">
+	<a class="dropdown-item" href="@Url.Action("Index","Services")">Service <span class="badge badge-pill badge-warning"></span></a>
+	<a class="dropdown-item" href="@Url.Action("Index","BusinessCards")">BusinessCard <span class="badge badge-pill badge-warning"></span></a>
+</div>

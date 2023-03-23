@@ -1,0 +1,151 @@
+﻿@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts{
+
+	<script>
+
+
+		$(function () {
+			reloadTable();
+		});
+
+		$(document).on('submit', '#Create_submit', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("BusinessCard_Create", "BusinessCards")',this);
+            return false;
+        });
+
+		function selectUserDetail() {
+
+			$('input[type="text"]').each(function (i,e) {
+
+				if (e.value != '') {
+					$(this).prop('readonly', true);
+				}
+
+			})
+
+			$('#User_id').change(function () {
+				var userVal = $('#User_id').val();
+				var UrlAction = '@Url.Action("BusinessCard_Create","BusinessCards")' + '?id=' + userVal;
+				$.ajax({
+					url: UrlAction,
+					success: function (res) {
+						$('#modalContent').html(res);
+						$('#modalContent').find('select').each(function () {
+							$(this).select2({
+								theme: 'bootstrap4',
+								width: '100%'
+							});
+						});
+						selectUserDetail();
+					}
+				});
+
+			});
+		}
+
+		function reloadTable() {
+
+			callTable('@Url.Action("Table_AllTask", "BusinessCards")')
+				.then(function () {
+					callTable('@Url.Action("Table_MyRequest", "BusinessCards")', false, false, [0],'#datalist2')
+						.then(function () {
+							callTable('@Url.Action("Table_Approval", "BusinessCards")', false, false, [2,0], '#datalist3');
+						});
+				});
+		}
+
+
+
+	</script>
+
+}
+
+@section breadcrumb{
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+			<li class="breadcrumb-item ">Request</li>
+			<li class="breadcrumb-item ">Business card</li>
+		</ol>
+	</nav>
+}
+
+<div class="d-flex mb-3">
+	<div class="mr-auto"></div>
+	<div class="ml-auto">
+		<button id="btn_create" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_Create","BusinessCards")', { bigSize: true, callback: selectUserDetail })"><i class="fa fa-plus"></i></button>
+	</div>
+</div>
+
+
+<ul class="nav nav-tabs" id="Cards" role="tablist">
+	@{
+		<li class="nav-item">
+			<a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
+				All task
+			</a>
+		</li>
+
+		<li class="nav-item">
+			<a class="nav-link" id="MyRequest-tab" data-toggle="tab" href="#MyRequest" role="tab" aria-controls="MyRequest" aria-selected="false">
+				My request task
+			</a>
+		</li>
+
+		if (ViewBag.authorized == 2)
+		{
+			<li class="nav-item">
+				<a class="nav-link " id="approval-tab" data-toggle="tab" href="#approval" role="tab" aria-controls="approval" aria-selected="true">
+					Approval task
+				</a>
+			</li>
+		}
+
+	}
+</ul>
+
+<div class="tab-content" id="myTabContent">
+
+	<div class="tab-pane fade show active" id="task" role="tabpanel" aria-labelledby="task-tab">
+
+		<div class="card">
+
+			<div class="card-body">
+				<div class="row" id="datalist"></div>11111
+			</div>
+		</div>
+
+	</div>
+
+	<div class="tab-pane fade" id="MyRequest" role="tabpanel" aria-labelledby="MyRequest-tab">
+
+		<div class="card">
+
+			<div class="card-body">
+				<div class="row" id="datalist2"></div>22222
+			</div>
+
+		</div>
+	</div>
+
+	<div class="tab-pane fade " id="approval" role="tabpanel" aria-labelledby="approval-tab">
+
+		<div class="card mb-3">
+
+
+			<div class="card-body">
+				<div class="row" id="datalist3"></div>33333
+			</div>
+		</div>
+
+	</div>
+
+</div>
+
+
+
+
