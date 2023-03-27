@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 
 namespace E2E.Models
 {
@@ -95,141 +96,50 @@ namespace E2E.Models
 
         public static void Generate()
         {
-            if (db.System_Authorizes.Count() != System_Authorize.DefaultList().Count())
-            {
-                Authorize_Save();
-            }
-
-            if (db.System_Language.Count() != System_Language.DefaultList().Count())
-            {
-                Language_Save();
-            }
-
-            if (db.System_ManualType.Count() != System_ManualType.DefaultList().Count())
-            {
-                ManualType_Save();
-            }
-
-            if (db.System_Roles.Count() != System_Roles.DefaultList().Count())
-            {
-                Role_Save();
-            }
-
-            if (db.System_Statuses.Count() != System_Statuses.DefaultList().Count())
-            {
-                Status_Save();
-            }
-
-            if (db.System_DueDateStatuses.Count() != System_DueDateStatuses.DefaultList().Count())
-            {
-                DueDateStatus_Save();
-            }
-
-            if (db.System_Priorities.Count() != System_Priorities.DefaultList().Count())
-            {
-                Priority_Save();
-            }
-
-            //if (db.Users.Count() > 0)
-            //{
-            //    int thisYear = DateTime.Today.Year;
-            //    List<Users> users = new List<Users>();
-            //    users = db.Users
-            //        .Where(w => w.YearSetPoint != thisYear)
-            //        .ToList();
-            //    if (users.Count > 0)
-            //    {
-            //        int setPoint = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).Select(s => s.Configuration_Point).FirstOrDefault();
-
-            //        foreach (var item in users)
-            //        {
-            //            item.User_Point = setPoint;
-            //            item.YearSetPoint = thisYear;
-            //            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
-            //        }
-            //        db.SaveChanges();
-            //    }
-            //}
-            //else
-            //{
-            //    Master_LineWorks master_LineWorks = new Master_LineWorks
-            //    {
-            //        Active = true,
-            //        Authorize_Id = 3,
-            //        LineWork_Name = "E-Engineering"
-            //    };
-
-            // db.Master_LineWorks.Add(master_LineWorks);
-
-            // if (db.SaveChanges() > 0) { Master_Grades master_Grades = new Master_Grades { Active
-            // = true, Grade_Name = "E8", Grade_Position = "Engineer", LineWork_Id =
-            // master_LineWorks.LineWork_Id }; db.Master_Grades.Add(master_Grades); if
-            // (db.SaveChanges() > 0) { Master_Plants master_Plants = new Master_Plants { Active =
-            // true, Plant_Name = "Bangpoo12" };
-
-            // db.Master_Plants.Add(master_Plants); if (db.SaveChanges() > 0) { Master_Divisions
-            // master_Divisions = new Master_Divisions { Active = true, Division_Name =
-            // "Administrative" }; db.Master_Divisions.Add(master_Divisions);
-
-            // if (db.SaveChanges() > 0) { Master_Departments master_Departments = new
-            // Master_Departments { Active = true, Department_Name = "Information Technology",
-            // Division_Id = master_Divisions.Division_Id };
-
-            // db.Master_Departments.Add(master_Departments);
-
-            // if (db.SaveChanges() > 0) { Master_Sections master_Sections = new Master_Sections {
-            // Active = true, Section_Name = "SAP & Application", Department_Id =
-            // master_Departments.Department_Id };
-
-            // db.Master_Sections.Add(master_Sections);
-
-            // if (db.SaveChanges() > 0) { Master_Processes master_Processes = new Master_Processes
-            // { Active = true, Process_Name = "Information Technology Bangpoo", Section_Id =
-            // master_Sections.Section_Id };
-
-            // db.Master_Processes.Add(master_Processes);
-
-            // if (db.SaveChanges() > 0) { Users users = new Users { Active = true, Grade_Id =
-            // master_Grades.Grade_Id, Process_Id = master_Processes.Process_Id, Plant_Id =
-            // master_Plants.Plant_Id, Role_Id = 1, User_Code = "1640488", User_CostCenter =
-            // "41100", User_Email = "nopparat@thaiparker.co.th", User_Point = 50, YearSetPoint =
-            // DateTime.Today.Year };
-
-            // db.Users.Add(users);
-
-            // if (db.SaveChanges() > 0) { System_Prefix_EN system_Prefix_EN = new System_Prefix_EN
-            // { Prefix_EN_Name = "Mr." };
-
-            // db.System_Prefix_ENs.Add(system_Prefix_EN);
-
-            // if (db.SaveChanges() > 0) { System_Prefix_TH system_Prefix_TH = new System_Prefix_TH
-            // { Prefix_TH_Name = "นาย" };
-
-            // db.System_Prefix_THs.Add(system_Prefix_TH);
-
-            // if (db.SaveChanges() > 0) { UserDetails userDetails = new UserDetails {
-            // Detail_EN_FirstName = "Nopparat", Detail_EN_LastName = "Thongnuapad",
-            // Detail_TH_FirstName = "นพรัตน์", Detail_TH_LastName = "ทองเนื้อแปด", Prefix_EN_Id =
-            // system_Prefix_EN.Prefix_EN_Id, Prefix_TH_Id = system_Prefix_TH.Prefix_TH_Id, User_Id
-            // = users.User_Id };
-
-            // db.UserDetails.Add(userDetails);
-
-            //                                            db.SaveChanges();
-            //                                        }
-            //                                    }
-            //                                }
-            //                            }
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
             try
             {
-                using (var transaction = db.Database.BeginTransaction())
+                if (db.System_Authorizes.Count() != System_Authorize.DefaultList().Count())
+                {
+                    Authorize_Save();
+                }
+
+                if (db.System_Language.Count() != System_Language.DefaultList().Count())
+                {
+                    Language_Save();
+                }
+
+                if (db.System_ManualType.Count() != System_ManualType.DefaultList().Count())
+                {
+                    ManualType_Save();
+                }
+
+                if (db.System_Roles.Count() != System_Roles.DefaultList().Count())
+                {
+                    Role_Save();
+                }
+
+                if (db.System_Statuses.Count() != System_Statuses.DefaultList().Count())
+                {
+                    Status_Save();
+                }
+
+                if (db.System_DueDateStatuses.Count() != System_DueDateStatuses.DefaultList().Count())
+                {
+                    DueDateStatus_Save();
+                }
+
+                if (db.System_Priorities.Count() != System_Priorities.DefaultList().Count())
+                {
+                    Priority_Save();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
                 {
                     // Check if there are any users in the Users table
                     if (db.Users.Count() > 0)
@@ -258,17 +168,13 @@ namespace E2E.Models
                     }
                     else
                     {
-                        // Create new records in the Master_LineWorks, Master_Grades, Master_Plants,
-                        // Master_Divisions, Master_Departments, Master_Sections and
-                        // Master_Processes tables
                         Master_LineWorks master_LineWorks = new Master_LineWorks
                         {
                             Active = true,
                             Authorize_Id = 3,
                             LineWork_Name = "E-Engineering"
                         };
-
-                        db.Master_LineWorks.Add(master_LineWorks);
+                        db.Entry(master_LineWorks).State = System.Data.Entity.EntityState.Added;
 
                         Master_Grades master_Grades = new Master_Grades
                         {
@@ -277,21 +183,21 @@ namespace E2E.Models
                             Grade_Position = "Engineer",
                             LineWork_Id = master_LineWorks.LineWork_Id
                         };
-                        db.Master_Grades.Add(master_Grades);
+                        db.Entry(master_Grades).State = System.Data.Entity.EntityState.Added;
 
                         Master_Plants master_Plants = new Master_Plants
                         {
                             Active = true,
                             Plant_Name = "Bangpoo12"
                         };
-                        db.Master_Plants.Add(master_Plants);
+                        db.Entry(master_Plants).State = System.Data.Entity.EntityState.Added;
 
                         Master_Divisions master_Divisions = new Master_Divisions
                         {
                             Active = true,
                             Division_Name = "Administrative"
                         };
-                        db.Master_Divisions.Add(master_Divisions);
+                        db.Entry(master_Divisions).State = System.Data.Entity.EntityState.Added;
 
                         Master_Departments master_Departments = new Master_Departments
                         {
@@ -299,7 +205,7 @@ namespace E2E.Models
                             Department_Name = "Information Technology",
                             Division_Id = master_Divisions.Division_Id
                         };
-                        db.Master_Departments.Add(master_Departments);
+                        db.Entry(master_Departments).State = System.Data.Entity.EntityState.Added;
 
                         Master_Sections master_Sections = new Master_Sections
                         {
@@ -307,7 +213,7 @@ namespace E2E.Models
                             Section_Name = "SAP & Application",
                             Department_Id = master_Departments.Department_Id
                         };
-                        db.Master_Sections.Add(master_Sections);
+                        db.Entry(master_Sections).State = System.Data.Entity.EntityState.Added;
 
                         Master_Processes master_Processes = new Master_Processes
                         {
@@ -315,17 +221,48 @@ namespace E2E.Models
                             Process_Name = "Information Technology Bangpoo",
                             Section_Id = master_Sections.Section_Id
                         };
-                        db.Master_Processes.Add(master_Processes);
+                        db.Entry(master_Processes).State = System.Data.Entity.EntityState.Added;
+
+                        System_Prefix_EN system_Prefix_EN = new System_Prefix_EN()
+                        {
+                            Prefix_EN_Name = "Mr."
+                        };
+                        db.Entry(system_Prefix_EN).State = System.Data.Entity.EntityState.Added;
+
+                        System_Prefix_TH system_Prefix_TH = new System_Prefix_TH()
+                        {
+                            Prefix_TH_Name = "นาย"
+                        };
+                        db.Entry(system_Prefix_TH).State = System.Data.Entity.EntityState.Added;
+
+                        Users users = new Users()
+                        {
+                            Grade_Id = master_Grades.Grade_Id,
+                            Plant_Id = master_Plants.Plant_Id,
+                            Process_Id = master_Processes.Process_Id,
+                            Role_Id = 1,
+                            User_Code = "1640488"
+                        };
+                        db.Entry(users).State = System.Data.Entity.EntityState.Added;
+
+                        UserDetails userDetails = new UserDetails()
+                        {
+                            User_Id = users.User_Id,
+                            Prefix_EN_Id = system_Prefix_EN.Prefix_EN_Id,
+                            Prefix_TH_Id = system_Prefix_TH.Prefix_TH_Id
+                        };
+                        db.Entry(userDetails).State = System.Data.Entity.EntityState.Added;
                     }
+
                     if (db.SaveChanges() > 0)
                     {
-                        transaction.Commit();
+                        scope.Complete();
                     }
                 }
-            }
-            catch (Exception)
-            {
-                throw;
+                catch (Exception)
+                {
+                    throw;
+                }
             }
         }
     }

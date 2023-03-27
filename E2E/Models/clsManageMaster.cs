@@ -857,7 +857,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments
                     .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() &&
@@ -1015,7 +1015,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions
                     .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim())
@@ -1194,13 +1194,52 @@ namespace E2E.Models
             }
         }
 
+        public string GetUsernameAD(string code)
+        {
+            try
+            {
+                try
+                {
+                    string res = string.Empty;
+                    string domainName = ConfigurationManager.AppSettings["DomainName"];
+                    using (var context = new PrincipalContext(ContextType.Domain, domainName))
+                    {
+                        UserPrincipal user = new UserPrincipal(context)
+                        {
+                            Description = code.Trim()
+                        };
+
+                        PrincipalSearcher searcher = new PrincipalSearcher
+                        {
+                            QueryFilter = user
+                        };
+                        Principal principal = searcher.FindOne();
+                        if (principal != null)
+                        {
+                            res = principal.SamAccountName;
+                        }
+                    }
+
+                    return res;
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Guid? Grade_GetId(Guid lineWorkId, string grade, string position, bool create = false)
         {
             try
             {
                 Guid? res = null;
 
-            FindModel:
+                FindModel:
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades
                     .Where(w => w.Grade_Name.ToLower() == grade.ToLower().Trim() &&
@@ -1463,12 +1502,32 @@ namespace E2E.Models
                 .ToList();
         }
 
+        public bool IsAdmin()
+        {
+            try
+            {
+                Guid userid = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                switch (db.Users.Find(userid).Role_Id)
+                {
+                    case 1:
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Guid? LineWork_GetId(string val, bool create = false)
         {
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks = db.Master_LineWorks
                     .Where(w => w.LineWork_Name.ToLower() == val.ToLower().Trim())
@@ -1599,11 +1658,11 @@ namespace E2E.Models
             return db.Master_LineWorks.ToList();
         }
 
-        public string LoginDomain(string username, string password)
+        public bool LoginDomain(string username, string password)
         {
             try
             {
-                string res = string.Empty;
+                bool res = new bool();
                 string domainName = ConfigurationManager.AppSettings["DomainName"];
                 using (var context = new PrincipalContext(ContextType.Domain, domainName))
                 {
@@ -1613,13 +1672,17 @@ namespace E2E.Models
                         {
                             dynamic select = searcher.FindAll().Where(w => w.SamAccountName == username).FirstOrDefault();
 
-                            res = string.Format("Invalid Password {0}/5", select.BadLogonCount);
-
                             if (select.BadLogonCount == 5)
                             {
-                                res = string.Format("Account is currently locked out\n Please contact IT");
+                                throw new Exception(string.Format("Account is currently locked out\n Please contact IT"));
                             }
+
+                            throw new Exception(string.Format("Invalid Password {0}/5", select.BadLogonCount));
                         }
+                    }
+                    else
+                    {
+                        res = true;
                     }
                 }
 
@@ -1646,7 +1709,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants = db.Master_Plants
                     .Where(w => w.Plant_Name.ToLower() == val.ToLower().Trim())
@@ -1778,7 +1841,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-            FindModel:
+                FindModel:
                 System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
                 system_Prefix_EN = db.System_Prefix_ENs
                     .Where(w => w.Prefix_EN_Name.ToLower() == val.ToLower().Trim())
@@ -1835,7 +1898,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-            FindModel:
+                FindModel:
                 System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
                 system_Prefix_TH = db.System_Prefix_THs
                     .Where(w => w.Prefix_TH_Name.ToLower() == val.ToLower().Trim())
@@ -1949,7 +2012,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes
                     .Where(w => w.Process_Name.ToLower() == val.ToLower().Trim() &&
@@ -2132,7 +2195,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections
                     .Where(w => w.Section_Name.ToLower() == val.ToLower().Trim() &&
@@ -2503,27 +2566,35 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                IQueryable<Users> users = db.Users
-                    .Where(w => !userCodeList.Contains(w.User_Code));
+                List<Users> users = db.Users
+                    .Where(w => !userCodeList.Contains(w.User_Code)).ToList();
 
-                foreach (var item in users)
+                if (users.Count > 0)
                 {
-                    if (string.IsNullOrEmpty(GetEmailAD(item.User_Code)) && !db.Log_Logins.Any(a => a.User_Id == item.User_Id))
+                    foreach (var item in users)
                     {
-                        db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+                        if (string.IsNullOrEmpty(GetEmailAD(item.User_Code)) && !db.Log_Logins.Any(a => a.User_Id == item.User_Id))
+                        {
+                            db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
+                        }
+                        else
+                        {
+                            item.Active = false;
+                            item.Update = DateTime.Now;
+                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        }
                     }
-                    else
+
+                    if (db.SaveChanges() > 0)
                     {
-                        item.Active = false;
-                        item.Update = DateTime.Now;
-                        db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        res = true;
                     }
                 }
-
-                if (db.SaveChanges() > 0)
+                else
                 {
                     res = true;
                 }
+
                 return res;
             }
             catch (Exception)
