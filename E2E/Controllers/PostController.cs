@@ -148,48 +148,38 @@ namespace E2E.Controllers
                         {
                             if (master.HaveAD(users.Username))
                             {
-                                var chk = master.LoginDomain(users.Username, model.Password);
-                                if (string.IsNullOrEmpty(chk))
+                                if (master.LoginDomain(users.Username, model.Password))
                                 {
-                                    loginPass = true;
-                                }
-                                else
-                                {
-                                    clsApi.Message = chk;
+                                    goto LoginPass;
                                 }
                             }
                         }
                         else if (string.Equals(password, passEncrypt))
                         {
-                            loginPass = true;
+                            goto LoginPass;
                         }
                         else
                         {
-                            clsApi.Message = "Password is incorrect";
                         }
                     }
                     else
                     {
-                        clsApi.Message = "Username not found";
-                        return clsApi;
+                        throw new Exception("Username not found");
                     }
+                    LoginPass:
+                    responseUser.Users = users;
+                    var name = db.UserDetails
+                        .Where(w => w.User_Id == users.User_Id)
+                        .Select(s => new
+                        {
+                            s.Detail_EN_FirstName,
+                            s.Detail_EN_LastName
+                        }).FirstOrDefault();
+                    responseUser.FirstName = name.Detail_EN_FirstName;
+                    responseUser.LastName = name.Detail_EN_LastName;
 
-                    if (loginPass)
-                    {
-                        responseUser.Users = users;
-                        var name = db.UserDetails
-                            .Where(w => w.User_Id == users.User_Id)
-                            .Select(s => new
-                            {
-                                s.Detail_EN_FirstName,
-                                s.Detail_EN_LastName
-                            }).FirstOrDefault();
-                        responseUser.FirstName = name.Detail_EN_FirstName;
-                        responseUser.LastName = name.Detail_EN_LastName;
-
-                        clsApi.Value = responseUser;
-                        clsApi.IsSuccess = true;
-                    }
+                    clsApi.Value = responseUser;
+                    clsApi.IsSuccess = true;
                 }
                 catch (Exception ex)
                 {

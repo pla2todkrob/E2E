@@ -48,14 +48,15 @@ namespace E2E.Models
         }
 
         public DbSet<BusinessCards> BusinessCards { get; set; }
-        public DbSet<Log_BusinessCards> Log_BusinessCards { get; set; }
+        public DbSet<ChatBotAnswer> ChatBotAnswers { get; set; }
+        public DbSet<ChatBotHistory> ChatBotHistories { get; set; }
+        public DbSet<ChatBotQuestion> ChatBotQuestions { get; set; }
+        public DbSet<ChatBot> ChatBots { get; set; }
         public DbSet<ChatGPT> ChatGPTs { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
-
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
-
         public DbSet<EForms> EForms { get; set; }
-
+        public DbSet<Log_BusinessCards> Log_BusinessCards { get; set; }
         public DbSet<Log_DbChange> Log_DbChanges { get; set; }
         public DbSet<Log_DbDelete> Log_DbDeletes { get; set; }
         public DbSet<Log_Exception> Log_Exceptions { get; set; }

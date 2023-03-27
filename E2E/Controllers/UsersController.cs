@@ -143,44 +143,44 @@ namespace E2E.Controllers
                         .FirstOrDefault();
                     if (users == null)
                     {
-                        ModelState.AddModelError("Username", string.Format("Username {0} not found", model.Username));
-                        return View(model);
+                        throw new Exception(string.Format("Username {0} not found", model.Username));
                     }
 
                     UserDetails userDetails = db.UserDetails
                         .Where(w => w.User_Id == users.User_Id)
                         .FirstOrDefault();
 
-                    string userName = users.Username;
-                    if (string.IsNullOrEmpty(userName))
+                    if (string.IsNullOrEmpty(users.User_Email) || string.IsNullOrEmpty(users.Username))
                     {
-                        userName = users.User_Email;
+                        users.User_Email = data.GetEmailAD(users.User_Code);
+                        users.Username = data.GetUsernameAD(users.User_Code);
                     }
-                    string CHK_login = data.LoginDomain(userName.Trim(), model.Password.Trim());
 
-                    if (string.IsNullOrEmpty(CHK_login))
+                    string loginName = users.Username;
+                    if (string.IsNullOrEmpty(loginName))
                     {
-                        if (!string.IsNullOrEmpty(userDetails.Detail_Password))
+                        loginName = users.User_Email;
+                    }
+
+                    if (string.IsNullOrEmpty(loginName))
+                    {
+                        if (!string.Equals(userDetails.Detail_Password, data.Users_Password(model.Password.Trim())))
                         {
-                            userDetails.Detail_Password = null;
-                            userDetails.Detail_ConfirmPassword = null;
+                            throw new Exception("Password is incorrect");
                         }
-                        goto SetAuthen;
                     }
                     else
                     {
-                        if (string.Equals(userDetails.Detail_Password, data.Users_Password(model.Password.Trim())))
+                        if (data.LoginDomain(loginName, model.Password.Trim()))
                         {
-                            goto SetAuthen;
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("Password", CHK_login);
-                            return View(model);
+                            if (!string.IsNullOrEmpty(userDetails.Detail_Password))
+                            {
+                                userDetails.Detail_Password = null;
+                                userDetails.Detail_ConfirmPassword = null;
+                            }
                         }
                     }
 
-                SetAuthen:
                     Log_Login log_Login = new Log_Login();
                     log_Login.User_Id = users.User_Id;
                     db.Entry(log_Login).State = System.Data.Entity.EntityState.Added;
@@ -202,9 +202,15 @@ namespace E2E.Controllers
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw;
+                    ModelState.AddModelError(ex.TargetSite.Name, ex.Message);
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        ModelState.AddModelError(inner.TargetSite.Name, inner.Message);
+                        inner = inner.InnerException;
+                    }
                 }
             }
 
