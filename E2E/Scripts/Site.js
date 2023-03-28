@@ -245,33 +245,28 @@ async function callTable_NoSort(urlAjax, blockId = '#datalist') {
     }
 }
 
-async function callFilter(urlAjax, blockId = '#filter') {
-    try {
-        // Make the GET request using the fetch API
-        const res = await fetch(`${urlAjax}?filter=${getQueryString()}`, {
-            method: 'GET'
-        });
-        if (!res.ok) {
-            // Handle non 200 status code
-            throw new Error(`Failed to fetch data, status code: ${res.status}`);
+function callFilter(urlAjax, blockId = '#filter') {
+    $.ajax({
+        url: `${urlAjax}?filter=${getQueryString()}`,
+        method: 'GET',
+        dataType: 'html',
+        success: function (data) {
+            const block = $(blockId);
+            block.html(data);
+            block.css({
+                display: 'block',
+                opacity: 0,
+                transition: 'opacity 500ms'
+            });
+            block.animate({ opacity: 1 }, 500);
+            block.find('select').css('width', '100%');
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error(`Failed to fetch data, status code: ${jqXHR.status}`);
         }
-        const data = await res.text();
-
-        const block = document.querySelector(blockId);
-        block.innerHTML = data;
-        block.style.display = 'block';
-        block.style.opacity = 0;
-        block.style.transition = "opacity 500ms";
-
-        block.style.opacity = 1;
-        const selects = block.querySelectorAll('select');
-        for (const select of selects) {
-            select.style.width = '100%';
-        }
-    } catch (error) {
-        console.error(error);
-    }
+    });
 }
+
 
 async function setTable_File(tableId, bOrder = false, bSearch = false) {
     return table = await $(tableId).DataTable({
@@ -317,167 +312,163 @@ async function callModal(urlAjax, options = { bigSize: false, callback: null }) 
     }
 }
 
-async function callSubmitModal(urlAjax, form) {
-    try {
-        const confirmed = await swal({
-            title: 'Are you sure?',
-            text: 'This information will be saved to the database.',
-            buttons: true,
-            icon: 'warning'
-        });
-
+function callSubmitModal(urlAjax, form) {
+    swal({
+        title: 'Are you sure?',
+        text: 'This information will be saved to the database.',
+        buttons: true,
+        icon: 'warning'
+    }).then(function (confirmed) {
         if (confirmed) {
             const fd = new FormData(form);
-            const res = await fetch(urlAjax, {
+            $.ajax({
+                url: urlAjax,
                 method: 'POST',
-                body: fd
-            });
-            const json = await res.json();
-
-            await swal({
-                title: json.Title,
-                text: json.Text,
-                icon: json.Icon,
-                button: json.Button,
-                dangerMode: json.DangerMode
-            });
-
-            if (json.Icon === 'success') {
-                $('#modalArea').modal('hide');
-                await reloadCount();
-                reloadTable();
-            }
-        }
-    } catch (error) {
-        console.error(error);
-        swal({
-            title: 'Error',
-            text: 'An error occured while submitting the form.',
-            icon: 'error'
-        });
-    }
-}
-
-async function callSubmitPage(urlAjax, form) {
-    try {
-        const confirmed = await swal({
-            title: 'Are you sure?',
-            text: 'This information will be saved to the database.',
-            buttons: true,
-            icon: 'warning'
-        });
-
-        if (confirmed) {
-            const fd = new FormData(form);
-            const res = await fetch(urlAjax, {
-                method: 'POST',
-                body: fd
-            });
-            const json = await res.json();
-
-            await swal({
-                title: json.Title,
-                text: json.Text,
-                icon: json.Icon,
-                button: json.Button,
-                dangerMode: json.DangerMode
-            });
-
-            if (json.Icon === 'success') {
-                window.location.reload();
-            }
-        }
-    } catch (error) {
-        console.error(error);
-        swal({
-            title: 'Error',
-            text: 'An error occured while submitting the form.',
-            icon: 'error'
-        });
-    }
-}
-
-async function callSubmitRedirect(urlAjax, form, urlRedirect) {
-    try {
-        const confirmed = await swal({
-            title: 'Are you sure?',
-            text: 'This information will be saved to the database.',
-            buttons: true,
-            icon: 'warning'
-        });
-
-        if (confirmed) {
-            const fd = new FormData(form);
-            const res = await fetch(urlAjax, {
-                method: 'POST',
-                body: fd
-            });
-            const json = await res.json();
-            await swal({
-                title: json.Title,
-                text: json.Text,
-                icon: json.Icon,
-                button: json.Button,
-                dangerMode: json.DangerMode
-            });
-            if (json.Icon === 'success') {
-                if (json.Option != null) {
-                    urlRedirect += '/' + json.Option;
+                data: fd,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function (json) {
+                    swal({
+                        title: json.Title,
+                        text: json.Text,
+                        icon: json.Icon,
+                        button: json.Button,
+                        dangerMode: json.DangerMode
+                    }).then(function () {
+                        if (json.Icon === 'success') {
+                            $('#modalArea').modal('hide');
+                            reloadCount().then(function () {
+                                reloadTable();
+                            });
+                        }
+                    });
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error(`An error occured while submitting the form: ${errorThrown}`);
+                    swal({
+                        title: 'Error',
+                        text: 'An error occured while submitting the form.',
+                        icon: 'error'
+                    });
                 }
-                window.location.href = urlRedirect;
-            }
+            });
         }
-    } catch (error) {
-        console.error(error);
-        swal({
-            title: 'Error',
-            text: 'An error occured while submitting the form.',
-            icon: 'error'
-        });
-    }
+    });
 }
 
-async function callDeleteItem(urlAjax, reloadPage = false) {
-    try {
-        const confirmed = await swal({
-            title: 'Are you sure?',
-            text: 'Once you delete this information, you cannot recover it.',
-            icon: 'warning',
-            buttons: true,
-            dangerMode: true
-        });
 
+function callSubmitPage(urlAjax, form) {
+    swal({
+        title: 'Are you sure?',
+        text: 'This information will be saved to the database.',
+        buttons: true,
+        icon: 'warning'
+    }).then((confirmed) => {
         if (confirmed) {
-            const res = await fetch(urlAjax, {
-                method: 'DELETE'
+            const fd = new FormData(form);
+            $.ajax({
+                url: urlAjax,
+                type: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: (json) => {
+                    swal({
+                        title: json.Title,
+                        text: json.Text,
+                        icon: json.Icon,
+                        button: json.Button,
+                        dangerMode: json.DangerMode
+                    }).then(() => {
+                        if (json.Icon === 'success') {
+                            window.location.reload();
+                        }
+                    });
+                },
+                error: (error) => {
+                    console.error(error);
+                    swal({
+                        title: 'Error',
+                        text: 'An error occured while submitting the form.',
+                        icon: 'error'
+                    });
+                }
             });
-            const json = await res.json();
+        }
+    });
+}
 
-            await swal({
+
+function callSubmitRedirect(urlAjax, form, urlRedirect) {
+    const formData = new FormData(form);
+    return $.ajax({
+        url: urlAjax,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (json) {
+            swal({
                 title: json.Title,
                 text: json.Text,
                 icon: json.Icon,
                 button: json.Button,
                 dangerMode: json.DangerMode
-            });
-            if (json.Icon === 'success') {
-                $('#modalArea').modal('hide');
-                if (reloadPage) {
-                    location.reload();
-                } else {
-                    reloadTable();
+            }).then(function () {
+                if (json.Icon === 'success') {
+                    if (json.Option != null) {
+                        urlRedirect += '/' + json.Option;
+                    }
+                    window.location.href = urlRedirect;
                 }
-            }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+            swal({
+                title: 'Error',
+                text: 'An error occurred while submitting the form.',
+                icon: 'error'
+            });
         }
-    } catch (error) {
-        console.error(error);
-        swal({
-            title: 'Error',
-            text: 'An error occured while deleting the item.',
-            icon: 'error'
-        });
-    }
+    });
 }
+
+
+function callDeleteItem(urlAjax, reloadPage = false) {
+    $.ajax({
+        url: urlAjax,
+        type: 'DELETE',
+        success: function (json) {
+            swal({
+                title: json.Title,
+                text: json.Text,
+                icon: json.Icon,
+                button: json.Button,
+                dangerMode: json.DangerMode
+            }).then(function () {
+                if (json.Icon === 'success') {
+                    $('#modalArea').modal('hide');
+                    if (reloadPage) {
+                        location.reload();
+                    } else {
+                        reloadTable();
+                    }
+                }
+            });
+        },
+        error: function (error) {
+            console.error(error);
+            swal({
+                title: 'Error',
+                text: 'An error occured while deleting the item.',
+                icon: 'error'
+            });
+        }
+    });
+}
+
 
 async function notifySignout(url) {
     return swal({

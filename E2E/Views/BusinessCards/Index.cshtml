@@ -1,11 +1,23 @@
 ﻿@{
 	Layout = "~/Views/Shared/_Layout.cshtml";
+
 }
 
 @section scripts{
 
 	<script>
 
+        $(document).ready(function() {
+
+			let isGA = '@ViewBag.GA'.toLowerCase();
+			if (isGA) {
+                $('#task-tab').removeClass('active');
+                $('#MyRequest-tab').addClass('active');
+
+                $('#task').removeClass('show active');
+                $('#MyRequest').addClass('show active');
+            }
+        });
 
 		$(function () {
 			reloadTable();
@@ -84,11 +96,14 @@
 
 <ul class="nav nav-tabs" id="Cards" role="tablist">
 	@{
-		<li class="nav-item">
-			<a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
-				All task
-			</a>
-		</li>
+		if (true/*ViewBag.GA*/)
+		{
+			<li class="nav-item">
+				<a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
+					All task
+				</a>
+			</li>
+		}
 
 		<li class="nav-item">
 			<a class="nav-link" id="MyRequest-tab" data-toggle="tab" href="#MyRequest" role="tab" aria-controls="MyRequest" aria-selected="false">

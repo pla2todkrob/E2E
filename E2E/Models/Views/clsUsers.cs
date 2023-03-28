@@ -22,6 +22,7 @@ namespace E2E.Models.Views
     public class ClsUsers
     {
         public bool Active { get; set; }
+        public bool BusinessCardGroup { get; set; }
         public DateTime Create { get; set; }
 
         [Display(Name = "Department")]

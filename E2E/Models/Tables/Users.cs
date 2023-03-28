@@ -61,5 +61,7 @@ namespace E2E.Models.Tables
         public string Username { get; set; }
 
         public int YearSetPoint { get; set; }
+        [Display(Name = "Business card group")]
+        public bool BusinessCardGroup { get; set; }
     }
 }
