@@ -48,6 +48,95 @@
 			swal("Approval cancelled!");
 			}
 		});
+		}
+
+	function ManagerUserReject(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to approve this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("ManagerUserReject", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: { id: id },
+				success: function (res) {
+					swal("Success!", "Rejected ", "success").then(() => {
+				    window.location.href = '@Url.Action("Index", "BusinessCards")';
+
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Reject cancelled!");
+			}
+		});
+		}
+
+	function ManagerGaApprove(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to approve this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("ManagerGaApprove", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: { id: id },
+				success: function (res) {
+					swal("Success!", "Approved", "success").then(() => {
+						location.reload();
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Approval cancelled!");
+			}
+		});
+		}
+
+	function ManagerGaReject(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to approve this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("ManagerGaReject", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: { id: id },
+				success: function (res) {
+					swal("Success!", "Rejected ", "success").then(() => {
+				    window.location.href = '@Url.Action("Index", "BusinessCards")';
+
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Reject cancelled!");
+			}
+		});
 	}
 	</script>
 }
@@ -122,10 +211,16 @@
 		</div>
 
 	</div>
-	@if (ViewBag.authorized == 2 && ViewBag.StatusId != 7)
+	@if (ViewBag.authorized == 2 && ViewBag.StatusId == 1)
 	{
-			<button id="Mgu_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
-			<button id="Mgu_Reject" class="btn btn-danger" type="button" onclick="'@Url.Action("ManagerUserReject", "BusinessCards")'">Reject</button>
+		<button id="Mgu_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
+		<button id="Mgu_Reject" class="btn btn-danger" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
+	}
+
+	@if (ViewBag.authorized == 2 && ViewBag.StatusId == 7 && ViewBag.GA)
+	{
+		<button id="MgGA_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">GA Approve</button>
+		<button id="MgGA_Reject" class="btn btn-danger" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">GA Reject</button>
 	}
 
 </div>

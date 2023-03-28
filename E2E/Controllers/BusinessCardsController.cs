@@ -10,19 +10,20 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
+    [Authorize]
     public class BusinessCardsController : Controller
     {
         private readonly ClsContext db = new ClsContext();
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
         ClsApi clsApi = new ClsApi();
-        private Guid GA = Guid.Parse("A8F29E44-554B-4D70-AD1B-736EFB7E9248");
-        private Guid IT = Guid.Parse("130B1A43-0EB2-4AA2-975A-71B393FCDB18");
-        private Guid UserAuthorized = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
+        private static Guid UserAuthorized { get; set; }
 
         // GET: BusinessCards
         public ActionResult Index()
-        { 
+        {
+            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
+            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
             ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
 
             return View();
@@ -68,7 +69,9 @@ namespace E2E.Controllers
 
         public ActionResult Table_AllTask()
         {
-            return View();
+
+         var clsBusinessCard = queryClsBusinessCard().OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
+            return View(clsBusinessCard);
         }
 
         public ActionResult Table_Approval()
@@ -81,11 +84,10 @@ namespace E2E.Controllers
 
         public ActionResult BusinessCard_Detail(Guid id)
         {
-
+            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
             ViewBag.StatusId = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.Status_Id).FirstOrDefault();
             ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s=>s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-           var clsBusinessCard = queryClsBusinessCard();
-            clsBusinessCard.Where(w => w.BusinessCard_Id == id);
+           var clsBusinessCard = queryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
             return View(clsBusinessCard.FirstOrDefault());
         }
@@ -200,9 +202,10 @@ namespace E2E.Controllers
                 businessCards.Status_Id = 7;
                 businessCards.Create = DateTime.Now;
 
-                if (db.SaveChanges() >0)
+                if (db.SaveChanges() >0 )
                 {
                     dataCard.BusinessCard_SaveLog(businessCards);
+                    dataCard.SendMail_MgApproved(businessCards);
                 }
   
             }
@@ -215,8 +218,74 @@ namespace E2E.Controllers
             return RedirectToAction("BusinessCard_Detail", "BusinessCards",new { @id = id });
         }
 
-        public ActionResult ManagerUserReject()
+        public ActionResult ManagerUserReject(Guid? id)
         {
+            try
+            {
+                BusinessCards businessCards = new BusinessCards();
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 5;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return View();
+        }
+
+        public ActionResult ManagerGaApprove(Guid? id)
+        {
+            try
+            {
+                BusinessCards businessCards = new BusinessCards();
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 8;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { @id = id });
+        }
+
+        public ActionResult ManagerGaReject(Guid? id)
+        {
+            try
+            {
+                BusinessCards businessCards = new BusinessCards();
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 5;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
 
             return View();
         }

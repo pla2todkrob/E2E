@@ -458,7 +458,8 @@ namespace E2E.Models
                     Role_Id = model.Users.Role_Id != 0 ? model.Users.Role_Id : 2,
                     User_CostCenter = model.Users.User_CostCenter.Trim(),
                     User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]),
-                    YearSetPoint = DateTime.Now.Year
+                    YearSetPoint = DateTime.Now.Year,
+                    BusinessCardGroup = model.Users.BusinessCardGroup
                 };
 
                 System_Configurations system_ = new System_Configurations();
@@ -547,6 +548,7 @@ namespace E2E.Models
                 users.Process_Id = model.Users.Process_Id;
                 users.User_Code = model.Users.User_Code.Trim();
                 users.User_CostCenter = model.Users.User_CostCenter.Trim();
+                users.BusinessCardGroup = model.Users.BusinessCardGroup;
 
                 if (!string.IsNullOrEmpty(model.Users.User_Email))
                 {
@@ -702,6 +704,7 @@ namespace E2E.Models
                 {
                     User_Id = s.Users.User_Id,
                     Active = s.Users.Active,
+                    BusinessCardGroup = s.Users.BusinessCardGroup,
                     Create = s.Users.Create,
                     Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
                     Division_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
@@ -2740,6 +2743,10 @@ namespace E2E.Models
                                             Users = new Users()
                                         };
                                         Guid? lineworkId = LineWork_GetId(sheet.Cells[row, 10].Text, true);
+                                        if (sheet.Cells[row, 15].Text.Contains("General Affair"))
+                                        {
+                                            userDetails.Users.BusinessCardGroup = true;
+                                        }
                                         userDetails.Users.Grade_Id = Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
                                         userDetails.Users.Plant_Id = Plant_GetId(sheet.Cells[row, 13].Text, true);
                                         Guid? divisionId = Division_GetId(sheet.Cells[row, 14].Text, true);
