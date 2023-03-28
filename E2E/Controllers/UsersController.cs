@@ -181,8 +181,10 @@ namespace E2E.Controllers
                         }
                     }
 
-                    Log_Login log_Login = new Log_Login();
-                    log_Login.User_Id = users.User_Id;
+                    Log_Login log_Login = new Log_Login
+                    {
+                        User_Id = users.User_Id
+                    };
                     db.Entry(log_Login).State = System.Data.Entity.EntityState.Added;
                     if (db.SaveChanges() > 0)
                     {

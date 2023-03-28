@@ -52,7 +52,6 @@ namespace E2E.Models
         public DbSet<ChatBotHistory> ChatBotHistories { get; set; }
         public DbSet<ChatBotQuestion> ChatBotQuestions { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
-        public DbSet<ChatGPT> ChatGPTs { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
         public DbSet<EForms> EForms { get; set; }

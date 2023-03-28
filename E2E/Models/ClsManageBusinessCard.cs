@@ -10,8 +10,9 @@ namespace E2E.Models
     public class ClsManageBusinessCard
     {
         private readonly ClsContext db = new ClsContext();
-        ClsMail mail = new ClsMail();
+        private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
+
         public bool BusinessCard_SaveCreate(ClsBusinessCard Model)
         {
             bool res = new bool();
@@ -19,22 +20,22 @@ namespace E2E.Models
             {
                 Guid MyUserID = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
-                BusinessCards businessCards = new BusinessCards();
-
-                businessCards.Amount = Model.Amount;
-                businessCards.BothSided = Model.BothSided;
-                businessCards.Key = long.Parse(DateTime.Now.ToString("yyyyMMddHHmmss"));
-                businessCards.Tel_External = Model.Tel_External;
-                businessCards.Tel_Internal = Model.Tel_Internal;
-                businessCards.User_id = Model.User_id.Value;
-                businessCards.Status_Id = 1; //Pending
+                BusinessCards businessCards = new BusinessCards
+                {
+                    Amount = Model.Amount,
+                    BothSided = Model.BothSided,
+                    Key = long.Parse(DateTime.Now.ToString("yyyyMMddHHmmss")),
+                    Tel_External = Model.Tel_External,
+                    Tel_Internal = Model.Tel_Internal,
+                    User_id = Model.User_id.Value,
+                    Status_Id = 1 //Pending
+                };
 
                 //เช็คว่ามีการ Create แทนกันไหม
                 if (businessCards.User_id != MyUserID)
                 {
                     businessCards.UserRef_id = MyUserID;
                 }
-
 
                 db.BusinessCards.Add(businessCards);
 
@@ -44,26 +45,24 @@ namespace E2E.Models
                     SendMail_MgApproved(businessCards);
                 }
 
+                return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 throw;
             }
-
-            return res;
         }
 
         public bool BusinessCard_SaveLog(BusinessCards Model)
         {
             bool res = new bool();
-            Log_BusinessCards log_BusinessCards = new Log_BusinessCards();
-
-            log_BusinessCards.BusinessCard_Id = Model.BusinessCard_Id;
-            log_BusinessCards.Status_Id = Model.Status_Id;
-            log_BusinessCards.User_Id = Model.User_id;
-            log_BusinessCards.Create = Model.Create;
-
+            Log_BusinessCards log_BusinessCards = new Log_BusinessCards
+            {
+                BusinessCard_Id = Model.BusinessCard_Id,
+                Status_Id = Model.Status_Id,
+                User_Id = Model.User_id,
+                Create = Model.Create
+            };
 
             db.Log_BusinessCards.Add(log_BusinessCards);
 
@@ -84,7 +83,6 @@ namespace E2E.Models
 
             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
             linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
-
 
             string subject = string.Format("[Business Card][Require approve] {0}", Model.Key);
             string content = "<p>Request Business Card";
@@ -120,7 +118,6 @@ namespace E2E.Models
             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
             linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
 
-
             string subject = string.Format("[Business Card][Rejected] {0}", Model.Key);
             string content = "<p>Request Business Card";
             content += "<br/>";
@@ -145,6 +142,5 @@ namespace E2E.Models
 
             return res;
         }
-
     }
 }

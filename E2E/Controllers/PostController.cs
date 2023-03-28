@@ -117,7 +117,6 @@ namespace E2E.Controllers
                 ResponseUser responseUser = new ResponseUser();
                 try
                 {
-                    bool loginPass = new bool();
                     string passEncrypt = new ClsManageMaster().Users_Password(model.Password);
                     Users users = new Users();
                     users = db.Users

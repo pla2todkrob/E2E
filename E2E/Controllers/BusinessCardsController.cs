@@ -16,7 +16,7 @@ namespace E2E.Controllers
         private readonly ClsContext db = new ClsContext();
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
-        ClsApi clsApi = new ClsApi();
+        readonly ClsApi clsApi = new ClsApi();
         private static Guid UserAuthorized { get; set; }
 
         // GET: BusinessCards
