@@ -16,7 +16,7 @@ namespace E2E.Models.Views
         public string Tel_External { get; set; }
         public bool BothSided { get; set; }
         public DateTime Create { get; set; }
-        public Guid UserAction { get; set; }
+        public Guid? UserAction { get; set; }
         public Guid? UserRef_id { get; set; }
         public string UserRefName { get; set; }
         public string UserActionName { get; set; }

@@ -3,14 +3,15 @@
 
 @{
 	Layout = "~/Views/Shared/_Layout.cshtml";
+	Guid UserID = Guid.Parse(HttpContext.Current.User.Identity.Name);
 }
 
 
 @section breadcrumb{
 	<nav aria-label="breadcrumb">
 		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-			<li class="breadcrumb-item"><a href="@Url.Action("Index","BusinessCards")">Business card</a></li>
+			<li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+			<li class="breadcrumb-item"><a href="@Url.Action("Index", "BusinessCards")">Business card</a></li>
 			<li class="breadcrumb-item ">Task detail</li>
 		</ol>
 	</nav>
@@ -20,6 +21,22 @@
 @section scripts{
 
 	<script>
+
+		$(function () {
+			reloadTable();
+			$('#DetailArea').find('select').each(function () {
+				$(this).select2({
+					theme: 'bootstrap4',
+					width: '100%'
+				});
+			});
+		});
+
+		function reloadTable() {
+
+			callTable('@Url.Action("UploadHistory", "BusinessCards", new { id = Model.BusinessCard_Id })')
+
+		}
 
 	function ManagerUserApprove(id) {
 
@@ -51,37 +68,41 @@
 		}
 
 	function ManagerUserReject(id) {
+swal({
+  title: "Are you sure?",
+  text: "You are about to approve this item!",
+  icon: "warning",
+  buttons: true,
+  dangerMode: true,
+  content: {
+    element: "input",
+    attributes: {
+      placeholder: "Please enter Remark",
+      type: "text",
+    },
+  },
+}).then((willApprove) => {
+  if (willApprove) {
+    var UrlAction = '@Url.Action("ManagerGaReject", "BusinessCards")';
+    var remark = $('.swal-content__input').val(); // ดึงค่า Remark จาก element ใหม่
+    $.ajax({
+      url: UrlAction,
+      data: { id: id, remark: remark }, // ส่งค่า Remark ไปด้วย
+      success: function (res) {
+        swal("Success!", "Rejected ", "success").then(() => {
+          window.location.href = '@Url.Action("Index", "BusinessCards")';
+        });
+      }
+    });
+  } else {
+    swal("Reject cancelled!");
+  }
+});
 
-	swal({
-		title: "Are you sure?",
-		text: "You are about to approve this item!",
-		icon: "warning",
-		buttons: true,
-		dangerMode: true,
-	})
-	.then((willApprove) => {
-		if (willApprove) {
-		var UrlAction = '@Url.Action("ManagerUserReject", "BusinessCards")';
-			$.ajax({
-				url: UrlAction,
-				data: { id: id },
-				success: function (res) {
-					swal("Success!", "Rejected ", "success").then(() => {
-				    window.location.href = '@Url.Action("Index", "BusinessCards")';
-
-					});
-					}
-				});
-			}
-			else
-			{
-			swal("Reject cancelled!");
-			}
-		});
 		}
 
 	function ManagerGaApprove(id) {
-
+		let SelectId = $('#Select').val();
 	swal({
 		title: "Are you sure?",
 		text: "You are about to approve this item!",
@@ -94,7 +115,10 @@
 		var UrlAction = '@Url.Action("ManagerGaApprove", "BusinessCards")';
 			$.ajax({
 				url: UrlAction,
-				data: { id: id },
+				data: {
+					id: id,
+					SelectId: SelectId
+				},
 				success: function (res) {
 					swal("Success!", "Approved", "success").then(() => {
 						location.reload();
@@ -111,37 +135,232 @@
 
 	function ManagerGaReject(id) {
 
+		swal({
+  title: "Are you sure?",
+  text: "You are about to approve this item!",
+  icon: "warning",
+  buttons: true,
+  dangerMode: true,
+  content: {
+    element: "input",
+    attributes: {
+      placeholder: "Please enter Remark",
+      type: "text",
+    },
+  },
+}).then((willApprove) => {
+  if (willApprove) {
+    var UrlAction = '@Url.Action("ManagerGaReject", "BusinessCards")';
+    var remark = $('.swal-content__input').val(); // ดึงค่า Remark จาก element ใหม่
+    $.ajax({
+      url: UrlAction,
+      data: { id: id, remark: remark }, // ส่งค่า Remark ไปด้วย
+      success: function (res) {
+        swal("Success!", "Rejected ", "success").then(() => {
+          window.location.href = '@Url.Action("Index", "BusinessCards")';
+        });
+      }
+    });
+  } else {
+    swal("Reject cancelled!");
+  }
+});
+
+
+		}
+
+	function StaffStart(id) {
+
 	swal({
 		title: "Are you sure?",
-		text: "You are about to approve this item!",
+		text: "You are about to Start this item!",
 		icon: "warning",
 		buttons: true,
 		dangerMode: true,
 	})
 	.then((willApprove) => {
 		if (willApprove) {
-		var UrlAction = '@Url.Action("ManagerGaReject", "BusinessCards")';
+		var UrlAction = '@Url.Action("StaffStart", "BusinessCards")';
 			$.ajax({
 				url: UrlAction,
 				data: { id: id },
 				success: function (res) {
-					swal("Success!", "Rejected ", "success").then(() => {
-				    window.location.href = '@Url.Action("Index", "BusinessCards")';
-
+					swal("Success!", "Start", "success").then(() => {
+						location.reload();
 					});
 					}
 				});
 			}
 			else
 			{
-			swal("Reject cancelled!");
+			swal("Cancelled!");
 			}
 		});
-	}
+		}
+
+	function StaffUndo(id) {
+
+		swal({
+  title: "Are you sure?",
+  text: "You are about to Undo this item!",
+  icon: "warning",
+  buttons: true,
+  dangerMode: true,
+  content: {
+    element: "input",
+    attributes: {
+      placeholder: "Please enter Remark",
+      type: "text",
+    },
+  },
+}).then((willApprove) => {
+  if (willApprove) {
+    var UrlAction = '@Url.Action("StaffUndo", "BusinessCards")';
+    var remark = $('.swal-content__input').val(); // ดึงค่า Remark จาก element ใหม่
+    $.ajax({
+      url: UrlAction,
+      data: { id: id, remark: remark }, // ส่งค่า Remark ไปด้วย
+      success: function (res) {
+		  swal("Success!", "Undo ", "success").then(() => {
+          window.location.href = '@Url.Action("Index", "BusinessCards")';
+        });
+      }
+    });
+  } else {
+	  swal("Undo cancelled!");
+  }
+});
+
+
+		}
+
+    function uploadFile(id) {
+    var fileInput = document.getElementById("file-input");
+    // Check if file has been uploaded
+    if (fileInput.files.length === 0) {
+        swal("Warning!", "Please select a file to send email.", "warning");
+        return;
+    }
+    var file = fileInput.files[0];
+    var formData = new FormData();
+    formData.append("file", file);
+    formData.append("id", id);
+
+    $.ajax({
+        url: "@Url.Action("Upload", "BusinessCards")",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            swal("Success!", "SendMail", "success").then(() => {
+                location.reload();
+            });
+        }
+    });
+		}
+
+	function StaffComplete(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to Complete this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("StaffComplete", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: { id: id },
+				success: function (res) {
+					swal("Success!", "Completed", "success").then(() => {
+						location.reload();
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Cancelled!");
+			}
+		});
+		}
+
+    function UserClose(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to Close this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("UserClose", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: { id: id },
+				success: function (res) {
+					swal("Success!", "Closed", "success").then(() => {
+						location.reload();
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Cancelled!");
+			}
+		});
+		}
+
+     function Cancel(id) {
+
+		swal({
+			title: "Are you sure?",
+			text: "You are about to Cancel this item!",
+			icon: "warning",
+			buttons: true,
+			dangerMode: true,
+		}).then((willApprove) => {
+  if (willApprove) {
+    var UrlAction = '@Url.Action("Cancel", "BusinessCards")';
+
+    $.ajax({
+      url: UrlAction,
+      data: { id: id},
+      success: function (res) {
+		  swal("Success!", "Cancel", "success").then(() => {
+          window.location.href = '@Url.Action("Index", "BusinessCards")';
+        });
+      }
+    });
+  } else {
+	  swal("Cancel cancelled!");
+  }
+});
+
+
+		}
+
 	</script>
 }
 
-<div class="container">
+<div class="container" id="DetailArea">
+
+	@if (ViewBag.authorized == 3 && ViewBag.StatusId == 2 && ViewBag.GA)
+	{
+		<div class="d-flex mb-3">
+			<div class="mr-auto"></div>
+			<div class="ml-auto">
+				<button id="btn_Upload" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_UploadFile","BusinessCards", new { id = Model.BusinessCard_Id })')"><i class="fa fa-plus"></i></button>
+			</div>
+		</div>
+	}
 
 	<div class="modal-body">
 
@@ -211,16 +430,56 @@
 		</div>
 
 	</div>
-	@if (ViewBag.authorized == 2 && ViewBag.StatusId == 1)
-	{
-		<button id="Mgu_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
-		<button id="Mgu_Reject" class="btn btn-danger" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
+	@{
+		if (ViewBag.authorized == 2 && ViewBag.StatusId == 1)
+		{
+			<button id="Mgu_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
+			<button id="Mgu_Reject" class="btn btn-danger" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
+		}
+
+		if (ViewBag.authorized == 2 && ViewBag.StatusId == 7 && ViewBag.GA)
+		{
+			<div class="form-group col-12">
+				@Html.LabelFor(m => m.UserAction)
+				@Html.DropDownListFor(m => m.UserAction, new SelectList(ViewBag.UserCardList, "Value", "Text"), "Select User", new { @class = "form-control" })
+			</div>
+
+			<button id="MgGA_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">GA Approve</button>
+			<button id="MgGA_Reject" class="btn btn-danger" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">GA Reject</button>
+		}
+
+		if (ViewBag.authorized == 3 && ViewBag.StatusId == 8 && ViewBag.GA)
+		{
+			<button id="Staff_Start " class="btn btn-primary mr-3" type="button" onclick="StaffStart('@Model.BusinessCard_Id')">Start</button>
+			<button id="Staff_Undo" class="btn btn-primary mr-3" type="button" onclick="StaffUndo('@Model.BusinessCard_Id')">Undo</button>
+		}
 	}
 
-	@if (ViewBag.authorized == 2 && ViewBag.StatusId == 7 && ViewBag.GA)
+	@if (ViewBag.authorized == 3 && ViewBag.StatusId == 9 && ViewBag.GA)
 	{
-		<button id="MgGA_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">GA Approve</button>
-		<button id="MgGA_Reject" class="btn btn-danger" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">GA Reject</button>
+		<button id="Staff_Completed" class="btn btn-success" type="button" onclick="StaffComplete('@Model.BusinessCard_Id')">Completed</button>
+	}
+
+	@if (ViewBag.StatusId == 3 && Model.User_id == UserID)
+	{
+		<button id="User_Close" class="btn btn-secondary" type="button" onclick="UserClose('@Model.BusinessCard_Id')">Closed</button>
+	}
+
+	@if (ViewBag.StatusId == 1 && Model.User_id == UserID)
+	{
+		<button id="Cancel" class="btn btn-secondary" type="button" onclick="Cancel('@Model.BusinessCard_Id')">Cancel</button>
 	}
 
 </div>
+
+@if (ViewBag.authorized == 3 && ViewBag.StatusId == 2 && ViewBag.GA || Model.User_id == UserID)
+{
+	<h3>Upload File</h3>
+	<div class="card">
+
+		<div class="card-body">
+			<div class="row" id="datalist"></div>
+		</div>
+
+	</div>
+}

@@ -18,6 +18,8 @@ namespace E2E.Controllers
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ClsUsers users = new ClsUsers();
+        private readonly ClsManageBusinessCard jobCount = new ClsManageBusinessCard();
+
 
         public ActionResult _Copyright()
         {
@@ -180,12 +182,16 @@ namespace E2E.Controllers
 
         public ActionResult _NavService()
         {
+            ClsJobCount clsJobCount = new ClsJobCount();
             try
             {
                 int? res = null;
+             
+
                 if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    Guid? userId = Guid.Parse(HttpContext.User.Identity.Name);
+
                     if (db.Users.Any(a => a.User_Id == userId))
                     {
                         int authorIndex = db.Users
@@ -207,8 +213,13 @@ namespace E2E.Controllers
                     {
                         users.RemoveCookie();
                     }
+
+                    clsJobCount.business = jobCount.CountJob(userId.Value);
+                    clsJobCount.service = res;
+                    clsJobCount.total = clsJobCount.business + clsJobCount.service;
+
                 }
-                return PartialView("_NavService", res);
+                return PartialView("_NavService", clsJobCount);
             }
             catch (Exception)
             {
