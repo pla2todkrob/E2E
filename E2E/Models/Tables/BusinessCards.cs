@@ -28,7 +28,7 @@ namespace E2E.Models.Tables
         public DateTime Create { get; set; }
         public int Status_Id { get; set; }
         public virtual System_Statuses System_Statuses{get;set;}
-        public Guid UserAction { get; set; }
+        public Guid? UserAction { get; set; }
 
     }
 }

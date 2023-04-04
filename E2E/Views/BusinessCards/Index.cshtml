@@ -7,10 +7,11 @@
 
 	<script>
 
-        $(document).ready(function() {
+		$(document).ready(function () {
 
 			let isGA = '@ViewBag.GA'.toLowerCase();
-			if (isGA) {
+			console.log(isGA);
+			if (isGA == "false") {
                 $('#task-tab').removeClass('active');
                 $('#MyRequest-tab').addClass('active');
 
@@ -96,7 +97,7 @@
 
 <ul class="nav nav-tabs" id="Cards" role="tablist">
 	@{
-		if (true/*ViewBag.GA*/)
+		if (ViewBag.GA)
 		{
 			<li class="nav-item">
 				<a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">

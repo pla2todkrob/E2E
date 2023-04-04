@@ -286,6 +286,7 @@
     <Compile Include="Models\Filter\CompressionFilterAttribute.cs" />
     <Compile Include="Models\Filter\ExceptionFilterAttribute.cs" />
     <Compile Include="Models\Filter\TimingFilterAttribute.cs" />
+    <Compile Include="Models\Tables\BusinessCardFiles.cs" />
     <Compile Include="Models\Tables\BusinessCards.cs" />
     <Compile Include="Models\Tables\ChatBot.cs" />
     <Compile Include="Models\Tables\ChatBotAnswer.cs" />
@@ -357,6 +358,7 @@
     <Compile Include="Models\Views\ClsHome.cs" />
     <Compile Include="Models\Views\ClsImage.cs" />
     <Compile Include="Models\Views\ClsInquiryTopics.cs" />
+    <Compile Include="Models\Views\ClsJobCount.cs" />
     <Compile Include="Models\Views\ClsLogin.cs" />
     <Compile Include="Models\Views\ClsEstimate.cs" />
     <Compile Include="Models\Views\ClsPassword.cs" />
@@ -1030,6 +1032,8 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\BusinessCards\UploadHistory.cshtml" />
+    <Content Include="Views\BusinessCards\BusinessCard_UploadFile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

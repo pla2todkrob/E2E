@@ -1,0 +1,126 @@
+﻿@model IEnumerable<E2E.Models.Tables.BusinessCardFiles>
+
+@{
+	Layout = null;
+	Guid UserID = Guid.Parse(HttpContext.Current.User.Identity.Name);
+}
+
+<script>
+
+	function UserConfirmApprove(id) {
+
+	swal({
+		title: "Are you sure?",
+		text: "You are about to confirm this item!",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,
+	})
+	.then((willApprove) => {
+		if (willApprove) {
+		var UrlAction = '@Url.Action("UserConfirmApprove", "BusinessCards")';
+			$.ajax({
+				url: UrlAction,
+				data: {
+					id: id
+				},
+				success: function (res) {
+					swal("Success!", "Confirm", "success").then(() => {
+						location.reload();
+					});
+					}
+				});
+			}
+			else
+			{
+			swal("Confirm cancelled!");
+			}
+		});
+		}
+
+	function UserConfirmCancel(id) {
+
+		swal({
+  title: "Are you sure?",
+			text: "You are about to cancel this item!",
+  icon: "warning",
+  buttons: true,
+  dangerMode: true,
+  content: {
+    element: "input",
+    attributes: {
+      placeholder: "Please enter Remark",
+      type: "text",
+    },
+  },
+}).then((willApprove) => {
+  if (willApprove) {
+    var UrlAction = '@Url.Action("UserConfirmCancel", "BusinessCards")';
+    var remark = $('.swal-content__input').val(); // ดึงค่า Remark จาก element ใหม่
+    $.ajax({
+      url: UrlAction,
+      data: { id: id, remark: remark }, // ส่งค่า Remark ไปด้วย
+      success: function (res) {
+		  swal("Success!", "Cancel", "success").then(() => {
+          window.location.href = '@Url.Action("Index", "BusinessCards")';
+        });
+      }
+    });
+  } else {
+	  swal("Cancel cancelled!");
+  }
+});
+
+
+		}
+
+</script>
+
+<table class="display table table-bordered table-hover w-100">
+	<thead>
+		<tr>
+			<th>Create</th>
+			<th>File Type</th>
+			<th>File Path</th>
+			<th>Status</th>
+
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+		<tr>
+			<td>@item.Create</td>
+			<td>@item.Extension</td>
+			<td><a href="@item.FilePath" target="_blank">@item.FileName</a></td>
+
+
+			@{
+				if (item.BusinessCards.User_id == UserID && item.BusinessCards.Status_Id == 2)
+				{
+					<td>@Html.CheckBoxFor(i => item.Confirm, new { @disabled = "disabled" })</td>
+
+					<td class="fit align-items-center">
+
+						<button type="button" class="btn btn-success mr-2" onclick="UserConfirmApprove('@item.BusinessCardFiles_Id')" /><i class="fa fa-check"></i>
+
+						<button type="button" class="btn btn-danger" onclick="UserConfirmCancel('@item.BusinessCardFiles_Id')" /><i class="fa fa-times"></i>
+
+					</td>
+				}
+				else
+				{
+					<td>@Html.CheckBoxFor(i => item.Confirm, new { @disabled = "disabled" })</td>
+
+				}
+			}
+
+
+
+		</tr>
+		}
+	</tbody>
+
+</table>
+
+
