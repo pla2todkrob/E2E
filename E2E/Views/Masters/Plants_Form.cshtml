@@ -1,4 +1,4 @@
-﻿@model E2E.Models.Tables.Master_Plants
+﻿@model E2E.Models.Tables.PlantDetail
 
 @{
     Layout = null;
@@ -15,18 +15,55 @@
     </button>
 </div>
 <div class="modal-body">
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-    @Html.HiddenFor(m => m.Plant_Id)
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.Plant_Name)
-            @Html.TextBoxFor(m=>m.Plant_Name, new { @class = "form-control", required = "required" })
-        </div>
-    </div>
-    <div class="form-group form-check">
-        @Html.CheckBoxFor(m => m.Active, new { @class = "form-check-input" })
-        @Html.LabelFor(m => m.Active, new { @class = "form-check-label" })
-    </div>
+	@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+	@Html.HiddenFor(m => m.PlantDetail_Id)
+	@Html.HiddenFor(m => m.Plant_Id)
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			@Html.LabelFor(m => m.Master_Plants.Plant_Name)
+			@Html.TextBoxFor(m => m.Master_Plants.Plant_Name, new { @class = "form-control", required = "required" })
+		</div>
+	</div>
+
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			@Html.LabelFor(m => m.OfficeAddress1)
+			@Html.TextBoxFor(m => m.OfficeAddress1, new { @class = "form-control", required = "required" })
+		</div>
+	</div>
+
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			@Html.LabelFor(m => m.OfficeAddress2)
+			@Html.TextBoxFor(m => m.OfficeAddress2, new { @class = "form-control", required = "required" })
+		</div>
+	</div>
+
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			@Html.LabelFor(m => m.OfficeFax)
+			@Html.TextBoxFor(m => m.OfficeFax, new { @class = "form-control", required = "required" })
+		</div>
+	</div>
+
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			@Html.LabelFor(m => m.OfficeNumber)
+			@Html.TextBoxFor(m => m.OfficeNumber, new { @class = "form-control", required = "required" })
+		</div>
+	</div>
+
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			@Html.LabelFor(m => m.OfficeName)
+			@Html.TextBoxFor(m => m.OfficeName, new { @class = "form-control", required = "required" })
+		</div>
+	</div>
+
+	<div class="form-group form-check">
+		@Html.CheckBoxFor(m => m.Master_Plants.Active, new { @class = "form-check-input" })
+		@Html.LabelFor(m => m.Master_Plants.Active, new { @class = "form-check-label" })
+	</div>
 </div>
 <div class="modal-footer">
     @{

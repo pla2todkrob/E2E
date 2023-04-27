@@ -1,0 +1,15 @@
+﻿@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    .card {
+        width: 8.27in;
+        height: 3.74in;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+}

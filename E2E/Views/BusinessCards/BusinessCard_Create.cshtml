@@ -18,69 +18,69 @@
 
 		<div class="form-row">
 			<div class="form-group col-12">
-				@Html.LabelFor(m => m.User_id)
+				@Html.LabelFor(m => m.UserDetails.Users)
 				@Html.DropDownListFor(m => m.User_id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
 			</div>
 			<div class="form-group col-6">
 				@Html.Label("Name(TH)")
-				@Html.TextBoxFor(m => m.UserDetails.Detail_TH_FirstName)
+				@Html.TextBoxFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
 
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Surname(TH)")
-				@Html.TextBoxFor(m => m.UserDetails.Detail_TH_LastName)
+				@Html.TextBoxFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Name(EN)")
-				@Html.TextBoxFor(m => m.UserDetails.Detail_EN_FirstName)
+				@Html.TextBoxFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Surname(EN)")
-				@Html.TextBoxFor(m => m.UserDetails.Detail_EN_LastName)
+				@Html.TextBoxFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Department")
-				@Html.TextBoxFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+				@Html.TextBoxFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Position")
-				@Html.TextBoxFor(m => m.UserDetails.Users.Master_Grades.Grade_Position)
+				@Html.TextBoxFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-12">
-				@Html.Label("Both Sided")
-				@Html.CheckBoxFor(m => m.BothSided)
-			</div>
+			@*<div class="form-group col-12">
+			@Html.Label("Both Sided")
+			@Html.CheckBoxFor(m => m.BothSided)
+		</div>*@
 
 			<div class="form-group col-6">
 				@Html.Label("Location")
-				@Html.TextBoxFor(m => m.UserDetails.Users.Master_Plants.Plant_Name)
-			</div>
-
-			<div class="form-group col-6">
-				@Html.Label("Tel")
-				@Html.TextBoxFor(m => m.Tel_Internal)
-			</div>
-
-			<div class="form-group col-6">
-				@Html.Label("Mobile")
-				@Html.TextBoxFor(m => m.Tel_External)
+				@Html.TextBoxFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Email")
-				@Html.TextBoxFor(m => m.UserDetails.Users.User_Email)
+				@Html.TextBoxFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Tel")
+				@Html.TextBoxFor(m => m.Tel_Internal, new { @class = "form-control" })
+			</div>
+
+			<div class="form-group col-6">
+				@Html.Label("Mobile")
+				@Html.TextBoxFor(m => m.Tel_External, new { @class = "form-control" })
 			</div>
 
 			<div class="form-group col-6">
 				@Html.Label("Amount")
-				
-				@Html.TextBoxFor(m => m.Amount, new { Value = "" , type = "number", @required = "required" })
+
+				@Html.TextBoxFor(m => m.Amount, new { Value = "", type = "number", @required = "required", @class = "form-control" })
 
 			</div>
 

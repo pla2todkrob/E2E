@@ -897,20 +897,28 @@ namespace E2E.Controllers
         public ActionResult Plants_Form(Guid? id)
         {
             bool isNew = true;
-            Master_Plants master_Plants = new Master_Plants();
+            PlantDetail plantDetail = new PlantDetail();
             if (id.HasValue)
             {
-                master_Plants = data.Plant_Get(id.Value);
+                plantDetail = data.Plant_Get(id.Value);
+
+                if (plantDetail == null)
+                {
+                    plantDetail = new PlantDetail();
+                    plantDetail.Plant_Id = id.Value;
+                    plantDetail.Master_Plants = db.Master_Plants.Find(id);
+                }
+
                 isNew = false;
             }
 
             ViewBag.IsNew = isNew;
 
-            return View(master_Plants);
+            return View(plantDetail);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Plants_Form(Master_Plants model)
+        public ActionResult Plants_Form(PlantDetail model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -919,6 +927,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
+
                         if (data.Plant_Save(model))
                         {
                             scope.Complete();
