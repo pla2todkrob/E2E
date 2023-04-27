@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -117,6 +118,7 @@ namespace E2E.Models
             var GetMgApp = db.Users.Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
 
             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+            bool found = linkUrl.Contains("Upload");
             linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
 
             string subject = string.Format("[Business Card][Require approve] {0}", Model.Key);
@@ -140,12 +142,15 @@ namespace E2E.Models
             //Mg User Approved
             if (Model.Status_Id == 7)
             {
+                linkUrl = linkUrl.Replace("ManagerUserApprove", "BusinessCard_Detail/");
                 GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
                 mail.SendToIds = GetMgApp;
             }
             //Staff Undo
             else if (Model.Status_Id == 7 && pseudo == "7")
             {
+                linkUrl = linkUrl.Replace("BusinessCards", "BusinessCards/BusinessCard_Detail/" + Model.BusinessCard_Id);
+
                 subject = string.Format("[Business Card][Staff Undo] {0}", Model.Key);
                 content = string.Empty;
 
@@ -167,6 +172,13 @@ namespace E2E.Models
             //Rejected
             else if (Model.Status_Id == 5)
             {
+
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 content = string.Empty;
 
@@ -190,6 +202,9 @@ namespace E2E.Models
             //[M] GA Assign
             else if (Model.Status_Id == 8)
             {
+                linkUrl = linkUrl.Replace("ManagerGaApprove", "BusinessCard_Detail/");
+
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 if (SelectId.HasValue)
@@ -217,8 +232,11 @@ namespace E2E.Models
             }
 
             //Staff Send Confirm
-            else if (Model.Status_Id == 2 && ModelFile == null)
+            else if (Model.Status_Id == 2 && ModelFile == null || found)
             {
+                linkUrl = linkUrl.Replace("Upload", "BusinessCard_Detail/");
+
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
@@ -237,6 +255,9 @@ namespace E2E.Models
             //User Confirm
             else if (Model.Status_Id == 9)
             {
+                linkUrl = linkUrl.Replace("UserConfirmApprove", "BusinessCard_Detail/");
+
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
@@ -250,8 +271,15 @@ namespace E2E.Models
             }
 
             //User Cancel Confirm
-            else if (Model.Status_Id == 2)
+            else if (Model.Status_Id == 2 && found == false)
             {
+
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
@@ -269,6 +297,9 @@ namespace E2E.Models
             //User Close
             else if (Model.Status_Id == 4)
             {
+                linkUrl = linkUrl.Replace("UserClose", "BusinessCard_Detail/");
+
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
@@ -284,6 +315,8 @@ namespace E2E.Models
             //Staff Completed
             else if (Model.Status_Id == 3)
             {
+                linkUrl = linkUrl.Replace("StaffComplete", "BusinessCard_Detail/");
+
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;

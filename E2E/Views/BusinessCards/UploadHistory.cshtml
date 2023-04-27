@@ -81,8 +81,14 @@
 		<tr>
 			<th>Create</th>
 			<th>File Type</th>
-			<th>File Path</th>
+			<th>File</th>
 			<th>Status</th>
+
+			@if (!Model.Any(a => a.Confirm == true))
+			{
+				<th id="CfUser">Approval</th>
+			}
+
 
 		</tr>
 	</thead>

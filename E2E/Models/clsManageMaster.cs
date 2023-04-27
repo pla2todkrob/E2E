@@ -269,18 +269,57 @@ namespace E2E.Models
             }
         }
 
-        protected bool Plant_Insert(Master_Plants model)
+        protected bool Plant_Insert(PlantDetail model)
         {
             try
             {
                 bool res = new bool();
-                Master_Plants master_Plants = new Master_Plants
+                Master_Plants master_Plants = db.Master_Plants.Find(model.Plant_Id);
+                if (master_Plants == null)
                 {
-                    Plant_Name = model.Plant_Name,
-                    Active = model.Active
-                };
+                    master_Plants = new Master_Plants();
+                    master_Plants.Plant_Name = model.Master_Plants.Plant_Name;
+                    master_Plants.Active = model.Master_Plants.Active;
 
-                db.Master_Plants.Add(master_Plants);
+                    db.Master_Plants.Add(master_Plants);
+                }
+                else
+                {
+
+                    master_Plants.Plant_Name = model.Master_Plants.Plant_Name;
+                    master_Plants.Update = DateTime.Now;
+                    master_Plants.Active = model.Master_Plants.Active;
+
+                }
+
+                PlantDetail plantDetail = db.PlantDetails.Find(model.PlantDetail_Id);
+                if (plantDetail == null)
+                {
+                    plantDetail = new PlantDetail
+                    {
+                        OfficeAddress1 = model.OfficeAddress1,
+                        OfficeAddress2 = model.OfficeAddress2,
+                        OfficeFax = model.OfficeFax,
+                        OfficeName = model.OfficeName,
+                        OfficeNumber = model.OfficeNumber,
+                        Plant_Id = master_Plants.Plant_Id
+                    };
+
+                    db.PlantDetails.Add(plantDetail);
+
+                }
+                else
+                {
+                    plantDetail.OfficeAddress1 = model.OfficeAddress1;
+                    plantDetail.OfficeAddress2 = model.OfficeAddress2;
+                    plantDetail.OfficeFax = model.OfficeFax;
+                    plantDetail.OfficeName = model.OfficeName;
+                    plantDetail.OfficeNumber = model.OfficeNumber;
+                }
+
+
+
+    
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -294,17 +333,23 @@ namespace E2E.Models
             }
         }
 
-        protected bool Plant_Update(Master_Plants model)
+        protected bool Plant_Update(PlantDetail model)
         {
             try
             {
                 bool res = new bool();
 
                 Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
-
-                master_Plants.Plant_Name = model.Plant_Name.Trim();
-                master_Plants.Active = model.Active;
+                master_Plants.Plant_Name = model.Master_Plants.Plant_Name.Trim();
+                master_Plants.Active = model.Master_Plants.Active;
                 master_Plants.Update = DateTime.Now;
+
+                PlantDetail plantDetail = db.PlantDetails.Where(w => w.PlantDetail_Id == model.PlantDetail_Id).FirstOrDefault();
+                plantDetail.OfficeAddress1 = model.OfficeAddress1;
+                plantDetail.OfficeAddress2 = model.OfficeAddress2;
+                plantDetail.OfficeFax = model.OfficeFax;
+                plantDetail.OfficeName = model.OfficeName;
+                plantDetail.OfficeNumber = model.OfficeNumber;
 
                 if (db.SaveChanges() > 0)
                 {
@@ -860,7 +905,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments
                     .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() &&
@@ -1018,7 +1063,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions
                     .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim())
@@ -1242,7 +1287,7 @@ namespace E2E.Models
             {
                 Guid? res = null;
 
-                FindModel:
+            FindModel:
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades
                     .Where(w => w.Grade_Name.ToLower() == grade.ToLower().Trim() &&
@@ -1530,7 +1575,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks = db.Master_LineWorks
                     .Where(w => w.LineWork_Name.ToLower() == val.ToLower().Trim())
@@ -1697,12 +1742,12 @@ namespace E2E.Models
             }
         }
 
-        public Master_Plants Plant_Get(Guid id)
+        public PlantDetail Plant_Get(Guid id)
         {
-            return db.Master_Plants.Find(id);
+            return db.PlantDetails.Where(w => w.Master_Plants.Plant_Id == id).FirstOrDefault();
         }
 
-        public List<Master_Plants> Plant_GetAll()
+        public IEnumerable<Master_Plants> Plant_GetAll()
         {
             return db.Master_Plants.ToList();
         }
@@ -1712,7 +1757,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants = db.Master_Plants
                     .Where(w => w.Plant_Name.ToLower() == val.ToLower().Trim())
@@ -1743,17 +1788,19 @@ namespace E2E.Models
             }
         }
 
-        public bool Plant_Save(Master_Plants model)
+        public bool Plant_Save(PlantDetail model)
         {
             try
             {
                 bool res = new bool();
-                Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == model.Plant_Id).FirstOrDefault();
+                PlantDetail plantDetail = db.PlantDetails.Where(w => w.PlantDetail_Id == model.PlantDetail_Id).FirstOrDefault();
 
-                if (master_Plants != null)
+                var masterPlants = db.Master_Plants.Where(w => w.Plant_Id != model.Plant_Id && w.Plant_Name.ToLower() == model.Master_Plants.Plant_Name.ToLower().Trim()).FirstOrDefault();
+
+
+                if (plantDetail != null)
                 {
-                    master_Plants = db.Master_Plants.Where(w => w.Plant_Id != model.Plant_Id && w.Plant_Name.ToLower() == model.Plant_Name.ToLower().Trim()).FirstOrDefault();
-                    if (master_Plants != null)
+                    if (masterPlants != null)
                     {
                         return false;
                     }
@@ -1764,9 +1811,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    master_Plants = db.Master_Plants.Where(w => w.Plant_Name.ToLower() == model.Plant_Name.ToLower().Trim()).FirstOrDefault();
-
-                    if (master_Plants != null)
+                    if (masterPlants != null && plantDetail == null)
                     {
                         return false;
                     }
@@ -1825,7 +1870,11 @@ namespace E2E.Models
                 }
                 else
                 {
+                    var PlantDetail = db.PlantDetails.Where(w => w.Plant_Id == id).FirstOrDefault();
+
                     db.Master_Plants.Remove(master_Plants);
+                    db.PlantDetails.Remove(PlantDetail);
+
                     if (db.SaveChanges() > 0)
                     {
                         res.IsSuccess = true;
@@ -1844,7 +1893,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-                FindModel:
+            FindModel:
                 System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
                 system_Prefix_EN = db.System_Prefix_ENs
                     .Where(w => w.Prefix_EN_Name.ToLower() == val.ToLower().Trim())
@@ -1901,7 +1950,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-                FindModel:
+            FindModel:
                 System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
                 system_Prefix_TH = db.System_Prefix_THs
                     .Where(w => w.Prefix_TH_Name.ToLower() == val.ToLower().Trim())
@@ -2015,7 +2064,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes
                     .Where(w => w.Process_Name.ToLower() == val.ToLower().Trim() &&
@@ -2198,7 +2247,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections
                     .Where(w => w.Section_Name.ToLower() == val.ToLower().Trim() &&

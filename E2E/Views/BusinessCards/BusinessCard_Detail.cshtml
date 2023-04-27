@@ -365,65 +365,65 @@ swal({
 	<div class="modal-body">
 
 		<div class="form-row">
-			<div class="form-group col-6">
+			<div class="form-group offset-2 col-5">
 				@Html.Label("Name(TH):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName)
+				@Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
 
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group col-5">
 				@Html.Label("Surname(TH):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName)
+				@Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group offset-2 col-5">
 				@Html.Label("Name(EN):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName)
+				@Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group col-5">
 				@Html.Label("Surname(EN):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName)
+				@Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group offset-2 col-5">
 				@Html.Label("Department:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+				@Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group col-5">
 				@Html.Label("Position:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position)
+				@Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-12">
-				@Html.Label("Both Sided:")
-				@Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
-			</div>
+			@*<div class="form-group col-12">
+					@Html.Label("Both Sided:")
+					@Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
+				</div>*@
 
-			<div class="form-group col-6">
+			<div class="form-group offset-2 col-5">
 				@Html.Label("Location:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name)
+				@Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group col-5">
 				@Html.Label("Tel:")
-				@Html.DisplayFor(m => m.Tel_Internal)
+				@Html.DisplayFor(m => m.Tel_Internal, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group offset-2 col-5">
 				@Html.Label("Mobile:")
-				@Html.DisplayFor(m => m.Tel_External)
+				@Html.DisplayFor(m => m.Tel_External, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group col-5">
 				@Html.Label("Email:")
-				@Html.DisplayFor(m => m.UserDetails.Users.User_Email)
+				@Html.DisplayFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
 			</div>
 
-			<div class="form-group col-6">
+			<div class="form-group offset-2 col-5">
 				@Html.Label("Amount:")
-				@Html.DisplayFor(m => m.Amount, new { type = "number" })
+				@Html.DisplayFor(m => m.Amount, new { type = "number", @class = "form-control" })
 
 			</div>
 
@@ -433,8 +433,12 @@ swal({
 	@{
 		if (ViewBag.authorized == 2 && ViewBag.StatusId == 1)
 		{
-			<button id="Mgu_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
-			<button id="Mgu_Reject" class="btn btn-danger" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
+
+
+		<div class="d-flex">
+			<button id="Mgu_Approve" class="btn btn-primary ml-auto" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
+			<button id="Mgu_Reject" class="btn btn-danger ml-3" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
+		</div>
 		}
 
 		if (ViewBag.authorized == 2 && ViewBag.StatusId == 7 && ViewBag.GA)
@@ -444,30 +448,47 @@ swal({
 				@Html.DropDownListFor(m => m.UserAction, new SelectList(ViewBag.UserCardList, "Value", "Text"), "Select User", new { @class = "form-control" })
 			</div>
 
-			<button id="MgGA_Approve" class="btn btn-primary mr-3" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">GA Approve</button>
-			<button id="MgGA_Reject" class="btn btn-danger" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">GA Reject</button>
+
+
+			<div class="d-flex">
+				<button id="MgGA_Approve" class="btn btn-primary ml-auto" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">GA Approve</button>
+				<button id="MgGA_Reject" class="btn btn-danger ml-auto" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">GA Reject</button>
+			</div>
 		}
 
 		if (ViewBag.authorized == 3 && ViewBag.StatusId == 8 && ViewBag.GA)
 		{
-			<button id="Staff_Start " class="btn btn-primary mr-3" type="button" onclick="StaffStart('@Model.BusinessCard_Id')">Start</button>
-			<button id="Staff_Undo" class="btn btn-primary mr-3" type="button" onclick="StaffUndo('@Model.BusinessCard_Id')">Undo</button>
+
+
+<div class="d-flex">
+	<button id="Staff_Start " class="btn btn-primary ml-auto" type="button" onclick="StaffStart('@Model.BusinessCard_Id')">Start</button>
+	<button id="Staff_Undo" class="btn btn-primary ml-auto" type="button" onclick="StaffUndo('@Model.BusinessCard_Id')">Undo</button>
+</div>
 		}
 	}
 
 	@if (ViewBag.authorized == 3 && ViewBag.StatusId == 9 && ViewBag.GA)
 	{
-		<button id="Staff_Completed" class="btn btn-success" type="button" onclick="StaffComplete('@Model.BusinessCard_Id')">Completed</button>
+
+
+<div class="d-flex">
+	<button id="Staff_Completed" class="btn btn-success ml-auto" type="button" onclick="StaffComplete('@Model.BusinessCard_Id')">Completed</button>
+</div>
 	}
 
 	@if (ViewBag.StatusId == 3 && Model.User_id == UserID)
 	{
-		<button id="User_Close" class="btn btn-secondary" type="button" onclick="UserClose('@Model.BusinessCard_Id')">Closed</button>
+		<div class="d-flex">
+			<button id="User_Close" class="btn btn-secondary ml-auto" type="button" onclick="UserClose('@Model.BusinessCard_Id')">Closed</button>
+		</div>
 	}
 
 	@if (ViewBag.StatusId == 1 && Model.User_id == UserID)
 	{
-		<button id="Cancel" class="btn btn-secondary" type="button" onclick="Cancel('@Model.BusinessCard_Id')">Cancel</button>
+		<div class="d-flex">
+			<button id="Cancel" class="btn btn-secondary ml-auto mt-3" type="button" onclick="Cancel('@Model.BusinessCard_Id')">Cancel</button>
+		</div>
+
 	}
 
 </div>
