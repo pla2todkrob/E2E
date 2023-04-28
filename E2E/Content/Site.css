@@ -61,3 +61,14 @@ nav.navbar { transition: top 0.5s ease; }
         top: 0;
         right: 100%;
     }
+#qaList{
+    left:100%;
+    transition:ease-in-out 0.5s;
+}
+#qaList.active{
+    left:0;
+}
+
+    #qaList #closeArea{
+        opacity:0.4;
+    }
