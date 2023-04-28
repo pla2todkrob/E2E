@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Manage";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+}
+
+@section scripts{
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+        $(document).on('submit', '#ImportForm', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("ImportExcel", "ChatBot")', this);
+            return false;
+        });
+
+        function reloadTable() {
+            callData('@Url.Action("GroupTable", "ChatBot")');
+        }
+    </script>
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","ChatBot")">Chat bot</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage</li>
+        </ol>
+    </nav>
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex">
+            <div class="mr-auto"></div>
+            <div class="ml-auto">
+                <button class="btn btn-secondary" onclick="callModal('@Url.Action("Import","ChatBot")',{bigSize:true});" title="Import"><i class="fa fa-upload"></i>&nbsp;Import</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body" id="datalist">
+    </div>
+</div>
+<div class="fixed-top fixed-bottom" id="qaList">
+    <div class="row vh-100">
+        <div class="col-4 col-md-3 col-lg-2 bg-dark" id="closeArea"></div>
+        <div class="col-8 col-md-9 col-lg-10 bg-light" id="listArea"></div>
+    </div>
+</div>

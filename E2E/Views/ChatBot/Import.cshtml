@@ -1,0 +1,26 @@
+﻿@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("", "", FormMethod.Post, new { id = "ImportForm", name = "ImportForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Import</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label for="importFile">File</label>
+            <input name="importFile" type="file" class="form-control-file" id="importFile" required />
+        </div>
+
+        @*@{ Html.RenderAction("UploadHistory", "Users"); }*@
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+    </div>
+}
