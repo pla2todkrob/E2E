@@ -267,6 +267,18 @@ function callFilter(urlAjax, blockId = '#filter') {
     });
 }
 
+async function callData(urlAjax, blockId = '#datalist') {
+    try {
+        const res = await $.ajax({
+            url: urlAjax,
+            method: 'GET'
+        });
+        // append the data to blockId
+        $(blockId).html(res);
+    } catch (e) {
+        console.error(e);
+    }
+}
 
 async function setTable_File(tableId, bOrder = false, bSearch = false) {
     return table = await $(tableId).DataTable({
