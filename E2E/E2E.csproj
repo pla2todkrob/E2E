@@ -515,7 +515,7 @@
     <Compile Include="Models\Tables\UserDetails.cs" />
     <Compile Include="Models\Tables\Users.cs" />
     <Compile Include="Models\Tables\System_Roles.cs" />
-    <Compile Include="Models\Tables\UserUploadHistories.cs" />
+    <Compile Include="Models\Tables\UserUploadHistory.cs" />
     <Compile Include="Models\Tables\WorkRootDocuments.cs" />
     <Compile Include="Models\Tables\WorkRoots.cs" />
     <Compile Include="Models\Views\ClsAuditReport.cs" />
