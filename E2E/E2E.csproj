@@ -465,6 +465,7 @@
     <Compile Include="Models\Tables\ChatBotAnswer.cs" />
     <Compile Include="Models\Tables\ChatBotHistory.cs" />
     <Compile Include="Models\Tables\ChatBotQuestion.cs" />
+    <Compile Include="Models\Tables\ChatBotUploadHistory.cs" />
     <Compile Include="Models\Tables\ChatGPT.cs" />
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
@@ -522,6 +523,7 @@
     <Compile Include="Models\Views\ClsBusinessCard.cs" />
     <Compile Include="Models\Views\ClsBusinessCardModel.cs" />
     <Compile Include="Models\Views\ClsChangeDueDates.cs" />
+    <Compile Include="Models\Views\ClsChatBot.cs" />
     <Compile Include="Models\Views\ClsCountNavbar.cs" />
     <Compile Include="Models\Views\ClsDepartments.cs" />
     <Compile Include="Models\Views\ClsDivisions.cs" />
