@@ -9,6 +9,10 @@ namespace E2E.Models.Tables
 {
     public class ChatBotQuestion
     {
+        public ChatBotQuestion()
+        {
+            ChatBotQuestion_Id = Guid.NewGuid();
+        }
         public virtual ChatBot ChatBot { get; set; }
 
         [Index]
