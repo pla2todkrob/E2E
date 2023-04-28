@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E2E.Models.Tables
 {
-    public class UserUploadHistories
+    public class UserUploadHistory
     {
-        public UserUploadHistories()
+        public UserUploadHistory()
         {
             UserUploadHistoryId = Guid.NewGuid();
             Create = DateTime.Now;
