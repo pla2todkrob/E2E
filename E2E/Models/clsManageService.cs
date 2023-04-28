@@ -262,10 +262,7 @@ namespace E2E.Models
                     res.ReportKPI_Overview.Unsatisfied_Count = UnsatCount.Count();
                 }
 
-                res.ReportKPI_Overview.Satisfied_Percent = Math.Abs(1 - (res.ReportKPI_Overview.Unsatisfied_Count / (double)res.ReportKPI_Overview.Close_Count));
-
-                //double averageScore = res.ReportKPI_Users.Where(w => w.Average_Score.HasValue).Sum(s => s.Average_Score.Value) / res.ReportKPI_Users.Where(w => w.Average_Score.HasValue).Count();
-                //int fullScore = string.IsNullOrEmpty(ConfigurationManager.AppSettings["FullScore"]) ? 5 : Convert.ToInt32(ConfigurationManager.AppSettings["FullScore"]);
+                res.ReportKPI_Overview.Satisfied_Percent = Math.Abs(1 - (res.ReportKPI_Overview.Unsatisfied_Count / (double)res.ReportKPI_Ove
 
 
                 return res;
@@ -295,7 +292,6 @@ namespace E2E.Models
                     var services = db.Services.Where(w => ServiceId.Contains(w.Service_Id))
                    .Select(item => new ClsServiceUserActionName
                    {
-
                        ActionBy = db.UserDetails
                        .Where(w => w.User_Id == item.Action_User_Id)
                        .Select(s => s.Detail_EN_FirstName)
@@ -309,7 +305,6 @@ namespace E2E.Models
                        .Where(w => w.User_Id == item.Create_User_Id)
                        .Select(s => s.Detail_EN_FirstName)
                        .FirstOrDefault()
-
                    }).ToList();
 
                     return services;
