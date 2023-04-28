@@ -341,12 +341,14 @@ namespace E2E.Models
 
             try
             {
-                BusinessCardFiles cardFiles = new BusinessCardFiles();
-                cardFiles.BusinessCard_Id = model.BusinessCard_Id;
-                cardFiles.Create = DateTime.Now;
-                cardFiles.Extension = Path.GetExtension(filepath);
-                cardFiles.FilePath = filepath;
-                cardFiles.FileName = Path.GetFileName(filepath);
+                BusinessCardFiles cardFiles = new BusinessCardFiles
+                {
+                    BusinessCard_Id = model.BusinessCard_Id,
+                    Create = DateTime.Now,
+                    Extension = Path.GetExtension(filepath),
+                    FilePath = filepath,
+                    FileName = Path.GetFileName(filepath)
+                };
 
                 db.BusinessCardFiles.Add(cardFiles);
 

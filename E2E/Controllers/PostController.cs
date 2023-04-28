@@ -114,7 +114,7 @@ namespace E2E.Controllers
             ClsApi clsApi = new ClsApi();
             if (ModelState.IsValid)
             {
-                ResponseUser responseUser = new ResponseUser();
+                UserResponse userResponse = new UserResponse();
                 try
                 {
                     string passEncrypt = new ClsManageMaster().Users_Password(model.Password);
@@ -166,7 +166,7 @@ namespace E2E.Controllers
                         throw new Exception("Username not found");
                     }
                     LoginPass:
-                    responseUser.Users = users;
+                    userResponse.Users = users;
                     var name = db.UserDetails
                         .Where(w => w.User_Id == users.User_Id)
                         .Select(s => new
@@ -174,10 +174,10 @@ namespace E2E.Controllers
                             s.Detail_EN_FirstName,
                             s.Detail_EN_LastName
                         }).FirstOrDefault();
-                    responseUser.FirstName = name.Detail_EN_FirstName;
-                    responseUser.LastName = name.Detail_EN_LastName;
+                    userResponse.FirstName = name.Detail_EN_FirstName;
+                    userResponse.LastName = name.Detail_EN_LastName;
 
-                    clsApi.Value = responseUser;
+                    clsApi.Value = userResponse;
                     clsApi.IsSuccess = true;
                 }
                 catch (Exception ex)

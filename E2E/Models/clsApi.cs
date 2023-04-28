@@ -217,7 +217,7 @@ namespace E2E.Models
         }
     }
 
-    public class ResponseUser
+    public class UserResponse
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

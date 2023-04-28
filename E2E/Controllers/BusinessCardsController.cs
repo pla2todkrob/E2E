@@ -27,94 +27,15 @@ namespace E2E.Controllers
     [Authorize]
     public class BusinessCardsController : Controller
     {
-        private readonly ClsContext db = new ClsContext();
+        private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
-        readonly ClsApi clsApi = new ClsApi();
+        private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private static Guid UserAuthorized { get; set; }
 
-        // GET: BusinessCards
-        public ActionResult Index()
-        {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            return View();
-        }
-        public List<ClsBusinessCard> queryClsBusinessCard()
-        {
-
-            List<ClsBusinessCard> clsBusinessCards = db.BusinessCards
-                .OrderByDescending(o => o.Create)
-                .Select(s => new ClsBusinessCard()
-                {
-                    Key = s.Key,
-                    Create = s.Create,
-                    User_id = s.User_id,
-                    Status_Id = s.Status_Id,
-                    BothSided = s.BothSided,
-                    Amount = s.Amount,
-                    UserAction = s.UserAction.Value,
-                    UserRef_id = s.UserRef_id,
-                    UserActionName = db.UserDetails.Where(w => w.User_Id == s.UserAction).Select(ss => ss.Users.Username).FirstOrDefault(),
-                    Tel_External = s.Tel_External,
-                    Tel_Internal = s.Tel_Internal,
-                    System_Statuses = db.System_Statuses.Where(w => w.Status_Id == s.Status_Id).FirstOrDefault(),
-                    UserDetails = db.UserDetails.Where(w => w.User_Id == s.User_id).FirstOrDefault(),
-                    UserRefName = db.UserDetails.Where(w => w.User_Id == s.UserRef_id).Select(ss => ss.Users.Username).FirstOrDefault(),
-                    BusinessCard_Id = s.BusinessCard_Id
-
-                }).ToList();
-
-
-            return clsBusinessCards;
-        }
-        public ActionResult Table_MyRequest()
-        {
-            Guid MyUserid = Guid.Parse(HttpContext.User.Identity.Name);
-
-            var clsBusinessCard = queryClsBusinessCard().Where(w => w.User_id == MyUserid).OrderByDescending(o => o.Create).ToList();
-
-            return View(clsBusinessCard);
-        }
-        public ActionResult Table_AllTask()
-        {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var Staff = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-
-            var clsBusinessCard = queryClsBusinessCard().OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
-
-            //ถ้าเป็น Staff
-            if (Staff == 3)
-            {
-                clsBusinessCard = queryClsBusinessCard().Where(w => w.Status_Id == 8).OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
-            }
-
-            return View(clsBusinessCard);
-        }
-        public ActionResult Table_Approval()
-        {
-            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            var clsBusinessCard = queryClsBusinessCard().Where(w => w.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Id == MyDeptId).ToList();
-
-            return View(clsBusinessCard);
-        }
-        public ActionResult BusinessCard_Detail(Guid id)
-        {
-            ViewBag.UserCardList = dataCard.SelectListItems_CardGroup();
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            ViewBag.StatusId = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.Status_Id).FirstOrDefault();
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            ViewBag.RoleID = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Role_Id).FirstOrDefault();
-            var clsBusinessCard = queryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
-
-            return View(clsBusinessCard.FirstOrDefault());
-        }
         public ActionResult BusinessCard_Create(Guid? id)
         {
-
             ClsBusinessCard businessCards;
             if (!id.HasValue)
             {
@@ -127,7 +48,6 @@ namespace E2E.Controllers
             }
             else
             {
-
                 businessCards = new ClsBusinessCard()
                 {
                     User_id = id.Value,
@@ -135,14 +55,13 @@ namespace E2E.Controllers
                 };
             }
 
-
             ViewBag.UserList = data.SelectListItems_User();
             return View(businessCards);
         }
+
         [HttpPost]
         public ActionResult BusinessCard_Create(ClsBusinessCard Model)
         {
-
             ClsSwal swal = new ClsSwal();
             if (Model.User_id.HasValue)
             {
@@ -155,7 +74,6 @@ namespace E2E.Controllers
                 {
                     try
                     {
-
                         if (dataCard.BusinessCard_SaveCreate(Model))
                         {
                             scope.Complete();
@@ -210,262 +128,30 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult ManagerUserApprove(Guid? id)
+
+        public ActionResult BusinessCard_Detail(Guid id)
         {
-            try
-            {
-                BusinessCards businessCards = new BusinessCards();
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 7;
-                businessCards.Create = DateTime.Now;
+            ViewBag.UserCardList = dataCard.SelectListItems_CardGroup();
+            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            ViewBag.StatusId = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.Status_Id).FirstOrDefault();
+            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            ViewBag.RoleID = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Role_Id).FirstOrDefault();
+            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
-                if (db.SaveChanges() > 0)
-                {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards);
-                }
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { @id = id });
-        }
-        public ActionResult ManagerUserReject(Guid? id, string remark)
-        {
-            try
-            {
-                BusinessCards businessCards = new BusinessCards();
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 5;
-                businessCards.Create = DateTime.Now;
-
-                if (db.SaveChanges() > 0)
-                {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards, null, null, "", remark);
-                }
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return View();
-        }
-        public ActionResult ManagerGaApprove(Guid? id, Guid? SelectId)
-        {
-            try
-            {
-                BusinessCards businessCards = new BusinessCards();
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 8;
-                businessCards.Create = DateTime.Now;
-
-                if (db.SaveChanges() > 0)
-                {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards, SelectId);
-                }
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { @id = id });
-        }
-        public ActionResult ManagerGaReject(Guid? id, string remark)
-        {
-            try
-            {
-                BusinessCards businessCards = new BusinessCards();
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 5;
-                businessCards.Create = DateTime.Now;
-
-                if (db.SaveChanges() > 0)
-                {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards, null, null, "", remark);
-                }
-
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return View();
-        }
-        public ActionResult StaffStart(Guid? id)
-        {
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 2;
-            businessCards.Create = DateTime.Now;
-            businessCards.UserAction = Guid.Parse(HttpContext.User.Identity.Name);
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        public ActionResult StaffUndo(Guid? id, string remark)
-        {
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 7;
-            businessCards.Create = DateTime.Now;
-            businessCards.UserAction = null;
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.SendMail(businessCards, null, null, "", remark, "7");
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        [HttpPost]
-        public ActionResult Upload(HttpPostedFileBase file, Guid? id)
-        {
-
-            if (file != null && file.ContentLength > 0 && id.HasValue)
-            {
-                string dir = "BusinessCard/" + id.Value;
-                string FileName = file.FileName;
-
-                bool cardFiles = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id.Value && a.FileName == file.FileName);
-
-                if (cardFiles)
-                {
-                    FileName = string.Concat("_", file.FileName);
-                }
-
-                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
-
-                if (!string.IsNullOrEmpty(filepath))
-                {
-                    var sql = db.BusinessCards.Find(id);
-                    dataCard.BusinessCard_SaveFile(filepath, sql);
-                }
-            }
-            return View();
-        }
-        public ActionResult UploadHistory(Guid? id)
-        {
-            var res = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).OrderByDescending(o => o.Create).ToList();
-
-            return View(res);
-        }
-        public ActionResult UserConfirmCancel(Guid? id, string remark)
-        {
-            BusinessCardFiles businessCardFiles = new BusinessCardFiles();
-            businessCardFiles = db.BusinessCardFiles.Find(id);
-            businessCardFiles.Confirm = false;
-            businessCardFiles.Create = DateTime.Now;
-
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
-            businessCards.Status_Id = 2;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        public ActionResult UserConfirmApprove(Guid? id)
-        {
-            BusinessCardFiles businessCardFiles = new BusinessCardFiles();
-            businessCardFiles = db.BusinessCardFiles.Find(id);
-            businessCardFiles.Confirm = true;
-            businessCardFiles.Create = DateTime.Now;
-
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
-            businessCards.Status_Id = 9;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.SendMail(businessCards);
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        public ActionResult StaffComplete(Guid? id)
-        {
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 3;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.SendMail(businessCards);
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        public ActionResult UserClose(Guid? id)
-        {
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 4;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.SendMail(businessCards);
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        public ActionResult Cancel(Guid? id)
-        {
-            BusinessCards businessCards = new BusinessCards();
-            businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 6;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
-            {
-                dataCard.BusinessCard_SaveLog(businessCards);
-            }
-
-            return View();
-        }
-        public ActionResult BusinessCard_UploadFile(Guid id)
-        {
-            return View(id);
+            return View(clsBusinessCard.FirstOrDefault());
         }
 
         public ActionResult BusinessCard_Model()
         {
-            ClsBusinessCardModel cardModel = new ClsBusinessCardModel();
-            cardModel.Company_en = "THAI PARKERIZING CO.,LTD.";
-            cardModel.Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP";
-            cardModel.NameEN = "SOMBOONLAP KHAMSAN";
-            cardModel.NameTH = "สมบูรณ์ลาภ คำสาร";
-            cardModel.Position = "Staff";
-            cardModel.Office_Number = "6157";
+            ClsBusinessCardModel cardModel = new ClsBusinessCardModel
+            {
+                Company_en = "THAI PARKERIZING CO.,LTD.",
+                Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP",
+                NameEN = "SOMBOONLAP KHAMSAN",
+                NameTH = "สมบูรณ์ลาภ คำสาร",
+                Position = "Staff",
+                Office_Number = "6157"
+            };
 
             List<ClsBusinessCardModel> Cards = new List<ClsBusinessCardModel>();
 
@@ -477,40 +163,23 @@ namespace E2E.Controllers
             return View(Cards);
         }
 
-        public MemoryStream LogoTP()
+        public ActionResult BusinessCard_UploadFile(Guid id)
         {
-
-            WebClient webClient = new WebClient();
-
-            byte[] data = webClient.DownloadData("https://tp-portal.thaiparker.co.th/TP_Service/File/E2E/Topic/88ec4008-57e7-4486-902f-cb4a4d3fc246/Media/_Capture.PNG");
-
-            MemoryStream mem = new MemoryStream(data);
-
-            return mem;
+            return View(id);
         }
 
-        public MemoryStream QrCodeTP()
+        public ActionResult Cancel(Guid? id)
         {
-            WebClient webClient = new WebClient();
+            BusinessCards businessCards = db.BusinessCards.Find(id);
+            businessCards.Status_Id = 6;
+            businessCards.Create = DateTime.Now;
 
-            string URL = "https://tp-portal.thaiparker.co.th/TP_Service/File/E2E/Topic/88ec4008-57e7-4486-902f-cb4a4d3fc246/Media/QR CODE TP.JPG";
-
-            byte[] data = webClient.DownloadData(URL);
-
-            MemoryStream mem = new MemoryStream(data);
-
-            return mem;
-        }
-
-        public string FormatPhoneNumber(string phoneNumber)
-        {
-            string formattedNumber = string.Empty;
-            if (phoneNumber.Length <= 10)
+            if (db.SaveChanges() > 0)
             {
-                formattedNumber = "+66" + phoneNumber.Substring(1, 1) + "-" + phoneNumber.Substring(2, 4) + "-" + phoneNumber.Substring(6);
+                dataCard.BusinessCard_SaveLog(businessCards);
             }
 
-            return formattedNumber;
+            return View();
         }
 
         public List<ClsBusinessCardModel> CardBack(string res, Guid id)
@@ -549,39 +218,41 @@ namespace E2E.Controllers
             var SelectPlant1 = db.PlantDetails.Where(w => w.Master_Plants.Plant_Name == plant1).FirstOrDefault();
             var SelectPlant2 = db.PlantDetails.Where(w => w.Master_Plants.Plant_Name == plant2).FirstOrDefault();
 
-            ClsBusinessCardModel cardModel1 = new ClsBusinessCardModel();
-            cardModel1.Company_en = "THAI PARKERIZING CO., LTD.";
-            cardModel1.Company_th = "บริษัท ไทยปาร์คเกอร์ไรซิ่ง จำกัด";
-            cardModel1.Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP";
-            cardModel1.Company_Web = "www.thaiparker.co.th";
+            ClsBusinessCardModel cardModel1 = new ClsBusinessCardModel
+            {
+                Company_en = "THAI PARKERIZING CO., LTD.",
+                Company_th = "บริษัท ไทยปาร์คเกอร์ไรซิ่ง จำกัด",
+                Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP",
+                Company_Web = "www.thaiparker.co.th",
 
-
-            cardModel1.NameEN = string.Format("{0} {1}", UserDetail.Detail_EN_FirstName, UserDetail.Detail_EN_LastName);
-            cardModel1.NameTH = string.Format("{0} {1}", UserDetail.Detail_TH_FirstName, UserDetail.Detail_TH_LastName);
-            cardModel1.Position = UserDetail.Users.Master_Grades.Grade_Position;
-            cardModel1.Dept = string.Format("{0} Department", UserDetail.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name);
-            cardModel1.Address1 = SelectPlant1.OfficeAddress1;
-            cardModel1.Address2 = SelectPlant1.OfficeAddress2;
-            cardModel1.Office_Number = string.Format("Office: {0}", SelectPlant1.OfficeNumber);
-            cardModel1.Fax = string.Format("Fax: {0}", SelectPlant1.OfficeFax);
+                NameEN = string.Format("{0} {1}", UserDetail.Detail_EN_FirstName, UserDetail.Detail_EN_LastName),
+                NameTH = string.Format("{0} {1}", UserDetail.Detail_TH_FirstName, UserDetail.Detail_TH_LastName),
+                Position = UserDetail.Users.Master_Grades.Grade_Position,
+                Dept = string.Format("{0} Department", UserDetail.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name),
+                Address1 = SelectPlant1.OfficeAddress1,
+                Address2 = SelectPlant1.OfficeAddress2,
+                Office_Number = string.Format("Office: {0}", SelectPlant1.OfficeNumber),
+                Fax = string.Format("Fax: {0}", SelectPlant1.OfficeFax)
+            };
             cardModel1.Email = string.Format("{0} / {1}", UserDetail.Users.User_Email, cardModel1.Company_Web);
             cardModel1.HeadOffice = SelectPlant1.OfficeName;
 
-            ClsBusinessCardModel cardModel2 = new ClsBusinessCardModel();
-            cardModel2.Company_en = "THAI PARKERIZING CO., LTD.";
-            cardModel2.Company_th = "บริษัท ไทยปาร์คเกอร์ไรซิ่ง จำกัด";
-            cardModel2.Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP";
-            cardModel2.Company_Web = "www.thaiparker.co.th";
+            ClsBusinessCardModel cardModel2 = new ClsBusinessCardModel
+            {
+                Company_en = "THAI PARKERIZING CO., LTD.",
+                Company_th = "บริษัท ไทยปาร์คเกอร์ไรซิ่ง จำกัด",
+                Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP",
+                Company_Web = "www.thaiparker.co.th",
 
-
-            cardModel2.NameEN = string.Format("{0} {1}", UserDetail.Detail_EN_FirstName, UserDetail.Detail_EN_LastName);
-            cardModel2.NameTH = string.Format("{0} {1}", UserDetail.Detail_TH_FirstName, UserDetail.Detail_TH_LastName);
-            cardModel2.Position = UserDetail.Users.Master_Grades.Grade_Position;
-            cardModel2.Dept = string.Format("{0} Department", UserDetail.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name);
-            cardModel2.Address1 = SelectPlant2.OfficeAddress1;
-            cardModel2.Address2 = SelectPlant2.OfficeAddress2;
-            cardModel2.Office_Number = string.Format("Office: {0}", SelectPlant2.OfficeNumber);
-            cardModel2.Fax = string.Format("Fax: {0}", SelectPlant2.OfficeFax);
+                NameEN = string.Format("{0} {1}", UserDetail.Detail_EN_FirstName, UserDetail.Detail_EN_LastName),
+                NameTH = string.Format("{0} {1}", UserDetail.Detail_TH_FirstName, UserDetail.Detail_TH_LastName),
+                Position = UserDetail.Users.Master_Grades.Grade_Position,
+                Dept = string.Format("{0} Department", UserDetail.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name),
+                Address1 = SelectPlant2.OfficeAddress1,
+                Address2 = SelectPlant2.OfficeAddress2,
+                Office_Number = string.Format("Office: {0}", SelectPlant2.OfficeNumber),
+                Fax = string.Format("Fax: {0}", SelectPlant2.OfficeFax)
+            };
             cardModel2.Email = string.Format("{0} / {1}", UserDetail.Users.User_Email, cardModel2.Company_Web);
             cardModel2.HeadOffice = SelectPlant2.OfficeName;
 
@@ -591,32 +262,31 @@ namespace E2E.Controllers
             return models;
         }
 
-
         // id businessCard
         public ActionResult DownloadPDF(Guid id)
         {
             try
             {
-
                 var BusinessCard = db.BusinessCards.Find(id);
                 var UserDetail = db.UserDetails.Where(w => w.User_Id == BusinessCard.User_id).FirstOrDefault();
                 var SelectPlant = db.PlantDetails.Where(w => w.Plant_Id == UserDetail.Users.Master_Plants.Plant_Id).FirstOrDefault();
 
-                ClsBusinessCardModel cardModel = new ClsBusinessCardModel();
-                //default
-                cardModel.Company_en = "THAI PARKERIZING CO., LTD.";
-                cardModel.Company_th = "บริษัท ไทยปาร์คเกอร์ไรซิ่ง จำกัด";
-                cardModel.Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP";
-                cardModel.Company_Web = "www.thaiparker.co.th";
+                ClsBusinessCardModel cardModel = new ClsBusinessCardModel
+                {
+                    //default
+                    Company_en = "THAI PARKERIZING CO., LTD.",
+                    Company_th = "บริษัท ไทยปาร์คเกอร์ไรซิ่ง จำกัด",
+                    Parent_company = "NIHON PARKERIZING CO.,LTD. GROUP",
+                    Company_Web = "www.thaiparker.co.th",
 
-
-                cardModel.NameEN = string.Format("{0} {1}", UserDetail.Detail_EN_FirstName, UserDetail.Detail_EN_LastName);
-                cardModel.NameTH = string.Format("{0} {1}", UserDetail.Detail_TH_FirstName, UserDetail.Detail_TH_LastName);
-                cardModel.Position = UserDetail.Users.Master_Grades.Grade_Position;
-                cardModel.Dept = string.Format("{0} Department", UserDetail.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name);
-                cardModel.Address1 = SelectPlant.OfficeAddress1;
-                cardModel.Address2 = SelectPlant.OfficeAddress2;
-                cardModel.Office_Number = string.Format("Office: {0}, Ext. {1}", SelectPlant.OfficeNumber, BusinessCard.Tel_Internal);
+                    NameEN = string.Format("{0} {1}", UserDetail.Detail_EN_FirstName, UserDetail.Detail_EN_LastName),
+                    NameTH = string.Format("{0} {1}", UserDetail.Detail_TH_FirstName, UserDetail.Detail_TH_LastName),
+                    Position = UserDetail.Users.Master_Grades.Grade_Position,
+                    Dept = string.Format("{0} Department", UserDetail.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name),
+                    Address1 = SelectPlant.OfficeAddress1,
+                    Address2 = SelectPlant.OfficeAddress2,
+                    Office_Number = string.Format("Office: {0}, Ext. {1}", SelectPlant.OfficeNumber, BusinessCard.Tel_Internal)
+                };
                 if (string.IsNullOrEmpty(BusinessCard.Tel_Internal))
                 {
                     cardModel.Office_Number = string.Format("Office: {0}", SelectPlant.OfficeNumber);
@@ -639,8 +309,6 @@ namespace E2E.Controllers
                     Cards.Add(cardModel);
                 }
 
-
-
                 MemoryStream stream = new MemoryStream();
 
                 // สร้างไฟล์ PDF โดยใช้ PDFSharp
@@ -652,7 +320,6 @@ namespace E2E.Controllers
                 PdfPage page2 = pdf.AddPage();
                 page2.Size = PdfSharp.PageSize.A4;
                 XGraphics graphics2 = XGraphics.FromPdfPage(page2);
-
 
                 double CardWidth = page.Width / 2;
                 double yLeft = 14.173228346;
@@ -668,7 +335,6 @@ namespace E2E.Controllers
                 //806.45669291339
                 graphics.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
                 graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
-
 
                 // สร้างหน้าเอกสาร
                 for (int i = 0; i < Cards.Count; i++)
@@ -716,13 +382,10 @@ namespace E2E.Controllers
                         graphics2.DrawString(Cards2[1].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
                         graphics2.DrawString(Cards2[1].Company_Web ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
 
-
-
                         // 161.338
                         graphics.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 262.20472440945, 162));
                         graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 262.20472440945, 162));
                         yLeft += 162;
-
                     }
                     else
                     {
@@ -767,15 +430,11 @@ namespace E2E.Controllers
                         graphics2.DrawString(Cards2[1].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
                         graphics2.DrawString(Cards2[1].Company_Web ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
 
-
-
-
                         // 161.338
                         graphics.DrawRectangle(XPens.Black, new XRect(xRight, yRight, 262.20472440945, 162));
                         graphics2.DrawRectangle(XPens.Black, new XRect(xRight, yRight, 262.20472440945, 162));
                         yRight += 162;
                     }
-
                 }
 
                 // บันทึกไฟล์ PDF ลงใน MemoryStream
@@ -784,17 +443,339 @@ namespace E2E.Controllers
 
                 // ส่งไฟล์ PDF กลับไปยัง View เพื่อดาวน์โหลด
                 return File(stream, "application/pdf", "BusinessCard.pdf");
-
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
-
         }
 
+        public string FormatPhoneNumber(string phoneNumber)
+        {
+            string formattedNumber = string.Empty;
+            if (phoneNumber.Length <= 10)
+            {
+                formattedNumber = "+66" + phoneNumber.Substring(1, 1) + "-" + phoneNumber.Substring(2, 4) + "-" + phoneNumber.Substring(6);
+            }
+
+            return formattedNumber;
+        }
+
+        // GET: BusinessCards
+        public ActionResult Index()
+        {
+            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
+            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            return View();
+        }
+
+        public MemoryStream LogoTP()
+        {
+            WebClient webClient = new WebClient();
+
+            byte[] data = webClient.DownloadData("https://tp-portal.thaiparker.co.th/TP_Service/File/E2E/Topic/88ec4008-57e7-4486-902f-cb4a4d3fc246/Media/_Capture.PNG");
+
+            MemoryStream mem = new MemoryStream(data);
+
+            return mem;
+        }
+
+        public ActionResult ManagerGaApprove(Guid? id, Guid? SelectId)
+        {
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 8;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                    dataCard.SendMail(businessCards, SelectId);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { id });
+        }
+
+        public ActionResult ManagerGaReject(Guid? id, string remark)
+        {
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 5;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                    dataCard.SendMail(businessCards, null, null, "", remark);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return View();
+        }
+
+        public ActionResult ManagerUserApprove(Guid? id)
+        {
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 7;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                    dataCard.SendMail(businessCards);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { id });
+        }
+
+        public ActionResult ManagerUserReject(Guid? id, string remark)
+        {
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+                businessCards = db.BusinessCards.Find(id);
+                businessCards.Status_Id = 5;
+                businessCards.Create = DateTime.Now;
+
+                if (db.SaveChanges() > 0)
+                {
+                    dataCard.BusinessCard_SaveLog(businessCards);
+                    dataCard.SendMail(businessCards, null, null, "", remark);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return View();
+        }
+
+        public MemoryStream QrCodeTP()
+        {
+            WebClient webClient = new WebClient();
+
+            string URL = "https://tp-portal.thaiparker.co.th/TP_Service/File/E2E/Topic/88ec4008-57e7-4486-902f-cb4a4d3fc246/Media/QR CODE TP.JPG";
+
+            byte[] data = webClient.DownloadData(URL);
+
+            MemoryStream mem = new MemoryStream(data);
+
+            return mem;
+        }
+
+        public List<ClsBusinessCard> QueryClsBusinessCard()
+        {
+            List<ClsBusinessCard> clsBusinessCards = db.BusinessCards
+                .OrderByDescending(o => o.Create)
+                .Select(s => new ClsBusinessCard()
+                {
+                    Key = s.Key,
+                    Create = s.Create,
+                    User_id = s.User_id,
+                    Status_Id = s.Status_Id,
+                    BothSided = s.BothSided,
+                    Amount = s.Amount,
+                    UserAction = s.UserAction.Value,
+                    UserRef_id = s.UserRef_id,
+                    UserActionName = db.UserDetails.Where(w => w.User_Id == s.UserAction).Select(ss => ss.Users.Username).FirstOrDefault(),
+                    Tel_External = s.Tel_External,
+                    Tel_Internal = s.Tel_Internal,
+                    System_Statuses = db.System_Statuses.Where(w => w.Status_Id == s.Status_Id).FirstOrDefault(),
+                    UserDetails = db.UserDetails.Where(w => w.User_Id == s.User_id).FirstOrDefault(),
+                    UserRefName = db.UserDetails.Where(w => w.User_Id == s.UserRef_id).Select(ss => ss.Users.Username).FirstOrDefault(),
+                    BusinessCard_Id = s.BusinessCard_Id
+                }).ToList();
+
+            return clsBusinessCards;
+        }
+
+        public ActionResult StaffComplete(Guid? id)
+        {
+            BusinessCards businessCards = db.BusinessCards.Find(id);
+            businessCards.Status_Id = 3;
+            businessCards.Create = DateTime.Now;
+
+            if (db.SaveChanges() > 0)
+            {
+                dataCard.SendMail(businessCards);
+                dataCard.BusinessCard_SaveLog(businessCards);
+            }
+
+            return View();
+        }
+
+        public ActionResult StaffStart(Guid? id)
+        {
+            BusinessCards businessCards = db.BusinessCards.Find(id);
+            businessCards.Status_Id = 2;
+            businessCards.Create = DateTime.Now;
+            businessCards.UserAction = Guid.Parse(HttpContext.User.Identity.Name);
+
+            if (db.SaveChanges() > 0)
+            {
+                dataCard.BusinessCard_SaveLog(businessCards);
+            }
+
+            return View();
+        }
+
+        public ActionResult StaffUndo(Guid? id, string remark)
+        {
+            BusinessCards businessCards = db.BusinessCards.Find(id);
+            businessCards.Status_Id = 7;
+            businessCards.Create = DateTime.Now;
+            businessCards.UserAction = null;
+
+            if (db.SaveChanges() > 0)
+            {
+                dataCard.SendMail(businessCards, null, null, "", remark, "7");
+                dataCard.BusinessCard_SaveLog(businessCards);
+            }
+
+            return View();
+        }
+
+        public ActionResult Table_AllTask()
+        {
+            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
+            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var Staff = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+
+            var clsBusinessCard = QueryClsBusinessCard().OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
+
+            //ถ้าเป็น Staff
+            if (Staff == 3)
+            {
+                clsBusinessCard = QueryClsBusinessCard().Where(w => w.Status_Id == 8).OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+
+            return View(clsBusinessCard);
+        }
+
+        public ActionResult Table_Approval()
+        {
+            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Id == MyDeptId).ToList();
+
+            return View(clsBusinessCard);
+        }
+
+        public ActionResult Table_MyRequest()
+        {
+            Guid MyUserid = Guid.Parse(HttpContext.User.Identity.Name);
+
+            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.User_id == MyUserid).OrderByDescending(o => o.Create).ToList();
+
+            return View(clsBusinessCard);
+        }
+
+        [HttpPost]
+        public ActionResult Upload(HttpPostedFileBase file, Guid? id)
+        {
+            if (file != null && file.ContentLength > 0 && id.HasValue)
+            {
+                string dir = "BusinessCard/" + id.Value;
+                string FileName = file.FileName;
+
+                bool cardFiles = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id.Value && a.FileName == file.FileName);
+
+                if (cardFiles)
+                {
+                    FileName = string.Concat("_", file.FileName);
+                }
+
+                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+
+                if (!string.IsNullOrEmpty(filepath))
+                {
+                    var sql = db.BusinessCards.Find(id);
+                    dataCard.BusinessCard_SaveFile(filepath, sql);
+                }
+            }
+            return View();
+        }
+
+        public ActionResult UploadHistory(Guid? id)
+        {
+            var res = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).OrderByDescending(o => o.Create).ToList();
+
+            return View(res);
+        }
+
+        public ActionResult UserClose(Guid? id)
+        {
+            BusinessCards businessCards = db.BusinessCards.Find(id);
+            businessCards.Status_Id = 4;
+            businessCards.Create = DateTime.Now;
+
+            if (db.SaveChanges() > 0)
+            {
+                dataCard.SendMail(businessCards);
+                dataCard.BusinessCard_SaveLog(businessCards);
+            }
+
+            return View();
+        }
+
+        public ActionResult UserConfirmApprove(Guid? id)
+        {
+            BusinessCardFiles businessCardFiles = db.BusinessCardFiles.Find(id);
+            businessCardFiles.Confirm = true;
+            businessCardFiles.Create = DateTime.Now;
+
+            BusinessCards businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
+            businessCards.Status_Id = 9;
+            businessCards.Create = DateTime.Now;
+
+            if (db.SaveChanges() > 0)
+            {
+                dataCard.SendMail(businessCards);
+                dataCard.BusinessCard_SaveLog(businessCards);
+            }
+
+            return View();
+        }
+
+        public ActionResult UserConfirmCancel(Guid? id, string remark)
+        {
+            BusinessCardFiles businessCardFiles = db.BusinessCardFiles.Find(id);
+            businessCardFiles.Confirm = false;
+            businessCardFiles.Create = DateTime.Now;
+
+            BusinessCards businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
+            businessCards.Status_Id = 2;
+            businessCards.Create = DateTime.Now;
+
+            if (db.SaveChanges() > 0)
+            {
+                dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
+                dataCard.BusinessCard_SaveLog(businessCards);
+            }
+
+            return View();
+        }
     }
 }
-
-

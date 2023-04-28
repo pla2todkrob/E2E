@@ -28,6 +28,7 @@ namespace E2E
                       "~/Scripts/spin.min.js",
                       "~/Scripts/jquery.justifiedGallery.min.js",
                       "~/Scripts/colorbox/jquery.colorbox-min.js",
+                      "~/Scripts/jquery.signalR-2.4.3.min.js",
                       "~/Scripts/Site.js"));
 
             bundles.Add(new StyleBundle("~/bundles/css").Include(

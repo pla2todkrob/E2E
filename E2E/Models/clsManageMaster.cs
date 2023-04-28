@@ -277,19 +277,19 @@ namespace E2E.Models
                 Master_Plants master_Plants = db.Master_Plants.Find(model.Plant_Id);
                 if (master_Plants == null)
                 {
-                    master_Plants = new Master_Plants();
-                    master_Plants.Plant_Name = model.Master_Plants.Plant_Name;
-                    master_Plants.Active = model.Master_Plants.Active;
+                    master_Plants = new Master_Plants
+                    {
+                        Plant_Name = model.Master_Plants.Plant_Name,
+                        Active = model.Master_Plants.Active
+                    };
 
                     db.Master_Plants.Add(master_Plants);
                 }
                 else
                 {
-
                     master_Plants.Plant_Name = model.Master_Plants.Plant_Name;
                     master_Plants.Update = DateTime.Now;
                     master_Plants.Active = model.Master_Plants.Active;
-
                 }
 
                 PlantDetail plantDetail = db.PlantDetails.Find(model.PlantDetail_Id);
@@ -306,7 +306,6 @@ namespace E2E.Models
                     };
 
                     db.PlantDetails.Add(plantDetail);
-
                 }
                 else
                 {
@@ -317,9 +316,6 @@ namespace E2E.Models
                     plantDetail.OfficeNumber = model.OfficeNumber;
                 }
 
-
-
-    
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -502,7 +498,6 @@ namespace E2E.Models
                     Process_Id = model.Users.Process_Id,
                     Role_Id = model.Users.Role_Id != 0 ? model.Users.Role_Id : 2,
                     User_CostCenter = model.Users.User_CostCenter.Trim(),
-                    User_Point = int.Parse(ConfigurationManager.AppSettings["Point"]),
                     YearSetPoint = DateTime.Now.Year,
                     BusinessCardGroup = model.Users.BusinessCardGroup
                 };
@@ -514,6 +509,10 @@ namespace E2E.Models
                 if (system_ != null)
                 {
                     users.User_Point = system_.Configuration_Point;
+                }
+                else
+                {
+                    users.User_Point = 50;
                 }
 
                 ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
@@ -905,7 +904,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments
                     .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() &&
@@ -1063,7 +1062,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions
                     .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim())
@@ -1287,7 +1286,7 @@ namespace E2E.Models
             {
                 Guid? res = null;
 
-            FindModel:
+                FindModel:
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades
                     .Where(w => w.Grade_Name.ToLower() == grade.ToLower().Trim() &&
@@ -1575,7 +1574,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks = db.Master_LineWorks
                     .Where(w => w.LineWork_Name.ToLower() == val.ToLower().Trim())
@@ -1757,7 +1756,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants = db.Master_Plants
                     .Where(w => w.Plant_Name.ToLower() == val.ToLower().Trim())
@@ -1796,7 +1795,6 @@ namespace E2E.Models
                 PlantDetail plantDetail = db.PlantDetails.Where(w => w.PlantDetail_Id == model.PlantDetail_Id).FirstOrDefault();
 
                 var masterPlants = db.Master_Plants.Where(w => w.Plant_Id != model.Plant_Id && w.Plant_Name.ToLower() == model.Master_Plants.Plant_Name.ToLower().Trim()).FirstOrDefault();
-
 
                 if (plantDetail != null)
                 {
@@ -1893,7 +1891,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-            FindModel:
+                FindModel:
                 System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
                 system_Prefix_EN = db.System_Prefix_ENs
                     .Where(w => w.Prefix_EN_Name.ToLower() == val.ToLower().Trim())
@@ -1950,7 +1948,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-            FindModel:
+                FindModel:
                 System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
                 system_Prefix_TH = db.System_Prefix_THs
                     .Where(w => w.Prefix_TH_Name.ToLower() == val.ToLower().Trim())
@@ -2064,7 +2062,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes
                     .Where(w => w.Process_Name.ToLower() == val.ToLower().Trim() &&
@@ -2247,7 +2245,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-            FindModel:
+                FindModel:
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections
                     .Where(w => w.Section_Name.ToLower() == val.ToLower().Trim() &&

@@ -904,9 +904,11 @@ namespace E2E.Controllers
 
                 if (plantDetail == null)
                 {
-                    plantDetail = new PlantDetail();
-                    plantDetail.Plant_Id = id.Value;
-                    plantDetail.Master_Plants = db.Master_Plants.Find(id);
+                    plantDetail = new PlantDetail
+                    {
+                        Plant_Id = id.Value,
+                        Master_Plants = db.Master_Plants.Find(id)
+                    };
                 }
 
                 isNew = false;
