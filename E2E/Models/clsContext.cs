@@ -146,7 +146,7 @@ namespace E2E.Models
 
         public DbSet<Users> Users { get; set; }
 
-        public DbSet<UserUploadHistories> UserUploadHistories { get; set; }
+        public DbSet<UserUploadHistory> UserUploadHistories { get; set; }
 
         public DbSet<WorkRootDocuments> WorkRootDocuments { get; set; }
 
