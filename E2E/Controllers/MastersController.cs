@@ -1456,16 +1456,16 @@ namespace E2E.Controllers
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             ClsServiceFTP serviceFTP = new ClsServiceFTP();
                             string filePath = serviceFTP.Ftp_UploadFileToString(dir, file);
-                            UserUploadHistories userUploadHistories = new UserUploadHistories
+                            UserUploadHistory userUploadHistory = new UserUploadHistory
                             {
                                 UserUploadHistoryFile = filePath,
                                 UserUploadHistoryFileName = Path.GetFileName(filePath),
                                 User_Id = Guid.Parse(HttpContext.User.Identity.Name)
                             };
-                            db.Entry(userUploadHistories).State = System.Data.Entity.EntityState.Added;
+                            db.Entry(userUploadHistory).State = System.Data.Entity.EntityState.Added;
                             if (db.SaveChanges() > 0)
                             {
-                                if (data.Users_AdjustMissing(data.Users_ReadFile(userUploadHistories.UserUploadHistoryFile)))
+                                if (data.Users_AdjustMissing(data.Users_ReadFile(userUploadHistory.UserUploadHistoryFile)))
                                 {
                                     scope.Complete();
                                     swal.Icon = "success";
