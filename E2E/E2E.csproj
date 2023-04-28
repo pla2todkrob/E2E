@@ -291,6 +291,7 @@
     <Compile Include="Models\Tables\ChatBotAnswer.cs" />
     <Compile Include="Models\Tables\ChatBotHistory.cs" />
     <Compile Include="Models\Tables\ChatBotQuestion.cs" />
+    <Compile Include="Models\Tables\ChatBotUploadHistory.cs" />
     <Compile Include="Models\Tables\ChatGPT.cs" />
     <Compile Include="Models\Tables\EForms.cs" />
     <Compile Include="Models\Tables\EForm_Files.cs" />
@@ -341,12 +342,13 @@
     <Compile Include="Models\Tables\UserDetails.cs" />
     <Compile Include="Models\Tables\Users.cs" />
     <Compile Include="Models\Tables\System_Roles.cs" />
-    <Compile Include="Models\Tables\UserUploadHistories.cs" />
+    <Compile Include="Models\Tables\UserUploadHistory.cs" />
     <Compile Include="Models\Tables\WorkRootDocuments.cs" />
     <Compile Include="Models\Tables\WorkRoots.cs" />
     <Compile Include="Models\Views\ClsAuditReport.cs" />
     <Compile Include="Models\Views\ClsBusinessCard.cs" />
     <Compile Include="Models\Views\ClsChangeDueDates.cs" />
+    <Compile Include="Models\Views\ClsChatBot.cs" />
     <Compile Include="Models\Views\ClsCountNavbar.cs" />
     <Compile Include="Models\Views\ClsDepartments.cs" />
     <Compile Include="Models\Views\ClsDivisions.cs" />
@@ -1030,6 +1032,11 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\ChatBot\ChatHistory.cshtml" />
+    <Content Include="Views\ChatBot\Manage.cshtml" />
+    <Content Include="Views\ChatBot\GetChatBot.cshtml" />
+    <Content Include="Views\ChatBot\Import.cshtml" />
+    <Content Include="Views\ChatBot\GroupTable.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

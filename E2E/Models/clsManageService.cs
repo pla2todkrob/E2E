@@ -96,6 +96,53 @@ namespace E2E.Models
             return swal;
         }
 
+        public List<ClsServiceUserActionName> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
+        {
+            try
+            {
+                var JobUnsat = db.Satisfactions.Where(w => w.Unsatisfied);
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    JobUnsat = JobUnsat.Where(w => w.Create <= filter.Date_To);
+
+                    var ServiceId = JobUnsat.Select(s => s.Service_Id).ToList();
+                    var services = db.Services.Where(w => ServiceId.Contains(w.Service_Id))
+                   .Select(item => new ClsServiceUserActionName
+                   {
+                       ActionBy = db.UserDetails
+                       .Where(w => w.User_Id == item.Action_User_Id)
+                       .Select(s => s.Detail_EN_FirstName)
+                       .FirstOrDefault(),
+                       Create = item.Create,
+                       Update = item.Update,
+                       Subject = item.Service_Subject,
+                       Key = item.Service_Key,
+                       ServiceId = item.Service_Id,
+                       Requester = db.UserDetails
+                       .Where(w => w.User_Id == item.Create_User_Id)
+                       .Select(s => s.Detail_EN_FirstName)
+                       .FirstOrDefault()
+                   }).ToList();
+
+                    return services;
+                }
+                else
+                {
+                    return new List<ClsServiceUserActionName>();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ClsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
         {
             try
@@ -114,7 +161,6 @@ namespace E2E.Models
                     .FirstOrDefault();
 
                 int[] finishIds = { 3, 4 };
-
 
                 Guid DeptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
 
@@ -264,60 +310,7 @@ namespace E2E.Models
 
                 res.ReportKPI_Overview.Satisfied_Percent = Math.Abs(1 - (res.ReportKPI_Overview.Unsatisfied_Count / (double)res.ReportKPI_Overview.Close_Count));
 
-                //double averageScore = res.ReportKPI_Users.Where(w => w.Average_Score.HasValue).Sum(s => s.Average_Score.Value) / res.ReportKPI_Users.Where(w => w.Average_Score.HasValue).Count();
-                //int fullScore = string.IsNullOrEmpty(ConfigurationManager.AppSettings["FullScore"]) ? 5 : Convert.ToInt32(ConfigurationManager.AppSettings["FullScore"]);
-
-
                 return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public List<ClsServiceUserActionName> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
-        {
-            try
-            {
-                var JobUnsat = db.Satisfactions.Where(w => w.Unsatisfied);
-                if (filter != null)
-                {
-                    if (filter.Date_From.HasValue)
-                    {
-                        JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
-                    }
-
-                    filter.Date_To = filter.Date_To.AddDays(1);
-                    JobUnsat = JobUnsat.Where(w => w.Create <= filter.Date_To);
-
-                    var ServiceId = JobUnsat.Select(s => s.Service_Id).ToList();
-                    var services = db.Services.Where(w => ServiceId.Contains(w.Service_Id))
-                   .Select(item => new ClsServiceUserActionName
-                   {
-
-                       ActionBy = db.UserDetails
-                       .Where(w => w.User_Id == item.Action_User_Id)
-                       .Select(s => s.Detail_EN_FirstName)
-                       .FirstOrDefault(),
-                       Create = item.Create,
-                       Update = item.Update,
-                       Subject = item.Service_Subject,
-                       Key = item.Service_Key,
-                       ServiceId = item.Service_Id,
-                       Requester = db.UserDetails
-                       .Where(w => w.User_Id == item.Create_User_Id)
-                       .Select(s => s.Detail_EN_FirstName)
-                       .FirstOrDefault()
-
-                   }).ToList();
-
-                    return services;
-                }
-                else
-                {
-                    return new List<ClsServiceUserActionName>();
-                }
             }
             catch (Exception)
             {
@@ -578,6 +571,15 @@ namespace E2E.Models
             {
                 throw ex;
             }
+        }
+
+        public void SaveUserActionChangeDue(Guid Service_ID)
+        {
+            Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            var Services = db.Services.Find(Service_ID);
+            Services.Action_User_Id = userId;
+
+            db.SaveChanges();
         }
 
         public List<SelectListItem> SelectListItems_Priority()
@@ -873,7 +875,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Accept(Guid id,string methodName)
+        public bool ServiceChangeDueDate_Accept(Guid id, string methodName)
         {
             try
             {
@@ -1023,17 +1025,6 @@ namespace E2E.Models
             {
                 throw;
             }
-        }
-
-        public void SaveUserActionChangeDue(Guid Service_ID)
-        {
-            Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-            var Services = db.Services.Find(Service_ID);
-            Services.Action_User_Id = userId;
-
-
-            db.SaveChanges();
-
         }
 
         public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model, string methodName)
@@ -1429,7 +1420,7 @@ namespace E2E.Models
                     db.SaveChanges();
                 }
 
-            InsertProcess:
+                InsertProcess:
 
                 bool res = new bool();
                 int todayCount = db.Services

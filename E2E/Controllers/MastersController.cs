@@ -1447,7 +1447,7 @@ namespace E2E.Controllers
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             ClsServiceFTP serviceFTP = new ClsServiceFTP();
                             string filePath = serviceFTP.Ftp_UploadFileToString(dir, file);
-                            UserUploadHistories userUploadHistories = new UserUploadHistories
+                            UserUploadHistory userUploadHistories = new UserUploadHistory
                             {
                                 UserUploadHistoryFile = filePath,
                                 UserUploadHistoryFileName = Path.GetFileName(filePath),

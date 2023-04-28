@@ -266,8 +266,18 @@ function callFilter(urlAjax, blockId = '#filter') {
         }
     });
 }
-
-
+async function callData(urlAjax, blockId = '#datalist') {
+    try {
+        const res = await $.ajax({
+            url: urlAjax,
+            method: 'GET'
+        });
+        // append the data to blockId
+        $(blockId).html(res);
+    } catch (e) {
+        console.error(e);
+    }
+}
 async function setTable_File(tableId, bOrder = false, bSearch = false) {
     return table = await $(tableId).DataTable({
         'ordering': bOrder,
@@ -357,7 +367,6 @@ function callSubmitModal(urlAjax, form) {
     });
 }
 
-
 function callSubmitPage(urlAjax, form) {
     swal({
         title: 'Are you sure?',
@@ -399,7 +408,6 @@ function callSubmitPage(urlAjax, form) {
     });
 }
 
-
 function callSubmitRedirect(urlAjax, form, urlRedirect) {
     const formData = new FormData(form);
     return $.ajax({
@@ -435,7 +443,6 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
     });
 }
 
-
 function callDeleteItem(urlAjax, reloadPage = false) {
     $.ajax({
         url: urlAjax,
@@ -468,7 +475,6 @@ function callDeleteItem(urlAjax, reloadPage = false) {
         }
     });
 }
-
 
 async function notifySignout(url) {
     return swal({
@@ -607,7 +613,7 @@ function scrollFunction() {
     } else {
         topButton.style.bottom = '-100%';
     }
-    
+
     lastScrollTop = scrollTop;
 }
 

@@ -12,6 +12,7 @@ namespace E2E.Models.Tables
         public ChatBot()
         {
             Create = DateTime.Now;
+            ChatBot_Id = Guid.NewGuid();
         }
 
         [Key]

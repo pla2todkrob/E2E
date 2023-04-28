@@ -7,26 +7,27 @@ using System.Web;
 
 namespace E2E.Models.Tables
 {
-    public class ChatBotHistory
+    public class ChatBotUploadHistory
     {
-        public ChatBotHistory()
+        public ChatBotUploadHistory()
         {
+            ChatBotUploadHistoryId = Guid.NewGuid();
             Create = DateTime.Now;
-            IsDisplay = true;
-            ChatBotHistory_Id = Guid.NewGuid();
         }
 
+        public string ChatBotUploadHistoryFile { get; set; }
+
+        [Display(Name = "File name")]
+        public string ChatBotUploadHistoryFileName { get; set; }
+
         [Key]
-        public Guid ChatBotHistory_Id { get; set; }
+        public Guid ChatBotUploadHistoryId { get; set; }
 
-        [Index]
         public DateTime Create { get; set; }
-
-        public string HumanChat { get; set; }
-        public bool IsDisplay { get; set; }
-        public string SystemChat { get; set; }
 
         [Index]
         public Guid User_Id { get; set; }
+
+        public virtual Users Users { get; set; }
     }
 }
