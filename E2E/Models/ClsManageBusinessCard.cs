@@ -190,6 +190,7 @@ namespace E2E.Models
                 mail.SendToId = Model.User_id;
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
+                mail.SendToIds.Clear();
 
                 var ChkMgUserRejected = GetMgApp.Any(a => a == ActionId);
 
@@ -210,6 +211,7 @@ namespace E2E.Models
                 if (SelectId.HasValue)
                 {
                     mail.SendToId = SelectId.Value;
+                    mail.SendToIds.Clear();
                 }
                 else
                 {
@@ -234,7 +236,7 @@ namespace E2E.Models
             //Staff Send Confirm
             else if (Model.Status_Id == 2 && ModelFile == null || found)
             {
-                linkUrl = linkUrl.Replace("Upload", "BusinessCard_Detail/");
+                linkUrl = linkUrl.Replace("Upload", "BusinessCard_Detail/" + Model.BusinessCard_Id);
 
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
@@ -246,16 +248,18 @@ namespace E2E.Models
                 content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.User_id;
+                mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
                 mail.SendCC = null;
+                mail.AttachPaths.Add(filepath);
 
             }
 
             //User Confirm
             else if (Model.Status_Id == 9)
             {
-                linkUrl = linkUrl.Replace("UserConfirmApprove", "BusinessCard_Detail/");
+                linkUrl = linkUrl.Replace("UserConfirmApprove", "BusinessCard_Detail/") ;
 
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
@@ -265,6 +269,7 @@ namespace E2E.Models
                 content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.UserAction;
+                mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
                 mail.SendCC = null;
@@ -289,6 +294,7 @@ namespace E2E.Models
                 content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.UserAction;
+                mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
                 mail.SendCC = null;
@@ -307,6 +313,7 @@ namespace E2E.Models
                 content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.UserAction;
+                mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
                 mail.SendCC = null;
@@ -324,6 +331,7 @@ namespace E2E.Models
                 content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.User_id;
+                mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
                 mail.SendCC = null;
@@ -352,8 +360,7 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    SendMail(model, null, cardFiles, filepath);
-                    res = true;
+                    res = SendMail(model, null, cardFiles, filepath);
                 }
             }
             catch (Exception)
