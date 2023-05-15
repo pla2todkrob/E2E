@@ -4,6 +4,21 @@
 	Layout = null;
 }
 
+<script>
+
+	$(document).ready(function () {
+
+		const inputDate = document.getElementById("DueDate");
+
+		// สร้างวันที่ปัจจุบัน
+		const today = new Date().toISOString().split("T")[0];
+
+		// กำหนดค่า min ให้เป็นวันที่ปัจจุบัน
+		inputDate.min = today;
+
+	});
+
+</script>
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { id = "Create_submit", @class = "was-validated", enctype = "multipath/form-data" }))
 {
@@ -83,6 +98,13 @@
 				@Html.TextBoxFor(m => m.Amount, new { Value = "", type = "number", @required = "required", @class = "form-control" })
 
 			</div>
+
+			@*<div class="form-group col-6">
+				@Html.Label("Due date")
+
+				@Html.TextBoxFor(m => m.DueDate, new { Value = "", type = "date", @required = "required", @class = "form-control" })
+
+			</div>*@
 
 		</div>
 

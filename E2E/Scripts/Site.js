@@ -1,5 +1,5 @@
-﻿const siteName = 'E2E';
-const baseUrl = window.location.pathname.search(siteName) < 0 ? '' : `/${siteName}`;
+﻿let siteName = 'E2E';
+let baseUrl = window.location.pathname.search(siteName) < 0 ? '' : `/${siteName}`;
 
 let chat;
 
@@ -147,7 +147,7 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
             $.each(dateCol, function (key, val) {
                 targetObj = {};
                 targetObj.targets = val;
-                targetObj.type = 'date';
+                targetObj.type = 'datetime';
                 targetArr.push(targetObj);
             });
         }

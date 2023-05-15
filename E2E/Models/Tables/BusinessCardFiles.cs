@@ -23,6 +23,7 @@ namespace E2E.Models.Tables
         public string FileName { get; set; }
         public bool Confirm { get; set; }
         public string FilePath { get; set; }
+        public string Remark { get; set; }
         public DateTime Create { get; set; }
         public virtual BusinessCards BusinessCards { get; set; }
     }

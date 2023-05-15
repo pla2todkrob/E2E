@@ -27,7 +27,7 @@ namespace E2E.Models.Tables
                 new System_Statuses() { Status_Name = "Cancel", Status_Class = "badge badge-danger" ,OrderBusinessCard=8},
                 new System_Statuses() { Status_Name = "Approved", Status_Class = "badge badge-success",OrderBusinessCard=2 },
                 new System_Statuses() { Status_Name = "Assigned", Status_Class = "badge badge-secondary" ,OrderBusinessCard=3},
-                new System_Statuses() { Status_Name = "Confirmed", Status_Class = "badge badge-success",OrderBusinessCard=5 },
+                new System_Statuses() { Status_Name = "Confirmed", Status_Class = "badge badge-info",OrderBusinessCard=5 }
             };
 
             return list;

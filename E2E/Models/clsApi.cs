@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Web;
@@ -120,6 +121,14 @@ namespace E2E.Models
             return res;
         }
 
+        public byte[] ConvertByte(string filePath)
+        {
+            WebClient client = new WebClient();
+            byte[] fileContent = client.DownloadData(filePath);
+            return fileContent;
+        }
+
+
         public bool SendMail(ClsServiceEmail clsServiceEmail, HttpFileCollectionBase files = null)
         {
             try
@@ -137,7 +146,8 @@ namespace E2E.Models
                     clsServiceEmail.SendCC,
                     clsServiceEmail.SendBCC,
                     clsServiceEmail.Subject,
-                    clsServiceEmail.Body
+                    clsServiceEmail.Body,
+                    ClsFileLists = clsServiceEmail.ClsFileAttaches
                 };
 
                 //Test text
@@ -152,11 +162,31 @@ namespace E2E.Models
                 using (RestClient client = new RestClient(options))
                 {
                     RestRequest request = new RestRequest()
-                        .AddHeader("Token", TokenKey)
-                        .AddBody(multiClass, "application/json");
+                        //.AddJsonBody(clsServiceEmail)
+                        .AddHeader("Token", TokenKey);
+                    request.AddParameter("SendFrom", clsServiceEmail.SendFrom);
+
+                    for (int i = 0; i < clsServiceEmail.SendTo.Length; i++)
+                    {
+                        request.AddParameter("SendTo", clsServiceEmail.SendTo[i]);
+                    }
+                    for (int i = 0; i < clsServiceEmail.SendCC?.Length; i++)
+                    {
+                        request.AddParameter("SendCC", clsServiceEmail.SendCC[i]);
+                    }
+                    for (int i = 0; i < clsServiceEmail.SendBCC?.Length; i++)
+                    {
+                        request.AddParameter("SendBCC", clsServiceEmail.SendBCC[i]);
+                    }
+                   
+
+                    request.AddParameter("Subject", clsServiceEmail.Subject);
+                    request.AddParameter("Body", clsServiceEmail.Body);
+                    
 
                     if (files != null)
                     {
+                        request.AlwaysMultipartFormData = true;
                         foreach (var item in files.AllKeys)
                         {
                             if (files[item].ContentLength > 0)
@@ -164,6 +194,20 @@ namespace E2E.Models
                                 request.AddFile("fileAttach", GetByteFileBase(files[item]), HttpUtility.UrlEncode(files[item].FileName, Encoding.UTF8), files[item].ContentType);
                             }
                         }
+                    }
+
+                    if(clsServiceEmail.ClsFileAttaches.Count > 0)
+                    {
+                        request.AlwaysMultipartFormData = true;
+                        foreach (var item in clsServiceEmail.ClsFileAttaches)
+                        {
+                            if (!string.IsNullOrEmpty(item.FilePath))
+                            {
+                                request.AddFile("fileAttach", ConvertByte(item.FilePath), HttpUtility.UrlEncode(Path.GetFileName(item.FilePath), Encoding.UTF8), MimeMapping.GetMimeMapping(item.FilePath));
+                            }
+
+                        }
+
                     }
                     RestResponse response = client.PostAsync(request).Result;
                     mailResponse = JsonConvert.DeserializeObject<MailResponse>(response.Content);

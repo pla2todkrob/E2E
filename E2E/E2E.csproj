@@ -537,6 +537,7 @@
     <Compile Include="Models\Views\ClsJobCount.cs" />
     <Compile Include="Models\Views\ClsLogin.cs" />
     <Compile Include="Models\Views\ClsEstimate.cs" />
+    <Compile Include="Models\Views\ClsLog_BusinessCards.cs" />
     <Compile Include="Models\Views\ClsPassword.cs" />
     <Compile Include="Models\Views\ClsProcesses.cs" />
     <Compile Include="Models\Views\ClsReportKPI.cs" />
@@ -1189,7 +1190,7 @@
     <Content Include="Views\Configurations\Table.cshtml" />
     <Content Include="Views\Services\Report_KPI_Unsatisfied.cshtml" />
     <Content Include="Views\BusinessCards\Index.cshtml" />
-    <Content Include="Views\BusinessCards\Table_MyRequest.cshtml" />
+    <Content Include="Views\BusinessCards\Table_MyTask.cshtml" />
     <Content Include="Views\BusinessCards\Table_AllTask.cshtml" />
     <Content Include="Views\BusinessCards\Table_Approval.cshtml" />
     <Content Include="Views\BusinessCards\BusinessCard_Detail.cshtml" />
@@ -1212,6 +1213,8 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\BusinessCards\Table_AllRequest.cshtml" />
+    <Content Include="Views\BusinessCards\LogStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
