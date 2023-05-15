@@ -25,7 +25,9 @@ namespace E2E.Models.Tables
         public string Tel_External { get; set; }
         public Guid? UserRef_id { get; set; }
         public bool BothSided { get; set; }
+        public DateTime? Update { get; set; }
         public DateTime Create { get; set; }
+        public DateTime? DueDate { get; set; }
         public int Status_Id { get; set; }
         public virtual System_Statuses System_Statuses{get;set;}
         public Guid? UserAction { get; set; }

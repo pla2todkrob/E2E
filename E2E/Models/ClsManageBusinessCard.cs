@@ -25,16 +25,21 @@ namespace E2E.Models
                 Guid MyUserID = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 string ChkJP = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Grades.Master_LineWorks.LineWork_Name).FirstOrDefault();
+                string Year = DateTime.Now.ToString("yyyy");
+                var CountNum = db.BusinessCards.Where(w => w.Key.ToString().StartsWith(Year)).Count()+1;
 
+
+
+                Year += CountNum.ToString("0000");
                 BusinessCards businessCards = new BusinessCards
                 {
                     Amount = Model.Amount,
                     BothSided = Model.BothSided,
-                    Key = long.Parse(DateTime.Now.ToString("yyyyMMddHHmmss")),
+                    Key = long.Parse(Year),
                     Tel_External = Model.Tel_External,
                     Tel_Internal = Model.Tel_Internal,
                     User_id = Model.User_id.Value,
-                    Status_Id = 1 //Pending
+                    Status_Id = 1, //Pending
                 };
 
                 if (ChkJP == "Japanese Executives")
@@ -64,22 +69,32 @@ namespace E2E.Models
             }
         }
 
-        public bool BusinessCard_SaveLog(BusinessCards Model)
+        public bool BusinessCard_SaveLog(BusinessCards Model,string remark = "",bool undo = false)
         {
             bool res = new bool();
-
-            if (Model.Status_Id != 1)
+            DateTime dateTime = new DateTime();
+            if (Model.Update.HasValue)
             {
-                Model.User_id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                dateTime = Model.Update.Value;
+            }
+            else
+            {
+                dateTime = DateTime.Now;
             }
 
             Log_BusinessCards log_BusinessCards = new Log_BusinessCards
             {
                 BusinessCard_Id = Model.BusinessCard_Id,
                 Status_Id = Model.Status_Id,
-                User_Id = Model.User_id,
-                Create = Model.Create
+                User_Id = Model.Status_Id == 1 ? Model.User_id: Guid.Parse(HttpContext.Current.User.Identity.Name),
+                Create = dateTime,
+                Undo = undo
             };
+
+            if (!string.IsNullOrEmpty(remark))
+            {
+                log_BusinessCards.Remark = remark;
+            }
 
             db.Log_BusinessCards.Add(log_BusinessCards);
 
@@ -122,14 +137,18 @@ namespace E2E.Models
             linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
 
             string subject = string.Format("[Business Card][Require approve] {0}", Model.Key);
+
             string content = "<p>Request Business Card";
             content += "<br/>";
             content += string.Format("<b>Requester:</b> {0}", master.Users_GetInfomation(Model.User_id));
             content += "<br/>";
             content += string.Format("<b>Amount:</b> {0} pcs.", Model.Amount);
-            content += "</p>";
-            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-            content += "<p>Thank you for your consideration</p>";
+            if (Model.DueDate.HasValue)
+            {
+                content += "<br/>";
+                content += string.Format("<b>Due date:</b> {0}", Model.DueDate.Value.ToString("D"));
+            }
+
             mail.SendToIds = GetMgApp;
             mail.SendFrom = Model.User_id;
             mail.Subject = subject;
@@ -140,33 +159,49 @@ namespace E2E.Models
             }
 
             //Mg User Approved
-            if (Model.Status_Id == 7)
+            if (Model.Status_Id == 7 && string.IsNullOrEmpty(pseudo))
             {
                 linkUrl = linkUrl.Replace("ManagerUserApprove", "BusinessCard_Detail/");
+
                 GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
                 mail.SendToIds = GetMgApp;
+                mail.SendCC = Model.User_id;
             }
             //Staff Undo
             else if (Model.Status_Id == 7 && pseudo == "7")
             {
-                linkUrl = linkUrl.Replace("BusinessCards", "BusinessCards/BusinessCard_Detail/" + Model.BusinessCard_Id);
+
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 subject = string.Format("[Business Card][Staff Undo] {0}", Model.Key);
-                content = string.Empty;
+                
+                content += string.Format("<p>Undo remark: {0}</p>", remark);
 
-                content = "<p>Request Business Card";
-                content += "<br/>";
-                content += string.Format("<b>Requester:</b> {0}", master.Users_GetInfomation(Model.User_id));
-                content += "<br/>";
-                content += string.Format("<b>Amount:</b> {0} pcs.", Model.Amount);
-                content += "</p>";
-                content += string.Format("<p>Staff Undo Comment: {0}</p>", remark);
-                content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
-
-
+                mail.Subject = subject;
                 GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
                 mail.SendToIds = GetMgApp;
+            }
+
+            //User Undo
+            else if (Model.Status_Id == 2 && pseudo == "2")
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+             
+
+                subject = string.Format("[Business Card][User Undo] {0}", Model.Key);
+
+                content += string.Format("<p>Comment: {0}</p>", remark);
+                mail.SendToIds.Clear();
+                mail.Subject = subject;
+                mail.SendToId = Model.UserAction;
             }
 
             //Rejected
@@ -180,13 +215,9 @@ namespace E2E.Models
                 linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                content = string.Empty;
 
                 subject = string.Format("[Business Card][Rejected] {0}", Model.Key);
                 content = string.Format("<p>Comment: {0}", remark);
-                content += "</p>";
-                content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.User_id;
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
@@ -207,7 +238,7 @@ namespace E2E.Models
 
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
+                List<Users> users = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).ToList();
                 if (SelectId.HasValue)
                 {
                     mail.SendToId = SelectId.Value;
@@ -215,21 +246,21 @@ namespace E2E.Models
                 }
                 else
                 {
-                    var StaffGA = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).Select(s => s.User_Id).ToList();
-                    mail.SendToIds = StaffGA;
+                    mail.SendToIds = users.Where(w => !w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
                 }
 
-                content = string.Empty;
 
                 subject = string.Format("[Business Card][Assign] {0}", Model.Key);
                 content = "<p>Comment: Assign task to Department General Affair";
-                content += "</p>";
-                content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
 
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendCCs = null;
+
+                if (users.Any(w => w.Master_Grades.Grade_Name.Contains("6")))
+                {
+                    mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
+                }
+           
 
             }
 
@@ -241,12 +272,8 @@ namespace E2E.Models
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
-                content = string.Empty;
                 subject = string.Format("[Business Card][Please Confirm] {0}", Model.Key);
-                content = string.Format("<p>Please confirm, check the correctness of the business card.");
-                content += "</p>";
-                content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
+                content += string.Format("<p>Please confirm, check the correctness of the business card.</p>");
                 mail.SendToId = Model.User_id;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -255,19 +282,20 @@ namespace E2E.Models
                 mail.AttachPaths.Add(filepath);
 
             }
-
+                
             //User Confirm
             else if (Model.Status_Id == 9)
             {
-                linkUrl = linkUrl.Replace("UserConfirmApprove", "BusinessCard_Detail/") ;
-
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
-                content = string.Empty;
+
                 subject = string.Format("[Business Card][Requester Confirm] {0}", Model.Key);
-                content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.UserAction;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -290,9 +318,7 @@ namespace E2E.Models
                 content = string.Empty;
                 subject = string.Format("[Business Card][Cancel Confirm {1}] {0}", Model.Key, ModelFile.FileName);
                 content = string.Format("<p>Requester Comment: {0}", remark);
-                content += "</p>";
-                content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
+                
                 mail.SendToId = Model.UserAction;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -310,8 +336,6 @@ namespace E2E.Models
 
                 content = string.Empty;
                 subject = string.Format("[Business Card][Closed] {0}", Model.Key);
-                content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
                 mail.SendToId = Model.UserAction;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -328,8 +352,7 @@ namespace E2E.Models
 
                 content = string.Empty;
                 subject = string.Format("[Business Card][Completed] {0}", Model.Key);
-                content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
-                content += "<p>Thank you for your consideration</p>";
+                
                 mail.SendToId = Model.User_id;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -337,6 +360,9 @@ namespace E2E.Models
                 mail.SendCC = null;
             }
 
+            content += "</p>";
+            content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
+            content += "<p>Thank you for your consideration</p>";
             mail.Body = content;
             res = mail.SendMail(mail);
 

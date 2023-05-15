@@ -10,8 +10,10 @@
 			<th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
 			<th class="fit">@Html.DisplayNameFor(m => m.Status_Id)</th>
 			<th class="fit">@Html.DisplayNameFor(m => m.Key)</th>
-			<th class="fit">@Html.DisplayNameFor(m => m.UserRefName)</th>
-			<th class="fit">@Html.DisplayNameFor(m => m.UserActionName)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.User_id)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.DueDate)</th>
+			<th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
 
 		</tr>
 	</thead>
@@ -27,8 +29,10 @@
 				<a href="@Url.Action("BusinessCard_Detail", "BusinessCards", new { id = item.BusinessCard_Id})">[@Html.DisplayFor(i => item.Key)]</a>
 			</td>
 
-			<td>@Html.DisplayFor(i => item.UserRefName)</td>
-			<td>@Html.DisplayFor(i => item.UserActionName)</td>
+			<td>@Html.DisplayFor(i => item.UserDetails.Users.Username)</td>
+			<td>@Html.DisplayFor(i => item.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)</td>
+			<td>@Html.DisplayFor(i => item.DueDate)</td>
+			<td>@Html.DisplayFor(i => item.Update)</td>
 		</tr>
 		}
 	</tbody>

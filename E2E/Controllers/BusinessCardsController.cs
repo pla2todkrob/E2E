@@ -32,8 +32,11 @@ namespace E2E.Controllers
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
-        private static Guid UserAuthorized { get; set; }
-
+        private static Guid? UserAuthorized { get; set; }
+        public BusinessCardsController()
+        {
+       
+        }
         public ActionResult BusinessCard_Create(Guid? id)
         {
             ClsBusinessCard businessCards;
@@ -131,11 +134,12 @@ namespace E2E.Controllers
 
         public ActionResult BusinessCard_Detail(Guid id)
         {
+            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.UserCardList = dataCard.SelectListItems_CardGroup();
             ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            ViewBag.StatusId = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.Status_Id).FirstOrDefault();
+            ViewBag.OrderBusinessCard = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.System_Statuses.OrderBusinessCard).FirstOrDefault();
             ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            ViewBag.RoleID = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Role_Id).FirstOrDefault();
+            ViewBag.UserCHK = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id && a.Confirm == true);
             var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
             return View(clsBusinessCard.FirstOrDefault());
@@ -170,16 +174,53 @@ namespace E2E.Controllers
 
         public ActionResult Cancel(Guid? id)
         {
-            BusinessCards businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 6;
-            businessCards.Create = DateTime.Now;
 
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 6;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public List<ClsBusinessCardModel> CardBack(string res, Guid id)
@@ -211,6 +252,13 @@ namespace E2E.Controllers
 
                     plant1 = "Bangpoo12";
                     plant2 = "ESIE1";
+
+                    break;
+
+                default:
+
+                    plant1 = "ESIE1";
+                    plant2 = "Gateway";
 
                     break;
             }
@@ -334,7 +382,7 @@ namespace E2E.Controllers
                 PdfSharp.Drawing.XImage QrCodeTPs = PdfSharp.Drawing.XImage.FromStream(QrCodeTP());
                 //806.45669291339
                 graphics.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
-                graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
+                //graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
 
                 // สร้างหน้าเอกสาร
                 for (int i = 0; i < Cards.Count; i++)
@@ -342,97 +390,97 @@ namespace E2E.Controllers
                     if (i % 2 == 0)
                     {
                         double yLogo_L = yLeft + 11;
-                        graphics.DrawImage(LogoTPs, xLeft + 10, yLogo_L, 60, 40);
+                        graphics.DrawImage(LogoTPs, xLeft + 10, yLogo_L, 53, 33);
 
-                        graphics.DrawString(Cards[i].Company_en ?? "", new XFont("Tahoma", 12, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 70, yLogo_L += 15, 60, 0));
-                        graphics.DrawString(Cards[i].Parent_company ?? "", new XFont("Tahoma", 10), XBrushes.Black, new XRect(xLeft + 70, yLogo_L += 13, 60, 0));
+                        graphics.DrawString(Cards[i].Company_en ?? "", new XFont("Roboto", 12, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 70, yLogo_L += 15, 60, 0));
+                        graphics.DrawString(Cards[i].Parent_company ?? "", new XFont("Roboto", 9), XBrushes.Black, new XRect(xLeft + 70, yLogo_L += 13, 60, 0));
 
-                        graphics.DrawString(Cards[i].NameTH ?? "", new XFont("Tahoma", 10, XFontStyle.Bold), XBrushes.Black, new XRect(17, yLogo_L, CardWidth, 40), XStringFormats.Center);
-                        graphics.DrawString(Cards[i].NameEN ?? "", new XFont("Tahoma", 10, XFontStyle.Bold), XBrushes.Black, new XRect(17, yLogo_L, CardWidth, 60), XStringFormats.Center);
-                        graphics.DrawString(Cards[i].Position ?? "", new XFont("Tahoma", 10), XBrushes.Black, new XRect(17, yLogo_L, CardWidth, 80), XStringFormats.Center);
+                        graphics.DrawString(Cards[i].NameTH ?? "", new XFont("AngsanaDSE", 17, XFontStyle.Bold), XBrushes.Black, new XRect(17, yLogo_L, CardWidth, 40), XStringFormats.Center);
+                        graphics.DrawString(Cards[i].NameEN.ToUpper() ?? "", new XFont("Myriad Pro Semibold", 11), XBrushes.Black, new XRect(17, yLogo_L+5, CardWidth, 60), XStringFormats.Center);
+                        graphics.DrawString(Cards[i].Position ?? "", new XFont("Myriad Pro Light", 10), XBrushes.Black, new XRect(17, yLogo_L+5, CardWidth, 80), XStringFormats.Center);
 
                         double yQR_L = yLeft + 88;
                         graphics.DrawImage(QrCodeTPs, 246, yQR_L, 40, 60);
 
-                        graphics.DrawString(Cards[i].Dept ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft + 10, yLogo_L += 70, CardWidth, 0));
+                        graphics.DrawString(Cards[i].Dept ?? "", new XFont("Roboto Light", 8), XBrushes.Black, new XRect(xLeft + 10, yLogo_L += 64, CardWidth, 0), XStringFormats.TopLeft);
 
-                        graphics.DrawRectangle(XPens.Blue, new XRect(xLeft_txt + 10, yLogo_L += 5, 130, 0));
+                        graphics.DrawRectangle(XPens.Blue, new XRect(xLeft_txt + 10, yLogo_L += 11, 130, 0));
 
-                        graphics.DrawString(Cards[i].HeadOffice ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 1, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Address1 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Address2 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Office_Number ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Email ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].HeadOffice ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 1, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Address1 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Address2 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Office_Number ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Fax ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Email.ToLower() ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 10, yLogo_L += 6, CardWidth, 0), XStringFormats.TopLeft);
 
                         double yPosition_B = yLeft + 23.66;
-                        graphics2.DrawString(Cards[i].Company_th ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 40, yPosition_B, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards[i].Company_th ?? "", new XFont("AngsanaDSE", 10), XBrushes.Black, new XRect(xLeft + 40, yPosition_B, page2.Width, 0), XStringFormats.TopLeft);
 
-                        graphics2.DrawString(Cards2[0].HeadOffice ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 15, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Address1 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Address2 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Office_Number ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Company_Web ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].HeadOffice ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 15, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Address1 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Address2 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Office_Number ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Fax ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Company_Web.ToLower() ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
 
-                        graphics2.DrawString(Cards2[1].HeadOffice ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 17, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Address1 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Address2 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Office_Number ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Company_Web ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].HeadOffice ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 17, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Address1 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Address2 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Office_Number ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Fax ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Company_Web.ToLower() ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
 
                         // 161.338
                         graphics.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 262.20472440945, 162));
-                        graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 262.20472440945, 162));
+                        //graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 262.20472440945, 162));
                         yLeft += 162;
                     }
                     else
                     {
                         double yLogo_R = yRight + 11;
-                        graphics.DrawImage(LogoTPs, xRight + 10, yLogo_R, 60, 40);
+                        graphics.DrawImage(LogoTPs, xRight + 10, yLogo_R, 53, 33);
 
-                        graphics.DrawString(Cards[i].Company_en ?? "", new XFont("Tahoma", 12, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 332, yLogo_R += 15, 60, 0));
-                        graphics.DrawString(Cards[i].Parent_company ?? "", new XFont("Tahoma", 10), XBrushes.Black, new XRect(xLeft + 332, yLogo_R += 13, 60, 0));
+                        graphics.DrawString(Cards[i].Company_en ?? "", new XFont("Roboto", 12, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 332, yLogo_R += 15, 60, 0));
+                        graphics.DrawString(Cards[i].Parent_company ?? "", new XFont("Roboto", 9), XBrushes.Black, new XRect(xLeft + 332, yLogo_R += 13, 60, 0));
 
-                        graphics.DrawString(Cards[i].NameTH ?? "", new XFont("Tahoma", 10, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 243.5, yLogo_R, CardWidth, 40), XStringFormats.Center);
-                        graphics.DrawString(Cards[i].NameEN ?? "", new XFont("Tahoma", 10, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 243.5, yLogo_R, CardWidth, 60), XStringFormats.Center);
-                        graphics.DrawString(Cards[i].Position ?? "", new XFont("Tahoma", 10), XBrushes.Black, new XRect(xLeft + 243.5, yLogo_R, CardWidth, 80), XStringFormats.Center);
+                        graphics.DrawString(Cards[i].NameTH ?? "", new XFont("AngsanaDSE", 17, XFontStyle.Bold), XBrushes.Black, new XRect(xLeft + 243.5, yLogo_R, CardWidth, 40), XStringFormats.Center);
+                        graphics.DrawString(Cards[i].NameEN.ToUpper() ?? "", new XFont("Myriad Pro Semibold", 11), XBrushes.Black, new XRect(xLeft + 243.5, yLogo_R+5, CardWidth, 60), XStringFormats.Center);
+                        graphics.DrawString(Cards[i].Position ?? "", new XFont("Myriad Pro Light", 10), XBrushes.Black, new XRect(xLeft + 243.5, yLogo_R+5, CardWidth, 80), XStringFormats.Center);
 
                         double yQR_R = yRight + 88;
                         graphics.DrawImage(QrCodeTPs, 510, yQR_R, 40, 60);
 
-                        graphics.DrawString(Cards[i].Dept ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight + 10, yLogo_R += 64, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Dept ?? "", new XFont("Roboto Light", 8), XBrushes.Black, new XRect(xRight + 10, yLogo_R += 64, CardWidth, 0), XStringFormats.TopLeft);
 
                         graphics.DrawRectangle(XPens.Blue, new XRect(xRight_txt + 10, yLogo_R += 11, 130, 0));
 
-                        graphics.DrawString(Cards[i].HeadOffice ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 1, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Address1 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Address2 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Office_Number ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
-                        graphics.DrawString(Cards[i].Email ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].HeadOffice ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 1, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Address1 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Address2 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Office_Number ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Fax ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
+                        graphics.DrawString(Cards[i].Email.ToLower() ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 10, yLogo_R += 6, CardWidth, 0), XStringFormats.TopLeft);
 
                         double yPosition_B = yRight + 23.66;
-                        graphics2.DrawString(Cards[i].Company_th ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight + 40, yPosition_B, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards[i].Company_th ?? "", new XFont("AngsanaDSE", 10), XBrushes.Black, new XRect(xRight + 40, yPosition_B, page2.Width, 0), XStringFormats.TopLeft);
 
-                        graphics2.DrawString(Cards2[0].HeadOffice ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 15, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Address1 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Address2 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Office_Number ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[0].Company_Web ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].HeadOffice ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 15, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Address1 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Address2 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Office_Number ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Fax ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[0].Company_Web.ToLower() ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
 
-                        graphics2.DrawString(Cards2[1].HeadOffice ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 17, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Address1 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Address2 ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Office_Number ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Fax ?? "", new XFont("Tahoma", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
-                        graphics2.DrawString(Cards2[1].Company_Web ?? "", new XFont("Tahoma", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].HeadOffice ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 17, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Address1 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Address2 ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Office_Number ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Fax ?? "", new XFont("Roboto Light", 6), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
+                        graphics2.DrawString(Cards2[1].Company_Web.ToLower() ?? "", new XFont("Roboto", 6, XFontStyle.Bold), XBrushes.Black, new XRect(xRight_txt + 40, yPosition_B += 6, page2.Width, 0), XStringFormats.TopLeft);
 
                         // 161.338
                         graphics.DrawRectangle(XPens.Black, new XRect(xRight, yRight, 262.20472440945, 162));
-                        graphics2.DrawRectangle(XPens.Black, new XRect(xRight, yRight, 262.20472440945, 162));
+                        //graphics2.DrawRectangle(XPens.Black, new XRect(xRight, yRight, 262.20472440945, 162));
                         yRight += 162;
                     }
                 }
@@ -453,9 +501,17 @@ namespace E2E.Controllers
         public string FormatPhoneNumber(string phoneNumber)
         {
             string formattedNumber = string.Empty;
-            if (phoneNumber.Length <= 10)
+            if (!string.IsNullOrEmpty(phoneNumber))
             {
-                formattedNumber = "+66" + phoneNumber.Substring(1, 1) + "-" + phoneNumber.Substring(2, 4) + "-" + phoneNumber.Substring(6);
+
+                if (phoneNumber.Length <= 10)
+                {
+                    formattedNumber = "+66" + phoneNumber.Substring(1, 1) + "-" + phoneNumber.Substring(2, 4) + "-" + phoneNumber.Substring(6);
+                }
+            }
+            else
+            {
+                formattedNumber = phoneNumber;
             }
 
             return formattedNumber;
@@ -466,7 +522,7 @@ namespace E2E.Controllers
         {
             UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
             return View();
         }
 
@@ -483,94 +539,217 @@ namespace E2E.Controllers
 
         public ActionResult ManagerGaApprove(Guid? id, Guid? SelectId)
         {
-            try
+          
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                BusinessCards businessCards = db.BusinessCards.Find(id);
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 8;
-                businessCards.Create = DateTime.Now;
-
-                if (db.SaveChanges() > 0)
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
                 {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards, SelectId);
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 8;
+                    businessCards.UserAction = SelectId;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        dataCard.SendMail(businessCards, SelectId);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
 
-            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { id });
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult ManagerGaReject(Guid? id, string remark)
         {
-            try
-            {
-                BusinessCards businessCards = db.BusinessCards.Find(id);
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 5;
-                businessCards.Create = DateTime.Now;
 
-                if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
                 {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards, null, null, "", remark);
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 5;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.BusinessCard_SaveLog(businessCards, remark);
+                        dataCard.SendMail(businessCards, null, null, "", remark);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Rejected";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult ManagerUserApprove(Guid? id)
         {
-            try
-            {
-                BusinessCards businessCards = db.BusinessCards.Find(id);
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 7;
-                businessCards.Create = DateTime.Now;
 
-                if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
                 {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards);
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 7;
+                    businessCards.DueDate = DateTime.Now.AddDays(3);
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        dataCard.SendMail(businessCards);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
 
-            return RedirectToAction("BusinessCard_Detail", "BusinessCards", new { id });
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+
+
         }
 
         public ActionResult ManagerUserReject(Guid? id, string remark)
         {
-            try
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                BusinessCards businessCards = db.BusinessCards.Find(id);
-                businessCards = db.BusinessCards.Find(id);
-                businessCards.Status_Id = 5;
-                businessCards.Create = DateTime.Now;
-
-                if (db.SaveChanges() > 0)
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
                 {
-                    dataCard.BusinessCard_SaveLog(businessCards);
-                    dataCard.SendMail(businessCards, null, null, "", remark);
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 5;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.BusinessCard_SaveLog(businessCards, remark);
+                        dataCard.SendMail(businessCards, null, null, "", remark);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Rejected";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public MemoryStream QrCodeTP()
@@ -589,7 +768,7 @@ namespace E2E.Controllers
         public List<ClsBusinessCard> QueryClsBusinessCard()
         {
             List<ClsBusinessCard> clsBusinessCards = db.BusinessCards
-                .OrderByDescending(o => o.Create)
+                .OrderByDescending(o => o.System_Statuses.OrderBusinessCard)
                 .Select(s => new ClsBusinessCard()
                 {
                     Key = s.Key,
@@ -606,7 +785,10 @@ namespace E2E.Controllers
                     System_Statuses = db.System_Statuses.Where(w => w.Status_Id == s.Status_Id).FirstOrDefault(),
                     UserDetails = db.UserDetails.Where(w => w.User_Id == s.User_id).FirstOrDefault(),
                     UserRefName = db.UserDetails.Where(w => w.User_Id == s.UserRef_id).Select(ss => ss.Users.Username).FirstOrDefault(),
-                    BusinessCard_Id = s.BusinessCard_Id
+                    BusinessCard_Id = s.BusinessCard_Id,
+                    DueDate = s.DueDate,
+                    Update = s.Update
+
                 }).ToList();
 
             return clsBusinessCards;
@@ -614,63 +796,224 @@ namespace E2E.Controllers
 
         public ActionResult StaffComplete(Guid? id)
         {
-            BusinessCards businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 3;
-            businessCards.Create = DateTime.Now;
 
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.SendMail(businessCards);
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 3;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.SendMail(businessCards);
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult StaffStart(Guid? id)
         {
-            BusinessCards businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 2;
-            businessCards.Create = DateTime.Now;
-            businessCards.UserAction = Guid.Parse(HttpContext.User.Identity.Name);
-
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 2;
+                    businessCards.UserAction = Guid.Parse(HttpContext.User.Identity.Name);
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult StaffUndo(Guid? id, string remark)
         {
-            BusinessCards businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 7;
-            businessCards.Create = DateTime.Now;
-            businessCards.UserAction = null;
 
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.SendMail(businessCards, null, null, "", remark, "7");
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 7;
+                    businessCards.UserAction = null;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.SendMail(businessCards, null, null, "", remark, "7");
+                        dataCard.BusinessCard_SaveLog(businessCards, remark, true);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult UserUndo(Guid? id, string remark)
+        {
+
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 2;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.SendMail(businessCards, null, null, "", remark, "2");
+                        dataCard.BusinessCard_SaveLog(businessCards, remark, true);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
+            }
+
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Table_AllTask()
         {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var Staff = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var clsBusinessCard = QueryClsBusinessCard();
 
-            var clsBusinessCard = QueryClsBusinessCard().OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
-
-            //ถ้าเป็น Staff
-            if (Staff == 3)
+            //staff ga
+            if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = QueryClsBusinessCard().Where(w => w.Status_Id == 8).OrderByDescending(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = clsBusinessCard.Where(w => w.Status_Id == 8 && w.UserAction == null).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
+
 
             return View(clsBusinessCard);
         }
@@ -678,16 +1021,72 @@ namespace E2E.Controllers
         public ActionResult Table_Approval()
         {
             Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Id == MyDeptId).ToList();
+            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var clsBusinessCard = QueryClsBusinessCard();
+
+
+            //mg user
+            if (authorized == 2 && GA == false)
+            {
+                clsBusinessCard = clsBusinessCard.Where(w => w.Status_Id == 1 && w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+            //mg ga
+            else if (authorized == 2 && GA == true)
+            {
+                clsBusinessCard = clsBusinessCard.Where(w => w.Status_Id == 1 && w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId || w.Status_Id == 7).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+
 
             return View(clsBusinessCard);
         }
 
-        public ActionResult Table_MyRequest()
+        public ActionResult Table_MyTask()
         {
-            Guid MyUserid = Guid.Parse(HttpContext.User.Identity.Name);
+            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var clsBusinessCard = QueryClsBusinessCard();
 
-            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.User_id == MyUserid).OrderByDescending(o => o.Create).ToList();
+
+            //staff ga
+            if (authorized == 3 && GA == true)
+            {
+                clsBusinessCard = clsBusinessCard.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+
+
+            return View(clsBusinessCard);
+        }
+
+        public ActionResult Table_AllRequest()
+        {
+            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var clsBusinessCard = QueryClsBusinessCard();
+
+
+            //user
+            if (authorized == 3 && GA == false)
+            {
+                clsBusinessCard = clsBusinessCard.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+            //mg user
+            else if (authorized == 2 && GA == false)
+            {
+                clsBusinessCard = clsBusinessCard.Where(w => w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+            //mg ga
+            else if (authorized == 2 && GA == true)
+            {
+                clsBusinessCard = clsBusinessCard.OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+            // staff ga 
+            else if (authorized == 3 && GA == true)
+            {
+                clsBusinessCard = clsBusinessCard.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+
 
             return View(clsBusinessCard);
         }
@@ -695,27 +1094,63 @@ namespace E2E.Controllers
         [HttpPost]
         public ActionResult Upload(HttpPostedFileBase file, Guid? id)
         {
-            if (file != null && file.ContentLength > 0 && id.HasValue)
+            ClsSwal swal = new ClsSwal();
+
+            try
             {
-                string dir = "BusinessCard/" + id.Value;
-                string FileName = file.FileName;
-
-                bool cardFiles = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id.Value && a.FileName == file.FileName);
-
-                if (cardFiles)
+                using (TransactionScope scope = new TransactionScope())
                 {
-                    FileName = string.Concat("_", file.FileName);
-                }
+                    if (file != null && file.ContentLength > 0 && id.HasValue)
+                    {
+                        string dir = "BusinessCard/" + id.Value;
+                        string FileName = file.FileName;
 
-                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                        bool cardFiles = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id.Value && a.FileName == file.FileName);
 
-                if (!string.IsNullOrEmpty(filepath))
-                {
-                    var sql = db.BusinessCards.Find(id);
-                    dataCard.BusinessCard_SaveFile(filepath, sql);
+                        if (cardFiles)
+                        {
+                            FileName = string.Concat("_", file.FileName);
+                        }
+
+                        string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+
+                        if (!string.IsNullOrEmpty(filepath))
+                        {
+                            var sql = db.BusinessCards.Find(id);
+                            if (dataCard.BusinessCard_SaveFile(filepath, sql))
+                            {
+                                scope.Complete();
+                                swal.DangerMode = false;
+                                swal.Icon = "success";
+                                swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                                swal.Title = "Successful";
+                            }
+                        }
+
+                        else
+                        {
+                            swal.Icon = "warning";
+                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                            swal.Title = "Warning";
+                        }
+                    }
+
                 }
             }
-            return View();
+            catch (Exception ex)
+            {
+                swal.Title = ex.Source;
+                swal.Text = ex.Message;
+                Exception inner = ex.InnerException;
+                while (inner != null)
+                {
+                    swal.Title = inner.Source;
+                    swal.Text += string.Format("\n{0}", inner.Message);
+                    inner = inner.InnerException;
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult UploadHistory(Guid? id)
@@ -725,57 +1160,189 @@ namespace E2E.Controllers
             return View(res);
         }
 
+        public ActionResult LogStatus(Guid? id)
+        {
+            var LogsCard = db.Log_BusinessCards.Where(w => w.BusinessCard_Id == id).ToList();
+
+            List<ClsLog_BusinessCards> clsLog_Businesses = db.Log_BusinessCards
+                          .Where(w => w.BusinessCard_Id == id)
+                          .Select(s => new ClsLog_BusinessCards()
+                          {
+                              User_id = s.User_Id,
+                              Status_Id = s.Status_Id,
+                              UserDetails = db.UserDetails.Where(w => w.User_Id == s.User_Id).FirstOrDefault(),
+                              System_Statuses = db.System_Statuses.Where(w => w.Status_Id == s.Status_Id).FirstOrDefault(),
+                              Create = s.Create,
+                              Remark = s.Remark,
+                              Undo = s.Undo
+                          }).ToList();
+
+            return View(clsLog_Businesses.OrderByDescending(O => O.Create));
+        }
+
         public ActionResult UserClose(Guid? id)
         {
-            BusinessCards businessCards = db.BusinessCards.Find(id);
-            businessCards.Status_Id = 4;
-            businessCards.Create = DateTime.Now;
 
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.SendMail(businessCards);
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(id);
+                    businessCards.Status_Id = 4;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.SendMail(businessCards);
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult UserConfirmApprove(Guid? id)
         {
-            BusinessCardFiles businessCardFiles = db.BusinessCardFiles.Find(id);
-            businessCardFiles.Confirm = true;
-            businessCardFiles.Create = DateTime.Now;
 
-            BusinessCards businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
-            businessCards.Status_Id = 9;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.SendMail(businessCards);
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCardFiles businessCardFiles = db.BusinessCardFiles.Find(id);
+                    businessCardFiles.Confirm = true;
+                    businessCardFiles.Create = DateTime.Now;
+
+                    BusinessCards businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
+                    businessCards.Status_Id = 9;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.SendMail(businessCards);
+                        dataCard.BusinessCard_SaveLog(businessCards);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult UserConfirmCancel(Guid? id, string remark)
         {
-            BusinessCardFiles businessCardFiles = db.BusinessCardFiles.Find(id);
-            businessCardFiles.Confirm = false;
-            businessCardFiles.Create = DateTime.Now;
 
-            BusinessCards businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
-            businessCards.Status_Id = 2;
-            businessCards.Create = DateTime.Now;
-
-            if (db.SaveChanges() > 0)
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
             {
-                dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
-                dataCard.BusinessCard_SaveLog(businessCards);
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCardFiles businessCardFiles = db.BusinessCardFiles.Find(id);
+                    businessCardFiles.Confirm = false;
+                    businessCardFiles.Create = DateTime.Now;
+                    businessCardFiles.Remark = remark;
+
+                    BusinessCards businessCards = db.BusinessCards.Find(businessCardFiles.BusinessCard_Id);
+                    businessCards.Status_Id = 2;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
+                        dataCard.BusinessCard_SaveLog(businessCards, remark);
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
             }
 
-            return View();
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
     }
 }

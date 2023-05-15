@@ -1,0 +1,44 @@
+﻿@model IEnumerable<E2E.Models.Views.ClsLog_BusinessCards>
+
+@{
+	Layout = null;
+}
+
+<table class="display table table-bordered table-hover w-100">
+	<thead>
+		<tr>
+			<th class="fit">Create</th>
+			<th class="fit">Status</th>
+			<th class="fit">User</th>
+			<th class="fit">Remark</th>
+
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model.OrderBy(o=>o.System_Statuses.OrderBusinessCard))
+		{
+		<tr>
+			<td class="">@item.Create</td>
+
+			@{
+				//เช็คว่ามีการ Undo ไหม
+				if (@item.Undo)
+				{
+					<td class="text-center"><span class="badge badge-warning">Undo</span></td>
+				}
+				else
+				{
+
+					<td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
+
+				}
+			}
+
+			<td>@item.UserDetails.Detail_EN_FirstName</td>
+			<td>@item.Remark</td>
+
+		</tr>
+		}
+	</tbody>
+
+</table>

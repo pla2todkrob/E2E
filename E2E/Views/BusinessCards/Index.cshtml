@@ -10,14 +10,24 @@
 		$(document).ready(function () {
 
 			let isGA = '@ViewBag.GA'.toLowerCase();
+			let authorized = '@ViewBag.authorized';
+			console.log(authorized);
 			console.log(isGA);
-			if (isGA == "false") {
+
+			if (isGA == "false" && authorized == '3') {
                 $('#task-tab').removeClass('active');
-                $('#MyRequest-tab').addClass('active');
+				$('#allReuqest-tab').addClass('active');
 
                 $('#task').removeClass('show active');
-                $('#MyRequest').addClass('show active');
-            }
+				$('#request').addClass('show active');
+			}
+			else if (authorized == '2') {
+				$('#task-tab').removeClass('active')
+				$('#approval-tab').addClass('active');
+
+				$('#task').removeClass('show active');
+				$('#approval').addClass('show active');
+			}
         });
 
 		$(function () {
@@ -64,9 +74,12 @@
 
 			callTable('@Url.Action("Table_AllTask", "BusinessCards")')
 				.then(function () {
-					callTable('@Url.Action("Table_MyRequest", "BusinessCards")', false, false, [0],'#datalist2')
+					callTable('@Url.Action("Table_MyTask", "BusinessCards")', false, false,[0,5],'#datalist2')
 						.then(function () {
-							callTable('@Url.Action("Table_Approval", "BusinessCards")', false, false, [2,0], '#datalist3');
+							callTable('@Url.Action("Table_Approval", "BusinessCards")', false, false, [2, 0], '#datalist3').then(function () {
+									callTable('@Url.Action("Table_AllRequest", "BusinessCards")', false, false, [0, 4], '#datalist4')
+
+							});
 						});
 				});
 		}
@@ -97,7 +110,8 @@
 
 <ul class="nav nav-tabs" id="Cards" role="tablist">
 	@{
-		if (ViewBag.GA)
+		//staff ga
+		if (ViewBag.authorized == 3 && ViewBag.GA)
 		{
 			<li class="nav-item">
 				<a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
@@ -106,11 +120,23 @@
 			</li>
 		}
 
+
 		<li class="nav-item">
-			<a class="nav-link" id="MyRequest-tab" data-toggle="tab" href="#MyRequest" role="tab" aria-controls="MyRequest" aria-selected="false">
-				My request task
+			<a class="nav-link" id="allReuqest-tab" data-toggle="tab" href="#request" role="tab" aria-controls="request" aria-selected="false">
+				All request
 			</a>
 		</li>
+
+		//staff ga
+		if (ViewBag.authorized == 3 && ViewBag.GA)
+		{
+			<li class="nav-item">
+				<a class="nav-link" id="MyTask-tab" data-toggle="tab" href="#MyTask" role="tab" aria-controls="MyTask" aria-selected="false">
+					My task
+				</a>
+			</li>
+		}
+
 
 		if (ViewBag.authorized == 2)
 		{
@@ -131,18 +157,29 @@
 		<div class="card">
 
 			<div class="card-body">
-				<div class="row" id="datalist"></div>11111
+				<div class="row" id="datalist"></div>
 			</div>
 		</div>
 
 	</div>
 
-	<div class="tab-pane fade" id="MyRequest" role="tabpanel" aria-labelledby="MyRequest-tab">
+	<div class="tab-pane fade" id="request" role="tabpanel" aria-labelledby="allReuqest-tab">
 
 		<div class="card">
 
 			<div class="card-body">
-				<div class="row" id="datalist2"></div>22222
+				<div class="row" id="datalist4"></div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="tab-pane fade" id="MyTask" role="tabpanel" aria-labelledby="MyTask-tab">
+
+		<div class="card">
+
+			<div class="card-body">
+				<div class="row" id="datalist2"></div>
 			</div>
 
 		</div>
@@ -154,7 +191,7 @@
 
 
 			<div class="card-body">
-				<div class="row" id="datalist3"></div>33333
+				<div class="row" id="datalist3"></div>
 			</div>
 		</div>
 

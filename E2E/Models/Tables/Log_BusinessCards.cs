@@ -18,5 +18,7 @@ namespace E2E.Models.Tables
         public virtual int Status_Id { get; set; }
         public Guid? User_Id { get; set; }
         public DateTime Create { get; set; }
+        public string Remark { get; set; }
+        public bool Undo { get; set; }
     }
 }
