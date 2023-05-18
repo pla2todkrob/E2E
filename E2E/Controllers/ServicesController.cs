@@ -950,6 +950,9 @@ namespace E2E.Controllers
                          System_Priorities = s.System_Priorities,
                          System_Statuses = s.System_Statuses
                      }).ToList();
+
+                ViewBag.UserNames = Users_GetName(Guid.Parse(HttpContext.User.Identity.Name));
+
                 return View(clsServiceUserActionName);
             }
             catch (Exception)

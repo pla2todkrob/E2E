@@ -107,9 +107,9 @@
         }
 
         function reloadTable() {
-            callFilter('@Url.Action("Report_KPI_Filter", "Services")').then(function () {
-				callTable_Normal('@Url.Action("Report_KPI_Table", "Services")');
-            });
+            callFilter('@Url.Action("Report_KPI_Filter", "Services")');
+
+            callTable_Normal('@Url.Action("Report_KPI_Table", "Services")');
 
         }
 
