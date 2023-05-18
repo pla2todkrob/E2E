@@ -660,7 +660,21 @@ namespace E2E.Controllers
                     BusinessCards businessCards = db.BusinessCards.Find(id);
                     businessCards = db.BusinessCards.Find(id);
                     businessCards.Status_Id = 7;
-                    businessCards.DueDate = DateTime.Now.AddDays(3);
+
+                    DateTime currentDate = DateTime.Now;
+                    int daysToAdd = 3;
+
+                    while (daysToAdd > 0)
+                    {
+                        currentDate = currentDate.AddDays(1);
+
+                        if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                        {
+                            daysToAdd--;
+                        }
+                    }
+
+                    businessCards.DueDate = currentDate;
                     businessCards.Update = DateTime.Now;
 
                     if (db.SaveChanges() > 0)

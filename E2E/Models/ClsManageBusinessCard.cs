@@ -16,6 +16,16 @@ namespace E2E.Models
         private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
 
+        public int GradeNumber(ClsBusinessCard Model)
+        {
+
+            var BypassGA = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Grades.Grade_Name).FirstOrDefault();
+
+            int Num = Convert.ToInt32(BypassGA.Substring(1));
+
+            return Num;
+        }
+
         public bool BusinessCard_SaveCreate(ClsBusinessCard Model)
         {
             bool res = new bool();
@@ -42,7 +52,7 @@ namespace E2E.Models
                     Status_Id = 1, //Pending
                 };
 
-                if (ChkJP == "Japanese Executives")
+                if (GradeNumber(Model) <= 4)
                 {
                     businessCards.Status_Id = 7; //Approved MG User
                 }
@@ -196,7 +206,7 @@ namespace E2E.Models
                 linkUrl = result;
              
 
-                subject = string.Format("[Business Card][User Undo] {0}", Model.Key);
+                subject = string.Format("[Business Card][Requester Undo] {0}", Model.Key);
 
                 content += string.Format("<p>Comment: {0}</p>", remark);
                 mail.SendToIds.Clear();
@@ -256,9 +266,10 @@ namespace E2E.Models
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
 
-                if (users.Any(w => w.Master_Grades.Grade_Name.Contains("6")))
+                //CC Email Grade 5 or 6
+                if (users.Any(w => w.Master_Grades.Grade_Name.Contains("6")) || users.Any(w => w.Master_Grades.Grade_Name.Contains("5")))
                 {
-                    mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
+                    mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6") || w.Master_Grades.Grade_Name.Contains("5")).Select(s => s.User_Id).ToList();
                 }
            
 
@@ -351,7 +362,7 @@ namespace E2E.Models
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
-                subject = string.Format("[Business Card][Completed] {0}", Model.Key);
+                subject = string.Format("[Business Card][Please Close] {0}", Model.Key);
                 
                 mail.SendToId = Model.User_id;
                 mail.SendToIds.Clear();

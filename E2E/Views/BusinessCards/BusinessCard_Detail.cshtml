@@ -432,7 +432,7 @@ swal({
 
 <div class="container" id="DetailArea">
 
-	@if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 4 && ViewBag.GA)
+	@if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 4 && ViewBag.GA && ViewBag.UserCHK != true)
 	{
 		<div class="d-flex mb-3">
 			<div class="mr-auto">
@@ -531,7 +531,7 @@ swal({
 		{
 			<div class="form-group col-12">
 				@Html.LabelFor(m => m.UserAction)
-				@Html.DropDownListFor(m => m.UserAction, new SelectList(ViewBag.UserCardList, "Value", "Text"), "Select User", new { id = "SelectId", @class = "form-control" })
+				@Html.DropDownListFor(m => m.UserAction, new SelectList(ViewBag.UserCardList, "Value", "Text"), "- Select -", new { id = "SelectId", @class = "form-control" })
 			</div>
 
 
