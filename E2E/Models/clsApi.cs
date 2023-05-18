@@ -14,6 +14,36 @@ namespace E2E.Models
 {
     public class ClsApi
     {
+        private string GetApiUrl()
+        {
+            try
+            {
+                string target = ConfigurationManager.AppSettings["TargetHost"];
+                string res = string.Empty;
+
+                switch (target)
+                {
+                    case "Pro":
+                        res = ConfigurationManager.AppSettings["ApiUrlPro"];
+                        break;
+
+                    case "Dev":
+                        res = ConfigurationManager.AppSettings["ApiUrlDev"];
+                        break;
+
+                    default:
+                        res = ConfigurationManager.AppSettings["ApiUrlLocal"];
+                        break;
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private byte[] GetByteFileBase(HttpPostedFileBase file)
         {
             try
@@ -33,49 +63,19 @@ namespace E2E.Models
             }
         }
 
-        private string GetDomainURL()
-        {
-            try
-            {
-                string nameConn = ConfigurationManager.AppSettings["NameConn"];
-                string res = string.Empty;
-
-                switch (nameConn)
-                {
-                    case "ConnPro":
-                        res = ConfigurationManager.AppSettings["UrlPro"];
-                        break;
-
-                    case "ConnDev":
-                        res = ConfigurationManager.AppSettings["UrlDev"];
-                        break;
-
-                    default:
-                        res = ConfigurationManager.AppSettings["UrlLocal"];
-                        break;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         private string GetToken()
         {
             try
             {
-                string nameConn = ConfigurationManager.AppSettings["NameConn"];
+                string target = ConfigurationManager.AppSettings["TargetHost"];
 
-                switch (nameConn)
+                switch (target)
                 {
-                    case "ConnPro":
+                    case "Pro":
 
                         return ConfigurationManager.AppSettings["TokenPro"];
 
-                    case "ConnDev":
+                    case "Dev":
 
                         return ConfigurationManager.AppSettings["TokenDev"];
 
@@ -98,11 +98,18 @@ namespace E2E.Models
         public string Message { get; set; }
         public dynamic Value { get; set; }
 
+        public byte[] ConvertByte(string filePath)
+        {
+            WebClient client = new WebClient();
+            byte[] fileContent = client.DownloadData(filePath);
+            return fileContent;
+        }
+
         public FileResponse Delete_File(string fileUrl)
         {
             FileResponse res = new FileResponse();
             string TokenKey = GetToken();
-            Uri ApiUrl = new Uri(GetDomainURL() + "api/Service_File/Delete_File");
+            Uri ApiUrl = new Uri(GetApiUrl() + "api/Service_File/Delete_File");
 
             RestClientOptions options = new RestClientOptions(ApiUrl)
             {
@@ -121,14 +128,6 @@ namespace E2E.Models
             return res;
         }
 
-        public byte[] ConvertByte(string filePath)
-        {
-            WebClient client = new WebClient();
-            byte[] fileContent = client.DownloadData(filePath);
-            return fileContent;
-        }
-
-
         public bool SendMail(ClsServiceEmail clsServiceEmail, HttpFileCollectionBase files = null)
         {
             try
@@ -137,7 +136,7 @@ namespace E2E.Models
                 string resApi = string.Empty;
                 List<ClsFileAttach> clsFiles = new List<ClsFileAttach>();
                 string TokenKey = GetToken();
-                Uri ApiUrl = new Uri(GetDomainURL() + "api/Service_Email/Send");
+                Uri ApiUrl = new Uri(GetApiUrl() + "api/Service_Email/Send");
 
                 var multiClass = new
                 {
@@ -178,11 +177,9 @@ namespace E2E.Models
                     {
                         request.AddParameter("SendBCC", clsServiceEmail.SendBCC[i]);
                     }
-                   
 
                     request.AddParameter("Subject", clsServiceEmail.Subject);
                     request.AddParameter("Body", clsServiceEmail.Body);
-                    
 
                     if (files != null)
                     {
@@ -196,7 +193,7 @@ namespace E2E.Models
                         }
                     }
 
-                    if(clsServiceEmail.ClsFileAttaches.Count > 0)
+                    if (clsServiceEmail.ClsFileAttaches.Count > 0)
                     {
                         request.AlwaysMultipartFormData = true;
                         foreach (var item in clsServiceEmail.ClsFileAttaches)
@@ -205,9 +202,7 @@ namespace E2E.Models
                             {
                                 request.AddFile("fileAttach", ConvertByte(item.FilePath), HttpUtility.UrlEncode(Path.GetFileName(item.FilePath), Encoding.UTF8), MimeMapping.GetMimeMapping(item.FilePath));
                             }
-
                         }
-
                     }
                     RestResponse response = client.PostAsync(request).Result;
                     mailResponse = JsonConvert.DeserializeObject<MailResponse>(response.Content);
@@ -231,7 +226,7 @@ namespace E2E.Models
 
                 string resApi = string.Empty;
                 string TokenKey = GetToken();
-                Uri ApiUrl = new Uri(GetDomainURL() + "api/Service_File/Upload");
+                Uri ApiUrl = new Uri(GetApiUrl() + "api/Service_File/Upload");
 
                 RestClientOptions options = new RestClientOptions(ApiUrl)
                 {
