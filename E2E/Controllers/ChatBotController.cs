@@ -65,33 +65,30 @@ namespace E2E.Controllers
 
                         if (file.ContentLength > 0)
                         {
-                            string dir = "ChatBot/" + DateTime.Today.ToString("d").Replace('/', '-');
-                            ClsServiceFTP serviceFTP = new ClsServiceFTP();
-                            string filePath = serviceFTP.Ftp_UploadFileToString(dir, file);
-                            ChatBotUploadHistory chatBotUploadHistory = new ChatBotUploadHistory
-                            {
-                                ChatBotUploadHistoryFile = filePath,
-                                ChatBotUploadHistoryFileName = Path.GetFileName(filePath),
-                                User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                            };
-                            db.Entry(chatBotUploadHistory).State = System.Data.Entity.EntityState.Added;
-                            if (db.SaveChanges() > 0)
-                            {
-                                if (chatBot.SaveChatBotLearn(filePath))
-                                {
-                                    scope.Complete();
-                                    swal.Icon = "success";
-                                    swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                                    swal.Title = "Successful";
-                                    swal.DangerMode = false;
-                                }
-                                else
-                                {
-                                    swal.Icon = "warning";
-                                    swal.Text = "กรุณาตรวจสอบข้อมูลอีกครั้ง";
-                                    swal.Title = "Warning";
-                                }
-                            }
+                            //ChatBotUploadHistory chatBotUploadHistory = new ChatBotUploadHistory
+                            //{
+                            //    ChatBotUploadHistoryFile = filePath,
+                            //    ChatBotUploadHistoryFileName = Path.GetFileName(filePath),
+                            //    User_Id = Guid.Parse(HttpContext.User.Identity.Name)
+                            //};
+                            //db.Entry(chatBotUploadHistory).State = System.Data.Entity.EntityState.Added;
+                            //if (db.SaveChanges() > 0)
+                            //{
+                            //    if (chatBot.SaveChatBotLearn(filePath))
+                            //    {
+                            //        scope.Complete();
+                            //        swal.Icon = "success";
+                            //        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                            //        swal.Title = "Successful";
+                            //        swal.DangerMode = false;
+                            //    }
+                            //    else
+                            //    {
+                            //        swal.Icon = "warning";
+                            //        swal.Text = "กรุณาตรวจสอบข้อมูลอีกครั้ง";
+                            //        swal.Title = "Warning";
+                            //    }
+                            //}
                         }
                     }
                 }

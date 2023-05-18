@@ -10,6 +10,7 @@ namespace E2E.Models
 {
     public class ClsManageEForm
     {
+        private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
@@ -53,7 +54,19 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
+                                ClsServiceFile clsServiceFile = new ClsServiceFile
+                                {
+                                    FolderPath = dir,
+                                    Filename = file.FileName
+                                };
+
+                                FileResponse fileResponse = clsApi.UploadFile(clsServiceFile, file);
+
+                                clsImag.OriginalPath = fileResponse.FileUrl;
+                                clsImag.ThumbnailPath = fileResponse.FileThumbnailUrl;
+
                                 clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
+
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(eForms, clsImag, FileName);

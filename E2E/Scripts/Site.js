@@ -1,5 +1,6 @@
-﻿let siteName = 'E2E';
-let baseUrl = window.location.pathname.search(siteName) < 0 ? '' : `/${siteName}`;
+﻿const siteName = 'e2e';
+const pathName = window.location.pathname.toLowerCase();
+const baseUrl = pathName.search(siteName) < 0 ? '' : `/${siteName}`;
 
 let chat;
 
@@ -369,7 +370,6 @@ function callSubmitModal(urlAjax, form) {
     });
 }
 
-
 function callSubmitPage(urlAjax, form) {
     swal({
         title: 'Are you sure?',
@@ -411,7 +411,6 @@ function callSubmitPage(urlAjax, form) {
     });
 }
 
-
 function callSubmitRedirect(urlAjax, form, urlRedirect) {
     const formData = new FormData(form);
     return $.ajax({
@@ -447,7 +446,6 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
     });
 }
 
-
 function callDeleteItem(urlAjax, reloadPage = false) {
     $.ajax({
         url: urlAjax,
@@ -480,7 +478,6 @@ function callDeleteItem(urlAjax, reloadPage = false) {
         }
     });
 }
-
 
 async function notifySignout(url) {
     return swal({
@@ -619,7 +616,7 @@ function scrollFunction() {
     } else {
         topButton.style.bottom = '-100%';
     }
-    
+
     lastScrollTop = scrollTop;
 }
 
