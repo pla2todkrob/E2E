@@ -20,18 +20,18 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    <button class="btn btn-outline-warning" onclick="callModalProcesses('@Url.Action("Processes_Form","Masters",new { id = Html.ValueFor(m => item.Processes_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                </td>
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td>@Html.DisplayFor(i => item.Process_Name)</td>
-                <td>@Html.DisplayFor(i => item.Section_Name)</td>
-                <td>@Html.DisplayFor(i => item.Department_Name)</td>
-                <td>@Html.DisplayFor(i => item.Division_Name)</td>
-                <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
-                <td>@Html.DisplayFor(i => item.Update)</td>
-            </tr>
+        <tr>
+            <td>
+                <button class="btn btn-outline-warning" onclick="callModalProcesses('@Url.Action("Processes_Form","Masters",new { id = Html.ValueFor(m => item.Processes_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+            </td>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>@Html.DisplayFor(i => item.Process_Name)</td>
+            <td>@Html.DisplayFor(i => item.Section_Name)</td>
+            <td>@Html.DisplayFor(i => item.Department_Name)</td>
+            <td>@Html.DisplayFor(i => item.Division_Name)</td>
+            <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
         }
     </tbody>
 </table>

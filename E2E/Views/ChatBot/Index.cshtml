@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4">
         <div class="card shadow sticky-top" id="stickyBody">
             <div class="card-header">
@@ -47,7 +47,7 @@
                         @{
                             if (ViewBag.IsAdmin)
                             {
-                                <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
+                            <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
                             }
                         }
                     </div>
@@ -56,9 +56,8 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="card-body" id="questionlist"></div>
         </div>
     </div>
-    
 </div>

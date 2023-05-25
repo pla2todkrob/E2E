@@ -5,7 +5,7 @@
 
 @section scripts{
 
-	<script>
+    <script>
 
 		$(document).ready(function () {
 
@@ -83,122 +83,106 @@
 						});
 				});
 		}
-
-
-
-	</script>
+    </script>
 
 }
 
 @section breadcrumb{
-	<nav aria-label="breadcrumb">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-			<li class="breadcrumb-item ">Request</li>
-			<li class="breadcrumb-item ">Business card</li>
-		</ol>
-	</nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item ">Request</li>
+            <li class="breadcrumb-item ">Business card</li>
+        </ol>
+    </nav>
 }
 
 <div class="d-flex mb-3">
-	<div class="mr-auto"></div>
-	<div class="ml-auto">
-		<button id="btn_create" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_Create","BusinessCards")', { bigSize: true, callback: selectUserDetail })"><i class="fa fa-plus"></i></button>
-	</div>
+    <div class="mr-auto"></div>
+    <div class="ml-auto">
+        <button id="btn_create" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_Create","BusinessCards")', { bigSize: true, callback: selectUserDetail })"><i class="fa fa-plus"></i></button>
+    </div>
 </div>
 
-
 <ul class="nav nav-tabs" id="Cards" role="tablist">
-	@{
+    @{
 		//staff ga
 		if (ViewBag.authorized == 3 && ViewBag.GA)
 		{
-			<li class="nav-item">
-				<a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
-					All task
-				</a>
-			</li>
+        <li class="nav-item">
+            <a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
+                All task
+            </a>
+        </li>
 		}
 
-
-		<li class="nav-item">
-			<a class="nav-link" id="allReuqest-tab" data-toggle="tab" href="#request" role="tab" aria-controls="request" aria-selected="false">
-				All request
-			</a>
-		</li>
+        <li class="nav-item">
+            <a class="nav-link" id="allReuqest-tab" data-toggle="tab" href="#request" role="tab" aria-controls="request" aria-selected="false">
+                All request
+            </a>
+        </li>
 
 		//staff ga
 		if (ViewBag.authorized == 3 && ViewBag.GA)
 		{
-			<li class="nav-item">
-				<a class="nav-link" id="MyTask-tab" data-toggle="tab" href="#MyTask" role="tab" aria-controls="MyTask" aria-selected="false">
-					My task
-				</a>
-			</li>
+        <li class="nav-item">
+            <a class="nav-link" id="MyTask-tab" data-toggle="tab" href="#MyTask" role="tab" aria-controls="MyTask" aria-selected="false">
+                My task
+            </a>
+        </li>
 		}
-
 
 		if (ViewBag.authorized == 2)
 		{
-			<li class="nav-item">
-				<a class="nav-link " id="approval-tab" data-toggle="tab" href="#approval" role="tab" aria-controls="approval" aria-selected="true">
-					Approval task
-				</a>
-			</li>
+        <li class="nav-item">
+            <a class="nav-link " id="approval-tab" data-toggle="tab" href="#approval" role="tab" aria-controls="approval" aria-selected="true">
+                Approval task
+            </a>
+        </li>
 		}
 
-	}
+    }
 </ul>
 
 <div class="tab-content" id="myTabContent">
 
-	<div class="tab-pane fade show active" id="task" role="tabpanel" aria-labelledby="task-tab">
+    <div class="tab-pane fade show active" id="task" role="tabpanel" aria-labelledby="task-tab">
 
-		<div class="card">
+        <div class="card">
 
-			<div class="card-body">
-				<div class="row" id="datalist"></div>
-			</div>
-		</div>
+            <div class="card-body">
+                <div class="row" id="datalist"></div>
+            </div>
+        </div>
+    </div>
 
-	</div>
+    <div class="tab-pane fade" id="request" role="tabpanel" aria-labelledby="allReuqest-tab">
 
-	<div class="tab-pane fade" id="request" role="tabpanel" aria-labelledby="allReuqest-tab">
+        <div class="card">
 
-		<div class="card">
+            <div class="card-body">
+                <div class="row" id="datalist4"></div>
+            </div>
+        </div>
+    </div>
 
-			<div class="card-body">
-				<div class="row" id="datalist4"></div>
-			</div>
-		</div>
+    <div class="tab-pane fade" id="MyTask" role="tabpanel" aria-labelledby="MyTask-tab">
 
-	</div>
+        <div class="card">
 
-	<div class="tab-pane fade" id="MyTask" role="tabpanel" aria-labelledby="MyTask-tab">
+            <div class="card-body">
+                <div class="row" id="datalist2"></div>
+            </div>
+        </div>
+    </div>
 
-		<div class="card">
+    <div class="tab-pane fade " id="approval" role="tabpanel" aria-labelledby="approval-tab">
 
-			<div class="card-body">
-				<div class="row" id="datalist2"></div>
-			</div>
+        <div class="card mb-3">
 
-		</div>
-	</div>
-
-	<div class="tab-pane fade " id="approval" role="tabpanel" aria-labelledby="approval-tab">
-
-		<div class="card mb-3">
-
-
-			<div class="card-body">
-				<div class="row" id="datalist3"></div>
-			</div>
-		</div>
-
-	</div>
-
+            <div class="card-body">
+                <div class="row" id="datalist3"></div>
+            </div>
+        </div>
+    </div>
 </div>
-
-
-
-

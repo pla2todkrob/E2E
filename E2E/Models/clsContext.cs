@@ -1,12 +1,10 @@
 ﻿using E2E.Models.Tables;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Configuration;
 using System.Data.Entity;
+using System.Configuration;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Reflection;
 using System.Web;
 
 namespace E2E.Models
@@ -47,7 +45,6 @@ namespace E2E.Models
         {
         }
 
-        public DbSet<PlantDetail> PlantDetails { get; set; }
         public DbSet<BusinessCardFiles> BusinessCardFiles { get; set; }
         public DbSet<BusinessCards> BusinessCards { get; set; }
         public DbSet<ChatBotAnswer> ChatBotAnswers { get; set; }
@@ -62,37 +59,22 @@ namespace E2E.Models
         public DbSet<Log_DbChange> Log_DbChanges { get; set; }
         public DbSet<Log_DbDelete> Log_DbDeletes { get; set; }
         public DbSet<Log_Exception> Log_Exceptions { get; set; }
-
         public DbSet<Log_Login> Log_Logins { get; set; }
-
         public DbSet<Log_SendEmail> Log_SendEmails { get; set; }
-
         public DbSet<Log_SendEmailTo> Log_SendEmailTos { get; set; }
-
         public DbSet<Manuals> Manuals { get; set; }
-
         public DbSet<Master_Categories> Master_Categories { get; set; }
-
         public DbSet<Master_Departments> Master_Departments { get; set; }
-
         public DbSet<Master_Divisions> Master_Divisions { get; set; }
-
         public DbSet<Master_Documents> Master_Documents { get; set; }
-
         public DbSet<Master_DocumentVersions> Master_DocumentVersions { get; set; }
-
         public DbSet<Master_Grades> Master_Grades { get; set; }
-
         public DbSet<Master_InquiryTopics> Master_InquiryTopics { get; set; }
-
         public DbSet<Master_LineWorks> Master_LineWorks { get; set; }
-
         public DbSet<Master_Plants> Master_Plants { get; set; }
-
         public DbSet<Master_Processes> Master_Processes { get; set; }
-
         public DbSet<Master_Sections> Master_Sections { get; set; }
-
+        public DbSet<PlantDetail> PlantDetails { get; set; }
         public DbSet<SatisfactionDetails> SatisfactionDetails { get; set; }
 
         public DbSet<Satisfactions> Satisfactions { get; set; }

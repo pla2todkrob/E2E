@@ -5,44 +5,44 @@
 }
 
 <table class="table table-bordered table-hover nowrap w-100">
-	<thead>
-		<tr>
-			<th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+    <thead>
+        <tr>
+            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
 
-			<th>@Html.DisplayNameFor(m => m.Subject)</th>
-			<th class="fit">@Html.DisplayNameFor(m => m.Requester)</th>
-			<th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
-			<th class="fit">@Html.DisplayNameFor(m => m.Duedate)</th>
+            <th>@Html.DisplayNameFor(m => m.Subject)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Requester)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
+            <th class="fit">@Html.DisplayNameFor(m => m.Duedate)</th>
 
-			@*<th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>*@
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model)
+            @*<th class="fit">@Html.DisplayNameFor(m => m.Users.User_Code)</th>*@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
 		{
-		<tr>
-			<td>@Html.DisplayFor(i => item.Update)</td>
+        <tr>
+            <td>@Html.DisplayFor(i => item.Update)</td>
 
-			<td class="text-wrap">
-				<small class="font-weight-bold">[@Html.DisplayFor(i => item.Key)]</small><br />
-				<a href="@Url.Action("Action", "Services", new { id = item.ServiceId })">@Html.DisplayFor(i => item.Subject)</a>
-				@{
+            <td class="text-wrap">
+                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Key)]</small><br />
+                <a href="@Url.Action("Action", "Services", new { id = item.ServiceId })">@Html.DisplayFor(i => item.Subject)</a>
+                @{
 
 					if (Guid.Equals(item.ActionBy, ViewBag.UserNames))
 					{
-						<span class="badge badge-danger">MY TASK</span>
+                    <span class="badge badge-danger">MY TASK</span>
 					}
 
-				}
-			</td>
+                }
+            </td>
 
-			<td class="text-center">@Html.DisplayFor(i => item.Requester)</td>
+            <td class="text-center">@Html.DisplayFor(i => item.Requester)</td>
 
-			<td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
 
-			<td>@Html.DisplayFor(i => item.Duedate)</td>
-			@*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
-		</tr>
+            <td>@Html.DisplayFor(i => item.Duedate)</td>
+            @*<td>@Html.DisplayFor(i => item.Users.User_Code)</td>*@
+        </tr>
 		}
-	</tbody>
+    </tbody>
 </table>

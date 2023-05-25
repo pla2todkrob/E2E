@@ -280,21 +280,21 @@ namespace E2E.Controllers
                        .ThenBy(t => t.Update)
                        .ThenByDescending(t => t.Create)
                        .Select(s => new ServiceAll()
-                    {
-                        Create = s.Create,
-                        Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
-                        Plant_Name = s.Users.Master_Plants.Plant_Name,
-                        Priority_Class = s.System_Priorities.Priority_Class,
-                        Priority_Id = s.Priority_Id,
-                        Priority_Name = s.System_Priorities.Priority_Name,
-                        Service_Id = s.Service_Id,
-                        Service_Key = s.Service_Key,
-                        Service_Subject = s.Service_Subject,
-                        Status_Class = s.System_Statuses.Status_Class,
-                        Status_Name = s.System_Statuses.Status_Name,
-                        Update = s.Update,
-                        Is_OverDue = s.Is_OverDue
-                    }).ToList();
+                       {
+                           Create = s.Create,
+                           Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
+                           Plant_Name = s.Users.Master_Plants.Plant_Name,
+                           Priority_Class = s.System_Priorities.Priority_Class,
+                           Priority_Id = s.Priority_Id,
+                           Priority_Name = s.System_Priorities.Priority_Name,
+                           Service_Id = s.Service_Id,
+                           Service_Key = s.Service_Key,
+                           Service_Subject = s.Service_Subject,
+                           Status_Class = s.System_Statuses.Status_Class,
+                           Status_Name = s.System_Statuses.Status_Name,
+                           Update = s.Update,
+                           Is_OverDue = s.Is_OverDue
+                       }).ToList();
 
                 return View(data);
             }
@@ -635,9 +635,8 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public void Download_Zipfiles(List<string> Urls ,string key)
+        public void Download_Zipfiles(List<string> Urls, string key)
         {
-
             ClsApi clsApi = new ClsApi();
             ClsServiceFile clsServiceFile = new ClsServiceFile();
             string ZipName = string.Format("{0}_{1}.zip", key, Urls.Count());
@@ -661,10 +660,8 @@ namespace E2E.Controllers
                                 }
                             }
                         }
-
                     }
                 }
-
 
                 byte[] fileBytes = System.IO.File.ReadAllBytes(ZipName);
                 HttpPostedFileBase objFile = (HttpPostedFileBase)new MemoryPostedFile(fileBytes);
@@ -672,8 +669,8 @@ namespace E2E.Controllers
                 clsServiceFile.FolderPath = string.Format("Service/{0}/DocumentControls", key);
                 clsServiceFile.Filename = Path.GetFileName(ZipName);
 
-                //เก็บไฟล์ที่ User Download ไว้ 
-              var res =  clsApi.UploadFile(clsServiceFile, objFile);
+                //เก็บไฟล์ที่ User Download ไว้
+                var res = clsApi.UploadFile(clsServiceFile, objFile);
 
                 Response.ContentType = "application/zip";
                 Response.AddHeader("content-disposition", "attachment; filename=" + ZipName);
@@ -691,9 +688,8 @@ namespace E2E.Controllers
                 var Paths = db.ServiceDocuments.Where(w => w.Service_Id == id).Select(s => s.ServiceDocument_Path).ToList();
 
                 Download_Zipfiles(Paths, Key);
-
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

@@ -7,21 +7,21 @@
     {
         if (!string.IsNullOrEmpty(item.HumanChat))
         {
-            <li class="list-group-item list-group-item-light">
-                <blockquote class="blockquote mb-0">
-                    <p class="mb-0 PreLine">@item.HumanChat</p>
-                    <footer class="blockquote-footer"><small>@item.Create</small></footer>
-                </blockquote>
-            </li>
+    <li class="list-group-item list-group-item-light">
+        <blockquote class="blockquote mb-0">
+            <p class="mb-0 PreLine">@item.HumanChat</p>
+            <footer class="blockquote-footer"><small>@item.Create</small></footer>
+        </blockquote>
+    </li>
         }
         if (!string.IsNullOrEmpty(item.SystemChat))
         {
-            <li class="list-group-item list-group-item-secondary">
-                <blockquote class="blockquote mb-0">
-                    <p class="mb-0 PreLine">@item.SystemChat</p>
-                    <footer class="blockquote-footer"><small>@item.Create</small></footer>
-                </blockquote>
-            </li>
+    <li class="list-group-item list-group-item-secondary">
+        <blockquote class="blockquote mb-0">
+            <p class="mb-0 PreLine">@item.SystemChat</p>
+            <footer class="blockquote-footer"><small>@item.Create</small></footer>
+        </blockquote>
+    </li>
         }
 
     }

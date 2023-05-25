@@ -4,25 +4,25 @@
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { id = "UploadForm", name = "UploadForm", enctype = "multipart/form-data" }))
 {
-    @Html.AntiForgeryToken()
-    <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Import</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+@Html.AntiForgeryToken()
+<div class="modal-header">
+    <h5 class="modal-title" id="modalTitle">Import</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+    <div class="form-group">
+        <label for="importFile">File</label>
+        <input name="importFile" type="file" class="form-control-file" id="importFile" required />
     </div>
-    <div class="modal-body">
-        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-        <div class="form-group">
-            <label for="importFile">File</label>
-            <input name="importFile" type="file" class="form-control-file" id="importFile" required />
-        </div>
-        <hr />
+    <hr />
 
-        @{ Html.RenderAction("UploadHistory", "Users"); }
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary mr-auto" onclick="confirmAndPerformAjaxRequest('@Url.Action("ReReadFile","Void")','reloadPage')"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Reload</button>
-        <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
-    </div>
+    @{ Html.RenderAction("UploadHistory", "Users"); }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary mr-auto" onclick="confirmAndPerformAjaxRequest('@Url.Action("ReReadFile","Void")','reloadPage')"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Reload</button>
+    <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+</div>
 }

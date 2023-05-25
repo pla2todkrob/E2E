@@ -20,22 +20,22 @@
             @foreach (var item in Model.Topics)
             {
 
-                <a href="@Url.Action("Boards_Form", "Topics", new { id = item.Topic_Id })" class="list-group-item list-group-item-action flex-column align-items-start">
+            <a href="@Url.Action("Boards_Form", "Topics", new { id = item.Topic_Id })" class="list-group-item list-group-item-action flex-column align-items-start">
 
-                    <div class="d-flex w-100 justify-content-between">
+                <div class="d-flex w-100 justify-content-between">
 
-                        <h5 class="mb-1">@item.Topic_Title</h5>
-                        <small class="text-muted">@item.Create.ToString("d")</small>
-                    </div>
-                    @if (item.Topic_Content.Length > 200)
+                    <h5 class="mb-1">@item.Topic_Title</h5>
+                    <small class="text-muted">@item.Create.ToString("d")</small>
+                </div>
+                @if (item.Topic_Content.Length > 200)
                     {
-                        <small class="text-muted">@item.Topic_Content.Substring(0, 199)</small>
+                <small class="text-muted">@item.Topic_Content.Substring(0, 199)</small>
                     }
                     else
                     {
-                        <small class="text-muted">@item.Topic_Content</small>
+                <small class="text-muted">@item.Topic_Content</small>
                     }
-                </a>
+            </a>
 
             }
         </div>
@@ -44,23 +44,23 @@
             @foreach (var item in Model.EForms)
             {
 
-                <a href="@Url.Action("EForms_Content", "EForms", new { id = item.EForm_Id })" class="list-group-item list-group-item-action flex-column align-items-start">
+            <a href="@Url.Action("EForms_Content", "EForms", new { id = item.EForm_Id })" class="list-group-item list-group-item-action flex-column align-items-start">
 
-                    <div class="d-flex w-100 justify-content-between">
+                <div class="d-flex w-100 justify-content-between">
 
-                        <h5 class="mb-1">@item.EForm_Title</h5>
+                    <h5 class="mb-1">@item.EForm_Title</h5>
 
-                        <small class="text-muted">@item.Create.ToString("d")</small>
-                    </div>
-                    @if (item.EForm_Description.Length > 200)
+                    <small class="text-muted">@item.Create.ToString("d")</small>
+                </div>
+                @if (item.EForm_Description.Length > 200)
                     {
-                        <small class="text-muted">@item.EForm_Description.Substring(0, 199)</small>
+                <small class="text-muted">@item.EForm_Description.Substring(0, 199)</small>
                     }
                     else
                     {
-                        <small class="text-muted">@item.EForm_Description</small>
+                <small class="text-muted">@item.EForm_Description</small>
                     }
-                </a>
+            </a>
 
             }
         </div>

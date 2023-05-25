@@ -13,12 +13,12 @@ namespace E2E.Controllers
     [AllowAnonymous]
     public class ConfigurationsController : Controller
     {
+        private readonly ClsManageService clsManageService = new ClsManageService();
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsContext db = new ClsContext();
+        private readonly ClsManageBusinessCard jobCount = new ClsManageBusinessCard();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ClsUsers users = new ClsUsers();
-        private readonly ClsManageBusinessCard jobCount = new ClsManageBusinessCard();
-        private readonly ClsManageService clsManageService = new ClsManageService();
 
         public ActionResult _Copyright()
         {
@@ -185,7 +185,6 @@ namespace E2E.Controllers
             try
             {
                 int? res = null;
-             
 
                 if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
                 {
@@ -216,7 +215,6 @@ namespace E2E.Controllers
                     clsJobCount.business = jobCount.CountJob(userId.Value);
                     clsJobCount.service = res;
                     clsJobCount.total = clsJobCount.business + clsJobCount.service;
-
                 }
                 return PartialView("_NavService", clsJobCount);
             }

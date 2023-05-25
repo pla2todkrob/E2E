@@ -1,12 +1,10 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
-using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -15,9 +13,11 @@ namespace E2E.Controllers
 {
     public class MastersController : Controller
     {
+        private readonly ClsManageService clsManageService = new ClsManageService();
         private readonly ClsManageMaster data = new ClsManageMaster();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsManageService clsManageService = new ClsManageService();
+        private readonly ClsApi api = new ClsApi();
+
         public ActionResult Categories()
         {
             return View();
@@ -102,6 +102,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         [HttpDelete]
         public ActionResult Categories_Delete(Guid id)
         {
@@ -190,6 +191,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Departments_Delete(Guid id)
         {
@@ -322,6 +324,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Divisions_Delete(Guid id)
         {
@@ -450,6 +453,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Grades_Delete(Guid id)
         {
@@ -585,6 +589,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult InquiryTopic_Delete(Guid id)
         {
@@ -725,6 +730,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult LineWorks_Delete(Guid id)
         {
@@ -855,6 +861,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Plants_Delete(Guid id)
         {
@@ -929,7 +936,6 @@ namespace E2E.Controllers
                 {
                     try
                     {
-
                         if (data.Plant_Save(model))
                         {
                             scope.Complete();
@@ -994,6 +1000,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Processes_Delete(Guid id)
         {
@@ -1130,6 +1137,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Sections_Delete(Guid id)
         {
@@ -1263,6 +1271,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult Users_Delete(Guid id)
         {
@@ -1457,7 +1466,7 @@ namespace E2E.Controllers
                         {
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             ClsServiceFTP serviceFTP = new ClsServiceFTP();
-                            string filePath = clsManageService.UploadFileToString(dir, file);
+                            string filePath = api.UploadFile(file,dir).FileUrl;
                             UserUploadHistory userUploadHistory = new UserUploadHistory
                             {
                                 UserUploadHistoryFile = filePath,

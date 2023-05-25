@@ -1,12 +1,11 @@
 ﻿using E2E.Models.Tables;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Data.Entity;
-using System.Net.Http;
 using System.IO;
-using OfficeOpenXml;
+using System.Linq;
+using System.Net.Http;
 
 namespace E2E.Models.Views
 {

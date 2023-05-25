@@ -11,10 +11,10 @@ namespace E2E.Models
     public class ClsManageTopic
     {
         private readonly ClsMail clsMail = new ClsMail();
+        private readonly ClsManageService clsManageService = new ClsManageService();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private ClsImage clsImag = new ClsImage();
-        private readonly ClsManageService clsManageService = new ClsManageService();
 
         protected bool Board_CountComment_Delete(Guid id, int num)
         {

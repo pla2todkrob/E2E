@@ -2,7 +2,6 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -14,125 +13,12 @@ namespace E2E.Models
 {
     public class ClsManageService
     {
-        private readonly ClsMail clsMail = new ClsMail();
-        private readonly ClsContext db = new ClsContext();
-        private readonly ClsManageService clsManageService = new ClsManageService();
-        private readonly ClsManageMaster master = new ClsManageMaster();
-        private readonly ClsServiceFile clsServiceFile = new ClsServiceFile();
-        private FileResponse fileResponse = new FileResponse();
         private readonly ClsApi clsApi = new ClsApi();
-
-
-        public bool Api_DeleteFile(string path)
-        {
-            try
-            {
-                fileResponse = clsApi.Delete_File(path);
-
-
-                if (!fileResponse.IsSuccess)
-                {
-                    throw new Exception(fileResponse.ErrorMessage);
-                }
-                return fileResponse.IsSuccess;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        public ClsImage UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
-        {
-            if (string.IsNullOrEmpty(fullDir))
-            {
-                throw new ArgumentException($"'{nameof(fullDir)}' cannot be null or empty.", nameof(fullDir));
-            }
-
-            if (filePost is null)
-            {
-                throw new ArgumentNullException(nameof(filePost));
-            }
-
-            if (string.IsNullOrEmpty(fileName))
-            {
-                throw new ArgumentException($"'{nameof(fileName)}' cannot be null or empty.", nameof(fileName));
-            }
-
-            try
-            {
-                ClsImage res = new ClsImage();
-
-                clsServiceFile.FolderPath = fullDir;
-
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    clsServiceFile.Filename = fileName;
-                }
-                else
-                {
-                    clsServiceFile.Filename = filePost.FileName;
-                }
-
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
-
-                res.OriginalPath = fileResponse.FileUrl;
-                res.ThumbnailPath = fileResponse.FileThumbnailUrl;
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //API Complete
-        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost)
-        {
-            try
-            {
-
-                clsServiceFile.FolderPath = fullDir;
-
-                clsServiceFile.Filename = filePost.FileName;
-
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
-
-                return fileResponse.FileUrl;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //API Complete
-        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
-        {
-            try
-            {
-
-                clsServiceFile.FolderPath = fullDir;
-
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    clsServiceFile.Filename = fileName;
-                }
-                else
-                {
-                    clsServiceFile.Filename = filePost.FileName;
-                }
-
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
-
-                return fileResponse.FileUrl;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+        private readonly ClsMail clsMail = new ClsMail();
+        private readonly ClsServiceFile clsServiceFile = new ClsServiceFile();
+        private readonly ClsContext db = new ClsContext();
+        private readonly ClsManageMaster master = new ClsManageMaster();
+        private FileResponse fileResponse = new FileResponse();
 
         private IQueryable<Services> Services_GetAllRequest_IQ()
         {
@@ -173,6 +59,24 @@ namespace E2E.Models
         {
             return db.ServiceTeams
                     .Where(w => w.Service_Id == id);
+        }
+
+        public bool Api_DeleteFile(string path)
+        {
+            try
+            {
+                fileResponse = clsApi.Delete_File(path);
+
+                if (!fileResponse.IsSuccess)
+                {
+                    throw new Exception(fileResponse.ErrorMessage);
+                }
+                return fileResponse.IsSuccess;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public ClsSwal CheckMissingDocument(Guid id)
@@ -1277,7 +1181,7 @@ namespace E2E.Models
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 db.Entry(serviceFiles).State = EntityState.Deleted;
-                if (clsManageService.Api_DeleteFile(serviceFiles.ServiceFile_Path))
+                if (Api_DeleteFile(serviceFiles.ServiceFile_Path))
                 {
                     if (db.SaveChanges() > 0)
                     {
@@ -1329,7 +1233,7 @@ namespace E2E.Models
                             ServiceCommentFile_Name = files[i].FileName
                         };
                         string dir = string.Format("Service/{0}/Comment/{1}/", db.Services.Find(model.Service_Id).Service_Key, DateTime.Today.ToString("yyMMdd"));
-                        serviceCommentFiles.ServiceCommentFile_Path = clsManageService.UploadFileToString(dir, files[i]);
+                        serviceCommentFiles.ServiceCommentFile_Path = UploadFileToString(dir, files[i]);
                         serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
                         serviceCommentFiles.ServiceComment_Seq = i;
                         serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
@@ -1563,7 +1467,7 @@ namespace E2E.Models
                             ServiceFile_Name = files[i].FileName
                         };
                         string dir = string.Format("Service/{0}/", model.Service_Key);
-                        serviceFiles.ServiceFile_Path = clsManageService.UploadFileToString(dir, files[i]);
+                        serviceFiles.ServiceFile_Path = UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = EntityState.Added;
                     }
@@ -1673,7 +1577,7 @@ namespace E2E.Models
                 {
                     serviceDocuments.ServiceDocument_Name = fileBase.FileName;
                     string dir = string.Format("Service/{0}/DocumentControls/", db.Services.Find(model.Service_Id).Service_Key);
-                    serviceDocuments.ServiceDocument_Path = clsManageService.UploadFileToString(dir, fileBase);
+                    serviceDocuments.ServiceDocument_Path = UploadFileToString(dir, fileBase);
                 }
 
                 db.Entry(serviceDocuments).State = EntityState.Modified;
@@ -2072,7 +1976,7 @@ namespace E2E.Models
                         {
                             if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
                             {
-                                if (clsManageService.Api_DeleteFile(item.ServiceDocument_Path))
+                                if (Api_DeleteFile(item.ServiceDocument_Path))
                                 {
                                     continue;
                                 }
@@ -2310,7 +2214,7 @@ namespace E2E.Models
                 serviceDocuments = db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToList();
                 foreach (var item in serviceDocuments)
                 {
-                    if (clsManageService.Api_DeleteFile(item.ServiceDocument_Path))
+                    if (Api_DeleteFile(item.ServiceDocument_Path))
                     {
                         db.Entry(item).State = EntityState.Deleted;
                     }
@@ -2521,7 +2425,7 @@ namespace E2E.Models
                             ServiceFile_Name = files[i].FileName
                         };
                         string dir = string.Format("Service/{0}/", model.Service_Key);
-                        serviceFiles.ServiceFile_Path = clsManageService.UploadFileToString(dir, files[i]);
+                        serviceFiles.ServiceFile_Path = UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = EntityState.Added;
                     }
@@ -2573,6 +2477,96 @@ namespace E2E.Models
                 }
 
                 return query.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //API Complete
+        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost)
+        {
+            try
+            {
+                clsServiceFile.FolderPath = fullDir;
+
+                clsServiceFile.Filename = filePost.FileName;
+
+                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+
+                return fileResponse.FileUrl;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //API Complete
+        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
+        {
+            try
+            {
+                clsServiceFile.FolderPath = fullDir;
+
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    clsServiceFile.Filename = fileName;
+                }
+                else
+                {
+                    clsServiceFile.Filename = filePost.FileName;
+                }
+
+                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+
+                return fileResponse.FileUrl;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public ClsImage UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        {
+            if (string.IsNullOrEmpty(fullDir))
+            {
+                throw new ArgumentException($"'{nameof(fullDir)}' cannot be null or empty.", nameof(fullDir));
+            }
+
+            if (filePost is null)
+            {
+                throw new ArgumentNullException(nameof(filePost));
+            }
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException($"'{nameof(fileName)}' cannot be null or empty.", nameof(fileName));
+            }
+
+            try
+            {
+                ClsImage res = new ClsImage();
+
+                clsServiceFile.FolderPath = fullDir;
+
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    clsServiceFile.Filename = fileName;
+                }
+                else
+                {
+                    clsServiceFile.Filename = filePost.FileName;
+                }
+
+                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+
+                res.OriginalPath = fileResponse.FileUrl;
+                res.ThumbnailPath = fileResponse.FileThumbnailUrl;
+
+                return res;
             }
             catch (Exception)
             {

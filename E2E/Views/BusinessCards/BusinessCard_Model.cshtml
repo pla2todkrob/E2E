@@ -7,30 +7,30 @@
 <h2>BusinessCard_Model</h2>
 
 <div class="container">
-	@for (int i = 0; i < Model.Count; i += 10)
+    @for (int i = 0; i < Model.Count; i += 10)
 	{
-		<div class="row">
-			@for (int j = i; j < i + 10 && j < Model.Count; j++)
+    <div class="row">
+        @for (int j = i; j < i + 10 && j < Model.Count; j++)
 			{
-				<div class="col-sm-6">
-					<div class="card mb-3">
-						<div class="card-body">
-							<h5 class="card-title">@Model[j].NameTH</h5>
-							<h6 class="card-subtitle mb-2 text-muted">@Model[j].Position</h6>
-							<p class="card-text">@Model[j].Office_Number<br />@Model[j].Mobile_Number</p>
-							<p class="card-text"><small class="text-muted">@Model[j].Company</small></p>
-						</div>
-					</div>
-				</div>
+        <div class="col-sm-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">@Model[j].NameTH</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@Model[j].Position</h6>
+                    <p class="card-text">@Model[j].Office_Number<br />@Model[j].Mobile_Number</p>
+                    <p class="card-text"><small class="text-muted">@Model[j].Company</small></p>
+                </div>
+            </div>
+        </div>
 				if (j % 2 == 1) // เพิ่มเงื่อนไขเพื่อแสดงผล NEXT_ELEMENT
 				{
-					<div class="w-100"></div>
+        <div class="w-100"></div>
 				}
 			}
-		</div>
+    </div>
 		if (i + 10 < Model.Count)
 		{
-			<div class="page-break"></div>
+    <div class="page-break"></div>
 		}
 	}
 </div>

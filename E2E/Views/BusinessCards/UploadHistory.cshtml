@@ -78,97 +78,78 @@
   }
 });
 
-
 		}
-
 </script>
 
 <table class="display table table-bordered table-hover w-100">
-	<thead>
-		<tr>
-			<th>Create</th>
-			<th>File Type</th>
-			<th>File</th>
-			<th>Checked</th>
+    <thead>
+        <tr>
+            <th>Create</th>
+            <th>File Type</th>
+            <th>File</th>
+            <th>Checked</th>
 
-			@{
+            @{
 				if (Model.ToList().Count > 0)
 				{
 
 					if (!Model.Any(a => a.Confirm == true) && Model.FirstOrDefault().BusinessCards.User_id == UserID) //เช็คเงื่อนไข ว่า job ยังไม่มีการ Cf และ Requetor ต้องเป็นคนเดียวกับ Staff
 					{
-						<th id="CfUser">Approval</th>
+                <th id="CfUser">Approval</th>
 					}
 				}
 
-			}
+            }
 
-
-			<th>Remark</th>
-
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model)
+            <th>Remark</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
 		{
-			<tr>
-				<td>@item.Create</td>
-				<td>@item.Extension</td>
+        <tr>
+            <td>@item.Create</td>
+            <td>@item.Extension</td>
 
-
-				@if (item.Confirm == true || item.Confirm == false && item.BusinessCards.Status_Id == 2 )
+            @if (item.Confirm == true || item.Confirm == false && item.BusinessCards.Status_Id == 2 )
 				{
-					<td><a href="@item.FilePath" target="_blank">@item.FileName</a></td>
+            <td><a href="@item.FilePath" target="_blank">@item.FileName</a></td>
 				}
 				else
 				{
-					<td>@item.FileName</td>
+            <td>@item.FileName</td>
 
 				}
 
-
-
-				@{
+            @{
 					if (item.BusinessCards.User_id == UserID && item.BusinessCards.Status_Id == 2)
 					{
-						<td>@Html.CheckBoxFor(i => item.Confirm, new { @disabled = "disabled" })</td>
-
-
-
-
+                <td>@Html.CheckBoxFor(i => item.Confirm, new { @disabled = "disabled" })</td>
 
 						if (string.IsNullOrEmpty(item.Remark) && item.Confirm != true) //เช็คเงื่อนไข หาก User กด Cancel ไปแล้ว จะไม่แสดงปุ่ม Approval
 						{
-							<td class="fit align-items-center">
+                <td class="fit align-items-center">
 
-								<button type="button" class="btn btn-success mr-2" onclick="UserConfirmApprove('@item.BusinessCardFiles_Id')" /><i class="fa fa-check"></i>
+                    <button type="button" class="btn btn-success mr-2" onclick="UserConfirmApprove('@item.BusinessCardFiles_Id')" /><i class="fa fa-check"></i>
 
-								<button type="button" class="btn btn-danger" onclick="UserConfirmCancel('@item.BusinessCardFiles_Id')" /><i class="fa fa-times"></i>
-
-
-							</td>
+                    <button type="button" class="btn btn-danger" onclick="UserConfirmCancel('@item.BusinessCardFiles_Id')" /><i class="fa fa-times"></i>
+                </td>
 						}
 						else
 						{
-							<td></td>
+                <td></td>
 						}
-
 
 					}
 					else
 					{
-						<td>@Html.CheckBoxFor(i => item.Confirm, new { @disabled = "disabled" })</td>
+                <td>@Html.CheckBoxFor(i => item.Confirm, new { @disabled = "disabled" })</td>
 
 					}
-				}
+            }
 
-				<td>@item.Remark</td>
-
-			</tr>
+            <td>@item.Remark</td>
+        </tr>
 		}
-	</tbody>
-
+    </tbody>
 </table>
-
-
-

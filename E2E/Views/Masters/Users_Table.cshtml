@@ -30,28 +30,28 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    <button class="btn btn-outline-warning" onclick="callModalUser('@Url.Action("Users_Form","Masters",new { id = item.User_Id })',true);" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                </td>
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td>@Html.DisplayFor(i => item.User_Code)</td>
-                <td>@Html.DisplayFor(i => item.User_Email)</td>
-                <td>@Html.DisplayFor(i => item.Username)</td>
-                <td>@Html.DisplayFor(i => item.Role)</td>
-                <td>@Html.DisplayFor(i => item.LineWork_Name)</td>
-                <td>@Html.DisplayFor(i => item.Grade_Name)</td>
-                <td>@Html.DisplayFor(i => item.Grade_Position)</td>
-                <td>@Html.DisplayFor(i => item.Plant_Name)</td>
-                <td>@Html.DisplayFor(i => item.Division_Name)</td>
-                <td>@Html.DisplayFor(i => item.Department_Name)</td>
-                <td>@Html.DisplayFor(i => item.Section_Name)</td>
-                <td>@Html.DisplayFor(i => item.Process_Name)</td>
-                <td>@Html.DisplayFor(i => item.User_CostCenter)</td>
-                <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
-                <td class="text-center">@Html.ValueFor(i => item.BusinessCardGroup)</td>
-                <td>@Html.DisplayFor(i => item.Update)</td>
-            </tr>
+        <tr>
+            <td>
+                <button class="btn btn-outline-warning" onclick="callModalUser('@Url.Action("Users_Form","Masters",new { id = item.User_Id })',true);" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+            </td>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td>@Html.DisplayFor(i => item.User_Code)</td>
+            <td>@Html.DisplayFor(i => item.User_Email)</td>
+            <td>@Html.DisplayFor(i => item.Username)</td>
+            <td>@Html.DisplayFor(i => item.Role)</td>
+            <td>@Html.DisplayFor(i => item.LineWork_Name)</td>
+            <td>@Html.DisplayFor(i => item.Grade_Name)</td>
+            <td>@Html.DisplayFor(i => item.Grade_Position)</td>
+            <td>@Html.DisplayFor(i => item.Plant_Name)</td>
+            <td>@Html.DisplayFor(i => item.Division_Name)</td>
+            <td>@Html.DisplayFor(i => item.Department_Name)</td>
+            <td>@Html.DisplayFor(i => item.Section_Name)</td>
+            <td>@Html.DisplayFor(i => item.Process_Name)</td>
+            <td>@Html.DisplayFor(i => item.User_CostCenter)</td>
+            <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
+            <td class="text-center">@Html.ValueFor(i => item.BusinessCardGroup)</td>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
         }
     </tbody>
 </table>

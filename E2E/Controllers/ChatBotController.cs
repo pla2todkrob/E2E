@@ -383,7 +383,7 @@ namespace E2E.Controllers
                                 string answers = string.Empty;
                                 foreach (var item in chatBot.GetAnswers(questions))
                                 {
-                                    answers += string.Concat(item.ChatBotQuestion.Question,": ",item.Answer, Environment.NewLine);
+                                    answers += string.Concat(item.ChatBotQuestion.Question, ": ", item.Answer, Environment.NewLine);
                                 }
 
                                 chatBotHistory = new ChatBotHistory()

@@ -21,17 +21,17 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    <tr>
-                        <td class="fit"><input type="checkbox" id="@item.Service_Id" name="CheckService" value="@item.Service_Id" onchange="getCheckedVal($(this))" /></td>
-                        <td class="fit">@Html.DisplayFor(m => item.Create)</td>
-                        <td>
-                            <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small><br />
-                            @Html.DisplayFor(m => item.Service_Subject)
-                        </td>
-                        <td class="fit">@Html.DisplayFor(m => item.WorkRoots.WorkRoot_Name)</td>
-                        <td class="fit">@Html.DisplayFor(m => item.User_Name)</td>
-                        <td class="fit">@Html.DisplayFor(m => item.Update)</td>
-                    </tr>
+                <tr>
+                    <td class="fit"><input type="checkbox" id="@item.Service_Id" name="CheckService" value="@item.Service_Id" onchange="getCheckedVal($(this))" /></td>
+                    <td class="fit">@Html.DisplayFor(m => item.Create)</td>
+                    <td>
+                        <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small><br />
+                        @Html.DisplayFor(m => item.Service_Subject)
+                    </td>
+                    <td class="fit">@Html.DisplayFor(m => item.WorkRoots.WorkRoot_Name)</td>
+                    <td class="fit">@Html.DisplayFor(m => item.User_Name)</td>
+                    <td class="fit">@Html.DisplayFor(m => item.Update)</td>
+                </tr>
                 }
             </tbody>
         </table>

@@ -12,8 +12,8 @@ namespace E2E.Models
     {
         private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsMail clsMail = new ClsMail();
-        private readonly ClsContext db = new ClsContext();
         private readonly ClsManageService clsManageService = new ClsManageService();
+        private readonly ClsContext db = new ClsContext();
         private ClsImage clsImag = new ClsImage();
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)

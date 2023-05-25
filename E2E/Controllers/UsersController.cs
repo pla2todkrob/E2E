@@ -191,7 +191,7 @@ namespace E2E.Controllers
                         int year = DateTime.Today.Year;
                         if (!Equals(users.YearSetPoint, year))
                         {
-                            ClsDefaultSystem.Generate();
+                            new ClsDefaultSystem().Generate();
                         }
                         FormsAuthentication.SetAuthCookie(users.User_Id.ToString(), model.Remember);
                         if (!string.IsNullOrEmpty(returnUrl))

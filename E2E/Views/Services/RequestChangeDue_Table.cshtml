@@ -22,27 +22,27 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <th>
-                    @if (!item.Update.HasValue)
+        <tr>
+            <th>
+                @if (!item.Update.HasValue)
                     {
-                        <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Reject","Services",new { id=item.ChangeDueDate_Id })', 'reloadTable', { isDangerous: true })">Reject</button>
-                        <button class="btn btn-success" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Accept","Services",new { id=item.ChangeDueDate_Id })','reloadTable')">Accept</button>
+                <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Reject","Services",new { id=item.ChangeDueDate_Id })', 'reloadTable', { isDangerous: true })">Reject</button>
+                <button class="btn btn-success" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Accept","Services",new { id=item.ChangeDueDate_Id })','reloadTable')">Accept</button>
                     }
-                </th>
-                <td>@Html.DisplayFor(i => item.Create)</td>
-                <td class="text-center"><span class="@Html.ValueFor(i => item.DueDateStatus_Class)">@Html.DisplayFor(i => item.DueDateStatus_Name)</span></td>
-                <td>
-                    <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
-                    <span>@Html.DisplayFor(i => item.Service_Subject)</span>
-                </td>
-                <td>@Html.DisplayFor(i => item.DueDate_Old)</td>
-                <td>@Html.DisplayFor(i => item.DueDate_New)</td>
-                <td>@Html.DisplayFor(i => item.Remark)</td>
+            </th>
+            <td>@Html.DisplayFor(i => item.Create)</td>
+            <td class="text-center"><span class="@Html.ValueFor(i => item.DueDateStatus_Class)">@Html.DisplayFor(i => item.DueDateStatus_Name)</span></td>
+            <td>
+                <b>[@Html.DisplayFor(i => item.Service_Key)]</b>
+                <span>@Html.DisplayFor(i => item.Service_Subject)</span>
+            </td>
+            <td>@Html.DisplayFor(i => item.DueDate_Old)</td>
+            <td>@Html.DisplayFor(i => item.DueDate_New)</td>
+            <td>@Html.DisplayFor(i => item.Remark)</td>
 
-                <td>@Html.DisplayFor(i => item.User_Name)</td>
-                <td>@Html.DisplayFor(i => item.Update)</td>
-            </tr>
+            <td>@Html.DisplayFor(i => item.User_Name)</td>
+            <td>@Html.DisplayFor(i => item.Update)</td>
+        </tr>
         }
     </tbody>
 </table>

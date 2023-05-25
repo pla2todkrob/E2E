@@ -7,7 +7,7 @@ namespace E2E.Migrations
     {
         protected override void Seed(ClsContext context)
         {
-            ClsDefaultSystem.Generate();
+            new ClsDefaultSystem().Generate();
         }
 
         public Configuration()

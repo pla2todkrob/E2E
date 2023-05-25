@@ -4,9 +4,7 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Transactions;
-using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -170,18 +168,8 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SetupSat()
-        {
-            List<Guid> SatId = db.SatisfactionDetails.Where(w => w.Point < 3).Select(s => s.Satisfaction_Id).Distinct().ToList();
-
-            db.Satisfactions.Where(w => SatId.Contains(w.Satisfaction_Id)).ToList().ForEach(f => f.Unsatisfied = true);
-            db.SaveChanges();
-            return RedirectToAction("Index","Home");
-        }
-
         public ActionResult SetUpActionBy()
         {
-
             List<Guid> ServiceId = db.Services.Where(w => !w.Action_User_Id.HasValue).Select(s => s.Service_Id).ToList();
 
             var ActionChangeDue = db.ServiceChangeDueDates.Where(w => ServiceId.Contains(w.Service_Id)).Select(s => new { s.Service_Id, s.User_Id }).ToList();
@@ -193,6 +181,15 @@ namespace E2E.Controllers
 
             db.SaveChanges();
 
+            return RedirectToAction("Index", "Home");
+        }
+
+        public ActionResult SetupSat()
+        {
+            List<Guid> SatId = db.SatisfactionDetails.Where(w => w.Point < 3).Select(s => s.Satisfaction_Id).Distinct().ToList();
+
+            db.Satisfactions.Where(w => SatId.Contains(w.Satisfaction_Id)).ToList().ForEach(f => f.Unsatisfied = true);
+            db.SaveChanges();
             return RedirectToAction("Index", "Home");
         }
     }

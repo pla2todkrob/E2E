@@ -67,8 +67,8 @@
                             <dd class="col-8">@Html.DisplayFor(m => m.Services.Service_Contact)</dd>
                             @if (Model.Services.Update.HasValue)
                             {
-                                <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                                <dd class="col-8">@Html.DisplayFor(m => m.Services.Update)</dd>
+                            <dt class="col-4">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                            <dd class="col-8">@Html.DisplayFor(m => m.Services.Update)</dd>
                             }
                             <dt class="col-4">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
                             <dd class="col-8"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
@@ -79,14 +79,14 @@
                                 @Model.ServiceFiles.Count Attachments
                                 @if (Model.ServiceFiles.Count > 0)
                                 {
-                                    <ul class="list-unstyled">
-                                        @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
+                                <ul class="list-unstyled">
+                                    @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
                                         {
-                                            <li>
-                                                <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                                            </li>
+                                    <li>
+                                        <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                                    </li>
                                         }
-                                    </ul>
+                                </ul>
                                 }
                             </dd>
                         </dl>
@@ -94,7 +94,7 @@
                             <div class="d-flex justify-content-between">
                                 @if (!Model.Services.Is_MustBeApproved)
                                 {
-                                    <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Must approved</button>
+                                <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Must approved</button>
                                 }
 
                                 <button type="button" class="btn btn-secondary" onclick="setCommitToDepartment('@Url.Action("Commit_ToDepartment","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })','@Url.Action("Index","Services")')">Commit to department</button>
@@ -105,67 +105,67 @@
 
                         @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CommitForm" }))
                         {
-                            @Html.ValidationSummary(true)
-                            @Html.AntiForgeryToken()
-                            @Html.HiddenFor(m => m.Services.Service_Id)
-                            <div class="form-group">
-                                <label for="plantList">
-                                    Plant
-                                </label>
-                                <select class="form-control" id="plantList" required>
-                                    @{
+                        @Html.ValidationSummary(true)
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.Services.Service_Id)
+                        <div class="form-group">
+                            <label for="plantList">
+                                Plant
+                            </label>
+                            <select class="form-control" id="plantList" required>
+                                @{
                                         foreach (var item in ViewBag.PlantList)
                                         {
-                                            <option value="@item.Value">@item.Text</option>
+                                    <option value="@item.Value">@item.Text</option>
                                         }
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="divisionList">
-                                    Division
-                                </label>
-                                <select class="form-control" id="divisionList" onchange="getSelectOp('@Url.Action("Users_GetSelectDepartments","Masters")',this.value,'#Services_Department_Id')" required>
-                                    @{
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="divisionList">
+                                Division
+                            </label>
+                            <select class="form-control" id="divisionList" onchange="getSelectOp('@Url.Action("Users_GetSelectDepartments","Masters")',this.value,'#Services_Department_Id')" required>
+                                @{
                                         foreach (var item in ViewBag.DivisionList)
                                         {
-                                            <option value="@item.Value">@item.Text</option>
+                                    <option value="@item.Value">@item.Text</option>
                                         }
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="Services_Department_Id">Department</label>
-                                <select class="form-control" id="Services_Department_Id" name="Services.Department_Id" onchange="getSelectOp('@Url.Action("Users_GetSelectSections","Masters")',this.value,'#sectionList')" required>
-                                    <option value="">Select Department</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="sectionList">
-                                    Section
-                                </label>
-                                <select class="form-control" id="sectionList" onchange="getSelectOp('@Url.Action("Users_GetSelectProcesses","Masters")',this.value,'#processList')">
-                                    <option value="">Select Section</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="processList">
-                                    Process
-                                </label>
-                                <select class="form-control" id="processList" onchange="getSelectOp('@Url.Action("Users_GetSelectUsers","Masters")',this.value,'#Services_Action_User_Id')">
-                                    <option value="">Select Process</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="Services_Action_User_Id">User</label>
-                                <select class="form-control" id="Services_Action_User_Id" name="Services.Action_User_Id">
-                                    <option value="">Select User</option>
-                                </select>
-                            </div>
-                            <div class="d-flex">
-                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Reject</button>
-                                <button type="submit" class="btn btn-primary ml-auto">Commit</button>
-                            </div>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Services_Department_Id">Department</label>
+                            <select class="form-control" id="Services_Department_Id" name="Services.Department_Id" onchange="getSelectOp('@Url.Action("Users_GetSelectSections","Masters")',this.value,'#sectionList')" required>
+                                <option value="">Select Department</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sectionList">
+                                Section
+                            </label>
+                            <select class="form-control" id="sectionList" onchange="getSelectOp('@Url.Action("Users_GetSelectProcesses","Masters")',this.value,'#processList')">
+                                <option value="">Select Section</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="processList">
+                                Process
+                            </label>
+                            <select class="form-control" id="processList" onchange="getSelectOp('@Url.Action("Users_GetSelectUsers","Masters")',this.value,'#Services_Action_User_Id')">
+                                <option value="">Select Process</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Services_Action_User_Id">User</label>
+                            <select class="form-control" id="Services_Action_User_Id" name="Services.Action_User_Id">
+                                <option value="">Select User</option>
+                            </select>
+                        </div>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Html.ValueFor(m => m.Services.Service_Id) })')">Reject</button>
+                            <button type="submit" class="btn btn-primary ml-auto">Commit</button>
+                        </div>
                         }
                     </div>
                 </div>

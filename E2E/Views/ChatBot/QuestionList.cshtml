@@ -12,7 +12,7 @@
             {
                 foreach (var item in ViewBag.ChatbotGroupList)
                 {
-                    <a href="javascript:reloadTable({id:'@item.Value'})" class="list-group-item list-group-item-action">@item.Text</a>
+        <a href="javascript:reloadTable({id:'@item.Value'})" class="list-group-item list-group-item-action">@item.Text</a>
                 }
             }
 
@@ -21,7 +21,7 @@
         {
             foreach (var item in Model)
             {
-                <a href="javascript:reloadTable({id:'@item.ChatBotQuestion_Id'})" class="list-group-item list-group-item-action">@item.Question</a>
+        <a href="javascript:reloadTable({id:'@item.ChatBotQuestion_Id'})" class="list-group-item list-group-item-action">@item.Question</a>
             }
         }
     }

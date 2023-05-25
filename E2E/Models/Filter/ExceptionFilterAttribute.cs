@@ -8,7 +8,7 @@ namespace E2E.Models.Filter
     {
         private void LogException(Exception exception, ExceptionContext filterContext)
         {
-            using (var context = new ClsContext())
+            using (ClsContext context = new ClsContext())
             {
                 var exceptionLog = new Log_Exception()
                 {

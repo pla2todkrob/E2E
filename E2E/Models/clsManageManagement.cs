@@ -9,8 +9,8 @@ namespace E2E.Models
 {
     public class ClsManageManagement
     {
-        private readonly ClsContext db = new ClsContext();
         private readonly ClsManageService clsManageService = new ClsManageService();
+        private readonly ClsContext db = new ClsContext();
 
         protected bool Document_Insert(ClsDocuments model, HttpFileCollectionBase files)
         {

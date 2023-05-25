@@ -7,11 +7,11 @@ using System.Transactions;
 
 namespace E2E.Models
 {
-    public static class ClsDefaultSystem
+    public class ClsDefaultSystem
     {
-        private static readonly ClsContext db = new ClsContext();
+        private readonly ClsContext db = new ClsContext();
 
-        private static void Authorize_Save()
+        private void Authorize_Save()
         {
             foreach (var item in System_Authorize.DefaultList())
             {
@@ -23,7 +23,7 @@ namespace E2E.Models
             }
         }
 
-        private static void DueDateStatus_Save()
+        private void DueDateStatus_Save()
         {
             foreach (var item in System_DueDateStatuses.DefaultList())
             {
@@ -35,7 +35,7 @@ namespace E2E.Models
             }
         }
 
-        private static void Language_Save()
+        private void Language_Save()
         {
             foreach (var item in System_Language.DefaultList())
             {
@@ -47,7 +47,7 @@ namespace E2E.Models
             }
         }
 
-        private static void ManualType_Save()
+        private void ManualType_Save()
         {
             foreach (var item in System_ManualType.DefaultList())
             {
@@ -59,7 +59,7 @@ namespace E2E.Models
             }
         }
 
-        private static void Priority_Save()
+        private void Priority_Save()
         {
             foreach (var item in System_Priorities.DefaultList())
             {
@@ -71,7 +71,7 @@ namespace E2E.Models
             }
         }
 
-        private static void Role_Save()
+        private void Role_Save()
         {
             foreach (var item in System_Roles.DefaultList())
             {
@@ -83,7 +83,7 @@ namespace E2E.Models
             }
         }
 
-        private static void Status_Save()
+        private void Status_Save()
         {
             foreach (var item in System_Statuses.DefaultList())
             {
@@ -95,7 +95,7 @@ namespace E2E.Models
             }
         }
 
-        public static void Generate()
+        public void Generate()
         {
             try
             {

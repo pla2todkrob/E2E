@@ -243,10 +243,53 @@ namespace E2E.Models
 
                     string mimeType = MimeMapping.GetMimeMapping(fileName);
 
-
                     RestRequest request = new RestRequest()
                         .AddHeader("Token", TokenKey)
                         .AddParameter("FolderPath", clsServiceFile.FolderPath)
+                        .AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(fileName, Encoding.UTF8), mimeType);
+                    RestResponse response = client.PostAsync(request).Result;
+                    fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);
+                }
+
+                if (!fileResponse.IsSuccess)
+                {
+                    throw new Exception(fileResponse.ErrorMessage);
+                }
+                return fileResponse;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public FileResponse UploadFile(HttpPostedFileBase file,string folderPath, string fileName = "")
+        {
+            try
+            {
+                FileResponse fileResponse = new FileResponse();
+
+                string resApi = string.Empty;
+                string TokenKey = GetToken();
+                Uri ApiUrl = new Uri(GetApiUrl() + "api/Service_File/Upload");
+
+                RestClientOptions options = new RestClientOptions(ApiUrl)
+                {
+                    ThrowOnAnyError = true
+                };
+
+                using (RestClient client = new RestClient(options))
+                {
+                    if (string.IsNullOrEmpty(fileName))
+                    {
+                        fileName = file.FileName;
+                    }
+
+                    string mimeType = MimeMapping.GetMimeMapping(fileName);
+
+                    RestRequest request = new RestRequest()
+                        .AddHeader("Token", TokenKey)
+                        .AddParameter("FolderPath", folderPath)
                         .AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(fileName, Encoding.UTF8), mimeType);
                     RestResponse response = client.PostAsync(request).Result;
                     fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);

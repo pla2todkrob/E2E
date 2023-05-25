@@ -16,16 +16,6 @@ namespace E2E.Models
         private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
 
-        public int GradeNumber(ClsBusinessCard Model)
-        {
-
-            var BypassGA = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Grades.Grade_Name).FirstOrDefault();
-
-            int Num = Convert.ToInt32(BypassGA.Substring(1));
-
-            return Num;
-        }
-
         public bool BusinessCard_SaveCreate(ClsBusinessCard Model)
         {
             bool res = new bool();
@@ -36,9 +26,7 @@ namespace E2E.Models
 
                 string ChkJP = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Grades.Master_LineWorks.LineWork_Name).FirstOrDefault();
                 string Year = DateTime.Now.ToString("yyyy");
-                var CountNum = db.BusinessCards.Where(w => w.Key.ToString().StartsWith(Year)).Count()+1;
-
-
+                var CountNum = db.BusinessCards.Where(w => w.Key.ToString().StartsWith(Year)).Count() + 1;
 
                 Year += CountNum.ToString("0000");
                 BusinessCards businessCards = new BusinessCards
@@ -94,7 +82,37 @@ namespace E2E.Models
             }
         }
 
-        public bool BusinessCard_SaveLog(BusinessCards Model,string remark = "",bool undo = false)
+        public bool BusinessCard_SaveFile(string filepath, BusinessCards model)
+        {
+            bool res = new bool();
+
+            try
+            {
+                BusinessCardFiles cardFiles = new BusinessCardFiles
+                {
+                    BusinessCard_Id = model.BusinessCard_Id,
+                    Create = DateTime.Now,
+                    Extension = Path.GetExtension(filepath),
+                    FilePath = filepath,
+                    FileName = Path.GetFileName(filepath)
+                };
+
+                db.BusinessCardFiles.Add(cardFiles);
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = SendMail(model, null, cardFiles, filepath);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return res;
+        }
+
+        public bool BusinessCard_SaveLog(BusinessCards Model, string remark = "", bool undo = false)
         {
             bool res = new bool();
             DateTime dateTime = new DateTime();
@@ -111,7 +129,7 @@ namespace E2E.Models
             {
                 BusinessCard_Id = Model.BusinessCard_Id,
                 Status_Id = Model.Status_Id,
-                User_Id = Model.Status_Id == 1 ? Model.User_id: Guid.Parse(HttpContext.Current.User.Identity.Name),
+                User_Id = Model.Status_Id == 1 ? Model.User_id : Guid.Parse(HttpContext.Current.User.Identity.Name),
                 Create = dateTime,
                 Undo = undo
             };
@@ -129,6 +147,47 @@ namespace E2E.Models
             }
 
             return res;
+        }
+
+        public int CountJob(Guid? id)
+        {
+            int jobCount = 0;
+
+            if (id.HasValue)
+            {
+                var authorIndex = db.Users.Where(w => w.User_Id == id).Select(s => new { s.Master_Grades.Master_LineWorks.Authorize_Id, s.Master_Processes.Master_Sections.Department_Id, s.Role_Id });
+                int author = authorIndex.Select(s => s.Authorize_Id).FirstOrDefault();
+                var ChkGA = db.Users.Where(w => w.BusinessCardGroup == true && w.User_Id == id);
+                //int RoleId = authorIndex.Select(s => s.Role_Id).FirstOrDefault();
+
+                //Mg User
+                if (author == 2 && ChkGA.Count() == 0)
+                {
+                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 1).Count();
+                }
+                //Mg GA
+                else if (author == 2 && ChkGA.Count() > 0)
+                {
+                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1).Count();
+                }
+
+                //Staff GA
+                else if (author == 3 && ChkGA.Count() > 0)
+                {
+                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 8).Count();
+                }
+            }
+
+            return jobCount;
+        }
+
+        public int GradeNumber(ClsBusinessCard Model)
+        {
+            var BypassGA = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Grades.Grade_Name).FirstOrDefault();
+
+            int Num = Convert.ToInt32(BypassGA.Substring(1));
+
+            return Num;
         }
 
         public List<SelectListItem> SelectListItems_CardGroup()
@@ -195,7 +254,6 @@ namespace E2E.Models
             //Staff Undo
             else if (Model.Status_Id == 7 && pseudo == "7")
             {
-
                 string keyword = "BusinessCards";
                 string pattern = $"{keyword}.*";
                 string result = Regex.Replace(linkUrl, pattern, keyword);
@@ -203,7 +261,7 @@ namespace E2E.Models
                 linkUrl = result;
 
                 subject = string.Format("[Business Card][Staff Undo] {0}", Model.Key);
-                
+
                 content += string.Format("<p>Undo remark: {0}</p>", remark);
 
                 mail.Subject = subject;
@@ -219,7 +277,6 @@ namespace E2E.Models
                 string result = Regex.Replace(linkUrl, pattern, keyword);
                 result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
                 linkUrl = result;
-             
 
                 subject = string.Format("[Business Card][Requester Undo] {0}", Model.Key);
 
@@ -232,7 +289,6 @@ namespace E2E.Models
             //Rejected
             else if (Model.Status_Id == 5)
             {
-
                 string keyword = "BusinessCards";
                 string pattern = $"{keyword}.*";
                 string result = Regex.Replace(linkUrl, pattern, keyword);
@@ -254,13 +310,11 @@ namespace E2E.Models
                 {
                     mail.SendBCC = GetMgApp;
                 }
-
             }
             //[M] GA Assign
             else if (Model.Status_Id == 8)
             {
                 linkUrl = linkUrl.Replace("ManagerGaApprove", "BusinessCard_Detail/");
-
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 List<Users> users = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).ToList();
@@ -274,7 +328,6 @@ namespace E2E.Models
                     mail.SendToIds = users.Where(w => !w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
                 }
 
-
                 subject = string.Format("[Business Card][Assign] {0}", Model.Key);
                 content = "<p>Comment: Assign task to Department General Affair";
 
@@ -286,15 +339,12 @@ namespace E2E.Models
                 {
                     mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6") || w.Master_Grades.Grade_Name.Contains("5")).Select(s => s.User_Id).ToList();
                 }
-           
-
             }
 
             //Staff Send Confirm
             else if (Model.Status_Id == 2 && ModelFile == null || found)
             {
                 linkUrl = linkUrl.Replace("Upload", "BusinessCard_Detail/" + Model.BusinessCard_Id);
-
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -306,9 +356,8 @@ namespace E2E.Models
                 mail.Subject = subject;
                 mail.SendCC = null;
                 mail.AttachPaths.Add(filepath);
-
             }
-                
+
             //User Confirm
             else if (Model.Status_Id == 9)
             {
@@ -319,7 +368,6 @@ namespace E2E.Models
                 linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
 
                 subject = string.Format("[Business Card][Requester Confirm] {0}", Model.Key);
                 mail.SendToId = Model.UserAction;
@@ -332,7 +380,6 @@ namespace E2E.Models
             //User Cancel Confirm
             else if (Model.Status_Id == 2 && found == false)
             {
-
                 string keyword = "BusinessCards";
                 string pattern = $"{keyword}.*";
                 string result = Regex.Replace(linkUrl, pattern, keyword);
@@ -344,7 +391,7 @@ namespace E2E.Models
                 content = string.Empty;
                 subject = string.Format("[Business Card][Cancel Confirm {1}] {0}", Model.Key, ModelFile.FileName);
                 content = string.Format("<p>Requester Comment: {0}", remark);
-                
+
                 mail.SendToId = Model.UserAction;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -356,7 +403,6 @@ namespace E2E.Models
             else if (Model.Status_Id == 4)
             {
                 linkUrl = linkUrl.Replace("UserClose", "BusinessCard_Detail/");
-
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -378,7 +424,7 @@ namespace E2E.Models
 
                 content = string.Empty;
                 subject = string.Format("[Business Card][Please Close] {0}", Model.Key);
-                
+
                 mail.SendToId = Model.User_id;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -394,70 +440,5 @@ namespace E2E.Models
 
             return res;
         }
-
-        public bool BusinessCard_SaveFile(string filepath, BusinessCards model)
-        {
-            bool res = new bool();
-
-            try
-            {
-                BusinessCardFiles cardFiles = new BusinessCardFiles
-                {
-                    BusinessCard_Id = model.BusinessCard_Id,
-                    Create = DateTime.Now,
-                    Extension = Path.GetExtension(filepath),
-                    FilePath = filepath,
-                    FileName = Path.GetFileName(filepath)
-                };
-
-                db.BusinessCardFiles.Add(cardFiles);
-
-                if (db.SaveChanges() > 0)
-                {
-                    res = SendMail(model, null, cardFiles, filepath);
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return res;
-        }
-
-        public int CountJob(Guid? id)
-        {
-            int jobCount = 0;
-
-            if (id.HasValue)
-            {
-                var authorIndex = db.Users.Where(w => w.User_Id == id).Select(s => new { s.Master_Grades.Master_LineWorks.Authorize_Id, s.Master_Processes.Master_Sections.Department_Id, s.Role_Id });
-                int author = authorIndex.Select(s => s.Authorize_Id).FirstOrDefault();
-                var ChkGA = db.Users.Where(w => w.BusinessCardGroup == true && w.User_Id == id);
-                //int RoleId = authorIndex.Select(s => s.Role_Id).FirstOrDefault();
-
-                //Mg User
-                if (author == 2 && ChkGA.Count() == 0)
-                {
-                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 1).Count();
-                }
-                //Mg GA
-                else if (author == 2 && ChkGA.Count() > 0)
-                {
-                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1).Count();
-                }
-
-                //Staff GA
-                else if (author == 3 && ChkGA.Count() > 0)
-                {
-                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 8).Count();
-                }
-
-            }
-
-
-            return jobCount;
-        }
-
     }
 }

@@ -27,18 +27,18 @@
             <tbody>
                 @foreach (var item in Model.List_Master_InquiryTopics)
                 {
-                    <tr class="score" id="@item.InquiryTopic_Id">
-                        <td>
-                            @Html.DisplayFor(m => item.Description_TH)
-                            <br />
-                            <small>(@Html.DisplayFor(m => item.Description_EN))</small>
-                        </td>
-                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="5" checked /></td>
-                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="4" /></td>
-                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="3" /></td>
-                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="2" /></td>
-                        <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="1" /></td>
-                    </tr>
+                <tr class="score" id="@item.InquiryTopic_Id">
+                    <td>
+                        @Html.DisplayFor(m => item.Description_TH)
+                        <br />
+                        <small>(@Html.DisplayFor(m => item.Description_EN))</small>
+                    </td>
+                    <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="5" checked /></td>
+                    <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="4" /></td>
+                    <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="3" /></td>
+                    <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="2" /></td>
+                    <td class="fit align-middle Point"><input type="radio" name="@item.InquiryTopic_Id" value="1" /></td>
+                </tr>
                 }
             </tbody>
         </table>

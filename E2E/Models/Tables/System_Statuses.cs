@@ -6,6 +6,7 @@ namespace E2E.Models.Tables
 {
     public class System_Statuses
     {
+        public int OrderBusinessCard { get; set; }
         public string Status_Class { get; set; }
 
         [Key]
@@ -13,7 +14,6 @@ namespace E2E.Models.Tables
 
         [Display(Name = "Status"), StringLength(100), Index(IsUnique = true)]
         public string Status_Name { get; set; }
-        public int OrderBusinessCard { get; set; }
 
         public static List<System_Statuses> DefaultList()
         {

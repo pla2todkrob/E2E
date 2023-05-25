@@ -601,6 +601,7 @@ namespace E2E.Controllers
                  }).ToList();
             return View(topicView);
         }
+
         [HttpDelete]
         public ActionResult Delete_Boards_Create(Guid id)
         {
@@ -640,6 +641,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         [HttpDelete]
         public ActionResult Delete_Boards_Section(Guid id)
         {
@@ -679,6 +681,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         [HttpDelete]
         public ActionResult Delete_Boards_Section_Attached(Guid id)
         {
@@ -719,6 +722,7 @@ namespace E2E.Controllers
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
+
         [HttpDelete]
         public ActionResult Delete_Reply(Guid id)
         {

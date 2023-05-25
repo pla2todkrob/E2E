@@ -14,8 +14,8 @@ namespace E2E.Controllers
     {
         private readonly ClsManageManagement data = new ClsManageManagement();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageMaster master = new ClsManageMaster();
 
         public ActionResult AuditReport()
         {
@@ -236,6 +236,7 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         [HttpDelete]
         public ActionResult DocumentControl_Delete(Guid id)
         {
@@ -318,6 +319,7 @@ namespace E2E.Controllers
         {
             return View();
         }
+
         [HttpDelete]
         public ActionResult WorkRoot_Delete(Guid id)
         {

@@ -4,17 +4,17 @@
 }
 
 @section breadcrumb{
-	<nav aria-label="breadcrumb ">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
-			<li class="breadcrumb-item">Management</li>
-			<li class="breadcrumb-item active" aria-current="page">Audit report</li>
-		</ol>
-	</nav>
+    <nav aria-label="breadcrumb ">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item">Management</li>
+            <li class="breadcrumb-item active" aria-current="page">Audit report</li>
+        </ol>
+    </nav>
 }
 
 @section scripts{
-	<script>
+    <script>
         var checkList = [];
         $(function () {
 
@@ -59,14 +59,14 @@
 
             window.location = actionUrl;
         }
-	</script>
+    </script>
 }
 
 <div class="mb-3 d-flex">
-	<div id="filter"></div>
-	<div class="ml-auto" id="actionTool">
-		<button class="btn btn-secondary" onclick="doAction('')"><i class="fa fa-download" aria-hidden="true"></i></button>
-		<button class="btn btn-primary" onclick="callModal('@Url.Action("AuditReport_Email","Management")')"><i class="fa fa-share" aria-hidden="true"></i></button>
-	</div>
+    <div id="filter"></div>
+    <div class="ml-auto" id="actionTool">
+        <button class="btn btn-secondary" onclick="doAction('')"><i class="fa fa-download" aria-hidden="true"></i></button>
+        <button class="btn btn-primary" onclick="callModal('@Url.Action("AuditReport_Email","Management")')"><i class="fa fa-share" aria-hidden="true"></i></button>
+    </div>
 </div>
 <div id="datalist"></div>

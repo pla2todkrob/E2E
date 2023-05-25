@@ -13,12 +13,12 @@
         <ul class="list-group" id="questionUl">
             @foreach (var item in Model.ChatBotQuestions)
             {
-                <li class="list-group-item list-group-item-action">
-                    <button class="btn btn-block btn-expand text-left" onclick="expandQuestion('@item.ChatBotQuestion_Id', this)">
-                        <b>@item.Question</b>
-                    </button>
-                    <ul id="@item.ChatBotQuestion_Id" class="list-group nested-list"></ul>
-                </li>
+            <li class="list-group-item list-group-item-action">
+                <button class="btn btn-block btn-expand text-left" onclick="expandQuestion('@item.ChatBotQuestion_Id', this)">
+                    <b>@item.Question</b>
+                </button>
+                <ul id="@item.ChatBotQuestion_Id" class="list-group nested-list"></ul>
+            </li>
             }
         </ul>
     </div>

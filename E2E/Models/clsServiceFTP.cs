@@ -51,7 +51,7 @@ namespace E2E.Models
         private string GetFinallyPath(string fullDir)
         {
             string res = string.Empty;
-        StartMethod:
+            StartMethod:
             string path = urlFtp;
             try
             {
@@ -484,7 +484,7 @@ namespace E2E.Models
                         goto StartRename;
                     }
 
-                StartRename:
+                    StartRename:
                     request = (FtpWebRequest)WebRequest.Create(new Uri(changeFolder));
                     request.Method = WebRequestMethods.Ftp.Rename;
                     request.Credentials = new NetworkCredential(user, pass);
@@ -502,6 +502,28 @@ namespace E2E.Models
                 }
 
                 return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public bool Local_DownloadZip(string zipPath)
+        {
+            try
+            {
+                FileInfo fileInfo = new FileInfo(zipPath);
+                HttpContext.Current.Response.Clear();
+                HttpContext.Current.Response.Buffer = true;
+                HttpContext.Current.Response.ContentType = MediaTypeNames.Application.Octet;
+                HttpContext.Current.Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", fileInfo.Name));
+                HttpContext.Current.Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+                HttpContext.Current.Response.WriteFile(fileInfo.FullName);
+                HttpContext.Current.Response.Flush();
+                File.Delete(zipPath);
+                HttpContext.Current.Response.End();
+                return true;
             }
             catch (Exception)
             {
@@ -713,28 +735,6 @@ namespace E2E.Models
 
                 return res;
             }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Local_DownloadZip(string zipPath)
-        {
-            try
-            {
-                FileInfo fileInfo = new FileInfo(zipPath);
-                HttpContext.Current.Response.Clear();
-                HttpContext.Current.Response.Buffer = true;
-                HttpContext.Current.Response.ContentType = MediaTypeNames.Application.Octet;
-                HttpContext.Current.Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", fileInfo.Name));
-                HttpContext.Current.Response.AddHeader("Content-Length", fileInfo.Length.ToString());
-                HttpContext.Current.Response.WriteFile(fileInfo.FullName);
-                HttpContext.Current.Response.Flush();
-                File.Delete(zipPath);
-                HttpContext.Current.Response.End();
-                return true;
-            } 
             catch (Exception)
             {
                 throw;

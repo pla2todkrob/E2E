@@ -13,8 +13,8 @@ namespace E2E.Controllers
 {
     public class ManualsController : Controller
     {
-        private readonly ClsContext db = new ClsContext();
         private readonly ClsManageService clsManageService = new ClsManageService();
+        private readonly ClsContext db = new ClsContext();
 
         // GET: Manuals
         public ActionResult Index()
