@@ -11,7 +11,7 @@ async function adjustHeight() {
         $('#serviceComment').innerHeight(0);
         var infoHeight = $('#serviceInfo').innerHeight();
         $('#serviceComment').innerHeight(infoHeight);
-        $('#commentHis').animate({ scrollTop: 5000 });
+       await bottomFunction('#commentHis');
     }
 
     if ($(document).find('#refSection').length) {

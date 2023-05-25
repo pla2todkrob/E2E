@@ -8,10 +8,10 @@ namespace E2E.Models.Views
         public Guid ChangeDueDate_Id { get; set; }
         public DateTime Create { get; set; }
 
-        [Display(Name = "To date")]
+        [Display(Name = "To date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? DueDate_New { get; set; }
 
-        [Display(Name = "From date")]
+        [Display(Name = "From date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime DueDate_Old { get; set; }
 
         public string DueDateStatus_Class { get; set; }

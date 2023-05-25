@@ -560,6 +560,7 @@
     <Content Include="android-chrome-192x192.png" />
     <Content Include="android-chrome-512x512.png" />
     <Content Include="apple-touch-icon.png" />
+    <Content Include="Asset\Chatbot.js" />
     <Content Include="Asset\EForm.js" />
     <Content Include="Asset\Master.js" />
     <Content Include="Asset\Service.js" />
@@ -1215,6 +1216,14 @@
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\BusinessCards\Table_AllRequest.cshtml" />
     <Content Include="Views\BusinessCards\LogStatus.cshtml" />
+    <Content Include="Views\ChatBot\ChatHistory.cshtml" />
+    <Content Include="Views\ChatBot\GetChatBot.cshtml" />
+    <Content Include="Views\ChatBot\GroupTable.cshtml" />
+    <Content Include="Views\ChatBot\Import.cshtml" />
+    <Content Include="Views\ChatBot\Manage.cshtml" />
+    <Content Include="Views\ChatBot\EditAnswer.cshtml" />
+    <Content Include="Views\ChatBot\_UploadHistory.cshtml" />
+    <Content Include="Views\ChatBot\QuestionList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

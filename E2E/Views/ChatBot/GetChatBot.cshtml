@@ -1,4 +1,38 @@
-﻿@model E2E.Models.Views.ClsChatBot
+﻿@model E2E.Models.Views.ClsChatbotQuestion
 @{
     Layout = null;
 }
+
+<div class="row">
+
+    <div class="col-md-6 col-lg-5" id="questionArea">
+        <blockquote class="blockquote text-center sticky-top col-12 bg-light py-3">
+            <h3>@Model.ChatBot.Group</h3>
+            <small class="blockquote-footer">@Html.DisplayNameFor(m => m.ChatBot.Create)<cite>&nbsp;@Html.DisplayFor(m => m.ChatBot.Create)</cite></small>
+        </blockquote>
+        <ul class="list-group" id="questionUl">
+            @foreach (var item in Model.ChatBotQuestions)
+            {
+                <li class="list-group-item list-group-item-action">
+                    <button class="btn btn-block btn-expand text-left" onclick="expandQuestion('@item.ChatBotQuestion_Id', this)">
+                        <b>@item.Question</b>
+                    </button>
+                    <ul id="@item.ChatBotQuestion_Id" class="list-group nested-list"></ul>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="col-md-6 col-lg-7" id="answerArea">
+        <div class="sticky-top py-3">
+            <div class="input-group mb-3">
+                <input type="search" id="searchInput" class="form-control" placeholder="Search for answers..." />
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
+                </div>
+            </div>
+            <ul class="list-group" id="answerUl">
+            </ul>
+        </div>
+    </div>
+</div>

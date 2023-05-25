@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Chat bot";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
 }
 
 @section scripts{
@@ -9,8 +10,13 @@
 
         });
 
-        function reloadTable() {
-            callData('@Url.Action("ChatHistory", "ChatBot")');
+        function reloadTable(option={ id :'', getAnswer : false }) {
+            let urlQuestion = '@Url.Action("QuestionList", "ChatBot")'.concat('?id=', option.id, '&getAnswer=',option.getAnswer);
+            callData(urlQuestion, '#questionlist').then(function () {
+                callData('@Url.Action("ChatHistory", "ChatBot")', '#chatlist').then(function () {
+                    bottomFunction('html');
+                });
+            });
         }
     </script>
 }
@@ -23,24 +29,36 @@
         </ol>
     </nav>
 }
-
-<div class="card shadow">
-    @{
-        if (ViewBag.IsAdmin)
-        {
+<div class="row">
+    <div class=" col-md-8">
+        <div class="card shadow">
+            <div class="card-body" id="chatlist"></div>
+            <div class="card-footer">
+                <button type="button" class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("ClearHistory","ChatBot")','reloadTable')">Clear history</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow sticky-top" id="stickyBody">
             <div class="card-header">
                 <div class="d-flex">
-                    <div class="mr-auto"></div>
+                    <div class="mr-auto">
+                        @{
+                            if (ViewBag.IsAdmin)
+                            {
+                                <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
+                            }
+                        }
+                    </div>
                     <div class="ml-auto">
-                        <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
+                        <button type="button" class="btn btn-success float-right" onclick="reloadTable({getAnswer:true})">Get answer</button>
                     </div>
                 </div>
             </div>
-        }
-    }
-
-    <div class="card-body">
-        <div class="row" id="datalist">
+            
+            <div class="card-body" id="questionlist"></div>
         </div>
     </div>
+    
 </div>

@@ -32,7 +32,11 @@ namespace E2E.Models
                     .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == departmentName)
                     .Select(s => s.User_Id);
                 IQueryable<Services> query = db.Services
-                    .Where(w => userIds.Contains(w.User_Id));
+                    .Where(w => userIds.Contains(w.User_Id))
+                    .OrderBy(o => o.Status_Id)
+                    .ThenByDescending(t => t.Priority_Id)
+                    .ThenBy(t => t.Service_DueDate)
+                    .ThenBy(t => t.Update);
 
                 return query;
             }
@@ -1248,7 +1252,11 @@ namespace E2E.Models
                     .Select(s => s.Department_Id);
 
                 IQueryable<Services> query = db.Services
-                    .Where(w => deptIds.Contains(w.Department_Id.Value));
+                    .Where(w => deptIds.Contains(w.Department_Id.Value))
+                    .OrderBy(o => o.Status_Id)
+                    .ThenByDescending(t => t.Priority_Id)
+                    .ThenBy(t => t.Service_DueDate)
+                    .ThenBy(t => t.Update);
 
                 return query;
             }
