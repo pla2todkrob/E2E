@@ -24,10 +24,6 @@ namespace E2E.Controllers
 
         private static Guid? UserAuthorized { get; set; }
 
-        public BusinessCardsController()
-        {
-        }
-
         public ActionResult BusinessCard_Create(Guid? id)
         {
             ClsBusinessCard businessCards;
@@ -778,9 +774,9 @@ namespace E2E.Controllers
             return mem;
         }
 
-        public List<ClsBusinessCard> QueryClsBusinessCard()
+        public IQueryable<ClsBusinessCard> QueryClsBusinessCard()
         {
-            List<ClsBusinessCard> clsBusinessCards = db.BusinessCards
+            IQueryable<ClsBusinessCard> clsBusinessCards = db.BusinessCards
                 .OrderByDescending(o => o.System_Statuses.OrderBusinessCard)
                 .Select(s => new ClsBusinessCard()
                 {
@@ -801,7 +797,7 @@ namespace E2E.Controllers
                     BusinessCard_Id = s.BusinessCard_Id,
                     DueDate = s.DueDate,
                     Update = s.Update
-                }).ToList();
+                });
 
             return clsBusinessCards;
         }
@@ -962,27 +958,27 @@ namespace E2E.Controllers
             Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
             var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
             var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            var clsBusinessCard = QueryClsBusinessCard();
-
+            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
+            var query = QueryClsBusinessCard();
             //user
             if (authorized == 3 && GA == false)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             //mg user
             else if (authorized == 2 && GA == false)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             //mg ga
             else if (authorized == 2 && GA == true)
             {
-                clsBusinessCard = clsBusinessCard.OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             // staff ga
             else if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
@@ -992,12 +988,13 @@ namespace E2E.Controllers
         {
             var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
             var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            var clsBusinessCard = QueryClsBusinessCard();
+            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
+            var query = QueryClsBusinessCard();
 
             //staff ga
             if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.Status_Id == 8 && w.UserAction == null).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.Status_Id == 8 && w.UserAction == null).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
@@ -1008,17 +1005,18 @@ namespace E2E.Controllers
             Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
             var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
             var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            var clsBusinessCard = QueryClsBusinessCard();
+            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
+            var query = QueryClsBusinessCard();
 
             //mg user
             if (authorized == 2 && GA == false)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.Status_Id == 1 && w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.Status_Id == 1 && w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             //mg ga
             else if (authorized == 2 && GA == true)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.Status_Id == 1 && w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId || w.Status_Id == 7).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.Status_Id == 1 && w.UserDetails.Users.Master_Processes.Master_Sections.Department_Id == MyDeptId || w.Status_Id == 7).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
@@ -1028,12 +1026,13 @@ namespace E2E.Controllers
         {
             var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
             var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            var clsBusinessCard = QueryClsBusinessCard();
+            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
+            var query = QueryClsBusinessCard();
 
             //staff ga
             if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = clsBusinessCard.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);

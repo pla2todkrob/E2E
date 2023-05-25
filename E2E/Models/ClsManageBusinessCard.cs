@@ -157,22 +157,22 @@ namespace E2E.Models
             {
                 var authorIndex = db.Users.Where(w => w.User_Id == id).Select(s => new { s.Master_Grades.Master_LineWorks.Authorize_Id, s.Master_Processes.Master_Sections.Department_Id, s.Role_Id });
                 int author = authorIndex.Select(s => s.Authorize_Id).FirstOrDefault();
-                var ChkGA = db.Users.Where(w => w.BusinessCardGroup == true && w.User_Id == id);
+                bool ChkGA = db.Users.Any(w => w.BusinessCardGroup == true && w.User_Id == id);
                 //int RoleId = authorIndex.Select(s => s.Role_Id).FirstOrDefault();
 
                 //Mg User
-                if (author == 2 && ChkGA.Count() == 0)
+                if (author == 2 && !ChkGA)
                 {
                     jobCount = db.BusinessCards.Where(w => w.Status_Id == 1).Count();
                 }
                 //Mg GA
-                else if (author == 2 && ChkGA.Count() > 0)
+                else if (author == 2 && ChkGA)
                 {
                     jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1).Count();
                 }
 
                 //Staff GA
-                else if (author == 3 && ChkGA.Count() > 0)
+                else if (author == 3 && ChkGA)
                 {
                     jobCount = db.BusinessCards.Where(w => w.Status_Id == 8).Count();
                 }

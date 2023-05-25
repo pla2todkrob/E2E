@@ -640,7 +640,7 @@ namespace E2E.Controllers
             ClsApi clsApi = new ClsApi();
             ClsServiceFile clsServiceFile = new ClsServiceFile();
             string ZipName = string.Format("{0}_{1}.zip", key, Urls.Count());
-
+            ZipName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ZipName);
             using (FileStream zipToCreate = new FileStream(ZipName, FileMode.Create))
             {
                 using (ZipArchive archive = new ZipArchive(zipToCreate, ZipArchiveMode.Create))
@@ -671,9 +671,12 @@ namespace E2E.Controllers
 
                 //เก็บไฟล์ที่ User Download ไว้
                 var res = clsApi.UploadFile(clsServiceFile, objFile);
-
+                if (res.IsSuccess)
+                {
+                    System.IO.File.Delete(ZipName);
+                }
                 Response.ContentType = "application/zip";
-                Response.AddHeader("content-disposition", "attachment; filename=" + ZipName);
+                Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(ZipName));
                 Response.BufferOutput = true;
                 Response.OutputStream.Write(fileBytes, 0, fileBytes.Length);
                 Response.End();

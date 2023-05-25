@@ -1,25 +1,28 @@
 ﻿@model E2E.Models.Views.ClsJobCount
 
 @{
-	Layout = null;
+    Layout = null;
 }
 <a class="nav-link dropdown-toggle" href="#" id="dropdown_request" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span>Request</span>
     @if (Model.total.HasValue)
-	{
-		if (Model.total > 0)
-		{
-    <span id="count" class="badge badge-pill badge-warning">@Model.total</span>
-		}
-	}
+    {
+        if (Model.total > 0)
+        {
+            <span id="count" class="badge badge-pill badge-warning">@Model.total</span>
+        }
+    }
 </a>
 
 <div class="dropdown-menu" aria-labelledby="dropdown_request">
-    <a class="dropdown-item" href="@Url.Action("Index","Services")">Service <span class="badge badge-pill badge-warning">@Model.service</span></a>
-    <a class="dropdown-item" href="@Url.Action("Index","BusinessCards")">
-        BusinessCard <span class="badge badge-pill badge-warning">
-            @if (Model.business > 0)
-	{@Model.business}
-        </span>
+    <a class="dropdown-item" href="@Url.Action("Index", "Services")">Service <span class="badge badge-pill badge-warning">@Model.service</span></a>
+    <a class="dropdown-item" href="@Url.Action("Index", "BusinessCards")">
+        BusinessCard&nbsp;
+        @{
+            if (Model.business > 0)
+            {
+                <span class="badge badge-pill badge-warning">@Model.business</span>
+            }
+        }
     </a>
 </div>
