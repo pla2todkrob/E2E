@@ -13,7 +13,7 @@ namespace E2E.Models
         private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageService clsManageService = new ClsManageService();
         private ClsImage clsImag = new ClsImage();
 
         protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
@@ -65,7 +65,7 @@ namespace E2E.Models
                                 clsImag.OriginalPath = fileResponse.FileUrl;
                                 clsImag.ThumbnailPath = fileResponse.FileThumbnailUrl;
 
-                                clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
+                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
 
                                 if (clsImag != null)
                                 {
@@ -82,7 +82,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
                                     File_Save(eForms, filepath, FileName);
@@ -162,7 +162,7 @@ namespace E2E.Models
                                     FileName = string.Concat("_", file.FileName);
                                 }
 
-                                clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
+                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(EForms, clsImag, FileName);
@@ -178,7 +178,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
                                     File_Save(EForms, filepath, FileName);
@@ -275,7 +275,7 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Api_DeleteFile(Files.EForm_File_Path);
+                        clsManageService.Api_DeleteFile(Files.EForm_File_Path);
                     }
 
                     res = true;
@@ -303,8 +303,8 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Api_DeleteFile(Galleries.EForm_Gallery_Original);
-                        ftp.Api_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
+                        clsManageService.Api_DeleteFile(Galleries.EForm_Gallery_Original);
+                        clsManageService.Api_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
                     }
                     res = true;
                 }
@@ -332,7 +332,7 @@ namespace E2E.Models
                     {
                         foreach (var item in File_)
                         {
-                            ftp.Api_DeleteFile(item);
+                            clsManageService.Api_DeleteFile(item);
                         }
                     }
                     res = true;

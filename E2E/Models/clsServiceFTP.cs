@@ -92,7 +92,7 @@ namespace E2E.Models
 
         public static string FinalPath { get; set; }
 
-        public bool Api_DeleteFile(string path)
+        public bool _Api_DeleteFile(string path)
         {
             try
             {
@@ -510,7 +510,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost)
+        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost)
         {
             try
             {
@@ -557,7 +557,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public string Ftp_UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
+        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
         {
             try
             {
@@ -612,7 +612,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public ClsImage Ftp_UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        public ClsImage UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
             if (string.IsNullOrEmpty(fullDir))
             {
@@ -734,7 +734,7 @@ namespace E2E.Models
                 File.Delete(zipPath);
                 HttpContext.Current.Response.End();
                 return true;
-            }
+            } 
             catch (Exception)
             {
                 throw;

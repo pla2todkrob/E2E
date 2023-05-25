@@ -24,11 +24,10 @@ namespace E2E.Models.Views
         public DateTime? DueDate { get; set; }
         public DateTime Create { get; set; }
         public DateTime? Update { get; set; }
-        [DisplayName("Staff action")]
         public Guid? UserAction { get; set; }
         public Guid? UserRef_id { get; set; }
         public string UserRefName { get; set; }
-        [DisplayName("UserAction")]
+        [DisplayName("Staff action")]
         public string UserActionName { get; set; }
         public  UserDetails UserDetails { get; set; }
         [DisplayName("Status")]

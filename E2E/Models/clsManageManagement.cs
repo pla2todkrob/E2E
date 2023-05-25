@@ -10,7 +10,7 @@ namespace E2E.Models
     public class ClsManageManagement
     {
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageService clsManageService = new ClsManageService();
 
         protected bool Document_Insert(ClsDocuments model, HttpFileCollectionBase files)
         {
@@ -46,7 +46,7 @@ namespace E2E.Models
                     FileName = FileName + "_V" + Count + "." + extension[1];
                     //FileName = string.Concat("_", FileName);
 
-                    var clsfile = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                    var clsfile = clsManageService.UploadFileToString(dir, file, FileName);
 
                     master_DocumentVersions.Document_Id = master_Documents.Document_Id;
                     master_DocumentVersions.DocumentVersion_Name = FileName;
@@ -105,7 +105,7 @@ namespace E2E.Models
 
                     FileName = FileName + "_V" + Count + "." + extension[1];
 
-                    var clsfile = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                    var clsfile = clsManageService.UploadFileToString(dir, file, FileName);
 
                     master_DocumentVersions.Document_Id = master_Documents.Document_Id;
                     master_DocumentVersions.DocumentVersion_Name = FileName;
