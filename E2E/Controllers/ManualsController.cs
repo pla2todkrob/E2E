@@ -14,7 +14,7 @@ namespace E2E.Controllers
     public class ManualsController : Controller
     {
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+        private readonly ClsManageService clsManageService = new ClsManageService();
 
         // GET: Manuals
         public ActionResult Index()
@@ -57,7 +57,7 @@ namespace E2E.Controllers
                             string dir = "Manuals/" + system_Manuals.Manual_Id;
                             string FileName = file.FileName;
 
-                            string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                            string filepath = clsManageService.UploadFileToString(dir, file, FileName);
 
                             system_Manuals.Manual_Path = filepath;
                             system_Manuals.Manual_Extension = Path.GetExtension(FileName);

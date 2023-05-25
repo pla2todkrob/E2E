@@ -55,6 +55,21 @@ namespace E2E.Models
                 if (GradeNumber(Model) <= 4)
                 {
                     businessCards.Status_Id = 7; //Approved MG User
+
+                    DateTime currentDate = DateTime.Now;
+                    int daysToAdd = 3;
+
+                    while (daysToAdd > 0)
+                    {
+                        currentDate = currentDate.AddDays(1);
+
+                        if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                        {
+                            daysToAdd--;
+                        }
+                    }
+
+                    businessCards.DueDate = currentDate;
                 }
 
                 //เช็คว่ามีการ Create แทนกันไหม

@@ -17,7 +17,7 @@ namespace E2E.Controllers
     {
         private readonly ClsManageMaster data = new ClsManageMaster();
         private readonly ClsContext db = new ClsContext();
-
+        private readonly ClsManageService clsManageService = new ClsManageService();
         public ActionResult Categories()
         {
             return View();
@@ -1457,7 +1457,7 @@ namespace E2E.Controllers
                         {
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             ClsServiceFTP serviceFTP = new ClsServiceFTP();
-                            string filePath = serviceFTP.Ftp_UploadFileToString(dir, file);
+                            string filePath = clsManageService.UploadFileToString(dir, file);
                             UserUploadHistory userUploadHistory = new UserUploadHistory
                             {
                                 UserUploadHistoryFile = filePath,

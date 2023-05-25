@@ -235,10 +235,19 @@ namespace E2E.Models
 
                 using (RestClient client = new RestClient(options))
                 {
+                    string fileName = file.FileName;
+                    if (string.IsNullOrEmpty(fileName))
+                    {
+                        fileName = clsServiceFile.Filename;
+                    }
+
+                    string mimeType = MimeMapping.GetMimeMapping(fileName);
+
+
                     RestRequest request = new RestRequest()
                         .AddHeader("Token", TokenKey)
                         .AddParameter("FolderPath", clsServiceFile.FolderPath)
-                        .AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName, Encoding.UTF8), file.ContentType);
+                        .AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(fileName, Encoding.UTF8), mimeType);
                     RestResponse response = client.PostAsync(request).Result;
                     fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);
                 }

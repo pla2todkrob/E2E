@@ -14,8 +14,8 @@ namespace E2E.Controllers
     {
         private readonly ClsManageManagement data = new ClsManageManagement();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsManageMaster master = new ClsManageMaster();
+        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
 
         public ActionResult AuditReport()
         {

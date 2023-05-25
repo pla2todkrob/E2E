@@ -12,9 +12,9 @@ namespace E2E.Models
     {
         private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private ClsImage clsImag = new ClsImage();
+        private readonly ClsManageService clsManageService = new ClsManageService();
 
         protected bool Board_CountComment_Delete(Guid id, int num)
         {
@@ -157,7 +157,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
+                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(topics, clsImag, FileName);
@@ -173,7 +173,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
                                     File_Save(topics, filepath, FileName);
@@ -228,7 +228,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                clsImag = ftp.Ftp_UploadImageToString(dir, file, FileName);
+                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(topics, clsImag, FileName);
@@ -244,7 +244,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
                                     File_Save(topics, filepath, FileName);
@@ -423,7 +423,7 @@ namespace E2E.Models
                     {
                         foreach (var item in File_)
                         {
-                            ftp.Api_DeleteFile(item);
+                            clsManageService.Api_DeleteFile(item);
                         }
                     }
                     res = true;
@@ -613,7 +613,7 @@ namespace E2E.Models
                     topicSections.TopicSection_Name = file.FileName;
 
                     string fulldir = string.Format("Topic/{0}/Media/", model.Topic_Id);
-                    topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString(fulldir, file);
+                    topicSections.TopicSection_Path = clsManageService.UploadFileToString(fulldir, file);
                 }
                 db.TopicSections.Add(topicSections);
                 if (db.SaveChanges() > 0)
@@ -676,7 +676,7 @@ namespace E2E.Models
                     topicSections.TopicSection_Name = file.FileName;
 
                     string fulldir = string.Format("Topic/{0}/Media/", model.Topic_Id);
-                    topicSections.TopicSection_Path = ftp.Ftp_UploadFileToString(fulldir, file);
+                    topicSections.TopicSection_Path = clsManageService.UploadFileToString(fulldir, file);
                 }
                 topicSections.Update = DateTime.Now;
 
@@ -770,7 +770,7 @@ namespace E2E.Models
                     res = true;
                     if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
                     {
-                        res = ftp.Api_DeleteFile(TopicSections.TopicSection_Path);
+                        res = clsManageService.Api_DeleteFile(TopicSections.TopicSection_Path);
                     }
                 }
 
@@ -800,7 +800,7 @@ namespace E2E.Models
                 {
                     if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
                     {
-                        res = ftp.Api_DeleteFile(TopicSections.TopicSection_Path);
+                        res = clsManageService.Api_DeleteFile(TopicSections.TopicSection_Path);
                     }
                 }
 
@@ -855,7 +855,7 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Api_DeleteFile(TopicFiles.TopicFile_Path);
+                        clsManageService.Api_DeleteFile(TopicFiles.TopicFile_Path);
                     }
 
                     res = DeleteFile_Count(topic_id);
@@ -885,8 +885,8 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        ftp.Api_DeleteFile(TopicGalleries.TopicGallery_Original);
-                        ftp.Api_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
+                        clsManageService.Api_DeleteFile(TopicGalleries.TopicGallery_Original);
+                        clsManageService.Api_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
                     }
 
                     res = DeleteGallery_Count(topic_id);

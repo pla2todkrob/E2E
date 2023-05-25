@@ -31,7 +31,7 @@ namespace E2E.Controllers
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
+
         private static Guid? UserAuthorized { get; set; }
         public BusinessCardsController()
         {
@@ -1126,7 +1126,7 @@ namespace E2E.Controllers
                             FileName = string.Concat("_", file.FileName);
                         }
 
-                        string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                        string filepath = data.UploadFileToString(dir, file, FileName);
 
                         if (!string.IsNullOrEmpty(filepath))
                         {

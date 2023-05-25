@@ -15,11 +15,10 @@ namespace E2E.Controllers
     {
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ClsUsers users = new ClsUsers();
         private readonly ClsManageBusinessCard jobCount = new ClsManageBusinessCard();
-
+        private readonly ClsManageService clsManageService = new ClsManageService();
 
         public ActionResult _Copyright()
         {
@@ -337,7 +336,7 @@ namespace E2E.Controllers
                             HttpPostedFileBase file = files[0];
                             string dir = "Configurations/" + system_Configurations.Configuration_Id;
                             string FileName = file.FileName;
-                            string filepath = ftp.Ftp_UploadFileToString(dir, file, FileName);
+                            string filepath = clsManageService.UploadFileToString(dir, file, FileName);
 
                             system_Configurations.Configuration_Brand = filepath;
                         }

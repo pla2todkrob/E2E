@@ -3,9 +3,14 @@ using E2E.Models.Tables;
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Text;
 using System.Transactions;
+using System.Web;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
@@ -271,9 +276,10 @@ namespace E2E.Controllers
             try
             {
                 var data = db.Services
-                    .OrderByDescending(o => o.Priority_Id)
-                    .ThenBy(t => new { t.Service_DueDate, t.Create })
-                    .Select(s => new ServiceAll()
+                       .OrderBy(o => o.Status_Id)
+                       .ThenBy(t => t.Update)
+                       .ThenByDescending(t => t.Create)
+                       .Select(s => new ServiceAll()
                     {
                         Create = s.Create,
                         Department_Name = s.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name,
@@ -629,16 +635,65 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public void Download_Zipfiles(List<string> Urls ,string key)
+        {
+
+            ClsApi clsApi = new ClsApi();
+            ClsServiceFile clsServiceFile = new ClsServiceFile();
+            string ZipName = string.Format("{0}_{1}.zip", key, Urls.Count());
+
+            using (FileStream zipToCreate = new FileStream(ZipName, FileMode.Create))
+            {
+                using (ZipArchive archive = new ZipArchive(zipToCreate, ZipArchiveMode.Create))
+                {
+                    foreach (var item in Urls)
+                    {
+                        if (!string.IsNullOrEmpty(item))
+                        {
+                            using (WebClient webClient = new WebClient())
+                            {
+                                byte[] data = webClient.DownloadData(item);
+                                ZipArchiveEntry entry = archive.CreateEntry(Path.GetFileName(HttpUtility.UrlDecode(item, Encoding.UTF8)));
+
+                                using (Stream entryStream = entry.Open())
+                                {
+                                    entryStream.Write(data, 0, data.Length);
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+
+                byte[] fileBytes = System.IO.File.ReadAllBytes(ZipName);
+                HttpPostedFileBase objFile = (HttpPostedFileBase)new MemoryPostedFile(fileBytes);
+
+                clsServiceFile.FolderPath = string.Format("Service/{0}/DocumentControls", key);
+                clsServiceFile.Filename = Path.GetFileName(ZipName);
+
+                //เก็บไฟล์ที่ User Download ไว้ 
+              var res =  clsApi.UploadFile(clsServiceFile, objFile);
+
+                Response.ContentType = "application/zip";
+                Response.AddHeader("content-disposition", "attachment; filename=" + ZipName);
+                Response.BufferOutput = true;
+                Response.OutputStream.Write(fileBytes, 0, fileBytes.Length);
+                Response.End();
+            }
+        }
+
         public void DownloadDocumentControl(Guid id)
         {
             try
             {
-                string key = db.Services.Find(id).Service_Key;
-                string dir = string.Format("Service/{0}/DocumentControls/", key);
-                string zipDir = string.Format("DocumentControls\\{0}", key);
-                ftp.Ftp_DownloadFolder(dir, zipDir);
+                string Key = db.Services.Find(id).Service_Key;
+                var Paths = db.ServiceDocuments.Where(w => w.Service_Id == id).Select(s => s.ServiceDocument_Path).ToList();
+
+                Download_Zipfiles(Paths, Key);
+
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -2281,4 +2336,22 @@ namespace E2E.Controllers
             }
         }
     }
+}
+
+public class MemoryPostedFile : HttpPostedFileBase
+{
+    private readonly byte[] fileBytes;
+
+    public MemoryPostedFile(byte[] fileBytes, string fileName = null)
+    {
+        this.fileBytes = fileBytes;
+        this.FileName = fileName;
+        this.InputStream = new MemoryStream(fileBytes);
+    }
+
+    public override int ContentLength => fileBytes.Length;
+
+    public override string FileName { get; }
+
+    public override Stream InputStream { get; }
 }
