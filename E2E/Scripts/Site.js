@@ -33,11 +33,18 @@ $(function () {
     reloadCount().then(function () {
         scrollFunction();
     });
+    preLineSetLink();
 });
 $(document).ajaxStart(function () {
-    callSpin(true);
+    callSpin(true).then(function () {
+        document.body.classList.add('disabled');
+    });
 }).ajaxStop(function () {
-    callSpin(false);
+    callSpin(false).then(function () {
+        preLineSetLink().then(function () {
+            document.body.classList.remove('disabled');
+        });
+    });
 });
 
 async function reloadCount() {
@@ -81,6 +88,57 @@ async function callSpin(active) {
         document.querySelector("body").classList.remove("disabled");
         $(target).empty();
     }
+}
+
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3, replacePattern4, replacePattern5;
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, function (match, p1) {
+        return inputText.includes('<a href="' + p1 + '"') ? match : '<a href="' + p1 + '" target="_blank">' + p1 + '</a>';
+    });
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    // Change network path (\\172.101.1.21\path\file) to file links
+    replacePattern4 = /(\\\\[\w\d.]+\\[\w\d\s.\\]+)/gim;
+    replacedText = replacedText.replace(replacePattern4, function (match) {
+        var formattedUrl = 'file:///' + match.replace(/\\/g, '/');
+        return '<a href="' + formattedUrl + '" target="_blank">' + match + '</a>';
+    });
+
+    // Change Windows drive path (e.g., C:\path\file) to file links
+    replacePattern5 = /([a-zA-Z]:\\[\w\d\s.\\]+)/gim;
+    replacedText = replacedText.replace(replacePattern5, function (match) {
+        var formattedUrl = 'file:///' + match.replace(/\\/g, '/');
+        return '<a href="' + formattedUrl + '" target="_blank">' + match + '</a>';
+    });
+
+    return replacedText;
+}
+
+let processedSet = new Set();
+
+async function preLineSetLink() {
+    $(".PreLine").each(function () {
+        var content = $(this).html();
+
+        // Skip if content is already linkified
+        if ($(this).find('a').length === 0) {
+            var lines = content.split('\n');  // Split content into lines
+            var linkedLines = lines.map(linkify);  // Linkify each line individually
+            var linkedContent = linkedLines.join('\n');  // Join the linkified lines back together
+
+            $(this).html(linkedContent);
+        }
+    });
 }
 
 function getQueryString() {
@@ -173,6 +231,7 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                 });
             }
         });
+        return preLineSetLink();
     } catch (error) {
         // Handle the error
         console.error(error);
@@ -202,6 +261,7 @@ async function callTable_Normal(urlAjax, blockId = '#datalist') {
                 width: '100%'
             });
         });
+        return preLineSetLink();
     } catch (error) {
         // Handle the error
         console.error(error);
@@ -240,6 +300,7 @@ async function callTable_NoSort(urlAjax, blockId = '#datalist') {
                 'scrollX': true
             });
         });
+        return preLineSetLink();
     } catch (error) {
         // Handle the error
         console.error(error);
@@ -276,6 +337,7 @@ async function callData(urlAjax, blockId = '#datalist') {
         });
         // append the data to blockId
         $(blockId).html(res);
+        return preLineSetLink();
     } catch (e) {
         console.error(e);
     }
@@ -597,6 +659,7 @@ async function callDeleteIMG_SC(urlAjax) {
 let lastScrollTop = window.pageYOffset;
 const eleNav = document.querySelector('nav.navbar');
 const topButton = document.getElementById('btnToTop');
+const stickyBody = document.getElementById('stickyBody');
 window.addEventListener("scroll", debounce(scrollFunction));
 
 function scrollFunction() {
@@ -604,17 +667,23 @@ function scrollFunction() {
     totalScroll = totalScroll * 0.25;
 
     let scrollTop = window.pageYOffset;
-    if (scrollTop > lastScrollTop) {
-        eleNav.style.top = `-${eleNav.offsetHeight}px`;
-    }
-    else {
-        eleNav.style.top = '0';
+    if (eleNav && stickyBody) {
+        if (scrollTop > lastScrollTop) {
+            eleNav.style.top = `-${eleNav.offsetHeight}px`;
+            stickyBody.style.top = '16px';
+        }
+        else {
+            eleNav.style.top = '0';
+            stickyBody.style.top = `${eleNav.offsetHeight + 16}px`;
+        }
     }
 
-    if (scrollTop > totalScroll) {
-        topButton.style.bottom = '0';
-    } else {
-        topButton.style.bottom = '-100%';
+    if (topButton) {
+        if (scrollTop > totalScroll) {
+            topButton.style.bottom = '0';
+        } else {
+            topButton.style.bottom = '-100%';
+        }
     }
 
     lastScrollTop = scrollTop;
@@ -653,4 +722,7 @@ function setCookie(name, value, expires = 1) {
     date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
     var expires = "expires=" + date.toUTCString();
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
+async function bottomFunction(target, duration = 500) {
+    await $(target).animate({ scrollTop: $(target)[0].scrollHeight }, duration);
 }

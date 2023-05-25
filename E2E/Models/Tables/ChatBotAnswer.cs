@@ -13,6 +13,8 @@ namespace E2E.Models.Tables
         {
             ChatBotAnswer_Id = Guid.NewGuid();
         }
+
+        [Required]
         public string Answer { get; set; }
 
         [Key]

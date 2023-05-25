@@ -2,3 +2,10 @@
 @{
     Layout = null;
 }
+
+<div class="list-group">
+    @foreach (var item in Model)
+    {
+        <button type="button" onclick="getQuestion('@item.ChatBot_Id')" class="list-group-item list-group-item-action">@item.Group</button>
+    }
+</div>

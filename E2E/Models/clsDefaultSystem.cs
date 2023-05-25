@@ -1,6 +1,7 @@
 ﻿using E2E.Models.Tables;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Transactions;
 
@@ -234,14 +235,24 @@ namespace E2E.Models
                             Prefix_TH_Name = "นาย"
                         };
                         db.Entry(system_Prefix_TH).State = System.Data.Entity.EntityState.Added;
+                        int point = 50; // Default value if ConfigurationManager.AppSettings["Point"] is not present or not a valid integer
 
+                        if (ConfigurationManager.AppSettings.AllKeys.Contains("Point"))
+                        {
+                            string pointConfigValue = ConfigurationManager.AppSettings["Point"];
+                            if (!string.IsNullOrEmpty(pointConfigValue) && int.TryParse(pointConfigValue, out int parsedPoint) && parsedPoint > 0)
+                            {
+                                point = parsedPoint;
+                            }
+                        }
                         Users users = new Users()
                         {
                             Grade_Id = master_Grades.Grade_Id,
                             Plant_Id = master_Plants.Plant_Id,
                             Process_Id = master_Processes.Process_Id,
                             Role_Id = 1,
-                            User_Code = "1640488"
+                            User_Code = "1640488",
+                            User_Point = point
                         };
                         db.Entry(users).State = System.Data.Entity.EntityState.Added;
 

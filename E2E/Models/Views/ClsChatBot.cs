@@ -14,27 +14,61 @@ namespace E2E.Models.Views
     {
         private readonly ClsContext db = new ClsContext();
         public ChatBot ChatBot { get; set; }
-        public List<QAView> QAViews { get; set; }
 
-        public ClsChatBot GetChatBotViewModel(Guid chatBotId)
+        public List<ChatBotAnswer> GetAnswers(List<ChatBotQuestion> questions)
         {
-            ClsChatBot clsChatBot = new ClsChatBot()
-            {
-                ChatBot = db.ChatBots.Find(chatBotId),
-                QAViews = db.ChatBotQuestions
-                .Where(w => w.ChatBot_Id.Equals(chatBotId))
-                .Join(db.ChatBotAnswers,
-                q => q.ChatBotQuestion_Id,
-                a => a.ChatBotQuestion_Id,
-                (q, a) => new QAView()
-                {
-                    ChatBotQuestion = q,
-                    ChatBotAnswer = a
-                }).OrderBy(o => o.ChatBotQuestion.ChatBotQuestion_ParentId)
-                .ToList()
-            };
+            var answers = new List<ChatBotAnswer>();
 
-            return clsChatBot;
+            try
+            {
+                var nextQuestions = new List<ChatBotQuestion>();
+                foreach (var question in questions)
+                {
+                    answers.AddRange(db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == question.ChatBotQuestion_Id));
+                    var childQuestions = db.ChatBotQuestions.Where(q => q.ChatBotQuestion_ParentId == question.ChatBotQuestion_Id).ToList();
+
+                    if (childQuestions.Any())
+                    {
+                        nextQuestions.AddRange(childQuestions);
+                    }
+                }
+
+                if (nextQuestions.Any())
+                {
+                    answers.AddRange(GetAnswers(nextQuestions));
+                }
+
+                return answers;
+            }
+            catch (Exception)
+            {
+                // Consider logging the exception before re-throwing
+                throw;
+            }
+        }
+
+        public ClsChatbotQuestion GetQuestion(Guid chatBotId)
+        {
+            try
+            {
+                ClsChatbotQuestion clsQuestion = new ClsChatbotQuestion()
+                {
+                    ChatBot = db.ChatBots.Find(chatBotId),
+                    ChatBotQuestions = db.ChatBotQuestions
+                    .Where(w =>
+                    w.ChatBot_Id.Equals(chatBotId) &&
+                    w.ChatBotQuestion_Level.Equals(1))
+                    .OrderBy(o => o.ChatBotQuestion_Level)
+                    .ThenBy(t => t.Question)
+                    .ToList()
+                };
+
+                return clsQuestion;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public bool SaveChatBotLearn(string fileUrl)
@@ -42,7 +76,12 @@ namespace E2E.Models.Views
             try
             {
                 bool res = new bool();
-                List<string> userCodeList = new List<string>();
+                if (db.ChatBots.Count() > 0)
+                {
+                    db.ChatBots.RemoveRange(db.ChatBots.ToList());
+                    db.SaveChanges();
+                }
+
                 using (HttpClient client = new HttpClient())
                 {
                     using (Stream stream = client.GetStreamAsync(fileUrl).Result)
@@ -51,16 +90,20 @@ namespace E2E.Models.Views
                         {
                             foreach (var sheet in package.Workbook.Worksheets)
                             {
+                                var startData = sheet.Cells[2, 1].Text;
+                                if (string.IsNullOrEmpty(startData))
+                                {
+                                    throw new Exception("The document has no information.");
+                                }
+
                                 for (int row = 2; row <= sheet.Dimension.End.Row; row++)
                                 {
-                                    var recNo = sheet.Cells[row, 1].Text;
-                                    if (string.IsNullOrEmpty(recNo))
-                                    {
-                                        throw new Exception("The document has no information.");
-                                    }
                                     var answer = sheet.Cells[row, 1].Text;
                                     var group = sheet.Cells[row, 2].Text;
-
+                                    if (string.IsNullOrEmpty(answer) || string.IsNullOrEmpty(group))
+                                    {
+                                        break;
+                                    }
                                     ChatBot chatBot = db.ChatBots.Where(w => w.Group.Equals(group)).FirstOrDefault();
                                     if (chatBot == null)
                                     {
@@ -75,21 +118,29 @@ namespace E2E.Models.Views
                                     {
                                         chatBot.Update = DateTime.Now;
                                     }
+
                                     Guid? parentId = null;
-                                    string beforeQuestion = string.Empty;
+                                    int questionLv = 1;
                                     for (int col = 3; col <= sheet.Dimension.End.Column; col++)
                                     {
                                         var question = sheet.Cells[row, col].Text;
                                         var nextQuestion = sheet.Cells[row, col + 1].Text;
 
-                                        ChatBotQuestion chatBotQuestion = db.ChatBotQuestions.Where(w => w.ChatBot_Id.Equals(chatBot.ChatBot_Id) && w.Question.Equals(question) && w.ChatBotQuestion_ParentId.Equals(parentId)).FirstOrDefault();
-                                        if (chatBotQuestion == null)
+                                        ChatBotQuestion chatBotQuestion = db.ChatBotQuestions
+                                            .Where(w =>
+                                            w.ChatBot_Id.Equals(chatBot.ChatBot_Id) &&
+                                            w.Question.Equals(question) &&
+                                            w.ChatBotQuestion_Level == questionLv &&
+                                            w.ChatBotQuestion_ParentId == parentId)
+                                            .FirstOrDefault();
+                                        if (chatBotQuestion == null && !string.IsNullOrEmpty(question))
                                         {
                                             chatBotQuestion = new ChatBotQuestion()
                                             {
                                                 ChatBotQuestion_ParentId = parentId,
                                                 ChatBot_Id = chatBot.ChatBot_Id,
-                                                Question = question
+                                                Question = question,
+                                                ChatBotQuestion_Level = questionLv
                                             };
                                             db.Entry(chatBotQuestion).State = EntityState.Added;
                                             db.SaveChanges();
@@ -99,24 +150,16 @@ namespace E2E.Models.Views
 
                                         if (string.IsNullOrEmpty(nextQuestion))
                                         {
-                                            ChatBotAnswer chatBotAnswer = db.ChatBotAnswers.Where(w => w.ChatBotQuestion_Id.Equals(chatBotQuestion.ChatBotQuestion_Id)).FirstOrDefault();
-                                            if (chatBotAnswer == null)
+                                            ChatBotAnswer chatBotAnswer = new ChatBotAnswer()
                                             {
-                                                chatBotAnswer = new ChatBotAnswer()
-                                                {
-                                                    Answer = answer,
-                                                    ChatBotQuestion_Id = chatBotQuestion.ChatBotQuestion_Id
-                                                };
-                                                db.Entry(chatBotAnswer).State = EntityState.Added;
-                                            }
-                                            else
-                                            {
-                                                chatBotAnswer.Answer = answer;
-                                                db.Entry(chatBotAnswer).State = EntityState.Modified;
-                                            }
+                                                Answer = answer,
+                                                ChatBotQuestion_Id = chatBotQuestion.ChatBotQuestion_Id
+                                            };
+                                            db.Entry(chatBotAnswer).State = EntityState.Added;
                                             db.SaveChanges();
                                             break;
                                         }
+                                        questionLv++;
                                     }
                                 }
                             }
@@ -134,9 +177,15 @@ namespace E2E.Models.Views
         }
     }
 
-    public class QAView
+    public class ClsChatbotQA
     {
-        public ChatBotAnswer ChatBotAnswer { get; set; }
-        public ChatBotQuestion ChatBotQuestion { get; set; }
+        public List<ChatBotAnswer> ChatBotAnswers { get; set; } = new List<ChatBotAnswer>();
+        public List<ChatBotQuestion> ChatBotQuestions { get; set; } = new List<ChatBotQuestion>();
+    }
+
+    public class ClsChatbotQuestion
+    {
+        public ChatBot ChatBot { get; set; }
+        public List<ChatBotQuestion> ChatBotQuestions { get; set; } = new List<ChatBotQuestion>();
     }
 }

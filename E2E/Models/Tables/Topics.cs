@@ -39,7 +39,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Pin it")]
         public bool Topic_Pin { get; set; }
 
-        [Display(Name = "Pinned to date")]
+        [Display(Name = "Pinned to date"), DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? Topic_Pin_EndDate { get; set; }
 
         [Display(Name = "Title")]

@@ -13,6 +13,7 @@ namespace E2E.Models.Tables
         {
             ChatBotQuestion_Id = Guid.NewGuid();
         }
+
         public virtual ChatBot ChatBot { get; set; }
 
         [Index]
@@ -21,9 +22,12 @@ namespace E2E.Models.Tables
         [Key]
         public Guid ChatBotQuestion_Id { get; set; }
 
+        [Index, Display(Name = "Level")]
+        public int ChatBotQuestion_Level { get; set; }
+
         public Guid? ChatBotQuestion_ParentId { get; set; }
 
-        [Index, StringLength(100)]
+        [Index, StringLength(100), Required]
         public string Question { get; set; }
     }
 }

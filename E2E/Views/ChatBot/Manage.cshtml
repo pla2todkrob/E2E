@@ -1,13 +1,13 @@
 ﻿@{
     ViewBag.Title = "Manage";
-    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @section scripts{
+    <script src="~/Asset/Chatbot.js"></script>
     <script>
         $(function () {
             reloadTable();
-
         });
 
         $(document).on('submit', '#ImportForm', function (e) {
@@ -16,9 +16,68 @@
             return false;
         });
 
+        $(document).on('submit', '#EditForm', function (e) {
+            e.preventDefault();
+            callSubmitModal('@Url.Action("EditAnswer", "ChatBot")', this);
+            return false;
+        });
+
+        function getQuestion(id) {
+            const url = '@Url.Action("GetChatBot","ChatBot")'.concat('/', id);
+            callData(url, '#listArea').then(function () {
+                $('#qaList').addClass('active');
+            });
+        }
+
         function reloadTable() {
             callData('@Url.Action("GroupTable", "ChatBot")');
         }
+
+function getNextLevel(id, container) {
+    const url = '@Url.Action("ExpandLevel", "ChatBot")'.concat('/', id);
+
+    $.ajax({
+        url: url,
+        async: true,
+        success: function(res) {
+            const questions = res.ChatBotQuestions;
+            const answers = res.ChatBotAnswers;
+
+            if (questions.length > 0) {
+                loadNextLevel(questions, container, answers);
+            } else {
+                displayAnswers(answers);
+            }
+        },
+        error: function(err) {
+            console.error(err);
+        }
+    });
+}
+
+        function displayAnswers(answers) {
+    const answerUl = $('#answerUl');
+    answerUl.empty();
+
+            $.each(answers, function (i, answer) {
+                console.log(answer.Answer);
+        const text = linkify(answer.ChatBotQuestion.Question.concat(': ', answer.Answer));
+        const onclickUrl = '@Url.Action("EditAnswer", "ChatBot")'.concat('/',answer.ChatBotAnswer_Id);
+
+        // Create a button
+        const button = $('<button type="button" class="btn btn-warning">')
+            .click(function() {
+                callModal(onclickUrl);
+            })
+            .append($('<i class="fa fa-pencil"></i>'));
+
+        // Append the button and text to the list item
+        const answerItem = $('<li class="list-group-item">').append(button, '&nbsp;');
+        answerItem.append($('<span>').html(text));
+
+        answerUl.append(answerItem);
+    });
+}
     </script>
 }
 
@@ -45,9 +104,9 @@
     <div class="card-body" id="datalist">
     </div>
 </div>
-<div class="fixed-top fixed-bottom" id="qaList">
-    <div class="row vh-100">
-        <div class="col-4 col-md-3 col-lg-2 bg-dark" id="closeArea"></div>
-        <div class="col-8 col-md-9 col-lg-10 bg-light" id="listArea"></div>
+<div class="fixed-top fixed-bottom overflow-auto" id="qaList">
+    <div class="row vh-100 m-0">
+        <div class="col-md-2 col-lg-3 bg-dark" id="closeArea"></div>
+        <div class="col-md-10 col-lg-9 bg-light" id="listArea"></div>
     </div>
 </div>
