@@ -508,7 +508,8 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
     });
 }
 
-function callDeleteItem(urlAjax, reloadPage = false) {
+
+function callDeleteItem(urlAjax, reloadPage = false, option = { emptyTarget: undefined, hideTarget: undefined, showTarget: undefined }) {
     $.ajax({
         url: urlAjax,
         type: 'DELETE',
@@ -521,11 +522,27 @@ function callDeleteItem(urlAjax, reloadPage = false) {
                 dangerMode: json.DangerMode
             }).then(function () {
                 if (json.Icon === 'success') {
-                    $('#modalArea').modal('hide');
+
                     if (reloadPage) {
                         location.reload();
                     } else {
-                        reloadTable();
+                        if (option.emptyTarget) {
+                            $(option.emptyTarget).empty();
+                            if (json.Option) {
+                                $('#' + json.Option).empty();
+                            }
+                            if (option.hideTarget) {
+                                $(option.hideTarget).hide();
+                            }
+                            if (option.showTarget) {
+                                $(option.showTarget).show();
+                            }
+                        }
+                        else {
+                            $('#modalArea').modal('hide');
+                            reloadTable();
+                        }
+
                     }
                 }
             });
@@ -623,38 +640,6 @@ async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedir
     }
 }
 
-async function callDeleteIMG_SC(urlAjax) {
-    return swal({
-        title: 'Are you sure?',
-        text: 'Once you delete this information, you cannot recover it.',
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true,
-    }).then((cf) => {
-        if (cf) {
-            $.ajax({
-                url: urlAjax,
-                async: true,
-                success: function (res) {
-                    swal({
-                        title: res.Title,
-                        text: res.Text,
-                        icon: res.Icon,
-                        button: res.Button,
-                        dangerMode: res.DangerMode
-                    }).then(function () {
-                        if (res.Icon == 'success') {
-                            const id = res.Option;
-
-                            $('#MediaSC').empty();
-                            $('#' + id).empty();
-                        }
-                    });
-                }
-            });
-        }
-    });
-}
 
 let lastScrollTop = window.pageYOffset;
 const eleNav = document.querySelector('nav.navbar');
