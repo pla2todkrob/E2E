@@ -1277,12 +1277,12 @@ namespace E2E.Controllers
                 try
                 {
                     BusinessCards businessCards = db.BusinessCards.Find(id);
-                    businessCards.Status_Id = 2;
+                    businessCards.Status_Id = 9;
                     businessCards.Update = DateTime.Now;
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, null, "", remark, "2");
+                        dataCard.SendMail(businessCards, null, null, "", remark, "9");
                         dataCard.BusinessCard_SaveLog(businessCards, remark, true);
                         scope.Complete();
                         swal.DangerMode = false;
