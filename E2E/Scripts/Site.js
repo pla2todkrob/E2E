@@ -91,7 +91,7 @@ async function callSpin(active) {
 }
 
 function linkify(inputText) {
-    var replacedText, replacePattern1, replacePattern2, replacePattern3, replacePattern4, replacePattern5;
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
 
     //URLs starting with http://, https://, or ftp://
     replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
@@ -104,40 +104,21 @@ function linkify(inputText) {
     replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
 
     //Change email addresses to mailto:: links.
-    replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
+    replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z.]{2,6})/gim; //Adjusted to accommodate for multiple dots in the domain
     replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
-
-    // Change network path (\\172.101.1.21\path\file) to file links
-    replacePattern4 = /(\\\\[\w\d.]+\\[\w\d\s.\\]+)/gim;
-    replacedText = replacedText.replace(replacePattern4, function (match) {
-        var formattedUrl = 'file:///' + match.replace(/\\/g, '/');
-        return '<a href="' + formattedUrl + '" target="_blank">' + match + '</a>';
-    });
-
-    // Change Windows drive path (e.g., C:\path\file) to file links
-    replacePattern5 = /([a-zA-Z]:\\[\w\d\s.\\]+)/gim;
-    replacedText = replacedText.replace(replacePattern5, function (match) {
-        var formattedUrl = 'file:///' + match.replace(/\\/g, '/');
-        return '<a href="' + formattedUrl + '" target="_blank">' + match + '</a>';
-    });
 
     return replacedText;
 }
 
-let processedSet = new Set();
-
 async function preLineSetLink() {
     $(".PreLine").each(function () {
-        var content = $(this).html();
-
-        // Skip if content is already linkified
-        if ($(this).find('a').length === 0) {
-            var lines = content.split('\n');  // Split content into lines
-            var linkedLines = lines.map(linkify);  // Linkify each line individually
-            var linkedContent = linkedLines.join('\n');  // Join the linkified lines back together
-
-            $(this).html(linkedContent);
+        var content = $(this).text(); // use text() to get raw text without html tags
+        var lines = content.split('\n'); // split into lines
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = linkify(lines[i]); // linkify each line individually
         }
+        var linkedContent = lines.join('\n'); // join the lines back together
+        $(this).html(linkedContent); // update the html
     });
 }
 
@@ -709,5 +690,8 @@ function setCookie(name, value, expires = 1) {
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
 async function bottomFunction(target, duration = 500) {
-    await $(target).animate({ scrollTop: $(target)[0].scrollHeight }, duration);
+    if ($(target).length > 0) {
+        await $(target).animate({ scrollTop: $(target)[0].scrollHeight }, duration);
+    }
+
 }

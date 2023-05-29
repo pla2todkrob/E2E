@@ -270,7 +270,7 @@ namespace E2E.Models
             }
 
             //User Undo
-            else if (Model.Status_Id == 2 && pseudo == "2")
+            else if (Model.Status_Id == 9 && pseudo == "9")
             {
                 string keyword = "BusinessCards";
                 string pattern = $"{keyword}.*";
@@ -329,7 +329,15 @@ namespace E2E.Models
                 }
 
                 subject = string.Format("[Business Card][Assign] {0}", Model.Key);
-                content = "<p>Comment: Assign task to Department General Affair";
+                if (Model.UserAction == null)
+                {
+                    content = "<p>Comment: Assign task to Department General Affair";
+                }
+                else
+                {
+                    content = "<p>Comment: Assign task to " + master.Users_GetInfomation(Model.UserAction.Value);
+                }
+
 
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
@@ -370,6 +378,7 @@ namespace E2E.Models
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 subject = string.Format("[Business Card][Requester Confirm] {0}", Model.Key);
+                content += string.Format("<p>Requester confirm business card is correct.</p>");
                 mail.SendToId = Model.UserAction;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -407,7 +416,8 @@ namespace E2E.Models
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
-                subject = string.Format("[Business Card][Closed] {0}", Model.Key);
+                subject = string.Format("[Business Card][Requester Closed] {0}", Model.Key);
+                content += string.Format("<p>Requester Closed job.</p>");
                 mail.SendToId = Model.UserAction;
                 mail.SendToIds.Clear();
                 mail.SendFrom = ActionId;
@@ -423,7 +433,7 @@ namespace E2E.Models
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
                 content = string.Empty;
-                subject = string.Format("[Business Card][Please Close] {0}", Model.Key);
+                subject = string.Format("[Business Card][Please Close job] {0}", Model.Key);
 
                 mail.SendToId = Model.User_id;
                 mail.SendToIds.Clear();
