@@ -27,7 +27,8 @@ namespace E2E.Models.Tables
             {
                 new System_ManualType() { Manual_TypeName = "TOPIC", Create = DateTime.Now },
                 new System_ManualType() { Manual_TypeName = "EFORM", Create = DateTime.Now },
-                new System_ManualType() { Manual_TypeName = "SERVICE", Create = DateTime.Now }
+                new System_ManualType() { Manual_TypeName = "SERVICE", Create = DateTime.Now },
+                new System_ManualType() { Manual_TypeName = "BUSINESS CARD", Create = DateTime.Now }
             };
 
             return list;
