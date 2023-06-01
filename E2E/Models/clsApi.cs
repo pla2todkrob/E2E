@@ -110,7 +110,7 @@ namespace E2E.Models
             FileResponse res = new FileResponse();
             string TokenKey = GetToken();
             Uri ApiUrl = new Uri(GetApiUrl() + "api/Service_File/Delete_File");
-
+            fileUrl = HttpUtility.UrlDecode(fileUrl, Encoding.UTF8);
             RestClientOptions options = new RestClientOptions(ApiUrl)
             {
                 ThrowOnAnyError = true
@@ -263,7 +263,7 @@ namespace E2E.Models
             }
         }
 
-        public FileResponse UploadFile(HttpPostedFileBase file,string folderPath, string fileName = "")
+        public FileResponse UploadFile(HttpPostedFileBase file, string folderPath, string fileName = "")
         {
             try
             {
