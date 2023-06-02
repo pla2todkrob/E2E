@@ -30,7 +30,7 @@
                 var data = e.params.data.id;
                  var url = '@Url.Action("Boards_Table", "Topics")';
                 url += '?category=' + data;
-                callTable_NoSort(url, false, [], '#datalist2');
+                callTable_NoSort(url, '#datalist2');
             });
 
         });
