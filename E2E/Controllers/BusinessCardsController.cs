@@ -128,8 +128,9 @@ namespace E2E.Controllers
             ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
             ViewBag.UserCHK = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id && a.Confirm == true);
             ViewBag.CountFileUpload = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).Count();
+            ViewBag.DeptCHK = dataCard.Same_department_check(id);
 
-            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
+           var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
             return View(clsBusinessCard.FirstOrDefault());
         }

@@ -40,7 +40,7 @@ namespace E2E.Models
                     Status_Id = 1, //Pending
                 };
 
-                if (GradeNumber(Model) <= 4)
+                if (GradeNumber(Model.User_id) <= 4)
                 {
                     businessCards.Status_Id = 7; //Approved MG User
 
@@ -168,7 +168,7 @@ namespace E2E.Models
                 //Mg GA
                 else if (author == 2 && ChkGA)
                 {
-                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1).Count();
+                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1 ).Count();
                 }
 
                 //Staff GA
@@ -181,9 +181,11 @@ namespace E2E.Models
             return jobCount;
         }
 
-        public int GradeNumber(ClsBusinessCard Model)
+        public int GradeNumber(Guid? UserID)
         {
-            var BypassGA = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Grades.Grade_Name).FirstOrDefault();
+            var BypassGA = db.Users.Where(w => w.User_Id == UserID).Select(s => s.Master_Grades.Grade_Name).FirstOrDefault();
+
+            
 
             int Num = Convert.ToInt32(BypassGA.Substring(1));
 
@@ -207,6 +209,22 @@ namespace E2E.Models
             {
                 throw;
             }
+        }
+
+        public bool Same_department_check(Guid? id)
+        {
+            bool res = new bool();
+            Guid MyUser = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            var businessCard = db.BusinessCards.Find(id);
+            Guid DeptJOB = db.Users.Where(w => w.User_Id == businessCard.User_id).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            Guid DeptUser = db.Users.Where(w => w.User_Id == MyUser).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+
+            if (DeptJOB == DeptUser)
+            {
+                res = true;
+            }
+
+            return res;
         }
 
         public bool SendMail(BusinessCards Model, Guid? SelectId = null, BusinessCardFiles ModelFile = null, string filepath = "", string remark = "", string pseudo = "")

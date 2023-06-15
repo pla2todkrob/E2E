@@ -524,7 +524,7 @@ swal({
 			</div>
 
 			@*ปุ่ม Resend*@
-			@if (ViewBag.OrderBusinessCard == 1 || ViewBag.OrderBusinessCard == 2 || ViewBag.OrderBusinessCard == 4 && ViewBag.CountFileUpload > 0 || ViewBag.OrderBusinessCard == 6)
+			@if (ViewBag.OrderBusinessCard == 1  && UserID == Model.User_id || ViewBag.OrderBusinessCard == 2 || ViewBag.OrderBusinessCard == 4 && ViewBag.CountFileUpload > 0 || ViewBag.OrderBusinessCard == 6)
 			{
 				<div class="form-group col-5">
 					<button class="btn btn-outline-info" onclick="Resend_Email('@Model.BusinessCard_Id')"><i class="fa fa-envelope"></i> Resend</button>
@@ -537,7 +537,7 @@ swal({
 	</div>
 	@{
 
-		if (ViewBag.authorized == 2 && ViewBag.OrderBusinessCard == 1)
+		if (ViewBag.authorized == 2 && ViewBag.OrderBusinessCard == 1 && ViewBag.DeptCHK)
 		{
 
 			<div class="d-flex">
