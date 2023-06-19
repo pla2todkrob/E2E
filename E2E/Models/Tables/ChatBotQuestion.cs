@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,6 +12,7 @@ namespace E2E.Models.Tables
             ChatBotQuestion_Id = Guid.NewGuid();
         }
 
+        public virtual ICollection<ChatBotAnswer> Answers { get; set; }
         public virtual ChatBot ChatBot { get; set; }
 
         [Index]
@@ -24,7 +26,7 @@ namespace E2E.Models.Tables
 
         public Guid? ChatBotQuestion_ParentId { get; set; }
 
-        [Index, StringLength(100), Required]
+        [Required]
         public string Question { get; set; }
     }
 }

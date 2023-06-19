@@ -35,6 +35,27 @@ $(function () {
     });
     preLineSetLink();
 });
+
+function findLastIndex() {
+    var elements = document.getElementsByTagName('*');
+    var maxZIndex = -Infinity;
+    var elementWithMaxZIndex = null;
+
+    for (var i = 0; i < elements.length; i++) {
+        var zIndex = parseInt(window.getComputedStyle(elements[i]).getPropertyValue('z-index'));
+        if (zIndex && zIndex !== 'auto') {
+            if (zIndex > maxZIndex) {
+                maxZIndex = zIndex;
+                elementWithMaxZIndex = elements[i];
+            }
+        }
+    }
+
+    console.log('The last z-index value is: ' + maxZIndex);
+    console.log('Element with the highest z-index: ' + elementWithMaxZIndex.tagName);
+
+}
+
 $(document).ajaxStart(function () {
     callSpin(true).then(function () {
         document.body.classList.add('disabled');
@@ -122,6 +143,45 @@ async function preLineSetLink() {
     });
 }
 
+function typeWriter(text, targetId, disableTarget = undefined) {
+    console.time('typeWriter');
+    let i = 0;
+    const target = document.getElementById(targetId);
+    text = linkify(text);
+    const speed = 10;
+    const maxTime = 3000;
+    const totalTime = text.length * speed;
+    let increase = 1;
+    if (totalTime > maxTime) {
+        increase = Math.ceil(totalTime / maxTime);
+    }
+
+    function typeNextChars() {
+        
+        if (i < text.length) {
+            if (disableTarget) {
+                document.getElementById(disableTarget).classList.add("disabled");
+            }
+            const charsToType = text.substr(i, increase);
+            target.textContent += charsToType;
+            i += increase;
+            target.scrollIntoView(false);
+            setTimeout(function () {
+                typeNextChars();
+            }, speed);
+        }
+        else {
+            document.getElementById(disableTarget).classList.remove("disabled");
+            target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+    }
+
+    typeNextChars();
+
+    return console.timeEnd('typeWriter');
+}
+
+
 function getQueryString() {
     if (window.location.search === "") {
         return '{}'
@@ -151,6 +211,18 @@ function clearQueryString() {
     history.pushState({}, null, location.href.split('?')[0]);
     location.reload();
 }
+async function callDataWriteText(urlAjax, targetId,disableTarget = undefined) {
+    const res = await $.ajax({
+        url: urlAjax,
+        async: true,
+        method: 'GET'
+    });
+
+    const target = document.getElementById(targetId);
+    target.innerHTML = '';
+
+    typeWriter(res, targetId,disableTarget);
+}
 
 // Helper function for creating a DataTable with the given options
 async function createDataTable(tableId, options) {
@@ -172,6 +244,7 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
         const res = await $.ajax({
             url: url,
             method: 'GET',
+            async: true
         });
         // append the data to blockId
         $(blockId).html(res);
@@ -233,6 +306,7 @@ async function callTable_Normal(urlAjax, blockId = '#datalist') {
         const res = await $.ajax({
             url: url,
             method: 'GET',
+            async: true
         });
         // append the data to blockId
         $(blockId).html(res);
@@ -262,7 +336,8 @@ async function callTable_NoSort(urlAjax, blockId = '#datalist') {
         // Make the GET request using the async/await pattern
         const res = await $.ajax({
             url: url,
-            method: 'GET'
+            method: 'GET',
+            async: true
         });
         // append the data to blockId
         $(blockId).html(res);
@@ -293,6 +368,7 @@ function callFilter(urlAjax, blockId = '#filter') {
         url: `${urlAjax}?filter=${getQueryString()}`,
         method: 'GET',
         dataType: 'html',
+        async: true,
         success: function (data) {
             const block = $(blockId);
             block.html(data);
@@ -314,7 +390,8 @@ async function callData(urlAjax, blockId = '#datalist') {
     try {
         const res = await $.ajax({
             url: urlAjax,
-            method: 'GET'
+            method: 'GET',
+            async: true
         });
         // append the data to blockId
         $(blockId).html(res);
@@ -343,7 +420,7 @@ async function callModal(urlAjax, options = { bigSize: false, callback: null }) 
     try {
         const res = await $.ajax({
             url: urlAjax,
-            async: true,
+            async: true
         });
 
         if (options.bigSize) {
@@ -383,6 +460,7 @@ function callSubmitModal(urlAjax, form) {
                 data: fd,
                 processData: false,
                 contentType: false,
+                async: true,
                 dataType: 'json',
                 success: function (json) {
                     swal({
@@ -425,6 +503,7 @@ function callSubmitPage(urlAjax, form) {
             $.ajax({
                 url: urlAjax,
                 type: 'POST',
+                async: true,
                 data: fd,
                 processData: false,
                 contentType: false,
@@ -460,6 +539,7 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
         url: urlAjax,
         type: 'POST',
         data: formData,
+        async: true,
         processData: false,
         contentType: false,
         success: function (json) {
@@ -489,11 +569,11 @@ function callSubmitRedirect(urlAjax, form, urlRedirect) {
     });
 }
 
-
 function callDeleteItem(urlAjax, reloadPage = false, option = { emptyTarget: undefined, hideTarget: undefined, showTarget: undefined }) {
     $.ajax({
         url: urlAjax,
         type: 'DELETE',
+        async: true,
         success: function (json) {
             swal({
                 title: json.Title,
@@ -503,7 +583,6 @@ function callDeleteItem(urlAjax, reloadPage = false, option = { emptyTarget: und
                 dangerMode: json.DangerMode
             }).then(function () {
                 if (json.Icon === 'success') {
-
                     if (reloadPage) {
                         location.reload();
                     } else {
@@ -523,7 +602,6 @@ function callDeleteItem(urlAjax, reloadPage = false, option = { emptyTarget: und
                             $('#modalArea').modal('hide');
                             reloadTable();
                         }
-
                     }
                 }
             });
@@ -621,7 +699,6 @@ async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedir
     }
 }
 
-
 let lastScrollTop = window.pageYOffset;
 const eleNav = document.querySelector('nav.navbar');
 const topButton = document.getElementById('btnToTop');
@@ -693,5 +770,23 @@ async function bottomFunction(target, duration = 500) {
     if ($(target).length > 0) {
         await $(target).animate({ scrollTop: $(target)[0].scrollHeight }, duration);
     }
+}
+// Function to set session value
+function setSessionValue(key, value) {
+    sessionStorage.setItem(key, JSON.stringify(value));
+}
 
+// Function to get session value
+function getSessionValue(key) {
+    console.log('key', key);
+    console.log('sessionStorage', sessionStorage);
+
+    var value = sessionStorage.getItem(key);
+    console.log(value);
+    return value ? JSON.parse(value) : null;
+}
+
+// Function to remove session value
+function removeSessionValue(key) {
+    sessionStorage.removeItem(key);
 }

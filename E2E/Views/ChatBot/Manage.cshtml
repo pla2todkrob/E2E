@@ -23,26 +23,25 @@
         });
 
         function getQuestion(id) {
-            const url = '@Url.Action("GetChatBot","ChatBot")'.concat('/', id);
+            const url = '@Url.Action("Manage_RootQuestion", "ChatBot")'.concat('/', id);
             callData(url, '#listArea').then(function () {
                 $('#qaList').addClass('active');
             });
         }
 
         function reloadTable() {
-            callData('@Url.Action("GroupTable", "ChatBot")');
+            callData('@Url.Action("Manage_Datalist", "ChatBot")');
         }
 
 function getNextLevel(id, container) {
-    const url = '@Url.Action("ExpandLevel", "ChatBot")'.concat('/', id);
+    const url = '@Url.Action("Manage_ExpandLevel", "ChatBot")'.concat('/', id);
 
     $.ajax({
         url: url,
         async: true,
-        success: function(res) {
+        success: function (res) {
             const questions = res.ChatBotQuestions;
             const answers = res.ChatBotAnswers;
-
             if (questions.length > 0) {
                 loadNextLevel(questions, container, answers);
             } else {
@@ -60,7 +59,6 @@ function getNextLevel(id, container) {
     answerUl.empty();
 
             $.each(answers, function (i, answer) {
-                console.log(answer.Answer);
         const text = linkify(answer.ChatBotQuestion.Question.concat(': ', answer.Answer));
         const onclickUrl = '@Url.Action("EditAnswer", "ChatBot")'.concat('/',answer.ChatBotAnswer_Id);
 

@@ -48,7 +48,6 @@ namespace E2E.Models
         public DbSet<BusinessCardFiles> BusinessCardFiles { get; set; }
         public DbSet<BusinessCards> BusinessCards { get; set; }
         public DbSet<ChatBotAnswer> ChatBotAnswers { get; set; }
-        public DbSet<ChatBotHistory> ChatBotHistories { get; set; }
         public DbSet<ChatBotQuestion> ChatBotQuestions { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
         public DbSet<ChatBotUploadHistory> ChatBotUploadHistories { get; set; }
