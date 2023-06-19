@@ -185,8 +185,6 @@ namespace E2E.Models
         {
             var BypassGA = db.Users.Where(w => w.User_Id == UserID).Select(s => s.Master_Grades.Grade_Name).FirstOrDefault();
 
-            
-
             int Num = Convert.ToInt32(BypassGA.Substring(1));
 
             return Num;
@@ -225,6 +223,20 @@ namespace E2E.Models
             }
 
             return res;
+        }
+
+        public List<Guid> NoM3(List<Guid> IDs)
+        {
+            List<Guid> MGs = new List<Guid>();
+            foreach (var item in IDs)
+            {
+                if (GradeNumber(item) >= 4)
+                {
+                    MGs.Add(item);
+                } 
+            }
+
+            return MGs;
         }
 
         public bool SendMail(BusinessCards Model, Guid? SelectId = null, BusinessCardFiles ModelFile = null, string filepath = "", string remark = "", string pseudo = "")
@@ -266,7 +278,7 @@ namespace E2E.Models
                 linkUrl = linkUrl.Replace("ManagerUserApprove", "BusinessCard_Detail/");
 
                 GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-                mail.SendToIds = GetMgApp;
+                mail.SendToIds = NoM3(GetMgApp);
                 mail.SendCC = Model.User_id;
             }
             //Staff Undo
