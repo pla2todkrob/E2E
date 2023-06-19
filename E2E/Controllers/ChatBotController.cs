@@ -1,10 +1,13 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -17,76 +20,7 @@ namespace E2E.Controllers
         private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsManageMaster master = new ClsManageMaster();
-
-        private bool ClearSession()
-        {
-            try
-            {
-                HttpContext.Session.Remove(SessionGroup);
-                HttpContext.Session.Remove(SessionQuestion);
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public static string SessionGroup { get; set; } = "GroupId";
-        public static string SessionQuestion { get; set; } = "QuestionId";
-
-        public ActionResult ChatHistory()
-        {
-            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-            List<ChatBotHistory> chatBotHistories = db.ChatBotHistories
-                .Where(w =>
-                w.IsDisplay &&
-                w.User_Id == userId)
-                .OrderBy(o => o.Create)
-                .ToList();
-            return View(chatBotHistories);
-        }
-
-        public ActionResult ClearHistory()
-        {
-            ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
-            {
-                try
-                {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    db.ChatBotHistories.Where(w => w.User_Id == userId && w.IsDisplay).ToList().ForEach(f => f.IsDisplay = false);
-                    if (db.SaveChanges() > 0)
-                    {
-                        scope.Complete();
-                        swal.Icon = "success";
-                        swal.Text = "ลบประวัติการแชทเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                        swal.DangerMode = false;
-                        ClearSession();
-                    }
-                    else
-                    {
-                        swal.Icon = "warning";
-                        swal.Text = "ไม่พบข้อมูลการแชท";
-                        swal.Title = "Warning";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.TargetSite.Name;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Text = inner.Message;
-                        inner = inner.InnerException;
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
+        public string SessionQuestionName { get; set; } = "QuestionLv";
 
         public ActionResult EditAnswer(Guid id)
         {
@@ -159,46 +93,88 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult ExpandLevel(Guid id)
+        public async Task<ActionResult> GetAnswer(Guid? id)
         {
             try
             {
-                var chatbotQA = new ClsChatbotQA
+                ClsChatbotQA chatbotQA = new ClsChatbotQA();
+
+                if (id.HasValue)
                 {
-                    ChatBotQuestions = db.ChatBotQuestions.Where(q => q.ChatBotQuestion_ParentId == id).ToList()
-                };
+                    if (db.ChatBots.Any(a => a.ChatBot_Id == id.Value))
+                    {
+                        chatbotQA.Parents.Add(new KeyValuePair<string, KeyValuePair<int, Guid>>(db.ChatBots.Find(id).Group, new KeyValuePair<int, Guid>(0, id.Value)));
+                    }
+                    else
+                    {
+                        List<ChatBotQuestion> questions = new List<ChatBotQuestion>();
 
-                chatbotQA.ChatBotAnswers = chatbotQA.ChatBotQuestions.Count > 0
-                                           ? chatBot.GetAnswers(chatbotQA.ChatBotQuestions)
-                                           : db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id).ToList();
+                        questions = await db.ChatBotQuestions
+                                .Where(q => q.ChatBotQuestion_ParentId == id)
+                                .OrderBy(o => o.Question)
+                                .ToListAsync();
 
-                return Json(chatbotQA, JsonRequestBehavior.AllowGet);
+                        chatbotQA.ChatBotAnswers = questions.Count > 0
+                            ? await chatBot.GetAnswersAsync(id.Value)
+                            : await db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id)
+                                .ToListAsync();
+
+                        ChatBotQuestion currentQuestion = db.ChatBotQuestions.Find(id);
+                        chatbotQA.Parents.Add(new KeyValuePair<string, KeyValuePair<int, Guid>>(currentQuestion.ChatBot.Group, new KeyValuePair<int, Guid>(0, currentQuestion.ChatBot_Id)));
+                        while (currentQuestion != null)
+                        {
+                            chatbotQA.Parents.Add(new KeyValuePair<string, KeyValuePair<int, Guid>>(currentQuestion.Question, new KeyValuePair<int, Guid>(currentQuestion.ChatBotQuestion_Level, currentQuestion.ChatBotQuestion_Id)));
+                            currentQuestion = db.ChatBotQuestions.Find(currentQuestion.ChatBotQuestion_ParentId);
+                        }
+                        chatbotQA.Parents = chatbotQA.Parents.OrderBy(o => o.Value.Key).ToList();
+                    }
+                }
+
+                return View(chatbotQA);
             }
             catch (Exception)
             {
-                // Consider logging the exception before re-throwing
                 throw;
             }
         }
 
-        public ActionResult GetChatBot(Guid id)
+        public ActionResult GetQuestionList(Guid? id)
         {
             try
             {
-                ClsChatbotQuestion question = chatBot.GetQuestion(id);
+                ClsChatbotQA chatbotQA = new ClsChatbotQA();
+                if (id.HasValue)
+                {
+                    if (db.ChatBots.Any(a => a.ChatBot_Id == id.Value))
+                    {
+                        chatbotQA.ChatBotQuestions = db.ChatBotQuestions
+                    .Where(w =>
+                    w.ChatBot_Id.Equals(id.Value) &&
+                    w.ChatBotQuestion_Level.Equals(1))
+                    .OrderBy(o => o.ChatBotQuestion_Level)
+                    .ThenBy(t => t.Question)
+                    .ToList();
+                    }
+                    else
+                    {
+                        chatbotQA.ChatBotQuestions = db.ChatBotQuestions
+                            .Where(w => w.ChatBotQuestion_ParentId == id.Value)
+                            .OrderBy(o => o.ChatBotQuestion_Level)
+                    .ThenBy(t => t.Question)
+                    .ToList();
+                    }
+                }
+                else
+                {
+                    chatbotQA.ChatBots = db.ChatBots.OrderBy(o => o.Group).ToList();
+                }
 
-                return View(question);
+                return View(chatbotQA);
             }
             catch (Exception)
             {
                 throw;
             }
-        }
-
-        public ActionResult GroupTable()
-        {
-            List<ChatBot> chatBots = db.ChatBots.OrderBy(o => o.Group).ToList();
-            return View(chatBots);
         }
 
         public ActionResult Import()
@@ -292,188 +268,55 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult QuestionList(Guid? id, bool getAnswer = false)
+        public ActionResult Manage_Datalist()
+        {
+            List<ChatBot> chatBots = db.ChatBots.OrderBy(o => o.Group).ToList();
+            return View(chatBots);
+        }
+
+        public async Task<JsonResult> Manage_ExpandLevel(Guid id)
         {
             try
             {
-                ReStart:
-                List<ChatBotQuestion> questions = new List<ChatBotQuestion>();
-                ChatBotHistory chatBotHistory = new ChatBotHistory();
-                if (id.HasValue)
+                ClsChatbotQA chatbotQA = new ClsChatbotQA
                 {
-                    if (HttpContext.Session[SessionGroup] == null)
-                    {
-                        HttpContext.Session[SessionGroup] = id.Value;
-                        questions = db.ChatBotQuestions
-                            .Where(w => w.ChatBot_Id == id.Value && !w.ChatBotQuestion_ParentId.HasValue)
-                            .OrderBy(o => o.Question)
-                            .ToList();
+                    ChatBotQuestions = db.ChatBotQuestions.AsNoTracking().Where(q => q.ChatBotQuestion_ParentId == id).OrderBy(o => o.Question).ToList()
+                };
 
-                        chatBotHistory = new ChatBotHistory()
-                        {
-                            HumanChat = db.ChatBots.Find(id).Group,
-                            IsDisplay = true,
-                            User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                        };
-                        db.ChatBotHistories.Add(chatBotHistory);
-                    }
-                    else
-                    {
-                        HttpContext.Session[SessionQuestion] = id.Value;
-                        questions = db.ChatBotQuestions
-                            .Where(w => w.ChatBotQuestion_ParentId == id)
-                            .OrderBy(o => o.Question)
-                            .ToList();
+                chatbotQA.ChatBotAnswers = chatbotQA.ChatBotQuestions.Count > 0
+                                           ? await chatBot.GetAnswersAsync(id)
+                                           : await db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id)
+                                           .ToListAsync();
 
-                        chatBotHistory = new ChatBotHistory()
-                        {
-                            HumanChat = db.ChatBotQuestions.Find(id).Question,
-                            IsDisplay = true,
-                            User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                        };
-                        db.ChatBotHistories.Add(chatBotHistory);
-
-                        if (questions.Count == 0)
-                        {
-                            string answers = string.Empty;
-                            foreach (var item in db.ChatBotAnswers.Where(w => w.ChatBotQuestion_Id == id.Value).Select(s => s.Answer).ToList())
-                            {
-                                answers += string.Concat(item, Environment.NewLine);
-                            }
-
-                            chatBotHistory = new ChatBotHistory()
-                            {
-                                SystemChat = answers.Trim(Environment.NewLine.ToCharArray()),
-                                IsDisplay = true,
-                                User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                            };
-                            db.ChatBotHistories.Add(chatBotHistory);
-                            if (ClearSession())
-                            {
-                                id = null;
-                                goto ReStart;
-                            }
-                        }
-                    }
-                }
-                else
+                return this.Json(chatbotQA, JsonRequestBehavior.AllowGet, new JsonSerializerSettings
                 {
-                    if (HttpContext.Session[SessionQuestion] == null)
-                    {
-                        if (HttpContext.Session[SessionGroup] == null)
-                        {
-                            ViewBag.ChatbotGroupList = db.ChatBots
-                                .OrderBy(o => o.Group)
-                                .Select(s => new SelectListItem()
-                                {
-                                    Value = s.ChatBot_Id.ToString(),
-                                    Text = s.Group
-                                })
-                                .ToList();
-                        }
-                        else
-                        {
-                            id = Guid.Parse(HttpContext.Session[SessionGroup].ToString());
-                            questions = db.ChatBotQuestions
-                                .Where(w => w.ChatBot_Id == id && !w.ChatBotQuestion_ParentId.HasValue)
-                                .OrderBy(o => o.Question)
-                                .ToList();
-                            if (getAnswer)
-                            {
-                                string answers = string.Empty;
-                                foreach (var item in chatBot.GetAnswers(questions))
-                                {
-                                    answers += string.Concat(item.ChatBotQuestion.Question, ": ", item.Answer, Environment.NewLine);
-                                }
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+            }
+            catch (Exception)
+            {
+                // Consider logging the exception before re-throwing
+                throw;
+            }
+        }
 
-                                chatBotHistory = new ChatBotHistory()
-                                {
-                                    SystemChat = answers.Trim(Environment.NewLine.ToCharArray()),
-                                    IsDisplay = true,
-                                    User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                                };
-                                db.ChatBotHistories.Add(chatBotHistory);
+        public async Task<ActionResult> Manage_RootQuestion(Guid id)
+        {
+            try
+            {
+                ClsChatbotQuestion question = await chatBot.GetQuestion(id);
 
-                                if (ClearSession())
-                                {
-                                    id = null;
-                                    goto ReStart;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        id = Guid.Parse(HttpContext.Session[SessionQuestion].ToString());
-                        questions = db.ChatBotQuestions
-                            .Where(w => w.ChatBotQuestion_ParentId == id)
-                            .OrderBy(o => o.Question)
-                            .ToList();
-
-                        if (questions.Count == 0)
-                        {
-                            string answers = string.Empty;
-                            foreach (var item in db.ChatBotAnswers.Where(w => w.ChatBotQuestion_Id == id.Value).Select(s => s.Answer).ToList())
-                            {
-                                answers += string.Concat(item, Environment.NewLine);
-                            }
-
-                            chatBotHistory = new ChatBotHistory()
-                            {
-                                SystemChat = answers.Trim(Environment.NewLine.ToCharArray()),
-                                IsDisplay = true,
-                                User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                            };
-                            db.ChatBotHistories.Add(chatBotHistory);
-
-                            if (ClearSession())
-                            {
-                                id = null;
-                                goto ReStart;
-                            }
-                        }
-                        else
-                        {
-                            if (getAnswer)
-                            {
-                                string answers = string.Empty;
-                                foreach (var item in chatBot.GetAnswers(questions))
-                                {
-                                    answers += string.Concat(item.ChatBotQuestion.Question, ": ", item.Answer, Environment.NewLine);
-                                }
-
-                                chatBotHistory = new ChatBotHistory()
-                                {
-                                    SystemChat = answers.Trim(Environment.NewLine.ToCharArray()),
-                                    IsDisplay = true,
-                                    User_Id = Guid.Parse(HttpContext.User.Identity.Name)
-                                };
-                                db.ChatBotHistories.Add(chatBotHistory);
-
-                                if (ClearSession())
-                                {
-                                    id = null;
-                                    goto ReStart;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    if (db.SaveChanges() > 0)
-                    {
-                        scope.Complete();
-                    }
-                }
-
-                return View(questions);
+                return View(question);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public ActionResult OpenAI()
+        {
+            return View();
         }
 
         public ActionResult UploadHistory()

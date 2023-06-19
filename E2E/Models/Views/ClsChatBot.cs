@@ -1,40 +1,70 @@
 ﻿using E2E.Models.Tables;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace E2E.Models.Views
 {
     public class ClsChatBot
     {
         private readonly ClsContext db = new ClsContext();
+
+        private async Task<List<ChatBotQuestion>> GetChildQuestionsAsync(Guid parentQuestionId)
+        {
+            return await db.ChatBotQuestions
+                .Where(q => q.ChatBotQuestion_ParentId == parentQuestionId)
+                .Include(q => q.Answers)
+                .OrderBy(o => o.Question)
+                .ToListAsync();
+        }
+
         public ChatBot ChatBot { get; set; }
 
-        public List<ChatBotAnswer> GetAnswers(List<ChatBotQuestion> questions)
+        public async Task<List<ChatBotAnswer>> GetAnswersAsync(Guid questionId)
         {
             var answers = new List<ChatBotAnswer>();
 
             try
             {
                 var nextQuestions = new List<ChatBotQuestion>();
-                foreach (var question in questions)
-                {
-                    answers.AddRange(db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == question.ChatBotQuestion_Id));
-                    var childQuestions = db.ChatBotQuestions.Where(q => q.ChatBotQuestion_ParentId == question.ChatBotQuestion_Id).ToList();
 
-                    if (childQuestions.Any())
-                    {
-                        nextQuestions.AddRange(childQuestions);
-                    }
+                // Retrieve the initial question
+                var initialQuestion = await db.ChatBotQuestions
+                    .Include(q => q.Answers)
+                    .FirstOrDefaultAsync(q => q.ChatBotQuestion_Id == questionId);
+
+                if (initialQuestion != null)
+                {
+                    // Add answers from the initial question
+                    answers.AddRange(initialQuestion.Answers.OrderBy(o => o.Answer));
+
+                    // Retrieve child questions recursively
+                    nextQuestions.AddRange(await GetChildQuestionsAsync(questionId));
                 }
 
-                if (nextQuestions.Any())
+                // Retrieve answers for child questions recursively
+                while (nextQuestions.Any())
                 {
-                    answers.AddRange(GetAnswers(nextQuestions));
+                    var currentQuestion = nextQuestions.FirstOrDefault();
+
+                    if (currentQuestion != null)
+                    {
+                        // Add answers from the current question
+                        answers.AddRange(currentQuestion.Answers.OrderBy(o => o.Answer));
+                        // Retrieve child questions for the current question
+                        var childQuestions = await GetChildQuestionsAsync(currentQuestion.ChatBotQuestion_Id);
+
+                        // Add child questions to the list of next questions
+                        nextQuestions.AddRange(childQuestions);
+                    }
+                    nextQuestions.RemoveAt(0);
+                    nextQuestions = nextQuestions.OrderBy(o => o.Question).ToList();
                 }
 
                 return answers;
@@ -46,20 +76,21 @@ namespace E2E.Models.Views
             }
         }
 
-        public ClsChatbotQuestion GetQuestion(Guid chatBotId)
+        public async Task<ClsChatbotQuestion> GetQuestion(Guid chatBotId)
         {
             try
             {
                 ClsChatbotQuestion clsQuestion = new ClsChatbotQuestion()
                 {
-                    ChatBot = db.ChatBots.Find(chatBotId),
-                    ChatBotQuestions = db.ChatBotQuestions
+                    ChatBot = await db.ChatBots.FindAsync(chatBotId),
+                    ChatBotQuestions = await db.ChatBotQuestions
+                    .AsNoTracking()
                     .Where(w =>
                     w.ChatBot_Id.Equals(chatBotId) &&
                     w.ChatBotQuestion_Level.Equals(1))
                     .OrderBy(o => o.ChatBotQuestion_Level)
                     .ThenBy(t => t.Question)
-                    .ToList()
+                    .ToListAsync()
                 };
 
                 return clsQuestion;
@@ -75,33 +106,61 @@ namespace E2E.Models.Views
             try
             {
                 bool res = new bool();
-                if (db.ChatBots.Count() > 0)
+                using (WebClient webClient = new WebClient())
                 {
-                    db.ChatBots.RemoveRange(db.ChatBots.ToList());
-                    db.SaveChanges();
-                }
-
-                using (HttpClient client = new HttpClient())
-                {
-                    using (Stream stream = client.GetStreamAsync(fileUrl).Result)
+                    byte[] fileData = webClient.DownloadData(fileUrl);
+                    using (var memoryStream = new MemoryStream(fileData))
                     {
-                        using (ExcelPackage package = new ExcelPackage(stream))
+                        List<string> GroupName = new List<string>();
+
+                        using (ExcelPackage package = new ExcelPackage(memoryStream))
                         {
+                            bool isNoData = true;
+
                             foreach (var sheet in package.Workbook.Worksheets)
                             {
                                 var startData = sheet.Cells[2, 1].Text;
                                 if (string.IsNullOrEmpty(startData))
                                 {
-                                    throw new Exception("The document has no information.");
+                                    continue;
                                 }
 
+                                for (int row = 2; row <= sheet.Dimension.End.Row; row++)
+                                {
+                                    var group = sheet.Cells[row, 2].Text;
+                                    if (string.IsNullOrEmpty(group))
+                                    {
+                                        continue;
+                                    }
+                                    if (!GroupName.Contains(group))
+                                    {
+                                        GroupName.Add(group);
+                                    }
+                                }
+                            }
+
+                            if (GroupName.Count > 0)
+                            {
+                                db.ChatBots.RemoveRange(db.ChatBots.Where(w => GroupName.Contains(w.Group)).ToList());
+                                db.SaveChanges();
+                            }
+
+                            foreach (var sheet in package.Workbook.Worksheets)
+                            {
+                                var startData = sheet.Cells[2, 1].Text;
+                                if (string.IsNullOrEmpty(startData))
+                                {
+                                    continue;
+                                }
+
+                                isNoData = false;
                                 for (int row = 2; row <= sheet.Dimension.End.Row; row++)
                                 {
                                     var answer = sheet.Cells[row, 1].Text;
                                     var group = sheet.Cells[row, 2].Text;
                                     if (string.IsNullOrEmpty(answer) || string.IsNullOrEmpty(group))
                                     {
-                                        break;
+                                        continue;
                                     }
                                     ChatBot chatBot = db.ChatBots.Where(w => w.Group.Equals(group)).FirstOrDefault();
                                     if (chatBot == null)
@@ -141,6 +200,7 @@ namespace E2E.Models.Views
                                                 Question = question,
                                                 ChatBotQuestion_Level = questionLv
                                             };
+                                            string jsonQuestion = JsonConvert.SerializeObject(chatBotQuestion, Formatting.Indented);
                                             db.Entry(chatBotQuestion).State = EntityState.Added;
                                             db.SaveChanges();
                                         }
@@ -162,6 +222,10 @@ namespace E2E.Models.Views
                                     }
                                 }
                             }
+                            if (isNoData)
+                            {
+                                throw new Exception("The document has no information.");
+                            }
                             res = true;
                         }
                     }
@@ -169,8 +233,13 @@ namespace E2E.Models.Views
 
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                FileResponse response = new ClsApi().Delete_File(fileUrl);
+                if (!response.IsSuccess)
+                {
+                    throw new Exception(response.ErrorMessage, ex);
+                }
                 throw;
             }
         }
@@ -180,6 +249,8 @@ namespace E2E.Models.Views
     {
         public List<ChatBotAnswer> ChatBotAnswers { get; set; } = new List<ChatBotAnswer>();
         public List<ChatBotQuestion> ChatBotQuestions { get; set; } = new List<ChatBotQuestion>();
+        public List<ChatBot> ChatBots { get; set; } = new List<ChatBot>();
+        public List<KeyValuePair<string, KeyValuePair<int, Guid>>> Parents { get; set; } = new List<KeyValuePair<string, KeyValuePair<int, Guid>>>();
     }
 
     public class ClsChatbotQuestion

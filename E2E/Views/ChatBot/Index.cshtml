@@ -7,15 +7,16 @@
     <script>
         $(function () {
             reloadTable();
-
         });
 
-        function reloadTable(option={ id :'', getAnswer : false }) {
-            let urlQuestion = '@Url.Action("QuestionList", "ChatBot")'.concat('?id=', option.id, '&getAnswer=',option.getAnswer);
-            callData(urlQuestion, '#questionlist').then(function () {
-                callData('@Url.Action("ChatHistory", "ChatBot")', '#chatlist').then(function () {
-                    bottomFunction('html');
-                });
+        function reloadTable(id=null,isGroup=false) {
+            let urlQuestion = '@Url.Action("GetQuestionList", "ChatBot")'.concat('?id=', id);
+            callData(urlQuestion, '#questionlistArea').then(function () {
+                let urlAnswer = '@Url.Action("GetAnswer", "ChatBot")'
+                if (id) {
+                    urlAnswer = urlAnswer.concat('?id=', id);
+                }
+                callData(urlAnswer, '#answerArea');
             });
         }
     </script>
@@ -26,38 +27,29 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
             <li class="breadcrumb-item active" aria-current="page">Chat bot</li>
+            <li class="breadcrumb-item active" aria-current="page">Internal</li>
         </ol>
     </nav>
 }
 <div class="row">
-    <div class=" col-md-8">
-        <div class="card shadow">
-            <div class="card-body" id="chatlist"></div>
-            <div class="card-footer">
-                <button type="button" class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("ClearHistory","ChatBot")','reloadTable')">Clear history</button>
-            </div>
-        </div>
-    </div>
-
     <div class="col-md-4">
         <div class="card shadow sticky-top" id="stickyBody">
-            <div class="card-header">
-                <div class="d-flex">
-                    <div class="mr-auto">
-                        @{
-                            if (ViewBag.IsAdmin)
-                            {
+            @if (ViewBag.IsAdmin)
+            {
+                <div class="card-header">
+                    <div class="d-flex">
+                        <div class="ml-auto">
                             <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
-                            }
-                        }
-                    </div>
-                    <div class="ml-auto">
-                        <button type="button" class="btn btn-success float-right" onclick="reloadTable({getAnswer:true})">Get answer</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="card-body" id="questionlist"></div>
+            }
+            <div class="card-body" id="questionlistArea"></div>
+        </div>
+    </div>
+    <div class=" col-md-8">
+        <div class="card shadow">
+            <div class="card-body" id="answerArea"></div>
         </div>
     </div>
 </div>

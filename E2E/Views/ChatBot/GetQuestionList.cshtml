@@ -1,0 +1,31 @@
+﻿@model E2E.Models.Views.ClsChatbotQA
+@{
+    Layout = null;
+}
+
+<ul class="list-group">
+    @{
+        if (Model.ChatBots.Count > 0)
+        {
+            foreach (var item in Model.ChatBots)
+            {
+                <li class="list-group-item list-group-item-action">
+                    <button type="button" onclick="reloadTable('@item.ChatBot_Id',true)" class="btn btn-block text-left">@item.Group</button>
+                </li>
+            }
+
+        }
+        else
+        {
+            if (Model.ChatBotQuestions.Count > 0)
+            {
+                foreach (var item in Model.ChatBotQuestions)
+                {
+                    <li class="list-group-item list-group-item-action">
+                        <button type="button" onclick="reloadTable('@item.ChatBotQuestion_Id')" class="btn btn-block text-left">@item.Question</button>
+                    </li>
+                }
+            }
+        }
+    }
+</ul>
