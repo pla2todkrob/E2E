@@ -127,7 +127,10 @@ namespace E2E.Controllers
             ViewBag.OrderBusinessCard = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.System_Statuses.OrderBusinessCard).FirstOrDefault();
             ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
             ViewBag.UserCHK = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id && a.Confirm == true);
-            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
+            ViewBag.CountFileUpload = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).Count();
+            ViewBag.DeptCHK = dataCard.Same_department_check(id);
+
+           var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
             return View(clsBusinessCard.FirstOrDefault());
         }
@@ -1308,6 +1311,46 @@ namespace E2E.Controllers
                         swal.Text += string.Format("\n{0}", inner.Message);
                         inner = inner.InnerException;
                     }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Resend_Email(Guid id)
+        {
+            ClsSwal swal = new ClsSwal();
+
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+
+                if (businessCards != null)
+                {
+                    dataCard.SendMail(businessCards, null, null, "", "");
+                    dataCard.BusinessCard_SaveLog(businessCards, "", true);
+                    swal.DangerMode = false;
+                    swal.Icon = "success";
+                    swal.Text = "Email send successfully";
+                    swal.Title = "Successful";
+                }
+                else
+                {
+                    swal.Icon = "warning";
+                    swal.Text = "Send email failed";
+                    swal.Title = "Warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                swal.Title = ex.Source;
+                swal.Text = ex.Message;
+                Exception inner = ex.InnerException;
+                while (inner != null)
+                {
+                    swal.Title = inner.Source;
+                    swal.Text += string.Format("\n{0}", inner.Message);
+                    inner = inner.InnerException;
                 }
             }
 
