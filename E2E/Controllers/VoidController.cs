@@ -133,7 +133,7 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     ClsManageMaster cls = new ClsManageMaster();
                     string lastFile = db.UserUploadHistories.OrderByDescending(o => o.Create).Select(s => s.UserUploadHistoryFile).FirstOrDefault();

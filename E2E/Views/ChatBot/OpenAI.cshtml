@@ -2,6 +2,139 @@
     ViewBag.Title = "OpenAI";
 }
 
+@section scripts{
+    <script>
+
+        $(function () {
+            callData('@Url.Action("OpenAI_History", "ChatBot")', '#historyArea').then(function () {
+                reloadQuestion();
+            });
+        });
+
+        function reloadQuestion() {
+            callData('@Url.Action("OpenAI_Request", "ChatBot")', '#questionArea').then(function () {
+                adjustHistoryHeight(document.getElementById("question"));
+                bottomFunction('html');
+
+                const totalElement = document.getElementById('totalToken');
+                const maxToken = 4096;
+                document.getElementById('maxToken').innerText = maxToken.toLocaleString(); // Use innerText to set the text content
+
+                const totalToken = parseFloat(totalElement.textContent.replace(/,/g, ''));
+
+                if (totalToken < maxToken * 0.5) {
+                    totalElement.classList.add('text-success');
+                } else if (totalToken < maxToken * 0.75) {
+                    totalElement.classList.add('text-warning');
+                } else if (totalToken <= maxToken) {
+                    totalElement.classList.add('text-danger');
+                } else {
+                    swal('Request clear history', "Your chat history is nearing its limit.\nPlease clear the chat history.", 'warning').then(function () {
+                        confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")', 'reloadPage');
+                    });
+
+                }
+
+                });
+        }
+
+        function adjustTextareaHeight(event) {
+            const textarea = event.target;
+            const maxHeight = 256; // Maximum height for the textarea
+
+            textarea.style.height = "auto";
+            textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + "px";
+
+            adjustHistoryHeight(textarea);
+        }
+
+        function adjustHistoryHeight(textarea) {
+            if (textarea.scrollHeight <= 256) {
+                const historyArea = document.getElementById("historyArea");
+                const marginBottom = textarea.scrollHeight + 32;
+                historyArea.style.marginBottom = marginBottom + "px";
+            }
+
+        }
+
+        $(document).on('keydown', '#question', function (e) {
+            if (e.keyCode === 13 && !e.shiftKey) {
+                e.preventDefault(); // Prevent Enter key from creating a new line
+                $('#RequestForm').submit(); // Submit the form
+            }
+            else {
+                adjustTextareaHeight(e);
+            }
+        });
+
+        $(document).on('submit', '#RequestForm', function (e) {
+            e.preventDefault();
+            if ($('#question').val()) {
+                const fd = new FormData(this);
+                let newId = '';
+                $.ajax({
+                    url: '@Url.Action("OpenAI_Request","ChatBot")',
+                    type: 'POST',
+                    async: true,
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        const ul = $('#histories');
+                        // Append question
+                        let li = $('<li>').addClass('list-group-item');
+                        let divRow = $('<div>').addClass('row');
+                        let divCol1 = $('<div>').addClass('col-2 col-md-1 text-center');
+                        let iUser = $('<i>').addClass('fa fa-user fa-2x');
+                        divCol1.append(iUser);
+                        let divCol2 = $('<div>').addClass('col-10 col-md-11');
+                        let blockquoteUser = $('<blockquote>').addClass('blockquote m-0');
+                        let spanUser = $('<span>').addClass('PreLine').text($('#question').val());
+                        blockquoteUser.append(spanUser);
+                        let citeUser = $('<cite>').addClass('blockquote-footer small mt-3').text(formatDate(new Date()));
+                        blockquoteUser.append(citeUser);
+                        divCol2.append(blockquoteUser);
+                        divRow.append(divCol1);
+                        divRow.append(divCol2);
+                        li.append(divRow);
+                        ul.append(li);
+                        $('#question').val('');
+
+                        // Append answer
+                        const childLength = ul.find('li').length;
+                        li = $('<li>').addClass('list-group-item list-group-item-info');
+                        divRow = $('<div>').addClass('row');
+                        divCol1 = $('<div>').addClass('col-2 col-md-1 text-center');
+                        let iCogs = $('<i>').addClass('fa fa-cogs fa-2x');
+                        divCol1.append(iCogs);
+                        divCol2 = $('<div>').addClass('col-10 col-md-11');
+                        let blockquoteCogs = $('<blockquote>').addClass('blockquote m-0');
+                        newId = 'conversation_'.concat(childLength + 1);
+                        let spanCogs = $('<span>').addClass('PreLine').attr('id', newId);
+                        blockquoteCogs.append(spanCogs);
+                        let citeCogs = $('<cite>').addClass('blockquote-footer small mt-3').text(formatDate(new Date()));
+                        blockquoteCogs.append(citeCogs);
+                        divCol2.append(blockquoteCogs);
+                        divRow.append(divCol1);
+                        divRow.append(divCol2);
+                        li.append(divRow);
+                        ul.append(li);
+                        bottomFunction('html');
+                      },
+                    success: function (json) {
+                        typeWriter(json, newId, { disableTarget: 'question', scrollTarget: 'html' });
+                        reloadQuestion();
+                    },
+                    error: (error) => {
+                        console.error(error);
+                    }
+                });
+            }
+            return false;
+        });
+    </script>
+}
+
 @section breadcrumb{
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -12,7 +145,12 @@
     </nav>
 }
 
-<div class="card mb-3">
-</div>
-<div class="card fixed-bottom">
+<div id="historyArea"></div>
+<div class="fixed-bottom" id="bottomArea">
+    <div class="container">
+        <div class="card">
+            <div class="card-header" id="questionArea">
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,5 +1,5 @@
 ﻿$(function () {
-    adjustHeight().then(t => {
+    adjustHeight().then(function () {
         $(window).resize(function () {
             adjustHeight();
         });

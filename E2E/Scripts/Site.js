@@ -53,7 +53,6 @@ function findLastIndex() {
 
     console.log('The last z-index value is: ' + maxZIndex);
     console.log('Element with the highest z-index: ' + elementWithMaxZIndex.tagName);
-
 }
 
 $(document).ajaxStart(function () {
@@ -112,21 +111,29 @@ async function callSpin(active) {
 }
 
 function linkify(inputText) {
-    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+    var replacedText;
 
-    //URLs starting with http://, https://, or ftp://
-    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-    replacedText = inputText.replace(replacePattern1, function (match, p1) {
-        return inputText.includes('<a href="' + p1 + '"') ? match : '<a href="' + p1 + '" target="_blank">' + p1 + '</a>';
+    // URLs starting with http://, https://, or ftp://
+    var replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, function (match) {
+        return '<a href="' + match + '">' + match + '</a>';
     });
 
-    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
-    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
-    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+    // URLs starting with "www."
+    var replacePattern2 = /(^|[^/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, function (match, prefix) {
+        return prefix + '<a href="http://' + match + '">' + match + '</a>';
+    });
 
-    //Change email addresses to mailto:: links.
-    replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z.]{2,6})/gim; //Adjusted to accommodate for multiple dots in the domain
+    // Change email addresses to mailto: links
+    var replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z.]{2,6})/gim;
     replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    // Format telephone numbers
+    replacedText = replacedText.replace(/(\b0\d{1,2}[-.\s]?\d+(?:[-.\s]\d+)*\d+)/g, function (match) {
+        var formattedNumber = match.replace(/[^\d-]/g, '');
+        return match.replace(formattedNumber, '<a href="tel:' + formattedNumber + '">' + formattedNumber + '</a>');
+    });
 
     return replacedText;
 }
@@ -143,8 +150,9 @@ async function preLineSetLink() {
     });
 }
 
-function typeWriter(text, targetId, disableTarget = undefined) {
-    console.time('typeWriter');
+
+
+function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined }) {
     let i = 0;
     const target = document.getElementById(targetId);
     text = linkify(text);
@@ -156,31 +164,56 @@ function typeWriter(text, targetId, disableTarget = undefined) {
         increase = Math.ceil(totalTime / maxTime);
     }
 
+    let disableTarget = undefined;
+    let scrollTarget = undefined;
+
+    if (option.disableTarget) {
+        disableTarget = document.getElementById(option.disableTarget);
+    }
+
+    if (option.scrollTarget) {
+        scrollTarget = document.getElementById(option.scrollTarget);
+        if (!scrollTarget) {
+            scrollTarget = document.querySelector(option.scrollTarget);
+        }
+    }
+
     function typeNextChars() {
-        
         if (i < text.length) {
             if (disableTarget) {
-                document.getElementById(disableTarget).classList.add("disabled");
+                disableTarget.classList.add("disabled");
             }
             const charsToType = text.substr(i, increase);
-            target.textContent += charsToType;
+            target.innerHTML += charsToType;
             i += increase;
-            target.scrollIntoView(false);
+            if (scrollTarget) {
+                scrollTarget.scrollIntoView(false);
+            }
+            else {
+                target.scrollIntoView(false);
+            }
+
             setTimeout(function () {
                 typeNextChars();
             }, speed);
         }
         else {
-            document.getElementById(disableTarget).classList.remove("disabled");
-            target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            if (disableTarget) {
+                disableTarget.classList.remove("disabled");
+            }
+            if (scrollTarget) {
+                setTimeout(function () {
+                    scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+            else {
+                target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
         }
     }
 
-    typeNextChars();
-
-    return console.timeEnd('typeWriter');
+    return typeNextChars();
 }
-
 
 function getQueryString() {
     if (window.location.search === "") {
@@ -211,7 +244,7 @@ function clearQueryString() {
     history.pushState({}, null, location.href.split('?')[0]);
     location.reload();
 }
-async function callDataWriteText(urlAjax, targetId,disableTarget = undefined) {
+async function callDataWriteText(urlAjax, targetId, disableTarget = undefined) {
     const res = await $.ajax({
         url: urlAjax,
         async: true,
@@ -221,7 +254,7 @@ async function callDataWriteText(urlAjax, targetId,disableTarget = undefined) {
     const target = document.getElementById(targetId);
     target.innerHTML = '';
 
-    typeWriter(res, targetId,disableTarget);
+    typeWriter(res, targetId, disableTarget);
 }
 
 // Helper function for creating a DataTable with the given options
@@ -386,7 +419,7 @@ function callFilter(urlAjax, blockId = '#filter') {
     });
 }
 
-async function callData(urlAjax, blockId = '#datalist') {
+async function callData(urlAjax, blockId = '#datalist', callback = undefined) {
     try {
         const res = await $.ajax({
             url: urlAjax,
@@ -395,6 +428,9 @@ async function callData(urlAjax, blockId = '#datalist') {
         });
         // append the data to blockId
         $(blockId).html(res);
+        if (callback) {
+            callback();
+        }
         return preLineSetLink();
     } catch (e) {
         console.error(e);
@@ -662,7 +698,7 @@ const warningConfirm = {
     dangerMode: false
 };
 
-async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedirect: '', isDangerous: false }) {
+async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedirect: '', isDangerous: false, callback: undefined }) {
     warningConfirm.dangerMode = option.isDangerous;
     const confirm = await swal(warningConfirm);
     if (confirm) {
@@ -671,28 +707,38 @@ async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedir
                 url: urlAjax,
                 async: true,
             });
+
             swal({
                 title: res.Title,
                 text: res.Text,
                 icon: res.Icon,
                 button: res.Button,
                 dangerMode: res.DangerMode
-            });
-            if (res.Icon === 'success') {
-                switch (action) {
-                    case 'reloadPage':
-                        location.reload();
-                        break;
-                    case 'reloadTable':
-                        reloadTable();
-                        break;
-                    case 'redirect':
-                        window.location.href = option.urlRedirect;
-                        break;
-                    default:
-                        console.log("Invalid Action type")
+            }).then(function () {
+                if (res.Icon === 'success') {
+                    switch (action) {
+                        case 'reloadPage':
+                            location.reload();
+                            break;
+                        case 'reloadTable':
+                            if (callback) {
+                                callback();
+                            }
+                            else {
+                                reloadTable();
+                            }
+
+                            break;
+                        case 'redirect':
+                            window.location.href = option.urlRedirect;
+                            break;
+                        default:
+                            console.log("Invalid Action type")
+                    }
                 }
-            }
+            });
+
+            
         } catch (error) {
             console.error(error);
         }
@@ -718,6 +764,14 @@ function scrollFunction() {
         else {
             eleNav.style.top = '0';
             stickyBody.style.top = `${eleNav.offsetHeight + 16}px`;
+        }
+    }
+    else if (eleNav) {
+        if (scrollTop > lastScrollTop) {
+            eleNav.style.top = `-${eleNav.offsetHeight}px`;
+        }
+        else {
+            eleNav.style.top = '0';
         }
     }
 
@@ -765,6 +819,10 @@ function setCookie(name, value, expires = 1) {
     date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
     var expires = "expires=" + date.toUTCString();
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
+function formatDate(date) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
 }
 async function bottomFunction(target, duration = 500) {
     if ($(target).length > 0) {

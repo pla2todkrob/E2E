@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -50,7 +51,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ActionResult BusinessCard_Create(ClsBusinessCard Model)
+        public async Task<ActionResult> BusinessCard_Create(ClsBusinessCard Model)
         {
             ClsSwal swal = new ClsSwal();
             if (Model.User_id.HasValue)
@@ -60,11 +61,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (dataCard.BusinessCard_SaveCreate(Model))
+                        if (await dataCard.BusinessCard_SaveCreate(Model))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -130,7 +131,7 @@ namespace E2E.Controllers
             ViewBag.CountFileUpload = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).Count();
             ViewBag.DeptCHK = dataCard.Same_department_check(id);
 
-           var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
+            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
             return View(clsBusinessCard.FirstOrDefault());
         }
@@ -544,7 +545,7 @@ namespace E2E.Controllers
             return View(clsLog_Businesses.OrderByDescending(O => O.Create));
         }
 
-        public ActionResult ManagerGaApprove(Guid? id, Guid? SelectId)
+        public async Task<ActionResult> ManagerGaApprove(Guid? id, Guid? SelectId)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -552,7 +553,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -565,7 +566,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards);
-                        dataCard.SendMail(businessCards, SelectId);
+                        await dataCard.SendMail(businessCards, SelectId);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -596,7 +597,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ManagerGaReject(Guid? id, string remark)
+        public async Task<ActionResult> ManagerGaReject(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -604,7 +605,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -616,7 +617,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards, remark);
-                        dataCard.SendMail(businessCards, null, null, "", remark);
+                        await dataCard.SendMail(businessCards, null, null, "", remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -647,7 +648,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ManagerUserApprove(Guid? id)
+        public async Task<ActionResult> ManagerUserApprove(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -655,7 +656,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -682,7 +683,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards);
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -713,7 +714,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ManagerUserReject(Guid? id, string remark)
+        public async Task<ActionResult> ManagerUserReject(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -721,7 +722,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -733,7 +734,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards, remark);
-                        dataCard.SendMail(businessCards, null, null, "", remark);
+                        await dataCard.SendMail(businessCards, null, null, "", remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -805,7 +806,47 @@ namespace E2E.Controllers
             return clsBusinessCards;
         }
 
-        public ActionResult StaffComplete(Guid? id)
+        public async Task<ActionResult> Resend_Email(Guid id)
+        {
+            ClsSwal swal = new ClsSwal();
+
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+
+                if (businessCards != null)
+                {
+                    await dataCard.SendMail(businessCards, null, null, "", "");
+                    dataCard.BusinessCard_SaveLog(businessCards, "", true);
+                    swal.DangerMode = false;
+                    swal.Icon = "success";
+                    swal.Text = "Email send successfully";
+                    swal.Title = "Successful";
+                }
+                else
+                {
+                    swal.Icon = "warning";
+                    swal.Text = "Send email failed";
+                    swal.Title = "Warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                swal.Title = ex.Source;
+                swal.Text = ex.Message;
+                Exception inner = ex.InnerException;
+                while (inner != null)
+                {
+                    swal.Title = inner.Source;
+                    swal.Text += string.Format("\n{0}", inner.Message);
+                    inner = inner.InnerException;
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<ActionResult> StaffComplete(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -813,7 +854,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -823,7 +864,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -905,7 +946,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult StaffUndo(Guid? id, string remark)
+        public async Task<ActionResult> StaffUndo(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -913,7 +954,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -924,7 +965,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, null, "", remark, "7");
+                        await dataCard.SendMail(businessCards, null, null, "", remark, "7");
                         dataCard.BusinessCard_SaveLog(businessCards, remark, true);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1042,13 +1083,13 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ActionResult Upload(HttpPostedFileBase file, Guid? id)
+        public async Task<ActionResult> Upload(HttpPostedFileBase file, Guid? id)
         {
             ClsSwal swal = new ClsSwal();
 
             try
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     if (file != null && file.ContentLength > 0 && id.HasValue)
                     {
@@ -1062,12 +1103,12 @@ namespace E2E.Controllers
                             FileName = string.Concat("_", file.FileName);
                         }
 
-                        string filepath = data.UploadFileToString(dir, file, FileName);
+                        string filepath = await data.UploadFileToString(dir, file, FileName);
 
                         if (!string.IsNullOrEmpty(filepath))
                         {
                             var sql = db.BusinessCards.Find(id);
-                            if (dataCard.BusinessCard_SaveFile(filepath, sql))
+                            if (await dataCard.BusinessCard_SaveFile(filepath, sql))
                             {
                                 scope.Complete();
                                 swal.DangerMode = false;
@@ -1108,7 +1149,7 @@ namespace E2E.Controllers
             return View(res);
         }
 
-        public ActionResult UserClose(Guid? id)
+        public async Task<ActionResult> UserClose(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1116,7 +1157,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1126,7 +1167,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1158,7 +1199,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult UserConfirmApprove(Guid? id)
+        public async Task<ActionResult> UserConfirmApprove(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1166,7 +1207,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1180,7 +1221,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1212,7 +1253,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult UserConfirmCancel(Guid? id, string remark)
+        public async Task<ActionResult> UserConfirmCancel(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1220,7 +1261,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1235,7 +1276,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
+                        await dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
                         dataCard.BusinessCard_SaveLog(businessCards, remark);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1267,7 +1308,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult UserUndo(Guid? id, string remark)
+        public async Task<ActionResult> UserUndo(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1275,7 +1316,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1285,7 +1326,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, null, "", remark, "9");
+                        await dataCard.SendMail(businessCards, null, null, "", remark, "9");
                         dataCard.BusinessCard_SaveLog(businessCards, remark, true);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1311,46 +1352,6 @@ namespace E2E.Controllers
                         swal.Text += string.Format("\n{0}", inner.Message);
                         inner = inner.InnerException;
                     }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult Resend_Email(Guid id)
-        {
-            ClsSwal swal = new ClsSwal();
-
-            try
-            {
-                BusinessCards businessCards = db.BusinessCards.Find(id);
-
-                if (businessCards != null)
-                {
-                    dataCard.SendMail(businessCards, null, null, "", "");
-                    dataCard.BusinessCard_SaveLog(businessCards, "", true);
-                    swal.DangerMode = false;
-                    swal.Icon = "success";
-                    swal.Text = "Email send successfully";
-                    swal.Title = "Successful";
-                }
-                else
-                {
-                    swal.Icon = "warning";
-                    swal.Text = "Send email failed";
-                    swal.Title = "Warning";
-                }
-            }
-            catch (Exception ex)
-            {
-                swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
                 }
             }
 

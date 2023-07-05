@@ -2,6 +2,8 @@
 using E2E.Models.Tables;
 using E2E.Models.Views;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -117,6 +119,7 @@ namespace E2E.Controllers
                         chatbotQA.ChatBotAnswers = questions.Count > 0
                             ? await chatBot.GetAnswersAsync(id.Value)
                             : await db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id)
+                            .OrderBy(o => o.Answer)
                                 .ToListAsync();
 
                         ChatBotQuestion currentQuestion = db.ChatBotQuestions.Find(id);
@@ -183,7 +186,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ActionResult ImportExcel()
+        public async Task<ActionResult> ImportExcel()
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -191,7 +194,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -206,17 +209,17 @@ namespace E2E.Controllers
                             {
                                 FolderPath = "ChatBot"
                             };
-                            FileResponse fileResponse = clsApi.UploadFile(clsServiceFile, file);
+                            FileResponse fileResponse = await clsApi.UploadFile(clsServiceFile, file);
                             ChatBotUploadHistory chatBotUploadHistory = new ChatBotUploadHistory
                             {
                                 ChatBotUploadHistoryFile = fileResponse.FileUrl,
                                 ChatBotUploadHistoryFileName = Path.GetFileName(fileResponse.FileUrl),
                                 User_Id = Guid.Parse(HttpContext.User.Identity.Name)
                             };
-                            db.Entry(chatBotUploadHistory).State = System.Data.Entity.EntityState.Added;
+                            db.Entry(chatBotUploadHistory).State = EntityState.Added;
                             if (db.SaveChanges() > 0)
                             {
-                                if (chatBot.SaveChatBotLearn(fileResponse.FileUrl))
+                                if (await chatBot.SaveChatBotLearn(fileResponse.FileUrl))
                                 {
                                     scope.Complete();
                                     swal.Icon = "success";
@@ -286,12 +289,10 @@ namespace E2E.Controllers
                 chatbotQA.ChatBotAnswers = chatbotQA.ChatBotQuestions.Count > 0
                                            ? await chatBot.GetAnswersAsync(id)
                                            : await db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id)
+                                           .OrderBy(o => o.Answer)
                                            .ToListAsync();
 
-                return this.Json(chatbotQA, JsonRequestBehavior.AllowGet, new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                });
+                return Json(chatbotQA, JsonRequestBehavior.AllowGet);
             }
             catch (Exception)
             {
@@ -317,6 +318,169 @@ namespace E2E.Controllers
         public ActionResult OpenAI()
         {
             return View();
+        }
+
+        public async Task<JsonResult> OpenAI_ClearConversation()
+        {
+            ClsSwal swal = new ClsSwal();
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+                    chatGPT.IsEnd = true;
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        scope.Complete();
+                        swal.Icon = "success";
+                        swal.Text = "ล้างประวัติการแชทเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                        swal.DangerMode = false;
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "ไม่พบประวัติการแชท";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.TargetSite.Name;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Text = inner.Message;
+                        inner = inner.InnerException;
+                    }
+                }
+            }
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<ActionResult> OpenAI_History()
+        {
+            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+            List<ChatGPTHistory> chatGPTHistories = new List<ChatGPTHistory>();
+            ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+            if (chatGPT != null)
+            {
+                chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
+            }
+            return View(chatGPTHistories);
+        }
+
+        public async Task<ActionResult> OpenAI_Request()
+        {
+            try
+            {
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+
+                return View(await db.ChatGPTs
+                    .Where(w => w.User_Id == userId && !w.IsEnd)
+                    .FirstOrDefaultAsync());
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpPost]
+        [ValidateInput(false)]
+        public async Task<JsonResult> OpenAI_Request(string question)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(question))
+                {
+                    return Json(null);
+                }
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                RestClientOptions options = new RestClientOptions("https://api.openai.com/")
+                {
+                    MaxTimeout = -1,
+                };
+                RestClient client = new RestClient(options);
+                RestRequest request = new RestRequest("v1/chat/completions", Method.Post);
+
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("Authorization", "Bearer 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");
+                ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+                if (chatGPT == null)
+                {
+                    chatGPT = new ChatGPT()
+                    {
+                        User_Id = userId
+                    };
+                    db.ChatGPTs.Add(chatGPT);
+                }
+                List<ChatGPTHistory> chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
+                var conversation = new List<dynamic>();
+
+                foreach (var item in chatGPTHistories)
+                {
+                    conversation.Add(new { role = item.Role, content = item.Content });
+                }
+
+                // Append the user's new input to the conversation
+                conversation.Add(new { role = "user", content = question });
+
+                ChatGPTHistory chatGPTHistory = new ChatGPTHistory()
+                {
+                    Content = question,
+                    GPTId = chatGPT.GPTId,
+                    Role = "user"
+                };
+                db.ChatGPTHistories.Add(chatGPTHistory);
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = conversation
+                };
+
+                request.AddJsonBody(requestBody);
+
+                var response = await client.ExecuteAsync(request);
+                string answer = string.Empty;
+                decimal tokenUsage = 0;
+                string role = string.Empty;
+                dynamic jsonResponse = JObject.Parse(response.Content);
+                if (response.IsSuccessful)
+                {
+                    dynamic choices = jsonResponse.choices[0];
+                    if (choices.finish_reason == "incomplete")
+                    {
+                    }
+                    dynamic messages = choices.message;
+                    answer = messages.content;
+                    role = messages.role;
+                    dynamic usage = jsonResponse.usage;
+                    tokenUsage = usage.total_tokens;
+                    chatGPTHistory = new ChatGPTHistory()
+                    {
+                        Content = answer,
+                        GPTId = chatGPT.GPTId,
+                        Role = role
+                    };
+                    db.ChatGPTHistories.Add(chatGPTHistory);
+                    chatGPT.TokenUsage = tokenUsage;
+                    await db.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception(jsonResponse.error.message);
+                }
+
+                return Json(answer, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ActionResult UploadHistory()

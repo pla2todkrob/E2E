@@ -12,7 +12,6 @@ namespace E2E.Models.Tables
             ChatBotQuestion_Id = Guid.NewGuid();
         }
 
-        public virtual ICollection<ChatBotAnswer> Answers { get; set; }
         public virtual ChatBot ChatBot { get; set; }
 
         [Index]

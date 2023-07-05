@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -33,7 +34,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Manuals_Table(Manuals model)
+        public async Task<ActionResult> Manuals_Table(Manuals model)
         {
             ClsSwal swal = new ClsSwal();
             bool res = new bool();
@@ -45,7 +46,7 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
@@ -57,7 +58,7 @@ namespace E2E.Controllers
                             string dir = "Manuals/" + system_Manuals.Manual_Id;
                             string FileName = file.FileName;
 
-                            string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                            string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
 
                             system_Manuals.Manual_Path = filepath;
                             system_Manuals.Manual_Extension = Path.GetExtension(FileName);

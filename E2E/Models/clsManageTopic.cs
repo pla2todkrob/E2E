@@ -2,8 +2,10 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -120,7 +122,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Insert(Topics model, HttpFileCollectionBase files)
+        protected async Task<bool> Board_Insert(Topics model, HttpFileCollectionBase files)
         {
             try
             {
@@ -157,7 +159,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(topics, clsImag, FileName);
@@ -173,7 +175,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
                                     File_Save(topics, filepath, FileName);
@@ -191,7 +193,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Board_Update(Topics model, HttpFileCollectionBase files)
+        protected async Task<bool> Board_Update(Topics model, HttpFileCollectionBase files)
         {
             try
             {
@@ -228,7 +230,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, FileName);
                                 if (clsImag != null)
                                 {
                                     Galleries_Save(topics, clsImag, FileName);
@@ -244,7 +246,7 @@ namespace E2E.Models
                                 {
                                     FileName = string.Concat("_", file.FileName);
                                 }
-                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
                                 if (filepath != "")
                                 {
                                     File_Save(topics, filepath, FileName);
@@ -314,7 +316,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Comment_Insert(TopicComments model)
+        public async Task<bool> Board_Comment_Insert(TopicComments model)
         {
             try
             {
@@ -345,7 +347,7 @@ namespace E2E.Models
                     clsMail.SendToId = query.User_Id;
                     clsMail.Subject = subject;
                     clsMail.Body = content;
-                    res = clsMail.SendMail(clsMail);
+                    res = await clsMail.SendMail(clsMail);
 
                     Board_CountComment_Update(model);
                 }
@@ -358,7 +360,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Comment_Save(TopicComments model)
+        public async Task<bool> Board_Comment_Save(TopicComments model)
         {
             try
             {
@@ -367,11 +369,11 @@ namespace E2E.Models
                 topicComments = db.TopicComments.Where(w => w.TopicComment_Id == model.TopicComment_Id).FirstOrDefault();
                 if (topicComments != null)
                 {
-                    res = Board_Comment_Update(model);
+                    res = await Board_Comment_Update(model);
                 }
                 else
                 {
-                    res = Board_Comment_Insert(model);
+                    res = await Board_Comment_Insert(model);
                 }
 
                 return res;
@@ -382,20 +384,20 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Comment_Update(TopicComments model)
+        public async Task<bool> Board_Comment_Update(TopicComments model)
         {
             try
             {
                 bool res = new bool();
                 TopicComments topicComments = new TopicComments();
-                topicComments = db.TopicComments
+                topicComments = await db.TopicComments
                     .Where(w => w.TopicComment_Id == model.TopicComment_Id)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 topicComments.Comment_Content = model.Comment_Content;
                 topicComments.Update = DateTime.Now;
 
-                if (db.SaveChanges() > 0)
+                if (await db.SaveChangesAsync() > 0)
                 {
                     res = true;
                 }
@@ -408,7 +410,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Delete(Guid id, List<string> File_ = null)
+        public async Task<bool> Board_Delete(Guid id, List<string> File_ = null)
         {
             try
             {
@@ -423,7 +425,7 @@ namespace E2E.Models
                     {
                         foreach (var item in File_)
                         {
-                            clsManageService.Api_DeleteFile(item);
+                            await clsManageService.Api_DeleteFile(item);
                         }
                     }
                     res = true;
@@ -471,7 +473,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Reply_Insert(TopicComments model)
+        public async Task<bool> Board_Reply_Insert(TopicComments model)
         {
             try
             {
@@ -504,7 +506,7 @@ namespace E2E.Models
                     clsMail.SendToId = DBTopicComment.User_Id;
                     clsMail.Subject = subject;
                     clsMail.Body = content;
-                    res = clsMail.SendMail(clsMail);
+                    res = await clsMail.SendMail(clsMail);
 
                     Board_CountComment_Update(DBTopicComment);
                 }
@@ -517,7 +519,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Reply_Save(TopicComments model, string Boards_Reply)
+        public async Task<bool> Board_Reply_Save(TopicComments model, string Boards_Reply)
         {
             try
             {
@@ -529,7 +531,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    res = Board_Reply_Insert(model);
+                    res = await Board_Reply_Insert(model);
                 }
 
                 return res;
@@ -566,7 +568,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Board_Save(Topics model, HttpFileCollectionBase files)
+        public async Task<bool> Board_Save(Topics model, HttpFileCollectionBase files)
         {
             try
             {
@@ -577,11 +579,11 @@ namespace E2E.Models
 
                 if (topics != null)
                 {
-                    res = Board_Update(model, files);
+                    res = await Board_Update(model, files);
                 }
                 else
                 {
-                    res = Board_Insert(model, files);
+                    res = await Board_Insert(model, files);
                 }
 
                 return res;
@@ -592,7 +594,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Boards_Section_Insert(TopicSections model, HttpFileCollectionBase files)
+        public async Task<bool> Boards_Section_Insert(TopicSections model, HttpFileCollectionBase files)
         {
             try
             {
@@ -613,7 +615,7 @@ namespace E2E.Models
                     topicSections.TopicSection_Name = file.FileName;
 
                     string fulldir = string.Format("Topic/{0}/Media/", model.Topic_Id);
-                    topicSections.TopicSection_Path = clsManageService.UploadFileToString(fulldir, file);
+                    topicSections.TopicSection_Path = await clsManageService.UploadFileToString(fulldir, file);
                 }
                 db.TopicSections.Add(topicSections);
                 if (db.SaveChanges() > 0)
@@ -628,7 +630,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Boards_Section_Save(TopicSections model, HttpFileCollectionBase files)
+        public async Task<bool> Boards_Section_Save(TopicSections model, HttpFileCollectionBase files)
         {
             try
             {
@@ -640,11 +642,11 @@ namespace E2E.Models
 
                 if (topicSections == null)
                 {
-                    res = Boards_Section_Insert(model, files);
+                    res = await Boards_Section_Insert(model, files);
                 }
                 else
                 {
-                    res = Boards_Section_Update(model, files);
+                    res = await Boards_Section_Update(model, files);
                 }
 
                 return res;
@@ -655,7 +657,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Boards_Section_Update(TopicSections model, HttpFileCollectionBase files)
+        public async Task<bool> Boards_Section_Update(TopicSections model, HttpFileCollectionBase files)
         {
             try
             {
@@ -676,7 +678,7 @@ namespace E2E.Models
                     topicSections.TopicSection_Name = file.FileName;
 
                     string fulldir = string.Format("Topic/{0}/Media/", model.Topic_Id);
-                    topicSections.TopicSection_Path = clsManageService.UploadFileToString(fulldir, file);
+                    topicSections.TopicSection_Path = await clsManageService.UploadFileToString(fulldir, file);
                 }
                 topicSections.Update = DateTime.Now;
 
@@ -715,7 +717,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Delete_Attached(Guid id)
+        public async Task<bool> Delete_Attached(Guid id)
         {
             try
             {
@@ -730,7 +732,7 @@ namespace E2E.Models
                 {
                     foreach (var item in clsTopic.TopicFiles)
                     {
-                        DeleteFile(item.TopicFile_Id, false);
+                        await DeleteFile(item.TopicFile_Id, false);
                     }
                 }
 
@@ -741,11 +743,11 @@ namespace E2E.Models
                 {
                     foreach (var item in clsTopic.TopicGalleries)
                     {
-                        DeleteGallery(item.TopicGallery_Id, false);
+                        await DeleteGallery(item.TopicGallery_Id, false);
                     }
                 }
 
-                res = Board_Delete(id, FilePath);
+                res = await Board_Delete(id, FilePath);
 
                 return res;
             }
@@ -755,7 +757,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Delete_Boards_Section(Guid id)
+        public async Task<bool> Delete_Boards_Section(Guid id)
         {
             try
             {
@@ -770,7 +772,7 @@ namespace E2E.Models
                     res = true;
                     if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
                     {
-                        res = clsManageService.Api_DeleteFile(TopicSections.TopicSection_Path);
+                        res = await clsManageService.Api_DeleteFile(TopicSections.TopicSection_Path);
                     }
                 }
 
@@ -782,7 +784,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Delete_Boards_Section_Attached(Guid id)
+        public async Task<bool> Delete_Boards_Section_Attached(Guid id)
         {
             try
             {
@@ -800,7 +802,7 @@ namespace E2E.Models
                 {
                     if (!string.IsNullOrEmpty(TopicSections.TopicSection_Path))
                     {
-                        res = clsManageService.Api_DeleteFile(TopicSections.TopicSection_Path);
+                        res = await clsManageService.Api_DeleteFile(TopicSections.TopicSection_Path);
                     }
                 }
 
@@ -839,7 +841,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteFile(Guid id, bool status = true)
+        public async Task<bool> DeleteFile(Guid id, bool status = true)
         {
             try
             {
@@ -855,7 +857,7 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        clsManageService.Api_DeleteFile(TopicFiles.TopicFile_Path);
+                        await clsManageService.Api_DeleteFile(TopicFiles.TopicFile_Path);
                     }
 
                     res = DeleteFile_Count(topic_id);
@@ -869,7 +871,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteGallery(Guid id, bool status = true)
+        public async Task<bool> DeleteGallery(Guid id, bool status = true)
         {
             try
             {
@@ -885,8 +887,8 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        clsManageService.Api_DeleteFile(TopicGalleries.TopicGallery_Original);
-                        clsManageService.Api_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
+                        await clsManageService.Api_DeleteFile(TopicGalleries.TopicGallery_Original);
+                        await clsManageService.Api_DeleteFile(TopicGalleries.TopicGallery_Thumbnail);
                     }
 
                     res = DeleteGallery_Count(topic_id);

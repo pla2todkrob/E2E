@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -33,7 +34,7 @@ namespace E2E.Models
         public List<string> SendToStrs { get; set; }
         public string Subject { get; set; }
 
-        public bool ResendMail(Guid logId)
+        public async Task<bool> ResendMail(Guid logId)
         {
             try
             {
@@ -71,7 +72,7 @@ namespace E2E.Models
                 clsMail.Subject = log_SendEmail.SendEmail_Subject;
                 clsMail.Body = log_SendEmail.SendEmail_Content;
 
-                res = SendMail(clsMail);
+                res = await SendMail(clsMail);
 
                 return res;
             }
@@ -81,7 +82,7 @@ namespace E2E.Models
             }
         }
 
-        public bool SendMail(ClsMail model, HttpFileCollectionBase files = null)
+        public async Task<bool> SendMail(ClsMail model, HttpFileCollectionBase files = null)
         {
             try
             {
@@ -296,7 +297,7 @@ namespace E2E.Models
                 clsServiceEmail.Subject = model.Subject;
                 clsServiceEmail.SendFrom = userDetails.Users.User_Email;
 
-                return clsApi.SendMail(clsServiceEmail, files);
+                return await clsApi.SendMail(clsServiceEmail, files);
             }
             catch (Exception)
             {

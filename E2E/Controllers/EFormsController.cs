@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Mvc;
 
@@ -34,7 +35,7 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Approve_Forms(Guid id, bool? res = null)
+        public async Task<ActionResult> Approve_Forms(Guid id, bool? res = null)
         {
             try
             {
@@ -56,7 +57,7 @@ namespace E2E.Controllers
 
                     string status = db.System_Statuses.Find(eForms.Status_Id).Status_Name.ToString();
 
-                    EmailForms(id, status);
+                    await EmailForms(id, status);
 
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
@@ -75,7 +76,7 @@ namespace E2E.Controllers
 
                     string status = db.System_Statuses.Find(eForms.Status_Id).Status_Name.ToString();
 
-                    EmailForms(id, status);
+                    await EmailForms(id, status);
 
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
@@ -120,14 +121,14 @@ namespace E2E.Controllers
         }
 
         [HttpDelete]
-        public ActionResult Delete_EForm(Guid id)
+        public async Task<ActionResult> Delete_EForm(Guid id)
         {
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (data.Delete_Attached(id))
+                    if (await data.Delete_Attached(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -159,14 +160,14 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult DeleteFiles(Guid id)
+        public async Task<ActionResult> DeleteFiles(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.DeleteFile(id))
+                    if (await data.DeleteFile(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -192,14 +193,14 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult DeleteGallery(Guid id)
+        public async Task<ActionResult> DeleteGallery(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.DeleteGallery(id))
+                    if (await data.DeleteGallery(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -271,7 +272,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult EForms_Create(EForms model)
+        public async Task<ActionResult> EForms_Create(EForms model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -281,11 +282,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.EForm_Save(model, Request.Files))
+                        if (await data.EForm_Save(model, Request.Files))
                         {
                             scope.Complete();
 
@@ -403,7 +404,7 @@ namespace E2E.Controllers
             }
         }
 
-        public void EmailForms(Guid id, string status)
+        public async Task EmailForms(Guid id, string status)
         {
             try
             {
@@ -424,7 +425,7 @@ namespace E2E.Controllers
                 clsMail.SendToId = sendTo;
                 clsMail.Subject = subject;
                 clsMail.Body = content;
-                clsMail.SendMail(clsMail);
+                await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {

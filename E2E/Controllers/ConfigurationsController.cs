@@ -4,6 +4,7 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -311,7 +312,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Table(System_Configurations model)
+        public async Task<ActionResult> Table(System_Configurations model)
         {
             ClsSwal swal = new ClsSwal();
             bool res = new bool();
@@ -323,7 +324,7 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
@@ -334,7 +335,7 @@ namespace E2E.Controllers
                             HttpPostedFileBase file = files[0];
                             string dir = "Configurations/" + system_Configurations.Configuration_Id;
                             string FileName = file.FileName;
-                            string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                            string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
 
                             system_Configurations.Configuration_Brand = filepath;
                         }

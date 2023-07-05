@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -16,7 +17,7 @@ namespace E2E.Models
         private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
 
-        public bool BusinessCard_SaveCreate(ClsBusinessCard Model)
+        public async Task<bool> BusinessCard_SaveCreate(ClsBusinessCard Model)
         {
             bool res = new bool();
             try
@@ -71,7 +72,7 @@ namespace E2E.Models
                 if (db.SaveChanges() > 0)
                 {
                     res = BusinessCard_SaveLog(businessCards);
-                    SendMail(businessCards);
+                    await SendMail(businessCards);
                 }
 
                 return res;
@@ -82,7 +83,7 @@ namespace E2E.Models
             }
         }
 
-        public bool BusinessCard_SaveFile(string filepath, BusinessCards model)
+        public async Task<bool> BusinessCard_SaveFile(string filepath, BusinessCards model)
         {
             bool res = new bool();
 
@@ -101,7 +102,7 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    res = SendMail(model, null, cardFiles, filepath);
+                    res = await SendMail(model, null, cardFiles, filepath);
                 }
             }
             catch (Exception)
@@ -115,22 +116,13 @@ namespace E2E.Models
         public bool BusinessCard_SaveLog(BusinessCards Model, string remark = "", bool undo = false)
         {
             bool res = new bool();
-            DateTime dateTime = new DateTime();
-            if (Model.Update.HasValue)
-            {
-                dateTime = Model.Update.Value;
-            }
-            else
-            {
-                dateTime = DateTime.Now;
-            }
 
             Log_BusinessCards log_BusinessCards = new Log_BusinessCards
             {
                 BusinessCard_Id = Model.BusinessCard_Id,
                 Status_Id = Model.Status_Id,
                 User_Id = Model.Status_Id == 1 ? Model.User_id : Guid.Parse(HttpContext.Current.User.Identity.Name),
-                Create = dateTime,
+                Create = Model.Update ?? DateTime.Now,
                 Undo = undo
             };
 
@@ -168,7 +160,7 @@ namespace E2E.Models
                 //Mg GA
                 else if (author == 2 && ChkGA)
                 {
-                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1 ).Count();
+                    jobCount = db.BusinessCards.Where(w => w.Status_Id == 7 || w.Status_Id == 1).Count();
                 }
 
                 //Staff GA
@@ -190,6 +182,36 @@ namespace E2E.Models
             return Num;
         }
 
+        public List<Guid> NoM3(List<Guid> IDs)
+        {
+            List<Guid> MGs = new List<Guid>();
+            foreach (var item in IDs)
+            {
+                if (GradeNumber(item) >= 4)
+                {
+                    MGs.Add(item);
+                }
+            }
+
+            return MGs;
+        }
+
+        public bool Same_department_check(Guid? id)
+        {
+            bool res = new bool();
+            Guid MyUser = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            var businessCard = db.BusinessCards.Find(id);
+            Guid DeptJOB = db.Users.Where(w => w.User_Id == businessCard.User_id).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            Guid DeptUser = db.Users.Where(w => w.User_Id == MyUser).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+
+            if (DeptJOB == DeptUser)
+            {
+                res = true;
+            }
+
+            return res;
+        }
+
         public List<SelectListItem> SelectListItems_CardGroup()
         {
             try
@@ -209,37 +231,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Same_department_check(Guid? id)
-        {
-            bool res = new bool();
-            Guid MyUser = Guid.Parse(HttpContext.Current.User.Identity.Name);
-            var businessCard = db.BusinessCards.Find(id);
-            Guid DeptJOB = db.Users.Where(w => w.User_Id == businessCard.User_id).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            Guid DeptUser = db.Users.Where(w => w.User_Id == MyUser).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-
-            if (DeptJOB == DeptUser)
-            {
-                res = true;
-            }
-
-            return res;
-        }
-
-        public List<Guid> NoM3(List<Guid> IDs)
-        {
-            List<Guid> MGs = new List<Guid>();
-            foreach (var item in IDs)
-            {
-                if (GradeNumber(item) >= 4)
-                {
-                    MGs.Add(item);
-                } 
-            }
-
-            return MGs;
-        }
-
-        public bool SendMail(BusinessCards Model, Guid? SelectId = null, BusinessCardFiles ModelFile = null, string filepath = "", string remark = "", string pseudo = "")
+        public async Task<bool> SendMail(BusinessCards Model, Guid? SelectId = null, BusinessCardFiles ModelFile = null, string filepath = "", string remark = "", string pseudo = "")
         {
             bool res = new bool();
 
@@ -368,7 +360,6 @@ namespace E2E.Models
                     content = "<p>Comment: Assign task to " + master.Users_GetInfomation(Model.UserAction.Value);
                 }
 
-
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
 
@@ -476,7 +467,7 @@ namespace E2E.Models
             content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
             content += "<p>Thank you for your consideration</p>";
             mail.Body = content;
-            res = mail.SendMail(mail);
+            res = await mail.SendMail(mail);
 
             return res;
         }

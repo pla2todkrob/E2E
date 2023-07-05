@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Mvc;
 
@@ -22,7 +23,7 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult AuditReport_Action(string id, string emails = "")
+        public async Task<ActionResult> AuditReport_Action(string id, string emails = "")
         {
             try
             {
@@ -59,7 +60,7 @@ namespace E2E.Controllers
                     content += "</p>";
                     content += "<b>Please do not reply to this mail. Thank you</b>";
 
-                    ftp.Ftp_DownloadFolder(dirList, string.Format("AuditReport\\{0}", zipName), arrEmail, subject, content);
+                    await ftp.Ftp_DownloadFolder(dirList, string.Format("AuditReport\\{0}", zipName), arrEmail, subject, content);
                 }
                 else
                 {
@@ -167,7 +168,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult DocumentControl_Create(ClsDocuments model)
+        public async Task<ActionResult> DocumentControl_Create(ClsDocuments model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -177,11 +178,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Document_Save(model, Request.Files))
+                        if (await data.Document_Save(model, Request.Files))
                         {
                             scope.Complete();
 

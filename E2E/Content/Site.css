@@ -16,7 +16,7 @@ img#img-table { height: 108px; width: 192px; }
 
 .row-card { margin-left: -20px; margin-right: -20px; }
 
-#btnToTop { right: 0; transition: 0.3s; }
+#btnToTop { right: 0; transition: 0.3s;z-index:10000 }
 /* CSS code to define the "nav-hide" class */
 nav.navbar { transition: top 0.5s ease;z-index:1050;}
 
@@ -24,7 +24,18 @@ nav.navbar { transition: top 0.5s ease;z-index:1050;}
 
 .text-prewrap { white-space: pre-wrap; }
 
-
+.bottom{
+    bottom:0;
+}
+.right{
+    right:0;
+}
+.left{
+    left:0;
+}
+.top{
+    top:0;
+}
 .dropdown-submenu { position: relative; }
 
     .dropdown-submenu .dropdown-menu { top: 0; right: 100%; }
@@ -34,3 +45,8 @@ nav.navbar { transition: top 0.5s ease;z-index:1050;}
     #qaList #closeArea { opacity: 0.4; cursor: zoom-out; }
     #qaList #listArea { opacity: 0.9; }
 #stickyBody { transition: top 0.5s ease; }
+.textarea-with-button { position: relative; display: inline-block; }
+
+    .textarea-with-button .form-control { padding-right: 45px; }
+
+.button-inside-textarea { position: absolute; top: 0; right: 0; bottom: 0; width: 40px; border-top-left-radius: 0; border-bottom-left-radius: 0; }

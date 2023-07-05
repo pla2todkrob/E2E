@@ -1,0 +1,48 @@
+﻿@model List<E2E.Models.Tables.ChatGPTHistory>
+
+@{
+    Layout = null;
+}
+
+@if (Model.Count == 0)
+{
+
+}
+
+<ul class="list-group" id="histories">
+    @foreach (var item in Model)
+    {
+        if (item.Role != "user")
+        {
+            <li class="list-group-item list-group-item-info">
+                <div class="row">
+                    <div class="col-2 col-md-1 text-center">
+                        <i class="fa fa-cogs fa-2x"></i>
+                    </div>
+                    <div class="col-10 col-md-11">
+                        <blockquote class="blockquote m-0">
+                            <span class="PreLine small">@item.Content</span>
+                            <cite class="blockquote-footer small mt-3">@item.Create</cite>
+                        </blockquote>
+                    </div>
+                </div>
+            </li>
+        }
+        else
+        {
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-2 col-md-1 text-center">
+                        <i class="fa fa-user fa-2x"></i>
+                    </div>
+                    <div class="col-10 col-md-11">
+                        <blockquote class="blockquote m-0">
+                            <span class="PreLine small">@item.Content</span>
+                            <cite class="blockquote-footer small mt-3">@item.Create</cite>
+                        </blockquote>
+                    </div>
+                </div>
+            </li>
+        }
+    }
+</ul>

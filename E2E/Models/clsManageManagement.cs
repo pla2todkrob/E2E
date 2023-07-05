@@ -3,6 +3,7 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -12,7 +13,7 @@ namespace E2E.Models
         private readonly ClsManageService clsManageService = new ClsManageService();
         private readonly ClsContext db = new ClsContext();
 
-        protected bool Document_Insert(ClsDocuments model, HttpFileCollectionBase files)
+        protected async Task<bool> Document_Insert(ClsDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -46,7 +47,7 @@ namespace E2E.Models
                     FileName = FileName + "_V" + Count + "." + extension[1];
                     //FileName = string.Concat("_", FileName);
 
-                    var clsfile = clsManageService.UploadFileToString(dir, file, FileName);
+                    var clsfile = await clsManageService.UploadFileToString(dir, file, FileName);
 
                     master_DocumentVersions.Document_Id = master_Documents.Document_Id;
                     master_DocumentVersions.DocumentVersion_Name = FileName;
@@ -70,7 +71,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool Document_Update(ClsDocuments model, HttpFileCollectionBase files)
+        protected async Task<bool> Document_Update(ClsDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -105,7 +106,7 @@ namespace E2E.Models
 
                     FileName = FileName + "_V" + Count + "." + extension[1];
 
-                    var clsfile = clsManageService.UploadFileToString(dir, file, FileName);
+                    var clsfile = await clsManageService.UploadFileToString(dir, file, FileName);
 
                     master_DocumentVersions.Document_Id = master_Documents.Document_Id;
                     master_DocumentVersions.DocumentVersion_Name = FileName;
@@ -145,7 +146,7 @@ namespace E2E.Models
             return res;
         }
 
-        public bool Document_Save(ClsDocuments model, HttpFileCollectionBase files)
+        public async Task<bool> Document_Save(ClsDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -156,11 +157,11 @@ namespace E2E.Models
 
                 if (master_Documents != null)
                 {
-                    res = Document_Update(model, files);
+                    res = await Document_Update(model, files);
                 }
                 else
                 {
-                    res = Document_Insert(model, files);
+                    res = await Document_Insert(model, files);
                 }
 
                 return res;

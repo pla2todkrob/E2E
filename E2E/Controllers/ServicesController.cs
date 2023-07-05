@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -42,15 +43,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult _AddTeam(ClsServiceTeams model)
+        public async Task<ActionResult> _AddTeam(ClsServiceTeams model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Service_AddTeam(model, methodBase.Name))
+                    if (await data.Service_AddTeam(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -98,7 +99,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult _Comment(ServiceComments model)
+        public async Task<ActionResult> _Comment(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -106,11 +107,11 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.Services_Comment(model, Request.Files))
+                    if (await data.Services_Comment(model, Request.Files))
                     {
                         scope.Complete();
                         swal.Icon = "success";
@@ -154,15 +155,15 @@ namespace E2E.Controllers
         }
 
         [HttpDelete]
-        public ActionResult _DeleteTeam(Guid id)
+        public async Task<ActionResult> _DeleteTeam(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Service_DeleteTeam(id, methodBase.Name))
+                    if (await data.Service_DeleteTeam(id, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -466,17 +467,17 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Commit(ClsServices model)
+        public async Task<ActionResult> Commit(ClsServices model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
                         MethodBase methodBase = MethodBase.GetCurrentMethod();
-                        if (data.Services_SetCommit(model.Services, methodBase.Name))
+                        if (await data.Services_SetCommit(model.Services, methodBase.Name))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -531,14 +532,14 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Commit_ToDepartment(Guid id)
+        public async Task<ActionResult> Commit_ToDepartment(Guid id)
         {
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (data.Services_SetToDepartment(id))
+                    if (await data.Services_SetToDepartment(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -602,14 +603,14 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult DeleteFile(Guid id)
+        public async Task<ActionResult> DeleteFile(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.ServiceFiles_Delete(id))
+                    if (await data.ServiceFiles_Delete(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -635,7 +636,7 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public void Download_Zipfiles(List<string> Urls, string key)
+        public async Task Download_Zipfiles(List<string> Urls, string key)
         {
             ClsApi clsApi = new ClsApi();
             ClsServiceFile clsServiceFile = new ClsServiceFile();
@@ -670,7 +671,7 @@ namespace E2E.Controllers
                 clsServiceFile.Filename = Path.GetFileName(ZipName);
 
                 //เก็บไฟล์ที่ User Download ไว้
-                var res = clsApi.UploadFile(clsServiceFile, objFile);
+                var res = await clsApi.UploadFile(clsServiceFile, objFile);
                 if (res.IsSuccess)
                 {
                     System.IO.File.Delete(ZipName);
@@ -683,14 +684,14 @@ namespace E2E.Controllers
             }
         }
 
-        public void DownloadDocumentControl(Guid id)
+        public async Task DownloadDocumentControl(Guid id)
         {
             try
             {
                 string Key = db.Services.Find(id).Service_Key;
                 var Paths = db.ServiceDocuments.Where(w => w.Service_Id == id).Select(s => s.ServiceDocument_Path).ToList();
 
-                Download_Zipfiles(Paths, Key);
+                await Download_Zipfiles(Paths, Key);
             }
             catch (Exception)
             {
@@ -728,7 +729,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Form(Services model)
+        public async Task<ActionResult> Form(Services model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -738,13 +739,13 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
                         if (!Check_ReferenceClose_Job(model.User_Id))
                         {
-                            if (data.Services_Save(model, Request.Files))
+                            if (await data.Services_Save(model, Request.Files))
                             {
                                 scope.Complete();
                                 swal.DangerMode = false;
@@ -863,7 +864,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Form_Forward(Services model)
+        public async Task<ActionResult> Form_Forward(Services model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -873,7 +874,7 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
@@ -883,7 +884,7 @@ namespace E2E.Controllers
                             return Json(swal, JsonRequestBehavior.AllowGet);
                         }
 
-                        if (data.Services_Save(model, Request.Files, true))
+                        if (await data.Services_Save(model, Request.Files, true))
                         {
                             scope.Complete();
                             swal.Option = null;
@@ -1220,15 +1221,15 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult RequestChangeDue_Accept(Guid id)
+        public async Task<ActionResult> RequestChangeDue_Accept(Guid id)
         {
             ClsSwal swal = new ClsSwal();
             MethodBase methodBase = MethodBase.GetCurrentMethod();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.ServiceChangeDueDate_Accept(id, methodBase.Name))
+                    if (await data.ServiceChangeDueDate_Accept(id, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1259,14 +1260,14 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult RequestChangeDue_Cancel(Guid id)
+        public async Task<ActionResult> RequestChangeDue_Cancel(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.ServiceChangeDueDate_Cancel(id))
+                    if (await data.ServiceChangeDueDate_Cancel(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1303,15 +1304,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult RequestChangeDue_Form(ServiceChangeDueDate model)
+        public async Task<ActionResult> RequestChangeDue_Form(ServiceChangeDueDate model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.ServiceChangeDueDate_Request(model, methodBase.Name))
+                    if (await data.ServiceChangeDueDate_Request(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1342,15 +1343,15 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult RequestChangeDue_Reject(Guid id)
+        public async Task<ActionResult> RequestChangeDue_Reject(Guid id)
         {
             ClsSwal swal = new ClsSwal();
             MethodBase methodBase = MethodBase.GetCurrentMethod();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.ServiceChangeDueDate_Reject(id, methodBase.Name))
+                    if (await data.ServiceChangeDueDate_Reject(id, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1395,7 +1396,7 @@ namespace E2E.Controllers
             }
         }
 
-        public JsonResult ResendEmail(Guid id, string method)
+        public async Task<JsonResult> ResendEmail(Guid id, string method)
         {
             ClsSwal swal = new ClsSwal();
             try
@@ -1406,7 +1407,7 @@ namespace E2E.Controllers
                     .FirstOrDefault();
                 if (log_SendEmail != null)
                 {
-                    if (mail.ResendMail(log_SendEmail.SendEmail_Id))
+                    if (await mail.ResendMail(log_SendEmail.SendEmail_Id))
                     {
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -1480,7 +1481,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ServiceInfomation_Document(ServiceDocuments model)
+        public async Task<ActionResult> ServiceInfomation_Document(ServiceDocuments model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -1490,11 +1491,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Services_SaveDocumentControl(model, Request.Files))
+                        if (await data.Services_SaveDocumentControl(model, Request.Files))
                         {
                             scope.Complete();
 
@@ -1568,15 +1569,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetApproved(ServiceComments model)
+        public async Task<ActionResult> SetApproved(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetApprove(model, methodBase.Name))
+                    if (await data.Services_SetApprove(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1643,17 +1644,17 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetAssign(ClsServices model)
+        public async Task<ActionResult> SetAssign(ClsServices model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
                         MethodBase methodBase = MethodBase.GetCurrentMethod();
-                        if (data.Services_SetToUser(model.Service_Id, model.User_Id, methodBase.Name))
+                        if (await data.Services_SetToUser(model.Service_Id, model.User_Id, methodBase.Name))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -1753,14 +1754,14 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetCancel(ServiceComments model)
+        public async Task<ActionResult> SetCancel(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.Services_SetCancel(model))
+                    if (await data.Services_SetCancel(model))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1804,14 +1805,14 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ActionResult SetClose(Guid id, List<ClsEstimate> score)
+        public async Task<ActionResult> SetClose(Guid id, List<ClsEstimate> score)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.SaveEstimate(id, score))
+                    if (await data.SaveEstimate(id, score))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1853,10 +1854,10 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetComplete(ServiceComments model)
+        public async Task<ActionResult> SetComplete(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1867,7 +1868,7 @@ namespace E2E.Controllers
                     }
 
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetComplete(model, methodBase.Name))
+                    if (await data.Services_SetComplete(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1898,14 +1899,14 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SetFreePoint(Guid id)
+        public async Task<ActionResult> SetFreePoint(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.Services_SetFreePoint(id))
+                    if (await data.Services_SetFreePoint(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1966,16 +1967,16 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetInProgress(Services model)
+        public async Task<ActionResult> SetInProgress(Services model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Services_SetAction(model))
+                        if (await data.Services_SetAction(model))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -2048,15 +2049,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetMustApprove(ServiceComments model)
+        public async Task<ActionResult> SetMustApprove(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetRequired(model, methodBase.Name))
+                    if (await data.Services_SetRequired(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2122,15 +2123,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetPending(ServiceComments model)
+        public async Task<ActionResult> SetPending(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetPending(model, methodBase.Name))
+                    if (await data.Services_SetPending(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2179,15 +2180,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetReject(ServiceComments model)
+        public async Task<ActionResult> SetReject(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetReject(model, methodBase.Name))
+                    if (await data.Services_SetReject(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2230,15 +2231,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetReturnAssign(ServiceComments model)
+        public async Task<ActionResult> SetReturnAssign(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetReturnAssign(model, methodBase.Name))
+                    if (await data.Services_SetReturnAssign(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2280,15 +2281,15 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult SetReturnJob(ServiceComments model)
+        public async Task<ActionResult> SetReturnJob(ServiceComments model)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (data.Services_SetReturnJob(model, methodBase.Name))
+                    if (await data.Services_SetReturnJob(model, methodBase.Name))
                     {
                         scope.Complete();
                         swal.DangerMode = false;

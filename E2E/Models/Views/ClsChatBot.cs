@@ -19,7 +19,6 @@ namespace E2E.Models.Views
         {
             return await db.ChatBotQuestions
                 .Where(q => q.ChatBotQuestion_ParentId == parentQuestionId)
-                .Include(q => q.Answers)
                 .OrderBy(o => o.Question)
                 .ToListAsync();
         }
@@ -34,35 +33,24 @@ namespace E2E.Models.Views
             {
                 var nextQuestions = new List<ChatBotQuestion>();
 
-                // Retrieve the initial question
-                var initialQuestion = await db.ChatBotQuestions
-                    .Include(q => q.Answers)
-                    .FirstOrDefaultAsync(q => q.ChatBotQuestion_Id == questionId);
+                answers.AddRange(await db.ChatBotAnswers.Where(w => w.ChatBotQuestion_Id == questionId).OrderBy(o => o.Answer).ToListAsync());
 
-                if (initialQuestion != null)
-                {
-                    // Add answers from the initial question
-                    answers.AddRange(initialQuestion.Answers.OrderBy(o => o.Answer));
-
-                    // Retrieve child questions recursively
-                    nextQuestions.AddRange(await GetChildQuestionsAsync(questionId));
-                }
+                // Retrieve child questions recursively
+                nextQuestions.AddRange(await GetChildQuestionsAsync(questionId));
 
                 // Retrieve answers for child questions recursively
                 while (nextQuestions.Any())
                 {
                     var currentQuestion = nextQuestions.FirstOrDefault();
 
-                    if (currentQuestion != null)
-                    {
-                        // Add answers from the current question
-                        answers.AddRange(currentQuestion.Answers.OrderBy(o => o.Answer));
-                        // Retrieve child questions for the current question
-                        var childQuestions = await GetChildQuestionsAsync(currentQuestion.ChatBotQuestion_Id);
+                    // Add answers from the current question
+                    answers.AddRange(await db.ChatBotAnswers.Where(w => w.ChatBotQuestion_Id == currentQuestion.ChatBotQuestion_Id).OrderBy(o => o.Answer).ToListAsync());
+                    // Retrieve child questions for the current question
+                    var childQuestions = await GetChildQuestionsAsync(currentQuestion.ChatBotQuestion_Id);
 
-                        // Add child questions to the list of next questions
-                        nextQuestions.AddRange(childQuestions);
-                    }
+                    // Add child questions to the list of next questions
+                    nextQuestions.AddRange(childQuestions);
+
                     nextQuestions.RemoveAt(0);
                     nextQuestions = nextQuestions.OrderBy(o => o.Question).ToList();
                 }
@@ -101,17 +89,17 @@ namespace E2E.Models.Views
             }
         }
 
-        public bool SaveChatBotLearn(string fileUrl)
+        public async Task<bool> SaveChatBotLearn(string fileUrl)
         {
             try
             {
-                bool res = new bool();
+                bool res = false;
                 using (WebClient webClient = new WebClient())
                 {
                     byte[] fileData = webClient.DownloadData(fileUrl);
                     using (var memoryStream = new MemoryStream(fileData))
                     {
-                        List<string> GroupName = new List<string>();
+                        List<string> OwnerNames = new List<string>();
 
                         using (ExcelPackage package = new ExcelPackage(memoryStream))
                         {
@@ -127,21 +115,21 @@ namespace E2E.Models.Views
 
                                 for (int row = 2; row <= sheet.Dimension.End.Row; row++)
                                 {
-                                    var group = sheet.Cells[row, 2].Text;
-                                    if (string.IsNullOrEmpty(group))
+                                    var owner = sheet.Cells[row, 2].Text;
+                                    if (string.IsNullOrEmpty(owner))
                                     {
                                         continue;
                                     }
-                                    if (!GroupName.Contains(group))
+                                    if (!OwnerNames.Contains(owner))
                                     {
-                                        GroupName.Add(group);
+                                        OwnerNames.Add(owner);
                                     }
                                 }
                             }
 
-                            if (GroupName.Count > 0)
+                            if (OwnerNames.Count > 0)
                             {
-                                db.ChatBots.RemoveRange(db.ChatBots.Where(w => GroupName.Contains(w.Group)).ToList());
+                                db.ChatBots.RemoveRange(db.ChatBots.Where(w => OwnerNames.Contains(w.Owner)).ToList());
                                 db.SaveChanges();
                             }
 
@@ -157,16 +145,18 @@ namespace E2E.Models.Views
                                 for (int row = 2; row <= sheet.Dimension.End.Row; row++)
                                 {
                                     var answer = sheet.Cells[row, 1].Text;
-                                    var group = sheet.Cells[row, 2].Text;
-                                    if (string.IsNullOrEmpty(answer) || string.IsNullOrEmpty(group))
+                                    var owner = sheet.Cells[row, 2].Text;
+                                    var group = sheet.Cells[row, 3].Text;
+                                    if (string.IsNullOrEmpty(answer) || string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(group))
                                     {
                                         continue;
                                     }
-                                    ChatBot chatBot = db.ChatBots.Where(w => w.Group.Equals(group)).FirstOrDefault();
+                                    ChatBot chatBot = db.ChatBots.Where(w => w.Owner.Equals(owner) && w.Group.Equals(group)).FirstOrDefault();
                                     if (chatBot == null)
                                     {
                                         chatBot = new ChatBot()
                                         {
+                                            Owner = owner,
                                             Group = group
                                         };
                                         db.Entry(chatBot).State = EntityState.Added;
@@ -179,7 +169,7 @@ namespace E2E.Models.Views
 
                                     Guid? parentId = null;
                                     int questionLv = 1;
-                                    for (int col = 3; col <= sheet.Dimension.End.Column; col++)
+                                    for (int col = 4; col <= sheet.Dimension.End.Column; col++)
                                     {
                                         var question = sheet.Cells[row, col].Text;
                                         var nextQuestion = sheet.Cells[row, col + 1].Text;
@@ -235,7 +225,7 @@ namespace E2E.Models.Views
             }
             catch (Exception ex)
             {
-                FileResponse response = new ClsApi().Delete_File(fileUrl);
+                FileResponse response = await new ClsApi().DeleteFile(fileUrl);
                 if (!response.IsSuccess)
                 {
                     throw new Exception(response.ErrorMessage, ex);

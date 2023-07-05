@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -81,16 +82,16 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Comment(TopicComments model)
+        public async Task<ActionResult> Boards_Comment(TopicComments model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Board_Comment_Save(model))
+                        if (await data.Board_Comment_Save(model))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -168,7 +169,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Create(Topics model)
+        public async Task<ActionResult> Boards_Create(Topics model)
         {
             ClsSwal swal = new ClsSwal();
             if (model.Topic_Title != string.Empty && model.Topic_Content != string.Empty)
@@ -178,11 +179,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Board_Save(model, Request.Files))
+                        if (await data.Board_Save(model, Request.Files))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -290,17 +291,17 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Reply(TopicComments model)
+        public async Task<ActionResult> Boards_Reply(TopicComments model)
         {
             string Boards_Reply = Session["Boards_Reply"].ToString();
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Board_Reply_Save(model, Boards_Reply))
+                        if (await data.Board_Reply_Save(model, Boards_Reply))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -362,7 +363,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_ReportComment(TopicComments model, string CommentReportUser)
+        public async Task<ActionResult> Boards_ReportComment(TopicComments model, string CommentReportUser)
         {
             if (!string.IsNullOrEmpty(CommentReportUser))
             {
@@ -387,7 +388,7 @@ namespace E2E.Controllers
                     clsMail.SendToIds = Approver;
                     clsMail.Subject = subject;
                     clsMail.Body = content;
-                    if (clsMail.SendMail(clsMail))
+                    if (await clsMail.SendMail(clsMail))
                     {
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -465,7 +466,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Boards_Section(TopicSections model)
+        public async Task<ActionResult> Boards_Section(TopicSections model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -475,11 +476,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.Boards_Section_Save(model, Request.Files))
+                        if (await data.Boards_Section_Save(model, Request.Files))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -603,14 +604,14 @@ namespace E2E.Controllers
         }
 
         [HttpDelete]
-        public ActionResult Delete_Boards_Create(Guid id)
+        public async Task<ActionResult> Delete_Boards_Create(Guid id)
         {
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (data.Delete_Attached(id))
+                    if (await data.Delete_Attached(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -643,14 +644,14 @@ namespace E2E.Controllers
         }
 
         [HttpDelete]
-        public ActionResult Delete_Boards_Section(Guid id)
+        public async Task<ActionResult> Delete_Boards_Section(Guid id)
         {
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (data.Delete_Boards_Section(id))
+                    if (await data.Delete_Boards_Section(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -683,14 +684,14 @@ namespace E2E.Controllers
         }
 
         [HttpDelete]
-        public ActionResult Delete_Boards_Section_Attached(Guid id)
+        public async Task<ActionResult> Delete_Boards_Section_Attached(Guid id)
         {
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (data.Delete_Boards_Section_Attached(id))
+                    if (await data.Delete_Boards_Section_Attached(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -763,14 +764,14 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult DeleteFiles(Guid id)
+        public async Task<ActionResult> DeleteFiles(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.DeleteFile(id))
+                    if (await data.DeleteFile(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -796,14 +797,14 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult DeleteGallery(Guid id)
+        public async Task<ActionResult> DeleteGallery(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.DeleteGallery(id))
+                    if (await data.DeleteGallery(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;

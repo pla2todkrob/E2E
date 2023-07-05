@@ -6,26 +6,14 @@ namespace E2E.Models.Tables
 {
     public class ChatGPT
     {
-        public ChatGPT()
-        {
-            Id = Guid.NewGuid();
-            Create = DateTime.Now;
-        }
-
-        public string Answer { get; set; }
-        public DateTime AnswerDateTime { get; set; }
-
         [Index]
-        public DateTime Create { get; set; }
-
-        public bool Display { get; set; }
+        public DateTime Create { get; set; } = DateTime.Now;
 
         [Key]
-        public Guid Id { get; set; }
+        public Guid GPTId { get; set; } = Guid.NewGuid();
 
-        public string Question { get; set; }
-        public DateTime QuestionDateTime { get; set; }
-        public int Tokens { get; set; }
+        public bool IsEnd { get; set; }
+        public decimal TokenUsage { get; set; }
 
         [Index]
         public Guid User_Id { get; set; }

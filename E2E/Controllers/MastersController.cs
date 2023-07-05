@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -13,10 +14,10 @@ namespace E2E.Controllers
 {
     public class MastersController : Controller
     {
+        private readonly ClsApi api = new ClsApi();
         private readonly ClsManageService clsManageService = new ClsManageService();
         private readonly ClsManageMaster data = new ClsManageMaster();
         private readonly ClsContext db = new ClsContext();
-        private readonly ClsApi api = new ClsApi();
 
         public ActionResult Categories()
         {
@@ -1444,7 +1445,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Users_UploadExcel()
+        public async Task<ActionResult> Users_UploadExcel()
         {
             ClsSwal swal = new ClsSwal();
 
@@ -1453,7 +1454,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1466,7 +1467,8 @@ namespace E2E.Controllers
                         {
                             string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
                             ClsServiceFTP serviceFTP = new ClsServiceFTP();
-                            string filePath = api.UploadFile(file,dir).FileUrl;
+                            var fileRes = await api.UploadFile(file, dir);
+                            string filePath = fileRes.FileUrl;
                             UserUploadHistory userUploadHistory = new UserUploadHistory
                             {
                                 UserUploadHistoryFile = filePath,

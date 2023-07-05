@@ -6,6 +6,7 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -61,11 +62,11 @@ namespace E2E.Models
                     .Where(w => w.Service_Id == id);
         }
 
-        public bool Api_DeleteFile(string path)
+        public async Task<bool> Api_DeleteFile(string path)
         {
             try
             {
-                fileResponse = clsApi.Delete_File(path);
+                fileResponse = await clsApi.DeleteFile(path);
 
                 if (!fileResponse.IsSuccess)
                 {
@@ -555,7 +556,7 @@ namespace E2E.Models
             }
         }
 
-        public bool SaveEstimate(Guid id, List<ClsEstimate> score)
+        public async Task<bool> SaveEstimate(Guid id, List<ClsEstimate> score)
         {
             try
             {
@@ -585,7 +586,7 @@ namespace E2E.Models
 
                 if (db.SaveChanges() > 0)
                 {
-                    res = Services_SetClose(id, score);
+                    res = await Services_SetClose(id, score);
                 }
 
                 return res;
@@ -746,7 +747,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Service_AddTeam(ClsServiceTeams model, string methodName)
+        public async Task<bool> Service_AddTeam(ClsServiceTeams model, string methodName)
         {
             try
             {
@@ -767,7 +768,7 @@ namespace E2E.Models
                             Service_Id = model.Service_Id,
                             Comment_Content = string.Format("Add {0} to join team", master.Users_GetInfomation(item))
                         };
-                        res = Services_Comment(serviceComments);
+                        res = await Services_Comment(serviceComments);
                     }
                 }
 
@@ -801,7 +802,7 @@ namespace E2E.Models
                 clsMail.SendToIds = listTeam;
                 clsMail.Subject = subject;
                 clsMail.Body = content;
-                res = clsMail.SendMail(clsMail);
+                res = await clsMail.SendMail(clsMail);
 
                 return res;
             }
@@ -832,7 +833,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Service_DeleteTeam(Guid id, string methodName)
+        public async Task<bool> Service_DeleteTeam(Guid id, string methodName)
         {
             try
             {
@@ -850,7 +851,7 @@ namespace E2E.Models
                         Service_Id = serviceId,
                         Comment_Content = string.Format("Delete {0} from this team", userName)
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
@@ -887,7 +888,7 @@ namespace E2E.Models
                         clsMail.SendToIds = listTeam;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
                 return res;
@@ -898,7 +899,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Accept(Guid id, string methodName)
+        public async Task<bool> ServiceChangeDueDate_Accept(Guid id, string methodName)
         {
             try
             {
@@ -916,7 +917,7 @@ namespace E2E.Models
                         Service_Id = serviceChangeDueDate.Service_Id,
                         User_Id = userId
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         Services services = db.Services.Find(serviceChangeDueDate.Service_Id);
                         services.Service_DueDate = serviceChangeDueDate.DueDate_New;
@@ -930,7 +931,7 @@ namespace E2E.Models
                                 Service_Id = serviceChangeDueDate.Service_Id,
                                 User_Id = userId
                             };
-                            res = Services_Comment(serviceComments);
+                            res = await Services_Comment(serviceComments);
 
                             var Sendto = db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefault();
 
@@ -946,7 +947,7 @@ namespace E2E.Models
                             clsMail.SendToId = Sendto.User_Id;
                             clsMail.Subject = subject;
                             clsMail.Body = content;
-                            res = clsMail.SendMail(clsMail);
+                            res = await clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -959,7 +960,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Cancel(Guid id)
+        public async Task<bool> ServiceChangeDueDate_Cancel(Guid id)
         {
             try
             {
@@ -977,7 +978,7 @@ namespace E2E.Models
                         Service_Id = serviceChangeDueDate.Service_Id,
                         User_Id = userId
                     };
-                    res = Services_Comment(serviceComments);
+                    res = await Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -1005,7 +1006,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Reject(Guid id, string methodName)
+        public async Task<bool> ServiceChangeDueDate_Reject(Guid id, string methodName)
         {
             try
             {
@@ -1023,7 +1024,7 @@ namespace E2E.Models
                         Service_Id = serviceChangeDueDate.Service_Id,
                         User_Id = userId
                     };
-                    res = Services_Comment(serviceComments);
+                    res = await Services_Comment(serviceComments);
 
                     var Sendto = db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefault();
 
@@ -1039,7 +1040,7 @@ namespace E2E.Models
                     clsMail.SendToId = Sendto.User_Id;
                     clsMail.Subject = subject;
                     clsMail.Body = content;
-                    res = clsMail.SendMail(clsMail);
+                    res = await clsMail.SendMail(clsMail);
                 }
 
                 return res;
@@ -1050,7 +1051,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceChangeDueDate_Request(ServiceChangeDueDate model, string methodName)
+        public async Task<bool> ServiceChangeDueDate_Request(ServiceChangeDueDate model, string methodName)
         {
             try
             {
@@ -1069,7 +1070,7 @@ namespace E2E.Models
                         Comment_Content = string.Format("{0}{1}{2}Remark: {3}", Comment, Environment.NewLine, Environment.NewLine, model.Remark),
                         User_Id = userId
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         Services services = new Services();
                         services = db.Services.Find(model.Service_Id);
@@ -1087,7 +1088,7 @@ namespace E2E.Models
                         clsMail.SendToId = services.User_Id;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -1167,7 +1168,7 @@ namespace E2E.Models
             }
         }
 
-        public bool ServiceFiles_Delete(Guid id)
+        public async Task<bool> ServiceFiles_Delete(Guid id)
         {
             try
             {
@@ -1181,7 +1182,7 @@ namespace E2E.Models
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 db.Entry(serviceFiles).State = EntityState.Deleted;
-                if (Api_DeleteFile(serviceFiles.ServiceFile_Path))
+                if (await Api_DeleteFile(serviceFiles.ServiceFile_Path))
                 {
                     if (db.SaveChanges() > 0)
                     {
@@ -1212,7 +1213,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
+        public async Task<bool> Services_Comment(ServiceComments model, HttpFileCollectionBase files = null)
         {
             try
             {
@@ -1233,7 +1234,7 @@ namespace E2E.Models
                             ServiceCommentFile_Name = files[i].FileName
                         };
                         string dir = string.Format("Service/{0}/Comment/{1}/", db.Services.Find(model.Service_Id).Service_Key, DateTime.Today.ToString("yyMMdd"));
-                        serviceCommentFiles.ServiceCommentFile_Path = UploadFileToString(dir, files[i]);
+                        serviceCommentFiles.ServiceCommentFile_Path = await UploadFileToString(dir, files[i]);
                         serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
                         serviceCommentFiles.ServiceComment_Seq = i;
                         serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
@@ -1423,7 +1424,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Insert(Services model, HttpFileCollectionBase files, bool isForward = false)
+        public async Task<bool> Services_Insert(Services model, HttpFileCollectionBase files, bool isForward = false)
         {
             try
             {
@@ -1467,7 +1468,7 @@ namespace E2E.Models
                             ServiceFile_Name = files[i].FileName
                         };
                         string dir = string.Format("Service/{0}/", model.Service_Key);
-                        serviceFiles.ServiceFile_Path = UploadFileToString(dir, files[i]);
+                        serviceFiles.ServiceFile_Path = await UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = EntityState.Added;
                     }
@@ -1500,7 +1501,7 @@ namespace E2E.Models
                                 Service_Id = model.Ref_Service_Id.Value,
                                 Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name)
                             };
-                            Services_Comment(serviceComments);
+                            await Services_Comment(serviceComments);
                         }
 
                         serviceComments = new ServiceComments
@@ -1508,7 +1509,7 @@ namespace E2E.Models
                             Service_Id = model.Ref_Service_Id.Value,
                             Comment_Content = string.Format("Forward this job to new service key {0}", model.Service_Key)
                         };
-                        res = Services_Comment(serviceComments);
+                        res = await Services_Comment(serviceComments);
                     }
                     else
                     {
@@ -1524,7 +1525,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Save(Services model, HttpFileCollectionBase files, bool isForward = false)
+        public async Task<bool> Services_Save(Services model, HttpFileCollectionBase files, bool isForward = false)
         {
             try
             {
@@ -1545,11 +1546,11 @@ namespace E2E.Models
 
                     services.Priority_Id = model.Priority_Id;
                     services.Service_DueDate = model.Service_DueDate;
-                    res = Services_Update(services, files);
+                    res = await Services_Update(services, files);
                 }
                 else
                 {
-                    res = Services_Insert(model, files, isForward);
+                    res = await Services_Insert(model, files, isForward);
                 }
 
                 return res;
@@ -1560,7 +1561,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SaveDocumentControl(ServiceDocuments model, HttpFileCollectionBase files)
+        public async Task<bool> Services_SaveDocumentControl(ServiceDocuments model, HttpFileCollectionBase files)
         {
             try
             {
@@ -1577,7 +1578,7 @@ namespace E2E.Models
                 {
                     serviceDocuments.ServiceDocument_Name = fileBase.FileName;
                     string dir = string.Format("Service/{0}/DocumentControls/", db.Services.Find(model.Service_Id).Service_Key);
-                    serviceDocuments.ServiceDocument_Path = UploadFileToString(dir, fileBase);
+                    serviceDocuments.ServiceDocument_Path = await UploadFileToString(dir, fileBase);
                 }
 
                 db.Entry(serviceDocuments).State = EntityState.Modified;
@@ -1594,7 +1595,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetAction(Services model)
+        public async Task<bool> Services_SetAction(Services model)
         {
             try
             {
@@ -1639,7 +1640,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime, system_Statuses.Status_Name)
                     };
-                    res = Services_Comment(serviceComments);
+                    res = await Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -1650,7 +1651,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetApprove(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetApprove(ServiceComments model, string methodName)
         {
             try
             {
@@ -1667,7 +1668,7 @@ namespace E2E.Models
                         Service_Id = model.Service_Id,
                         Comment_Content = string.Format("Approved,\n{0}", model.Comment_Content)
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
@@ -1681,7 +1682,7 @@ namespace E2E.Models
                         clsMail.SendToId = services.User_Id;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -1693,7 +1694,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetCancel(ServiceComments model)
+        public async Task<bool> Services_SetCancel(ServiceComments model)
         {
             try
             {
@@ -1719,7 +1720,7 @@ namespace E2E.Models
                             Service_Id = services.Service_Id,
                             Comment_Content = model.Comment_Content
                         };
-                        Services_Comment(serviceComments);
+                        await Services_Comment(serviceComments);
                     }
 
                     serviceComments = new ServiceComments
@@ -1727,7 +1728,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Cancel task, Status update to {0}", system_Statuses.Status_Name)
                     };
-                    res = Services_Comment(serviceComments);
+                    res = await Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -1738,7 +1739,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetClose(Guid id, List<ClsEstimate> score)
+        public async Task<bool> Services_SetClose(Guid id, List<ClsEstimate> score)
         {
             try
             {
@@ -1762,7 +1763,7 @@ namespace E2E.Models
                                 Service_Id = nextId.Value,
                                 Comment_Content = string.Format("Status update to {0}", system_Statuses.Status_Name)
                             };
-                            if (Services_Comment(serviceComments))
+                            if (await Services_Comment(serviceComments))
                             {
                                 res = true;
                                 if (services.Ref_Service_Id.HasValue)
@@ -1770,7 +1771,7 @@ namespace E2E.Models
                                     nextId = services.Ref_Service_Id.Value;
                                     if (db.Services.Any(a => a.Service_Id == nextId && a.Status_Id == 3))
                                     {
-                                        res = SaveEstimate(nextId.Value, score);
+                                        res = await SaveEstimate(nextId.Value, score);
                                     }
                                     else
                                     {
@@ -1795,18 +1796,18 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetCommit(Services model, string methodName)
+        public async Task<bool> Services_SetCommit(Services model, string methodName)
         {
             try
             {
                 bool res = new bool();
                 if (model.Action_User_Id.HasValue)
                 {
-                    res = Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value, methodName);
+                    res = await Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value, methodName);
                 }
                 else
                 {
-                    res = Services_SetToDepartment(model.Service_Id, model.Department_Id);
+                    res = await Services_SetToDepartment(model.Service_Id, model.Department_Id);
                 }
 
                 return res;
@@ -1817,7 +1818,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetComplete(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetComplete(ServiceComments model, string methodName)
         {
             try
             {
@@ -1847,7 +1848,7 @@ namespace E2E.Models
                             Service_Id = services.Service_Id,
                             Comment_Content = model.Comment_Content
                         };
-                        Services_Comment(serviceComments);
+                        await Services_Comment(serviceComments);
                     }
 
                     serviceComments = new ServiceComments
@@ -1855,7 +1856,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name)
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
@@ -1869,7 +1870,7 @@ namespace E2E.Models
                         clsMail.SendToId = services.User_Id;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        if (clsMail.SendMail(clsMail))
+                        if (await clsMail.SendMail(clsMail))
                         {
                             MethodBase methodBase = MethodBase.GetCurrentMethod();
                             Log_SendEmail log_SendEmail = new Log_SendEmail
@@ -1906,7 +1907,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetFreePoint(Guid id)
+        public async Task<bool> Services_SetFreePoint(Guid id)
         {
             try
             {
@@ -1923,7 +1924,7 @@ namespace E2E.Models
                         Service_Id = id,
                         Comment_Content = "This request is not deducted points."
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         int point = db.System_Priorities.Find(services.Priority_Id).Priority_Point;
                         Users users = db.Users.Find(services.User_Id);
@@ -1936,7 +1937,7 @@ namespace E2E.Models
                                 Service_Id = id,
                                 Comment_Content = string.Format("Give back {0} points to {1}", point, master.Users_GetInfomation(services.User_Id))
                             };
-                            res = Services_Comment(serviceComments);
+                            res = await Services_Comment(serviceComments);
                         }
                     }
                 }
@@ -1949,7 +1950,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetPending(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetPending(ServiceComments model, string methodName)
         {
             try
             {
@@ -1976,7 +1977,7 @@ namespace E2E.Models
                         {
                             if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
                             {
-                                if (Api_DeleteFile(item.ServiceDocument_Path))
+                                if (await Api_DeleteFile(item.ServiceDocument_Path))
                                 {
                                     continue;
                                 }
@@ -1993,12 +1994,12 @@ namespace E2E.Models
                             Comment_Content = model.Comment_Content
                         };
 
-                        if (Services_Comment(serviceComments))
+                        if (await Services_Comment(serviceComments))
                         {
                             List<ServiceTeams> serviceTeams = db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToList();
                             foreach (var item in serviceTeams)
                             {
-                                Service_DeleteTeam(item.Team_Id, methodName);
+                                await Service_DeleteTeam(item.Team_Id, methodName);
                             }
                         }
                     }
@@ -2010,7 +2011,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Return job to department {0}", deptName)
                     };
-                    res = Services_Comment(serviceComments);
+                    res = await Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -2021,7 +2022,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetReject(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetReject(ServiceComments model, string methodName)
         {
             try
             {
@@ -2030,7 +2031,7 @@ namespace E2E.Models
                 services = db.Services.Find(model.Service_Id);
                 if (!services.Department_Id.HasValue)
                 {
-                    Services_SetToDepartment(model.Service_Id);
+                    await Services_SetToDepartment(model.Service_Id);
                 }
 
                 System_Statuses system_Statuses = new System_Statuses();
@@ -2051,7 +2052,7 @@ namespace E2E.Models
                             Service_Id = services.Service_Id,
                             Comment_Content = model.Comment_Content
                         };
-                        Services_Comment(serviceComments);
+                        await Services_Comment(serviceComments);
                     }
 
                     serviceComments = new ServiceComments
@@ -2059,7 +2060,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name)
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
@@ -2073,7 +2074,7 @@ namespace E2E.Models
                         clsMail.SendToId = services.User_Id;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2085,7 +2086,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetRequired(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetRequired(ServiceComments model, string methodName)
         {
             try
             {
@@ -2102,7 +2103,7 @@ namespace E2E.Models
                         Service_Id = model.Service_Id,
                         Comment_Content = string.Format("Approval required, \n {0}", model.Comment_Content)
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                         List<Guid> sendTo = db.Users
@@ -2126,7 +2127,7 @@ namespace E2E.Models
                         clsMail.SendToIds = sendTo;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2138,7 +2139,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetReturnAssign(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetReturnAssign(ServiceComments model, string methodName)
         {
             try
             {
@@ -2159,7 +2160,7 @@ namespace E2E.Models
                             Service_Id = services.Service_Id,
                             Comment_Content = model.Comment_Content
                         };
-                        Services_Comment(serviceComments);
+                        await Services_Comment(serviceComments);
                     }
 
                     serviceComments = new ServiceComments
@@ -2167,7 +2168,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Return assignments to {0} department", db.Master_Departments.Find(services.Department_Id).Department_Name)
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         if (services.Assign_User_Id.HasValue)
                         {
@@ -2183,7 +2184,7 @@ namespace E2E.Models
                             clsMail.SendToId = services.Assign_User_Id;
                             clsMail.Subject = subject;
                             clsMail.Body = content;
-                            res = clsMail.SendMail(clsMail);
+                            res = await clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -2196,7 +2197,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetReturnJob(ServiceComments model, string methodName)
+        public async Task<bool> Services_SetReturnJob(ServiceComments model, string methodName)
         {
             try
             {
@@ -2214,7 +2215,7 @@ namespace E2E.Models
                 serviceDocuments = db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToList();
                 foreach (var item in serviceDocuments)
                 {
-                    if (Api_DeleteFile(item.ServiceDocument_Path))
+                    if (await Api_DeleteFile(item.ServiceDocument_Path))
                     {
                         db.Entry(item).State = EntityState.Deleted;
                     }
@@ -2229,7 +2230,7 @@ namespace E2E.Models
                             Service_Id = services.Service_Id,
                             Comment_Content = model.Comment_Content
                         };
-                        Services_Comment(serviceComments);
+                        await Services_Comment(serviceComments);
                     }
 
                     serviceComments = new ServiceComments
@@ -2237,7 +2238,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = "Return job to center room"
                     };
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         if (services.Assign_User_Id.HasValue)
                         {
@@ -2253,7 +2254,7 @@ namespace E2E.Models
                             clsMail.SendToId = services.Assign_User_Id;
                             clsMail.Subject = subject;
                             clsMail.Body = content;
-                            res = clsMail.SendMail(clsMail);
+                            res = await clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -2266,7 +2267,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetToDepartment(Guid id, Guid? deptId = null)
+        public async Task<bool> Services_SetToDepartment(Guid id, Guid? deptId = null)
         {
             try
             {
@@ -2292,7 +2293,7 @@ namespace E2E.Models
                         Service_Id = services.Service_Id,
                         Comment_Content = string.Format("Commit Task, Assign task to the {0} department", deptName)
                     };
-                    res = Services_Comment(serviceComments);
+                    res = await Services_Comment(serviceComments);
                 }
 
                 return res;
@@ -2303,7 +2304,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetToUser(Guid id, Guid deptId, Guid userId, string methodName)
+        public async Task<bool> Services_SetToUser(Guid id, Guid deptId, Guid userId, string methodName)
         {
             try
             {
@@ -2326,7 +2327,7 @@ namespace E2E.Models
                         Comment_Content = string.Format("Commit Task, Assign task to the {0} department, Assign task to {1}", deptName, master.Users_GetInfomation(userId))
                     };
 
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "Action");
@@ -2344,7 +2345,7 @@ namespace E2E.Models
                         clsMail.SendToId = userId;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2356,7 +2357,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_SetToUser(Guid id, Guid userId, string methodName)
+        public async Task<bool> Services_SetToUser(Guid id, Guid userId, string methodName)
         {
             try
             {
@@ -2376,7 +2377,7 @@ namespace E2E.Models
                         Comment_Content = string.Format("Assign task to {0}", master.Users_GetInfomation(userId))
                     };
 
-                    if (Services_Comment(serviceComments))
+                    if (await Services_Comment(serviceComments))
                     {
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl = linkUrl.Replace(methodName, "Action");
@@ -2395,7 +2396,7 @@ namespace E2E.Models
                         clsMail.SendToId = userId;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
-                        res = clsMail.SendMail(clsMail);
+                        res = await clsMail.SendMail(clsMail);
                     }
                 }
 
@@ -2407,7 +2408,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Services_Update(Services model, HttpFileCollectionBase files)
+        public async Task<bool> Services_Update(Services model, HttpFileCollectionBase files)
         {
             try
             {
@@ -2425,7 +2426,7 @@ namespace E2E.Models
                             ServiceFile_Name = files[i].FileName
                         };
                         string dir = string.Format("Service/{0}/", model.Service_Key);
-                        serviceFiles.ServiceFile_Path = UploadFileToString(dir, files[i]);
+                        serviceFiles.ServiceFile_Path = await UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = EntityState.Added;
                     }
@@ -2485,7 +2486,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost)
+        public async Task<string> UploadFileToString(string fullDir, HttpPostedFileBase filePost)
         {
             try
             {
@@ -2493,7 +2494,7 @@ namespace E2E.Models
 
                 clsServiceFile.Filename = filePost.FileName;
 
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = await clsApi.UploadFile(clsServiceFile, filePost);
 
                 return fileResponse.FileUrl;
             }
@@ -2504,7 +2505,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
+        public async Task<string> UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
         {
             try
             {
@@ -2519,7 +2520,7 @@ namespace E2E.Models
                     clsServiceFile.Filename = filePost.FileName;
                 }
 
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = await clsApi.UploadFile(clsServiceFile, filePost);
 
                 return fileResponse.FileUrl;
             }
@@ -2529,7 +2530,7 @@ namespace E2E.Models
             }
         }
 
-        public ClsImage UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        public async Task<ClsImage> UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
             if (string.IsNullOrEmpty(fullDir))
             {
@@ -2561,7 +2562,7 @@ namespace E2E.Models
                     clsServiceFile.Filename = filePost.FileName;
                 }
 
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = await clsApi.UploadFile(clsServiceFile, filePost);
 
                 res.OriginalPath = fileResponse.FileUrl;
                 res.ThumbnailPath = fileResponse.FileThumbnailUrl;

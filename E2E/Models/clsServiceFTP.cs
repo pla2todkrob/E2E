@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -92,11 +93,11 @@ namespace E2E.Models
 
         public static string FinalPath { get; set; }
 
-        public bool _Api_DeleteFile(string path)
+        public async Task<bool> _Api_DeleteFile(string path)
         {
             try
             {
-                fileResponse = clsApi.Delete_File(path);
+                fileResponse = await clsApi.DeleteFile(path);
 
                 //path = path.Replace(urlDomain, urlFtp);
                 //FtpWebRequest request = (FtpWebRequest)WebRequest.Create(new Uri(path));
@@ -355,7 +356,7 @@ namespace E2E.Models
             }
         }
 
-        public void Ftp_DownloadFolder(List<string> pathsFolder, string zirDir, List<string> emails, string subject, string content)
+        public async Task Ftp_DownloadFolder(List<string> pathsFolder, string zirDir, List<string> emails, string subject, string content)
         {
             try
             {
@@ -407,7 +408,7 @@ namespace E2E.Models
                 clsMail.Body = content;
                 clsMail.SendCC = userId;
                 clsMail.AttachPaths = attachPath;
-                if (clsMail.SendMail(clsMail))
+                if (await clsMail.SendMail(clsMail))
                 {
                     Directory.Delete(saveToPath, true);
                 }
@@ -532,7 +533,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost)
+        public async Task<string> UploadFileToString(string fullDir, HttpPostedFileBase filePost)
         {
             try
             {
@@ -568,7 +569,7 @@ namespace E2E.Models
 
                 clsServiceFile.Filename = filePost.FileName;
 
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = await clsApi.UploadFile(clsServiceFile, filePost);
 
                 return fileResponse.FileUrl;
             }
@@ -579,7 +580,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public string UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
+        public async Task<string> UploadFileToString(string fullDir, HttpPostedFileBase filePost, string fileName)
         {
             try
             {
@@ -623,7 +624,7 @@ namespace E2E.Models
                     clsServiceFile.Filename = filePost.FileName;
                 }
 
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = await clsApi.UploadFile(clsServiceFile, filePost);
 
                 return fileResponse.FileUrl;
             }
@@ -634,7 +635,7 @@ namespace E2E.Models
         }
 
         //API Complete
-        public ClsImage UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
+        public async Task<ClsImage> UploadImageToString(string fullDir, HttpPostedFileBase filePost, string fileName = "")
         {
             if (string.IsNullOrEmpty(fullDir))
             {
@@ -728,7 +729,7 @@ namespace E2E.Models
                     clsServiceFile.Filename = filePost.FileName;
                 }
 
-                fileResponse = clsApi.UploadFile(clsServiceFile, filePost);
+                fileResponse = await clsApi.UploadFile(clsServiceFile, filePost);
 
                 res.OriginalPath = fileResponse.FileUrl;
                 res.ThumbnailPath = fileResponse.FileThumbnailUrl;
