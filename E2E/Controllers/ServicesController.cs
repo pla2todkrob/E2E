@@ -667,7 +667,7 @@ namespace E2E.Controllers
                 byte[] fileBytes = System.IO.File.ReadAllBytes(ZipName);
                 HttpPostedFileBase objFile = (HttpPostedFileBase)new MemoryPostedFile(fileBytes);
 
-                clsServiceFile.FolderPath = string.Format("Service/{0}/DocumentControls", key);
+                clsServiceFile.FolderPath = Path.Combine("Service", key, "DocumentControls");
                 clsServiceFile.Filename = Path.GetFileName(ZipName);
 
                 //เก็บไฟล์ที่ User Download ไว้

@@ -1233,7 +1233,7 @@ namespace E2E.Models
                         {
                             ServiceCommentFile_Name = files[i].FileName
                         };
-                        string dir = string.Format("Service/{0}/Comment/{1}/", db.Services.Find(model.Service_Id).Service_Key, DateTime.Today.ToString("yyMMdd"));
+                        string dir = Path.Combine("Service", db.Services.Find(model.Service_Id).Service_Key, "Comment");
                         serviceCommentFiles.ServiceCommentFile_Path = await UploadFileToString(dir, files[i]);
                         serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
                         serviceCommentFiles.ServiceComment_Seq = i;
@@ -1467,7 +1467,7 @@ namespace E2E.Models
                             Service_Id = model.Service_Id,
                             ServiceFile_Name = files[i].FileName
                         };
-                        string dir = string.Format("Service/{0}/", model.Service_Key);
+                        string dir = Path.Combine("Service", model.Service_Key);
                         serviceFiles.ServiceFile_Path = await UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = EntityState.Added;
@@ -1577,7 +1577,7 @@ namespace E2E.Models
                 if (fileBase.ContentLength > 0)
                 {
                     serviceDocuments.ServiceDocument_Name = fileBase.FileName;
-                    string dir = string.Format("Service/{0}/DocumentControls/", db.Services.Find(model.Service_Id).Service_Key);
+                    string dir = Path.Combine("Service", db.Services.Find(model.Service_Id).Service_Key, "DocumentControls");
                     serviceDocuments.ServiceDocument_Path = await UploadFileToString(dir, fileBase);
                 }
 
@@ -2425,7 +2425,7 @@ namespace E2E.Models
                             Service_Id = model.Service_Id,
                             ServiceFile_Name = files[i].FileName
                         };
-                        string dir = string.Format("Service/{0}/", model.Service_Key);
+                        string dir = Path.Combine("Service", model.Service_Key);
                         serviceFiles.ServiceFile_Path = await UploadFileToString(dir, files[i]);
                         serviceFiles.ServiceFile_Extension = Path.GetExtension(files[i].FileName);
                         db.Entry(serviceFiles).State = EntityState.Added;

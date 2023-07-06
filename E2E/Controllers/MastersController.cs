@@ -1465,7 +1465,7 @@ namespace E2E.Controllers
 
                         if (file.ContentLength > 0)
                         {
-                            string dir = "Users/" + DateTime.Today.ToString("d").Replace('/', '-');
+                            string dir = "Users";
                             ClsServiceFTP serviceFTP = new ClsServiceFTP();
                             var fileRes = await api.UploadFile(file, dir);
                             string filePath = fileRes.FileUrl;

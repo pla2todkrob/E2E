@@ -24,18 +24,18 @@
 
                 if (totalToken < maxToken * 0.5) {
                     totalElement.classList.add('text-success');
-                } else if (totalToken < maxToken * 0.75) {
+                } else if (totalToken <= maxToken * 0.7) {
                     totalElement.classList.add('text-warning');
-                } else if (totalToken <= maxToken) {
+                } else if (totalToken <= maxToken * 0.9) {
                     totalElement.classList.add('text-danger');
-                } else {
+                }
+                else {
                     swal('Request clear history', "Your chat history is nearing its limit.\nPlease clear the chat history.", 'warning').then(function () {
                         confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")', 'reloadPage');
                     });
 
                 }
-
-                });
+            });
         }
 
         function adjustTextareaHeight(event) {

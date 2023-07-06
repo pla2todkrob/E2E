@@ -43,7 +43,7 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "EForm/" + eForms.EForm_Id;
+                            string dir = Path.Combine("EForm", eForms.EForm_Id.ToString());
 
                             if (CK_IMG)
                             {
@@ -150,7 +150,7 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "EForm/" + EForms.EForm_Id;
+                            string dir = Path.Combine("EForm", EForms.EForm_Id.ToString());
 
                             if (CK_IMG)
                             {

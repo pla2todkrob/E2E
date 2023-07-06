@@ -147,7 +147,7 @@ namespace E2E.Models
                     {
                         if (files[i].ContentLength > 0)
                         {
-                            string dir = "Topic/" + topics.Topic_Id;
+                            string dir = Path.Combine("Topic", topics.Topic_Id.ToString());
                             HttpPostedFileBase file = files[i];
                             if (file.ContentType.StartsWith("image"))
                             {
@@ -219,7 +219,7 @@ namespace E2E.Models
                         if (files[i].ContentLength > 0)
                         {
                             HttpPostedFileBase file = files[i];
-                            string dir = "Topic/" + model.Topic_Id;
+                            string dir = Path.Combine("Topic", model.Topic_Id.ToString());
                             if (files[i].ContentType.StartsWith("image"))
                             {
                                 string FileName = file.FileName;
