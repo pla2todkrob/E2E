@@ -7,11 +7,11 @@ namespace E2E.Controllers
 {
     public class GetController : ApiController
     {
+        private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsContext db = new ClsContext();
 
         public ClsApi GetAllUser()
         {
-            ClsApi clsApi = new ClsApi();
             try
             {
                 clsApi.IsSuccess = true;
