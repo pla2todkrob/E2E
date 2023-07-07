@@ -169,6 +169,7 @@ namespace E2E.Controllers
                         throw new Exception("Username not found");
                     }
                     LoginPass:
+                    clsApi.Value = users.User_Id;
                     clsApi.IsSuccess = true;
                 }
                 catch (Exception ex)
