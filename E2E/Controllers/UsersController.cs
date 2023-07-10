@@ -145,7 +145,10 @@ namespace E2E.Controllers
                     {
                         throw new Exception(string.Format("Username {0} not found", model.Username));
                     }
-
+                    else if (!users.Active)
+                    {
+                        new Exception("This account has been suspended.\nPlease contact the system administrator.");
+                    }
                     UserDetails userDetails = db.UserDetails
                         .Where(w => w.User_Id == users.User_Id)
                         .FirstOrDefault();

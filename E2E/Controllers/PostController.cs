@@ -124,6 +124,10 @@ namespace E2E.Controllers
                         .FirstOrDefault();
                     if (users != null)
                     {
+                        if (!users.Active)
+                        {
+                            new Exception("This account has been suspended.\nPlease contact the system administrator.");
+                        }
                         if (string.IsNullOrEmpty(users.Username))
                         {
                             ClsActiveDirectoryInfo adInfo = new ClsManageMaster().GetAdInfo(users.User_Code);
