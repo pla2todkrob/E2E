@@ -1,0 +1,37 @@
+﻿@{
+	ViewBag.Title = "Report KPI";
+	Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+}
+
+@section breadcrumb{
+	<nav aria-label="breadcrumb ">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+			<li class="breadcrumb-item"><a href="@Url.Action("Index","BusinessCards")">Business Card</a></li>
+			<li class="breadcrumb-item active" aria-current="page">Report KPI</li>
+		</ol>
+	</nav>
+}
+
+@section scripts{
+	<script>
+        $(function () {
+            reloadTable();
+
+        });
+
+
+
+        function reloadTable() {
+            callFilter('@Url.Action("Report_KPI_Filter", "Services")');
+
+            callTable_Normal('@Url.Action("Report_KPI_Table", "Services")');
+
+        }
+	</script>
+}
+
+<div class="mb-3 d-flex">
+	<div class="ml-auto" id="filter"></div>
+</div>
+<div id="datalist"></div>

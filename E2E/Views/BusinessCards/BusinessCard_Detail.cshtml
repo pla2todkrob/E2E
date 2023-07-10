@@ -105,42 +105,45 @@ swal({
 
 		}
 
-	function ManagerGaApprove(id) {
-		let SelectId = $('#SelectId').val();
-	swal({
-		title: "Are you sure?",
-		text: "You are about to approve this item!",
-		icon: "warning",
-		buttons: true
+function ManagerGaApprove(id) {
+    swal({
+        title: "Are you sure?",
+        text: "You are about to approve this item!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+        content: {
+            element: "input",
+            attributes: {
+                placeholder: "Please enter Remark",
+                type: "text",
+            },
+        },
+    }).then((willApprove) => {
+        if (willApprove) {
+            var UrlAction = '@Url.Action("ManagerGaApprove", "BusinessCards")';
+            var SelectId = $('#SelectId').val(); // เพิ่มบรรทัดนี้เพื่อดึงค่า SelectId
+            var remark = $('.swal-content__input').val();
+            $.ajax({
+                url: UrlAction,
+                data: { id: id, SelectId: SelectId, remark: remark }, // เพิ่ม SelectId ในข้อมูลที่ส่งไปใน Ajax คอนโทรลเลอร์
+                success: function (res) {
+                    swal({
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        dangerMode: res.DangerMode
+                    }).then(() => {
+                        window.location.href = '@Url.Action("Index", "BusinessCards")';
+                    });
+                }
+            });
+        }
+    });
+}
 
-	})
-	.then((willApprove) => {
-		if (willApprove) {
-		var UrlAction = '@Url.Action("ManagerGaApprove", "BusinessCards")';
-			$.ajax({
-				url: UrlAction,
-				data: {
-					id: id,
-					SelectId: SelectId
-				},
-				success: function (res) {
 
-				swal({
-				title: res.Title,
-				text: res.Text,
-				icon: res.Icon,
-					dangerMode: res.DangerMode
-				}).then(() => {
 
-					window.location.href = '@Url.Action("Index", "BusinessCards")';
-
-				});
-				}
-			});
-			}
-
-		});
-	}
 
 	function ManagerGaReject(id) {
 
@@ -420,26 +423,42 @@ swal({
 
 		}
 
-		function Resend_Email(id) {
+function Resend_Email(id) {
+    var UrlAction = '@Url.Action("Resend_Email", "BusinessCards")';
+    console.log(id);
 
-			var UrlAction = '@Url.Action("Resend_Email", "BusinessCards")';
-			console.log(id);
-    $.ajax({
-      url: UrlAction,
-		data: { id: id},
-		success: function (res) {
-
-			swal({
-				title: res.Title,
-				text: res.Text,
-				icon: res.Icon,
-				dangerMode: res.DangerMode
-			})
-
-      }
+    swal({
+        title: "Confirmation",
+        text: "Are you sure you want to resend the email?",
+        icon: "warning",
+        buttons: {
+            cancel: "No",
+            confirm: "Yes"
+        }
+    }).then(function (confirmed) {
+        if (confirmed) {
+            $.ajax({
+                url: UrlAction,
+                data: { id: id },
+                success: function (res) {
+                    swal({
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        dangerMode: res.DangerMode
+                    });
+                }
+            });
+        }
     });
+}
 
-		}
+
+		$(document).on('submit', '#EditDetil_submit', function (e) {
+			e.preventDefault();
+			callSubmitPage('@Url.Action("BusinessCard_UpdateDetail", "BusinessCards")', this);
+            return false;
+        });
 
 	</script>
 }
@@ -460,81 +479,96 @@ swal({
 
 	}
 
-	<div class="card mb-3">
+<div class="card mb-3">
 
-		<div class="form-row mt-3">
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Name(TH):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
-			</div>
+	@if (Model.User_id == UserID)
+	{
+		<div class="col-12 mt-3">
 
-			<div class="form-group col-5">
-				@Html.Label("Surname(TH):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
-			</div>
+			<div class="d-flex">
+				<div class="ml-auto">
+					<button class="btn btn-outline-secondary" onclick="callModal('@Url.Action("BusinessCard_EditPhone", "BusinessCards", new { id = Model.BusinessCard_Id })')"><i class="fa fa-pencil"></i></button>
 
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Name(EN):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group col-5">
-				@Html.Label("Surname(EN):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Department:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group col-5">
-				@Html.Label("Position:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
-			</div>
-
-			@*<div class="form-group col-12">
-					@Html.Label("Both Sided:")
-					@Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
-				</div>*@
-
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Location:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group col-5">
-				@Html.Label("Tel:")
-				@Html.DisplayFor(m => m.Tel_Internal, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Mobile:")
-				@Html.DisplayFor(m => m.Tel_External, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group col-5">
-				@Html.Label("Email:")
-				@Html.DisplayFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
-			</div>
-
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Amount:")
-				@Html.DisplayFor(m => m.Amount, new { type = "number", @class = "form-control" })
-			</div>
-
-			@*ปุ่ม Resend*@
-			@if (ViewBag.OrderBusinessCard == 1  && UserID == Model.User_id || ViewBag.OrderBusinessCard == 2 || ViewBag.OrderBusinessCard == 4 && ViewBag.CountFileUpload > 0 || ViewBag.OrderBusinessCard == 6)
-			{
-				<div class="form-group col-5">
-					<button class="btn btn-outline-info" onclick="Resend_Email('@Model.BusinessCard_Id')"><i class="fa fa-envelope"></i> Resend</button>
 				</div>
+			</div>
+		</div>
+	}
 
-			}
 
+	<div class="form-row">
+		<div class="form-group offset-2 col-5">
+			@Html.Label("Name(TH):")
+			@Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group col-5">
+			@Html.Label("Surname(TH):")
+			@Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
 
 		</div>
+
+		<div class="form-group offset-2 col-5">
+			@Html.Label("Name(EN):")
+			@Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group col-5">
+			@Html.Label("Surname(EN):")
+			@Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group offset-2 col-5">
+			@Html.Label("Department:")
+			@Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group col-5">
+			@Html.Label("Position:")
+			@Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
+		</div>
+
+		@*<div class="form-group col-12">
+				@Html.Label("Both Sided:")
+				@Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
+			</div>*@
+
+		<div class="form-group offset-2 col-5">
+			@Html.Label("Location:")
+			@Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group col-5">
+			@Html.Label("Tel:")
+			@Html.DisplayFor(m => m.Tel_Internal, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group offset-2 col-5">
+			@Html.Label("Mobile:")
+			@Html.DisplayFor(m => m.Tel_External, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group col-5">
+			@Html.Label("Email:")
+			@Html.DisplayFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
+		</div>
+
+		<div class="form-group offset-2 col-5">
+			@Html.Label("Amount:")
+			@Html.DisplayFor(m => m.Amount, new { type = "number", @class = "form-control" })
+		</div>
+
+		@*ปุ่ม Resend*@
+		@if (ViewBag.OrderBusinessCard == 1 && UserID == Model.User_id || ViewBag.OrderBusinessCard == 2 || ViewBag.OrderBusinessCard == 4 && ViewBag.CountFileUpload > 0 || ViewBag.OrderBusinessCard == 6)
+		{
+			<div class="form-group col-5">
+				<button class="btn btn-outline-info" onclick="Resend_Email('@Model.BusinessCard_Id')"><i class="fa fa-envelope"></i> Resend</button>
+			</div>
+
+		}
+
+
 	</div>
+</div>
 	@{
 
 		if (ViewBag.authorized == 2 && ViewBag.OrderBusinessCard == 1 && ViewBag.DeptCHK)

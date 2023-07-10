@@ -353,11 +353,13 @@ namespace E2E.Models
                 subject = string.Format("[Business Card][Assign] {0}", Model.Key);
                 if (Model.UserAction == null)
                 {
-                    content = "<p>Comment: Assign task to Department General Affair";
+                    content = string.Format("<p>Comment: {0}</p>", remark);
+                    content += "<p>Assign task to Department General Affair";
                 }
                 else
                 {
-                    content = "<p>Comment: Assign task to " + master.Users_GetInfomation(Model.UserAction.Value);
+                    content = string.Format("<p>Comment: {0}</p>", remark);
+                    content += "<p>Assign task to " + master.Users_GetInfomation(Model.UserAction.Value);
                 }
 
                 mail.SendFrom = ActionId;

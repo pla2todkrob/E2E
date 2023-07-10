@@ -1,82 +1,88 @@
 ﻿@model E2E.Models.Views.ClsCountNavbar
 
 @{
-    Layout = null;
+	Layout = null;
 }
 
 <div class="collapse navbar-collapse" id="navbar_top">
-    <ul class="navbar-nav mr-auto">
 
-        @*Nav Service*@
-        <li class="nav-item dropdown" id="nav_service">
-            @*@{ Html.RenderAction("_NavService", "Configurations"); }*@
-        </li>
+	<ul class="navbar-nav mr-auto">
 
-        @*Nav Department*@
-        <li class="nav-item dropdown" id="nav_department">
-            <a>@*@{ Html.RenderAction("_NavDepartment", "Configurations"); }*@</a>
-        </li>
-    </ul>
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-            <a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@*@{ Html.RenderAction("_Newtopic", "Topics"); }*@ </a>
-        </li>
+		@*Nav Service*@
+		<li class="nav-item dropdown" id="nav_service">
+			@*@{ Html.RenderAction("_NavService", "Configurations"); }*@
+		</li>
 
-        <li class="nav-item dropdown">
-            @{ Html.RenderAction("_NavEForms", "Configurations"); }
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown_chatbot" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Chat bot
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_chatbot">
-                <a class="dropdown-item" href="@Url.Action("Index","ChatBot")">Internal</a>
-                <a class="dropdown-item" href="@Url.Action("OpenAI","ChatBot")">External (Open AI)</a>
-            </div>
-        </li>
+		@*Nav Department*@
+		<li class="nav-item dropdown" id="nav_department">
+			<a>@*@{ Html.RenderAction("_NavDepartment", "Configurations"); }*@</a>
+		</li>
 
-        @if (Model.Admin.HasValue)
-        {
-            if (Model.Admin == 1)
-            {
-                Html.RenderPartial("_NavbarAdmin");
-            }
+		<li class="nav-item dropdown" id="nav_report">
+			@{Html.RenderAction("_NavReport", "Configurations"); }
+		</li>
 
-            Html.RenderAction("_NavManagement", "Configurations");
+	</ul>
+	<ul class="navbar-nav ml-auto">
+		<li class="nav-item">
+			<a id="nav_Newtopic" class="nav-link" href="@Url.Action("Boards","Topics")">@*@{ Html.RenderAction("_Newtopic", "Topics"); }*@ </a>
+		</li>
 
-            <li class="nav-item dropdown">
+		<li class="nav-item dropdown">
+			@{ Html.RenderAction("_NavEForms", "Configurations"); }
+		</li>
+		<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="dropdown_chatbot" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Chat bot
+			</a>
+			<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_chatbot">
+				<a class="dropdown-item" href="@Url.Action("Index","ChatBot")">Internal</a>
+				<a class="dropdown-item" href="@Url.Action("OpenAI","ChatBot")">External (Open AI)</a>
+			</div>
+		</li>
 
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    @{ Html.RenderAction("_Profile", "Configurations"); }
+		@if (Model.Admin.HasValue)
+		{
+			if (Model.Admin == 1)
+			{
+				Html.RenderPartial("_NavbarAdmin");
+			}
 
-                    @if (Model.ChangeDue.Value > 0)
-                    {
-                        <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
-                    }
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_profile">
-                    <a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
-                    <a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
-                    <a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">
+			Html.RenderAction("_NavManagement", "Configurations");
 
-                        <span>Request change due date</span>
-                        @if (Model.ChangeDue.Value > 0)
-                        {
-                            <span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
-                        }
-                    </a>
+			<li class="nav-item dropdown">
 
-                    <div class="dropdown-divider"></div>
-                    @{ Html.RenderAction("ShowChangePassword", "Users"); }
-                    <a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
-                </div>
-            </li>
-        }
-        else
-        {
-            <li class="nav-item">
-                <a class="nav-link" href="@FormsAuthentication.LoginUrl">Login</a>
-            </li>
-        }
-    </ul>
+				<a class="nav-link dropdown-toggle" href="#" id="dropdown_profile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					@{ Html.RenderAction("_Profile", "Configurations"); }
+
+					@if (Model.ChangeDue.Value > 0)
+					{
+						<span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
+					}
+				</a>
+				<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_profile">
+					<a class="dropdown-item" href="@Url.Action("MyTask", "Services")">My task</a>
+					<a class="dropdown-item" href="@Url.Action("MyRequest", "Services")">My request</a>
+					<a class="dropdown-item" href="@Url.Action("RequestChangeDue", "Services")">
+
+						<span>Request change due date</span>
+						@if (Model.ChangeDue.Value > 0)
+						{
+							<span id="count" class="badge badge-pill badge-warning">@Model.ChangeDue.Value</span>
+						}
+					</a>
+
+					<div class="dropdown-divider"></div>
+					@{ Html.RenderAction("ShowChangePassword", "Users"); }
+					<a class="dropdown-item" href="#" onclick="notifySignout('@Url.Action("Signout", "Users")');">Signout</a>
+				</div>
+			</li>
+		}
+		else
+		{
+			<li class="nav-item">
+				<a class="nav-link" href="@FormsAuthentication.LoginUrl">Login</a>
+			</li>
+		}
+	</ul>
 </div>
