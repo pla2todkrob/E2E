@@ -163,6 +163,62 @@ namespace E2E.Controllers
             return View(id);
         }
 
+        public ActionResult BusinessCard_EditPhone(Guid id)
+        {
+            var BusinessCard = db.BusinessCards.Find(id);
+
+            return View(BusinessCard);
+        }
+
+        public ActionResult BusinessCard_UpdateDetail(BusinessCards model)
+        {
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(model.BusinessCard_Id);
+                    businessCards.Tel_External = model.Tel_External;
+                    businessCards.Tel_Internal = model.Tel_Internal;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.Message;
+                    Exception inner = ex.InnerException;
+                    while (inner != null)
+                    {
+                        swal.Title = inner.Source;
+                        swal.Text += string.Format("\n{0}", inner.Message);
+                        inner = inner.InnerException;
+                    }
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult Cancel(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
@@ -545,7 +601,7 @@ namespace E2E.Controllers
             return View(clsLog_Businesses.OrderByDescending(O => O.Create));
         }
 
-        public async Task<ActionResult> ManagerGaApprove(Guid? id, Guid? SelectId)
+        public async Task<ActionResult> ManagerGaApprove(Guid? id, Guid? SelectId , string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -566,7 +622,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards);
-                        await dataCard.SendMail(businessCards, SelectId);
+                        await dataCard.SendMail(businessCards, SelectId,null,"",remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -1357,5 +1413,38 @@ namespace E2E.Controllers
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult Report_KPI()
+        {
+            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
+            var query = QueryClsBusinessCard();
+
+            //staff ga
+            if (authorized == 3 && GA == true)
+            {
+                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+
+            return View(clsBusinessCard);
+        }
+
+        public ActionResult Report_KPI_Table()
+        {
+            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
+            var query = QueryClsBusinessCard();
+
+            //staff ga
+            if (authorized == 3 && GA == true)
+            {
+                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+            }
+
+            return View(clsBusinessCard);
+        }
+
     }
 }

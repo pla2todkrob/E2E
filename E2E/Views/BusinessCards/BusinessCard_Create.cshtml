@@ -80,24 +80,24 @@
             @Html.TextBoxFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
         </div>
 
-        <div class="form-group col-6">
-            @Html.Label("Extension number")
-            @Html.TextBoxFor(m => m.Tel_Internal, new { placeholder = "Sample: 6xxx" ,@class = "form-control" })
-        </div>
+		<div class="form-group col-6">
+			@Html.Label("Extension number")
+			@Html.TextBoxFor(m => m.Tel_Internal, new { placeholder = "Numbers 4 digits", @class = "form-control", pattern = @"\d{1,4}"})
+		</div>
 
-        <div class="form-group col-6">
-            @Html.Label("Mobile")
-            @Html.TextBoxFor(m => m.Tel_External, new { placeholder = "Sample: 08xxxxxxxx", @class = "form-control" })
-        </div>
+		<div class="form-group col-6">
+			@Html.Label("Mobile")
+			@Html.TextBoxFor(m => m.Tel_External, new { placeholder = "Numbers only", @class = "form-control", type = "number" })
+
+		</div>
 
         <div class="form-group col-6">
             @Html.Label("Amount")
+            @Html.TextBoxFor(m => m.Amount, new { Value = "", placeholder = "Min:50 , Max:100", min = "50", max = "100", step = "50", type = "number", @required = "required", @class = "form-control" })
 
-            @Html.TextBoxFor(m => m.Amount, new { Value = "", placeholder = "Min:50 , Max:200", min = "50", max = "200", step = "50", type = "number", @required = "required", @class = "form-control" })
-
-            <span style="color:red;" class="small">
-                Grade 8 - 5 can request maximum of 100 cards per request.
-            </span>
+			<span style="color:red;" class="small">
+				Minimum request: 50, maximum: 100 per request.
+			</span>
         </div>
 
         @*<div class="form-group col-6">

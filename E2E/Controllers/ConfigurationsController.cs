@@ -225,6 +225,19 @@ namespace E2E.Controllers
             }
         }
 
+        public ActionResult _NavReport()
+        {
+
+            try
+            {
+                return PartialView("_NavReport");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult _Profile()
         {
             try
