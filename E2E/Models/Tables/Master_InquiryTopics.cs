@@ -11,6 +11,8 @@ namespace E2E.Models.Tables
             Create = DateTime.Now;
         }
 
+        public string Program { get; set; }
+
         public DateTime Create { get; set; }
 
         [Display(Name = "EN  Inquiry topic")]

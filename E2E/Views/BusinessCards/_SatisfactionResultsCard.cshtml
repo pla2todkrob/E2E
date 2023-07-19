@@ -1,0 +1,51 @@
+﻿@model E2E.Models.Views.ClsSatisfaction
+
+@{
+	Layout = null;
+}
+
+
+<div class="col-12">
+	<h5>Satisfaction results</h5>
+	<table class="table table-bordered table-hover ">
+		<thead>
+			<tr>
+				<th class="text-center fit">#</th>
+				<th>Topic</th>
+				<th class="text-center fit">Point</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.SatisfactionDetails_BusinessCards)
+			{
+				<tr>
+					<td class="text-center">@Html.DisplayFor(m => item.Master_InquiryTopics.InquiryTopic_Index)</td>
+					<td>
+						@Html.DisplayFor(m => item.Master_InquiryTopics.Description_TH)<br />
+						<small>@Html.DisplayFor(m => item.Master_InquiryTopics.Description_EN)</small>
+					</td>
+					<td class="text-center">@Html.DisplayFor(m => item.Point)</td>
+				</tr>
+			}
+		</tbody>
+		<tfoot>
+			<tr>
+				<th colspan="2" class="text-right">@Html.DisplayNameFor(m => m.Satisfactions_BusinessCards.Satisfaction_Average)</th>
+				@{
+					if (Model.Satisfactions_BusinessCards.Satisfaction_Average < 4)
+					{
+						<th class="text-center" style="color:red;">@Html.DisplayFor(m => m.Satisfactions_BusinessCards.Satisfaction_Average)</th>
+					}
+					else
+					{
+						<th class="text-center">@Html.DisplayFor(m => m.Satisfactions_BusinessCards.Satisfaction_Average)</th>
+
+					}
+				}
+
+			</tr>
+		</tfoot>
+	</table>
+
+</div>
+

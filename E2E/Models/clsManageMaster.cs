@@ -1517,7 +1517,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -1528,8 +1528,14 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                model.Update = DateTime.Now;
-                db.Entry(model).State = System.Data.Entity.EntityState.Modified;
+                var InquiryTopic = db.Master_InquiryTopics.Where(w => w.InquiryTopic_Id == model.InquiryTopic_Id).FirstOrDefault();
+                InquiryTopic.Update = DateTime.Now;
+                InquiryTopic.InquiryTopic_Index = model.InquiryTopic_Index;
+                InquiryTopic.Program = model.Program;
+                InquiryTopic.Description_TH = model.Description_TH;
+                InquiryTopic.Description_EN = model.Description_EN;
+
+
                 if (db.SaveChanges() > 0)
                 {
                     res = true;

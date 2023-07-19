@@ -80,6 +80,10 @@ namespace E2E.Models
 
         public DbSet<Satisfactions> Satisfactions { get; set; }
 
+        public DbSet<SatisfactionDetails_BusinessCards> SatisfactionDetails_BusinessCards { get; set; }
+
+        public DbSet<Satisfactions_BusinessCards> Satisfactions_BusinessCards { get; set; }
+
         public DbSet<ServiceChangeDueDate> ServiceChangeDueDates { get; set; }
 
         public DbSet<ServiceCommentFiles> ServiceCommentFiles { get; set; }
