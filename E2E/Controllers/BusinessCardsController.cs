@@ -5,6 +5,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -22,6 +23,9 @@ namespace E2E.Controllers
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
         private readonly ClsContext db = new ClsContext();
+        private readonly ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
+        private readonly ClsManageMaster master = new ClsManageMaster();
+        
 
         private static Guid? UserAuthorized { get; set; }
 
@@ -902,6 +906,18 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public bool Chk_OverDue(BusinessCards model)
+        {
+            bool res = new bool();
+
+            if (model.Update > model.DueDate)
+            {
+                res = true;
+            }
+
+            return res;
+        }
+
         public async Task<ActionResult> StaffComplete(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
@@ -917,6 +933,7 @@ namespace E2E.Controllers
                     BusinessCards businessCards = db.BusinessCards.Find(id);
                     businessCards.Status_Id = 3;
                     businessCards.Update = DateTime.Now;
+                    businessCards.Is_OverDue = Chk_OverDue(businessCards);
 
                     if (db.SaveChanges() > 0)
                     {
@@ -1205,26 +1222,27 @@ namespace E2E.Controllers
             return View(res);
         }
 
-        public async Task<ActionResult> UserClose(Guid? id)
+        public ActionResult SetColse(Guid id)
+        {
+            ClsInquiryTopics clsInquiryTopics = new ClsInquiryTopics
+            {
+                BusinessCards = db.BusinessCards.Find(id),
+                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w=>w.Program == "BusinessCard").OrderBy(o => o.InquiryTopic_Index).ToList()
+            };
+
+            return View(clsInquiryTopics);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SetClose(Guid id, List<ClsEstimate> score)
         {
             ClsSwal swal = new ClsSwal();
-            TransactionOptions options = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.MaxValue
-            };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    BusinessCards businessCards = db.BusinessCards.Find(id);
-                    businessCards.Status_Id = 4;
-                    businessCards.Update = DateTime.Now;
-
-                    if (db.SaveChanges() > 0)
+                    if (await dataCard.SaveEstimate(id, score))
                     {
-                        await dataCard.SendMail(businessCards);
-                        dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -1251,8 +1269,26 @@ namespace E2E.Controllers
                     }
                 }
             }
-
             return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Report_KPI_Unsatisfied(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(dataCard.ClsReport_KPI_Unsatisfied(_Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult _SatisfactionResultsCard(Guid id)
+        {
+            return PartialView("_SatisfactionResultsCard", dataCard.ClsSatisfactionCard_View(id));
         }
 
         public async Task<ActionResult> UserConfirmApprove(Guid? id)
@@ -1414,36 +1450,68 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Report_KPI()
+        public ActionResult Report_KPI(ReportKPI_Filter model)
         {
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
-            var query = QueryClsBusinessCard();
-
-            //staff ga
-            if (authorized == 3 && GA == true)
+            try
             {
-                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                return View(model);
             }
-
-            return View(clsBusinessCard);
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public ActionResult Report_KPI_Table()
+
+
+        public ActionResult Report_KPI_View(Guid id, string filter)
         {
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-            List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
-            var query = QueryClsBusinessCard();
-
-            //staff ga
-            if (authorized == 3 && GA == true)
+            try
             {
-                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
-            }
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
 
-            return View(clsBusinessCard);
+                return View(dataCard.ReportKPI_User_Views(id, _Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI_Table(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(dataCard.ClsReportKPI_ViewList(_Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI_Filter(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                ViewBag.AuthorizeId = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+
+                ViewBag.UserList = data.SelectListItems_UsersDepartment();
+
+                return View(_Filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

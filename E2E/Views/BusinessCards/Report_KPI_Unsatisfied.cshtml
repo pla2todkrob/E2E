@@ -1,0 +1,46 @@
+﻿@model List<E2E.Models.Views.ClsBusinessCard>
+
+@{
+	Layout = null;
+}
+
+<div class="modal-header">
+	<h5 class="modal-title">Total Unsatisfied: @Model.Count() tasks.</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div class="modal-body">
+	<div class="row">
+		<table class="display table table-bordered table-hover nowrap w-100">
+			<thead>
+				<tr>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().Create)</th>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().System_Statuses.Status_Name)</th>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().Key)</th>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().UserRefName)</th>
+					<th class="fit">@Html.DisplayNameFor(m => m.FirstOrDefault().DueDate)</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model)
+				{
+					string txtColor = "";
+					if (item.Is_OverDue)
+					{
+						txtColor = "text-danger";
+					}
+					<tr class="@txtColor">
+						<td>@Html.DisplayFor(i => item.Create)</td>
+						<td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
+						<td class="text-wrap">
+							<a target="_blank" href="@Url.Action("BusinessCard_Detail","BusinessCards",new { id = item.BusinessCard_Id })">[@Html.DisplayFor(i => item.Key)]</a>
+						</td>
+						<td>@Html.DisplayFor(i => item.UserRefName)</td>
+						<td>@Html.DisplayFor(i => item.DueDate)</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>

@@ -145,4 +145,26 @@ namespace E2E.Models.Views
         [Display(Name = "Status")]
         public string Status_Name { get; set; }
     }
+
+    public class ReportKPI_User_Cards_Views
+    {
+        public DateTime Create { get; set; }
+
+        [Display(Name = "Point")]
+        public int Priority_Point { get; set; }
+
+        [Display(Name = "Average")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
+        public double? Satisfaction_Average { get; set; }
+
+        public Guid BusinessCard_Id { get; set; }
+        public string Key { get; set; }
+
+        [Display(Name = "Subject")]
+
+        public string Status_Class { get; set; }
+
+        [Display(Name = "Status")]
+        public string Status_Name { get; set; }
+    }
 }

@@ -1798,7 +1798,7 @@ namespace E2E.Controllers
             ClsInquiryTopics clsInquiryTopics = new ClsInquiryTopics
             {
                 Services = db.Services.Find(id),
-                List_Master_InquiryTopics = db.Master_InquiryTopics.OrderBy(o => o.InquiryTopic_Index).ToList()
+                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w=>w.Program == "Service").OrderBy(o => o.InquiryTopic_Index).ToList()
             };
 
             return View(clsInquiryTopics);

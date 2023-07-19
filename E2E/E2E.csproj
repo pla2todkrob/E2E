@@ -362,6 +362,8 @@
     <Compile Include="Models\Tables\Master_Categories.cs" />
     <Compile Include="Models\Tables\Master_Documents.cs" />
     <Compile Include="Models\Tables\Master_DocumentVersions.cs" />
+    <Compile Include="Models\Tables\SatisfactionDetails_BusinessCards.cs" />
+    <Compile Include="Models\Tables\Satisfactions_BusinessCards.cs" />
     <Compile Include="Models\Tables\ServiceDocuments.cs" />
     <Compile Include="Models\Tables\System_Language.cs" />
     <Compile Include="Models\Tables\Manuals.cs" />
@@ -1103,6 +1105,11 @@
     <Content Include="Views\BusinessCards\Report_KPI.cshtml" />
     <Content Include="Views\BusinessCards\Report_KPI_Table.cshtml" />
     <Content Include="Views\Configurations\_NavReport.cshtml" />
+    <Content Include="Views\BusinessCards\Report_KPI_Filter.cshtml" />
+    <Content Include="Views\BusinessCards\Report_KPI_View.cshtml" />
+    <Content Include="Views\BusinessCards\SetColse.cshtml" />
+    <Content Include="Views\BusinessCards\_SatisfactionResultsCard.cshtml" />
+    <Content Include="Views\BusinessCards\Report_KPI_Unsatisfied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

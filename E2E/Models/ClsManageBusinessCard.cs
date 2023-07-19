@@ -2,6 +2,7 @@
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -16,6 +17,134 @@ namespace E2E.Models
         private readonly ClsContext db = new ClsContext();
         private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
+
+
+        public List<ClsBusinessCard> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
+        {
+            try
+            {
+                var JobUnsat = db.Satisfactions_BusinessCards.Where(w => w.Unsatisfied);
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    JobUnsat = JobUnsat.Where(w => w.Create <= filter.Date_To);
+
+                    var BusinessCardId = JobUnsat.Select(s => s.BusinessCard_Id).ToList();
+                    var BusinessCards = db.BusinessCards.Where(w => BusinessCardId.Contains(w.BusinessCard_Id)).AsEnumerable()
+                   .Select(item => new ClsBusinessCard
+                   {
+                       Create = item.Create,
+                       BusinessCard_Id = item.BusinessCard_Id,
+                       Status_Id = item.Status_Id,
+                       Key = item.Key,
+                       UserRefName = item.UserRef_id.HasValue ? master.Users_GetInfomation(item.UserRef_id.Value) : null,
+                       DueDate = item.DueDate,
+                       Update = item.Update,
+                       System_Statuses = item.System_Statuses
+
+                   }).ToList();
+
+
+
+                    return BusinessCards;
+                }
+                else
+                {
+                    return new List<ClsBusinessCard>();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> SaveEstimate(Guid id, List<ClsEstimate> score)
+        {
+            try
+            {
+                bool res = new bool();
+
+                var average = score.Select(x => x.Score).Average();
+                var Sum = score.Select(x => x.Score).Sum();
+                Sum = Sum * 100 / 25;
+
+                bool unsatisfied = Sum < (0.8 * 100);
+
+                Satisfactions_BusinessCards Satisfactions_BusinessCard = new Satisfactions_BusinessCards
+                {
+                    BusinessCard_Id = id,
+                    Satisfaction_Average = average,
+                    Unsatisfied = unsatisfied
+                };
+
+
+
+                db.Satisfactions_BusinessCards.Add(Satisfactions_BusinessCard);
+
+                foreach (var item in score)
+                {
+                    SatisfactionDetails_BusinessCards SatisfactionDetails_BusinessCard = new SatisfactionDetails_BusinessCards
+                    {
+                        Satisfactions_BusinessCard_id = Satisfactions_BusinessCard.Satisfactions_BusinessCard_id,
+                        InquiryTopic_Id = item.Id,
+                        Point = item.Score
+                    };
+
+                    db.SatisfactionDetails_BusinessCards.Add(SatisfactionDetails_BusinessCard);
+                }
+
+                if (db.SaveChanges() > 0)
+                {
+                    res = await BusinessCards_SetClose(id);
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> BusinessCards_SetClose(Guid id)
+        {
+            bool res = new bool();
+            try
+            {
+
+                BusinessCards BusinessCard = new BusinessCards();
+                BusinessCard = db.BusinessCards.Find(id);
+                if (BusinessCard.Status_Id == 3)
+                {
+                    BusinessCard.Status_Id = 4;
+                    BusinessCard.Update = DateTime.Now;
+
+                    db.Entry(BusinessCard).State = EntityState.Modified;
+                    if (db.SaveChanges() > 0)
+                    {
+                        if (BusinessCard_SaveLog(BusinessCard))
+                        {
+                            res = await SendMail(BusinessCard);
+                        }
+                    }
+                }
+
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return res;
+        }
 
         public async Task<bool> BusinessCard_SaveCreate(ClsBusinessCard Model)
         {
@@ -139,6 +268,27 @@ namespace E2E.Models
             }
 
             return res;
+        }
+
+        public ClsSatisfaction ClsSatisfactionCard_View(Guid id)
+        {
+            try
+            {
+                ClsSatisfaction clsSatisfaction = new ClsSatisfaction();
+                clsSatisfaction = db.Satisfactions_BusinessCards
+                    .Where(w => w.BusinessCard_Id == id)
+                    .GroupJoin(db.SatisfactionDetails_BusinessCards.OrderBy(o => o.Master_InquiryTopics.InquiryTopic_Index), m => m.Satisfactions_BusinessCard_id, j => j.Satisfactions_BusinessCard_id, (m, gj) => new ClsSatisfaction()
+                    {
+                        SatisfactionDetails_BusinessCards = gj.ToList(),
+                        Satisfactions_BusinessCards = m
+                    }).FirstOrDefault();
+
+                return clsSatisfaction;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public int CountJob(Guid? id)
@@ -267,7 +417,11 @@ namespace E2E.Models
             //Mg User Approved
             if (Model.Status_Id == 7 && string.IsNullOrEmpty(pseudo))
             {
-                linkUrl = linkUrl.Replace("ManagerUserApprove", "BusinessCard_Detail/");
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
                 mail.SendToIds = NoM3(GetMgApp);
@@ -336,7 +490,11 @@ namespace E2E.Models
             //[M] GA Assign
             else if (Model.Status_Id == 8)
             {
-                linkUrl = linkUrl.Replace("ManagerGaApprove", "BusinessCard_Detail/");
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 List<Users> users = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).ToList();
@@ -375,7 +533,11 @@ namespace E2E.Models
             //Staff Send Confirm
             else if (Model.Status_Id == 2 && ModelFile == null || found)
             {
-                linkUrl = linkUrl.Replace("Upload", "BusinessCard_Detail/" + Model.BusinessCard_Id);
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -434,7 +596,11 @@ namespace E2E.Models
             //User Close
             else if (Model.Status_Id == 4)
             {
-                linkUrl = linkUrl.Replace("UserClose", "BusinessCard_Detail/");
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -451,7 +617,11 @@ namespace E2E.Models
             //Staff Completed
             else if (Model.Status_Id == 3)
             {
-                linkUrl = linkUrl.Replace("StaffComplete", "BusinessCard_Detail/");
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
                 Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -472,6 +642,233 @@ namespace E2E.Models
             res = await mail.SendMail(mail);
 
             return res;
+        }
+
+        public List<ReportKPI_User_Cards_Views> ReportKPI_User_Views(Guid id, ReportKPI_Filter filter)
+        {
+            try
+            {
+                IQueryable<ReportKPI_User_Cards_Views> query = db.BusinessCards
+                    .Where(w => w.UserAction == id)
+                    .GroupJoin(db.Satisfactions_BusinessCards, ser => ser.BusinessCard_Id, sat => sat.BusinessCard_Id, (ser, g) => new
+                    {
+                        ser,
+                        g
+                    }).SelectMany(tmp => tmp.g.DefaultIfEmpty(), (tmp, sat) => new ReportKPI_User_Cards_Views()
+                    {
+                        BusinessCard_Id = tmp.ser.BusinessCard_Id,
+                        Create = tmp.ser.Create,
+                        Key = tmp.ser.Key.ToString(),
+                        Priority_Point = tmp.ser.System_Priorities != null ? tmp.ser.System_Priorities.Priority_Point : 0,
+                        Satisfaction_Average = sat != null ? sat.Satisfaction_Average : (double?)null,
+                        Status_Name = tmp.ser.System_Statuses != null ? tmp.ser.System_Statuses.Status_Name : null,
+                        Status_Class = tmp.ser.System_Statuses != null ? tmp.ser.System_Statuses.Status_Class : null
+                    }).OrderBy(o => o.Create);
+
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        query = query.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
+                }
+
+                return query.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public ClsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
+        {
+            try
+            {
+                ClsReportKPI res = new ClsReportKPI();
+
+                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                IQueryable<Guid> userIds;
+
+                IQueryable<Guid> businessCardIds;
+                IQueryable<BusinessCards> query = db.BusinessCards.OrderBy(o => o.Create).ThenBy(t => t.Update);
+
+                res.Authorize_Id = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+
+                int[] finishIds = { 3, 4 };
+
+                Guid DeptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
+
+                userIds = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId)
+                    .OrderBy(o => o.User_Code)
+                    .Select(s => s.User_Id);
+
+                query = query.Where(w => userIds.Contains(w.UserAction.Value));
+
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        query = query.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
+                }
+
+                if (res.Authorize_Id /*!= 3*/ > 0)
+                {
+                    foreach (var item in userIds)
+                    {
+                        businessCardIds = query
+                            .Where(w => w.UserAction == item)
+                            .Select(s => s.BusinessCard_Id);
+
+                        ReportKPI_User reportKPI_User = new ReportKPI_User();
+
+                        if (businessCardIds.Count() > 0)
+                        {
+                            int countSatisfaction = db.Satisfactions_BusinessCards
+                        .Where(w => businessCardIds.Contains(w.BusinessCard_Id))
+                        .Count();
+                            if (countSatisfaction > 0)
+                            {
+                                reportKPI_User.Average_Score = db.Satisfactions_BusinessCards
+                        .Where(w => businessCardIds.Contains(w.BusinessCard_Id))
+                        .Average(a => a.Satisfaction_Average);
+                            }
+
+                            if (query.Any(w => businessCardIds.Contains(w.BusinessCard_Id) && finishIds.Contains(w.Status_Id)))
+                            {
+                                int? SuccessPoint = query
+                         .Where(w => businessCardIds.Contains(w.BusinessCard_Id) && finishIds.Contains(w.Status_Id))
+                        .Sum(s => (int?)s.System_Priorities.Priority_Point);
+
+
+                                if (SuccessPoint.HasValue)
+                                {
+                                    reportKPI_User.SuccessPoint = SuccessPoint.Value;
+                                }
+                            }
+
+                            reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                            reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                            reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                            reportKPI_User.Total = query.Where(w => businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                        }
+
+                        businessCardIds = query
+                        .Where(w => w.UserAction != item)
+                        .Select(s => s.BusinessCard_Id);
+
+                        reportKPI_User.User_Id = item;
+                        reportKPI_User.User_Name = master.Users_GetInfomation(item);
+                        res.ReportKPI_Users.Add(reportKPI_User);
+                    }
+                }
+                else
+                {
+                    businessCardIds = query
+                        .Where(w => w.UserAction == userId)
+                        .Select(s => s.BusinessCard_Id);
+
+                    ReportKPI_User reportKPI_User = new ReportKPI_User();
+
+                    if (businessCardIds.Count() > 0)
+                    {
+                        int countSatisfaction = db.Satisfactions_BusinessCards
+                        .Where(w => businessCardIds.Contains(w.BusinessCard_Id))
+                        .Count();
+
+                        if (countSatisfaction > 0)
+                        {
+                            reportKPI_User.Average_Score = db.Satisfactions_BusinessCards
+                                .Where(w => businessCardIds.Contains(w.BusinessCard_Id))
+                                .Average(a => a.Satisfaction_Average);
+                        }
+
+                        int successCount = query
+                            .Where(w => finishIds.Contains(w.Status_Id) && businessCardIds.Contains(w.BusinessCard_Id))
+                            .Count();
+                        if (successCount > 0)
+                        {
+                            reportKPI_User.SuccessPoint = query
+                            .Where(w => finishIds.Contains(w.Status_Id) && businessCardIds.Contains(w.BusinessCard_Id))
+                        .Sum(s => s.System_Priorities.Priority_Point);
+                        }
+
+                        reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                        reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                        reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                        reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                        reportKPI_User.Total = query.Where(w => businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && businessCardIds.Contains(w.BusinessCard_Id)).Count();
+                    }
+
+                    businessCardIds = query
+                        .Where(w => w.UserAction != userId)
+                        .Select(s => s.BusinessCard_Id);
+
+                    reportKPI_User.JoinTeam_Count = db.ServiceTeams
+                        .Where(w => businessCardIds.Contains(w.Service_Id) && w.User_Id == userId)
+                        .Count();
+
+                    reportKPI_User.User_Id = userId;
+                    reportKPI_User.User_Name = master.Users_GetInfomation(userId);
+                    res.ReportKPI_Users.Add(reportKPI_User);
+                }
+
+                res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
+                res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
+                res.ReportKPI_Overview.Inprogress_Count = res.ReportKPI_Users.Select(s => s.Inprogress_Count).Sum();
+                res.ReportKPI_Overview.Pending_Count = res.ReportKPI_Users.Select(s => s.Pending_Count).Sum();
+                res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
+                res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
+                int ontimeCount = res.ReportKPI_Overview.Total - res.ReportKPI_Overview.OverDue_Count;
+                res.ReportKPI_Overview.OnTime_Count = ontimeCount;
+                double ontimePercent = Convert.ToDouble(ontimeCount) / Convert.ToDouble(res.ReportKPI_Overview.Total);
+                res.ReportKPI_Overview.OnTime_Percent = ontimePercent;
+
+                var UnsatCount = db.Satisfactions_BusinessCards.Where(w => w.Unsatisfied);
+                if (filter != null)
+                {
+                    if (filter.Date_From.HasValue)
+                    {
+                        UnsatCount = UnsatCount.Where(w => w.Create >= filter.Date_From);
+                    }
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    UnsatCount = UnsatCount.Where(w => w.Create <= filter.Date_To);
+                    res.ReportKPI_Overview.Unsatisfied_Count = UnsatCount.Count();
+
+                }
+
+                double? Avg = res.ReportKPI_Users.Select(s => s.Average_Score).Average();
+
+
+                int CountTopic = db.Master_InquiryTopics.Where(w => w.Program == "BusinessCard").Count();
+
+                if (Avg != null)
+                {
+                    res.ReportKPI_Overview.Satisfied_Percent = Math.Abs((Avg.Value / CountTopic) * 100) / 100;
+                }
+
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
