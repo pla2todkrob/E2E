@@ -69,9 +69,20 @@
 
         $(document).on('submit', '#RequestForm', function (e) {
             e.preventDefault();
+            let newId = '';
+
+            function checkEmptyChat() {
+                var emptyChatBlock = document.getElementById("emptyChat");
+
+                // Check if the element exists before accessing its properties
+                if (emptyChatBlock && emptyChatBlock.style.display !== "none") {
+                    emptyChatBlock.remove();
+                }
+            }
+
             if ($('#question').val()) {
                 const fd = new FormData(this);
-                let newId = '';
+
                 $.ajax({
                     url: '@Url.Action("OpenAI_Request","ChatBot")',
                     type: 'POST',
@@ -80,49 +91,55 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function () {
+                        checkEmptyChat();
+
                         const ul = $('#histories');
-                        // Append question
+
                         let li = $('<li>').addClass('list-group-item');
                         let divRow = $('<div>').addClass('row');
                         let divCol1 = $('<div>').addClass('col-2 col-md-1 text-center');
                         let iUser = $('<i>').addClass('fa fa-user fa-2x');
                         divCol1.append(iUser);
                         let divCol2 = $('<div>').addClass('col-10 col-md-11');
-                        let blockquoteUser = $('<blockquote>').addClass('blockquote m-0');
-                        let spanUser = $('<span>').addClass('PreLine').text($('#question').val());
-                        blockquoteUser.append(spanUser);
-                        let citeUser = $('<cite>').addClass('blockquote-footer small mt-3').text(formatDate(new Date()));
-                        blockquoteUser.append(citeUser);
-                        divCol2.append(blockquoteUser);
+                        let pUser = $('<p>').addClass('text-prewrap text-break').text($('#question').val());
+                        let divCite = $('<div>').addClass('text-right');
+                        let citeUser = $('<cite>').addClass('small mt-3').text(new Date().toLocaleString());
+                        divCite.append(citeUser);
+                        divCol2.append(pUser);
+                        divCol2.append(divCite);
                         divRow.append(divCol1);
                         divRow.append(divCol2);
                         li.append(divRow);
                         ul.append(li);
+
                         $('#question').val('');
 
-                        // Append answer
                         const childLength = ul.find('li').length;
-                        li = $('<li>').addClass('list-group-item list-group-item-info');
+
+                        li = $('<li>').addClass('list-group-item bg-light');
                         divRow = $('<div>').addClass('row');
                         divCol1 = $('<div>').addClass('col-2 col-md-1 text-center');
                         let iCogs = $('<i>').addClass('fa fa-android fa-2x');
                         divCol1.append(iCogs);
                         divCol2 = $('<div>').addClass('col-10 col-md-11');
-                        let blockquoteCogs = $('<blockquote>').addClass('blockquote m-0');
                         newId = 'conversation_'.concat(childLength + 1);
-                        let spanCogs = $('<span>').addClass('PreLine').attr('id', newId);
-                        blockquoteCogs.append(spanCogs);
-                        let citeCogs = $('<cite>').addClass('blockquote-footer small mt-3').text(formatDate(new Date()));
-                        blockquoteCogs.append(citeCogs);
-                        divCol2.append(blockquoteCogs);
+                        let pCogs = $('<p>').addClass('text-prewrap text-break').attr('id', newId);
+                        divCite = $('<div>').addClass('text-right');
+                        let citeCogs = $('<cite>').addClass('small mt-3');
+                        divCite.append(citeCogs);
+                        divCol2.append(pCogs);
+                        divCol2.append(divCite);
                         divRow.append(divCol1);
                         divRow.append(divCol2);
                         li.append(divRow);
                         ul.append(li);
+
                         bottomFunction('html');
                       },
                     success: function (json) {
-                        typeWriter(json, newId, { disableTarget: 'question', scrollTarget: 'html' });
+                        $('#'.concat(newId)).parent('div').find('cite').text(new Date().toLocaleString());
+                        typeWriter(json, newId, { disableTarget: 'question', scrollTarget: 'html', setLink: false });
+
                         reloadQuestion();
                     },
                     error: (error) => {
@@ -148,8 +165,8 @@
 <div id="historyArea"></div>
 <div class="fixed-bottom" id="bottomArea">
     <div class="container">
-        <div class="card">
-            <div class="card-header" id="questionArea">
+        <div class="card bg-transparent border-0">
+            <div class="card-header bg-transparent border-0 px-0" id="questionArea">
             </div>
         </div>
     </div>

@@ -454,6 +454,7 @@ namespace E2E.Controllers
                     dynamic choices = jsonResponse.choices[0];
                     if (choices.finish_reason == "incomplete")
                     {
+                        throw new Exception("AI's response was too long and got cut off.\nPlease try asking a shorter question or break your question up into smaller parts.");
                     }
                     dynamic messages = choices.message;
                     answer = messages.content;
@@ -475,7 +476,7 @@ namespace E2E.Controllers
                     throw new Exception(jsonResponse.error.message);
                 }
 
-                return Json(answer, JsonRequestBehavior.AllowGet);
+                return Json(chatGPTHistory.Content, JsonRequestBehavior.AllowGet);
             }
             catch (Exception)
             {

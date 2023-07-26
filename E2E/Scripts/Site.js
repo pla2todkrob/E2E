@@ -152,10 +152,13 @@ async function preLineSetLink() {
 
 
 
-function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined }) {
+function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined,setLink:true }) {
     let i = 0;
     const target = document.getElementById(targetId);
-    text = linkify(text);
+    if (option.setLink) {
+        text = linkify(text);
+    }
+    
     const speed = 10;
     const maxTime = 3000;
     const totalTime = text.length * speed;

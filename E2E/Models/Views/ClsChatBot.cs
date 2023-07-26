@@ -25,6 +25,15 @@ namespace E2E.Models.Views
 
         public ChatBot ChatBot { get; set; }
 
+        public string EscapeHtml(string html)
+        {
+            return html.Replace("<", "&lt;")
+                       .Replace(">", "&gt;")
+                       .Replace("\"", "&quot;")
+                       .Replace("'", "&apos;")
+                       .Replace("&", "&amp;");
+        }
+
         public async Task<List<ChatBotAnswer>> GetAnswersAsync(Guid questionId)
         {
             var answers = new List<ChatBotAnswer>();
@@ -232,6 +241,15 @@ namespace E2E.Models.Views
                 }
                 throw;
             }
+        }
+
+        public string UnescapeHtml(string escapedHtml)
+        {
+            return escapedHtml.Replace("&lt;", "<")
+                              .Replace("&gt;", ">")
+                              .Replace("&quot;", "\"")
+                              .Replace("&apos;", "'")
+                              .Replace("&amp;", "&");
         }
     }
 
