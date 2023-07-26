@@ -10,6 +10,7 @@ namespace E2E.Controllers
 {
     public class PostController : ApiController
     {
+        private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsManageMaster master = new ClsManageMaster();
 
@@ -111,13 +112,11 @@ namespace E2E.Controllers
         [HttpPost]
         public ClsApi CheckLogin(ClsLogin model)
         {
-            ClsApi clsApi = new ClsApi();
             if (ModelState.IsValid)
             {
-                UserResponse userResponse = new UserResponse();
                 try
                 {
-                    string passEncrypt = new ClsManageMaster().Users_Password(model.Password);
+                    string passEncrypt = master.Users_Password(model.Password);
                     Users users = new Users();
                     users = db.Users
                         .Where(w => w.User_Code == model.Username || w.User_Email == model.Username || w.Username == model.Username)
@@ -130,7 +129,7 @@ namespace E2E.Controllers
                         }
                         if (string.IsNullOrEmpty(users.Username))
                         {
-                            ClsActiveDirectoryInfo adInfo = new ClsManageMaster().GetAdInfo(users.User_Code);
+                            ClsActiveDirectoryInfo adInfo = master.GetAdInfo(users.User_Code);
                             if (!string.IsNullOrEmpty(adInfo.SamAccountName))
                             {
                                 users.Username = adInfo.SamAccountName;
@@ -156,6 +155,10 @@ namespace E2E.Controllers
                                     goto LoginPass;
                                 }
                             }
+                            else
+                            {
+                                throw new Exception("Username not found");
+                            }
                         }
                         else if (string.Equals(password, passEncrypt))
                         {
@@ -163,6 +166,7 @@ namespace E2E.Controllers
                         }
                         else
                         {
+                            throw new Exception("Password is incorrect");
                         }
                     }
                     else
@@ -170,18 +174,7 @@ namespace E2E.Controllers
                         throw new Exception("Username not found");
                     }
                     LoginPass:
-                    userResponse.Users = users;
-                    var name = db.UserDetails
-                        .Where(w => w.User_Id == users.User_Id)
-                        .Select(s => new
-                        {
-                            s.Detail_EN_FirstName,
-                            s.Detail_EN_LastName
-                        }).FirstOrDefault();
-                    userResponse.FirstName = name.Detail_EN_FirstName;
-                    userResponse.LastName = name.Detail_EN_LastName;
-
-                    clsApi.Value = userResponse;
+                    clsApi.Value = users.User_Id;
                     clsApi.IsSuccess = true;
                 }
                 catch (Exception ex)
@@ -215,6 +208,39 @@ namespace E2E.Controllers
                             clsApi.Message += "\n" + item2.ErrorMessage;
                         }
                     }
+                }
+            }
+
+            return clsApi;
+        }
+
+        [HttpPost]
+        public ClsApi GetUserData(Guid[] ids)
+        {
+            try
+            {
+                clsApi.Value = db.Users
+                    .Where(w => ids.Contains(w.User_Id))
+                    .Join(db.UserDetails,
+                    u => u.User_Id,
+                    ud => ud.User_Id,
+                    (u, ud) => new UserResponse()
+                    {
+                        Users = u,
+                        FirstName = ud.Detail_EN_FirstName,
+                        LastName = ud.Detail_EN_LastName
+                    }).ToList();
+                clsApi.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                Exception inner = ex.InnerException;
+                clsApi.Message = ex.Message;
+
+                while (inner != null)
+                {
+                    clsApi.Message += "\n" + inner.Message;
+                    inner = inner.InnerException;
                 }
             }
 
