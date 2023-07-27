@@ -34,6 +34,18 @@ $(function () {
         scrollFunction();
     });
     preLineSetLink();
+    document.querySelectorAll('.copyText').forEach(item => {
+        item.addEventListener('click', function () {
+            const textToCopy = this.textContent;
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    toastr.success(`Copied: ${textToCopy}`);
+                })
+                .catch(err => {
+                    toastr.error('Failed to copy text: ' + err);
+                });
+        });
+    });
 });
 
 function findLastIndex() {
@@ -150,15 +162,13 @@ async function preLineSetLink() {
     });
 }
 
-
-
-function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined,setLink:true }) {
+function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined, setLink: true }) {
     let i = 0;
     const target = document.getElementById(targetId);
     if (option.setLink) {
         text = linkify(text);
     }
-    
+
     const speed = 10;
     const maxTime = 3000;
     const totalTime = text.length * speed;
@@ -724,8 +734,8 @@ async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedir
                             location.reload();
                             break;
                         case 'reloadTable':
-                            if (callback) {
-                                callback();
+                            if (option.callback) {
+                                option.callback();
                             }
                             else {
                                 reloadTable();
@@ -740,8 +750,6 @@ async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedir
                     }
                 }
             });
-
-            
         } catch (error) {
             console.error(error);
         }

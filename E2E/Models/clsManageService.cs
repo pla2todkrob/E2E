@@ -3,6 +3,7 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -1440,7 +1441,7 @@ namespace E2E.Models
                     int usePoint = db.System_Priorities.Find(model.Priority_Id).Priority_Point;
                     if (users.User_Point < usePoint)
                     {
-                        return false;
+                        throw new Exception("Your point balance is insufficient.");
                     }
 
                     users.User_Point -= usePoint;
@@ -1872,12 +1873,11 @@ namespace E2E.Models
                         clsMail.Body = content;
                         if (await clsMail.SendMail(clsMail))
                         {
-                            MethodBase methodBase = MethodBase.GetCurrentMethod();
                             Log_SendEmail log_SendEmail = new Log_SendEmail
                             {
-                                SendEmail_ClassName = methodBase.ReflectedType.Name,
+                                SendEmail_ClassName = nameof(Services_SetComplete),
                                 SendEmail_Content = content,
-                                SendEmail_MethodName = methodBase.Name,
+                                SendEmail_MethodName = methodName,
                                 SendEmail_Ref_Id = model.Service_Id,
                                 SendEmail_Subject = subject,
                                 User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)

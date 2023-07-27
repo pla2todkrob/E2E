@@ -16,26 +16,19 @@ img#img-table { height: 108px; width: 192px; }
 
 .row-card { margin-left: -20px; margin-right: -20px; }
 
-#btnToTop { right: 0; transition: 0.3s;z-index:10000 }
+#btnToTop { right: 0; transition: 0.3s; z-index: 10000 }
 /* CSS code to define the "nav-hide" class */
-nav.navbar { transition: top 0.5s ease;z-index:1050;}
+nav.navbar { transition: top 0.5s ease; z-index: 1050; }
 
 .disabled { pointer-events: none; }
 
 .text-prewrap { white-space: pre-wrap; }
-
-.bottom{
-    bottom:0;
-}
-.right{
-    right:0;
-}
-.left{
-    left:0;
-}
-.top{
-    top:0;
-}
+.copyText { cursor: pointer; }
+    .copyText:hover { opacity: 0.8; }
+.bottom { bottom: 0; }
+.right { right: 0; }
+.left { left: 0; }
+.top { top: 0; }
 .dropdown-submenu { position: relative; }
 
     .dropdown-submenu .dropdown-menu { top: 0; right: 100%; }

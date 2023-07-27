@@ -50,8 +50,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Service_AddTeam(model, methodBase.Name))
+                    if (await data.Service_AddTeam(model, nameof(_AddTeam)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -162,8 +161,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Service_DeleteTeam(id, methodBase.Name))
+                    if (await data.Service_DeleteTeam(id, nameof(_DeleteTeam)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -476,8 +474,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        MethodBase methodBase = MethodBase.GetCurrentMethod();
-                        if (await data.Services_SetCommit(model.Services, methodBase.Name))
+                        if (await data.Services_SetCommit(model.Services, nameof(Commit)))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -1224,12 +1221,11 @@ namespace E2E.Controllers
         public async Task<ActionResult> RequestChangeDue_Accept(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            MethodBase methodBase = MethodBase.GetCurrentMethod();
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (await data.ServiceChangeDueDate_Accept(id, methodBase.Name))
+                    if (await data.ServiceChangeDueDate_Accept(id, nameof(RequestChangeDue_Accept)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1311,8 +1307,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.ServiceChangeDueDate_Request(model, methodBase.Name))
+                    if (await data.ServiceChangeDueDate_Request(model, nameof(RequestChangeDue_Form)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1346,12 +1341,11 @@ namespace E2E.Controllers
         public async Task<ActionResult> RequestChangeDue_Reject(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            MethodBase methodBase = MethodBase.GetCurrentMethod();
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (await data.ServiceChangeDueDate_Reject(id, methodBase.Name))
+                    if (await data.ServiceChangeDueDate_Reject(id, nameof(RequestChangeDue_Reject)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1576,8 +1570,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetApprove(model, methodBase.Name))
+                    if (await data.Services_SetApprove(model, nameof(SetApproved)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1653,8 +1646,7 @@ namespace E2E.Controllers
                 {
                     try
                     {
-                        MethodBase methodBase = MethodBase.GetCurrentMethod();
-                        if (await data.Services_SetToUser(model.Service_Id, model.User_Id, methodBase.Name))
+                        if (await data.Services_SetToUser(model.Service_Id, model.User_Id, nameof(SetAssign)))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -1798,7 +1790,7 @@ namespace E2E.Controllers
             ClsInquiryTopics clsInquiryTopics = new ClsInquiryTopics
             {
                 Services = db.Services.Find(id),
-                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w=>w.Program == "Service").OrderBy(o => o.InquiryTopic_Index).ToList()
+                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w => w.Program == "Service").OrderBy(o => o.InquiryTopic_Index).ToList()
             };
 
             return View(clsInquiryTopics);
@@ -1867,8 +1859,7 @@ namespace E2E.Controllers
                         return Json(swal, JsonRequestBehavior.AllowGet);
                     }
 
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetComplete(model, methodBase.Name))
+                    if (await data.Services_SetComplete(model, nameof(SetComplete)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2056,8 +2047,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetRequired(model, methodBase.Name))
+                    if (await data.Services_SetRequired(model, nameof(SetMustApprove)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2130,8 +2120,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetPending(model, methodBase.Name))
+                    if (await data.Services_SetPending(model, nameof(SetPending)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2187,8 +2176,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetReject(model, methodBase.Name))
+                    if (await data.Services_SetReject(model, nameof(SetReject)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2238,8 +2226,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetReturnAssign(model, methodBase.Name))
+                    if (await data.Services_SetReturnAssign(model, nameof(SetReturnAssign)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -2288,8 +2275,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    MethodBase methodBase = MethodBase.GetCurrentMethod();
-                    if (await data.Services_SetReturnJob(model, methodBase.Name))
+                    if (await data.Services_SetReturnJob(model, nameof(SetReturnJob)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
