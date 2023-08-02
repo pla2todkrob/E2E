@@ -126,7 +126,7 @@ namespace E2E.Models
             FileResponse res = new FileResponse();
             string tokenKey = GetToken();
             Uri apiUrl = new Uri(GetApiUrl() + "api/Service_File/Delete_File");
-            fileUrl = Uri.EscapeDataString(fileUrl);
+            fileUrl = HttpUtility.UrlDecode(fileUrl);
 
             using (HttpClient client = new HttpClient())
             {
@@ -189,7 +189,7 @@ namespace E2E.Models
                         HttpPostedFileBase file = files[i];
                         if (file.ContentLength > 0)
                         {
-                            request.AddFile("fileAttach", GetByteFileBase(file), Uri.EscapeDataString(file.FileName), file.ContentType);
+                            request.AddFile("fileAttach", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName), file.ContentType);
                         }
                     }
                 }
@@ -200,7 +200,7 @@ namespace E2E.Models
                     {
                         if (!string.IsNullOrEmpty(item.FilePath))
                         {
-                            request.AddFile("fileAttach", ConvertByte(item.FilePath), Uri.EscapeDataString(Path.GetFileName(item.FilePath)), MimeMapping.GetMimeMapping(item.FilePath));
+                            request.AddFile("fileAttach", ConvertByte(item.FilePath), HttpUtility.UrlEncode(Path.GetFileName(item.FilePath)), MimeMapping.GetMimeMapping(item.FilePath));
                         }
                     }
                 }
@@ -246,7 +246,7 @@ namespace E2E.Models
                 RestRequest request = new RestRequest("api/Service_File/Upload", Method.Post);
                 request.AddHeader("Token", tokenKey);
                 request.AlwaysMultipartFormData = true;
-                request.AddFile("fileUpload", GetByteFileBase(file), Uri.EscapeDataString(file.FileName), file.ContentType);
+                request.AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName), file.ContentType);
                 request.AddParameter("FolderPath", clsServiceFile.FolderPath);
                 RestResponse response = await client.ExecuteAsync(request);
 
@@ -294,7 +294,7 @@ namespace E2E.Models
                 RestRequest request = new RestRequest("api/Service_File/Upload", Method.Post);
                 request.AddHeader("Token", tokenKey);
                 request.AlwaysMultipartFormData = true;
-                request.AddFile("fileUpload", GetByteFileBase(file), Uri.EscapeDataString(fileName), file.ContentType);
+                request.AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(fileName), file.ContentType);
                 request.AddParameter("FolderPath", folderPath);
 
                 RestResponse response = await client.ExecuteAsync(request);

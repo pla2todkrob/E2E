@@ -1956,7 +1956,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                services = await db.Services.FindAsync(model.Service_Id);
 
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
@@ -1964,20 +1964,20 @@ namespace E2E.Models
                 services.Service_EstimateTime = 0;
                 services.WorkRoot_Id = null;
                 db.Entry(services).State = EntityState.Modified;
-                if (db.SaveChanges() > 0)
+                if (await db.SaveChangesAsync() > 0)
                 {
                     List<ServiceDocuments> serviceDocuments = new List<ServiceDocuments>();
-                    serviceDocuments = db.ServiceDocuments
+                    serviceDocuments = await db.ServiceDocuments
                         .Where(w => w.Service_Id == model.Service_Id)
-                        .ToList();
+                        .ToListAsync();
                     foreach (var item in serviceDocuments)
                     {
-                        db.Entry(item).State = EntityState.Deleted;
-                        if (db.SaveChanges() > 0)
+                        if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
                         {
-                            if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
+                            if (await Api_DeleteFile(item.ServiceDocument_Path))
                             {
-                                if (await Api_DeleteFile(item.ServiceDocument_Path))
+                                db.Entry(item).State = EntityState.Deleted;
+                                if (await db.SaveChangesAsync() > 0)
                                 {
                                     continue;
                                 }
@@ -1996,7 +1996,7 @@ namespace E2E.Models
 
                         if (await Services_Comment(serviceComments))
                         {
-                            List<ServiceTeams> serviceTeams = db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToList();
+                            List<ServiceTeams> serviceTeams = await db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToListAsync();
                             foreach (var item in serviceTeams)
                             {
                                 await Service_DeleteTeam(item.Team_Id, methodName);
