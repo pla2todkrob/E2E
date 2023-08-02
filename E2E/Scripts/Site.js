@@ -479,16 +479,20 @@ async function callModal(urlAjax, options = { bigSize: false, callback: null }) 
         }
 
         $('#modalContent').html(res);
+
+        if (options.callback) {
+            options.callback();
+        }
+
+        $('#modalArea').modal('show');
+
+        // Reinitialize Select2 after the modal is shown
         $('#modalContent').find('select').each(function () {
             $(this).select2({
                 theme: 'bootstrap4',
                 width: '100%'
             });
         });
-        if (options.callback) {
-            options.callback();
-        }
-        $('#modalArea').modal('show');
     } catch (error) {
         console.error(error);
     }

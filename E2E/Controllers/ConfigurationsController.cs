@@ -4,6 +4,7 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
@@ -23,10 +24,16 @@ namespace E2E.Controllers
 
         public ActionResult _Copyright()
         {
-            System_Configurations system_Configurations = new System_Configurations();
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            AssemblyName assemblyName = assembly.GetName();
 
-            system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
-            return PartialView("_Copyright", system_Configurations);
+            string version = assemblyName.Version.ToString();
+            string productName = assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
+            string description = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
+            string company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>().Company;
+            string copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright;
+
+            return PartialView("_Copyright", $"{description} ({productName}) Version {version} {copyright} - {company}");
         }
 
         public ActionResult _Navbar()
@@ -180,6 +187,18 @@ namespace E2E.Controllers
             return PartialView("_NavManagement", res);
         }
 
+        public ActionResult _NavReport()
+        {
+            try
+            {
+                return PartialView("_NavReport");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult _NavService()
         {
             ClsJobCount clsJobCount = new ClsJobCount();
@@ -218,19 +237,6 @@ namespace E2E.Controllers
                     clsJobCount.total = clsJobCount.business + clsJobCount.service;
                 }
                 return PartialView("_NavService", clsJobCount);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public ActionResult _NavReport()
-        {
-
-            try
-            {
-                return PartialView("_NavReport");
             }
             catch (Exception)
             {

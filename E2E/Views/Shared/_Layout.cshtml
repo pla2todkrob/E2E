@@ -16,49 +16,48 @@
 </head>
 <body>
 
-	<nav class="navbar sticky-top navbar-expand-xl navbar-light bg-light">
-		<div class=" container-fluid">
+    <nav class="navbar sticky-top navbar-expand-xl navbar-light bg-light">
+        <div class=" container-fluid">
 
-			@{ Html.RenderAction("_NavbarBrand", "Configurations"); }
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_top" aria-controls="navbar_top" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
+            @{ Html.RenderAction("_NavbarBrand", "Configurations"); }
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_top" aria-controls="navbar_top" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-			@{ Html.RenderAction("_Navbar", "Configurations"); }
+            @{ Html.RenderAction("_Navbar", "Configurations"); }
+        </div>
+    </nav>
+    <div id="objSpin"></div>
 
-		</div>
-	</nav>
-	<div id="objSpin"></div>
+    <div class="container-sm container-fluid bg-white py-3" id="sectionArea">
+        @RenderSection("breadcrumb", required: false)
+        @RenderBody()
+    </div>
 
-	<div class="container-sm container-fluid bg-white py-3" id="sectionArea">
-		@RenderSection("breadcrumb", required: false)
-		@RenderBody()
-	</div>
+    <button onclick="topFunction()" id="btnToTop" title="Go to top" class="btn btn-outline-primary position-fixed m-3 rounded-circle"><i class="fa fa-arrow-up fa-2x" aria-hidden="true"></i></button>
 
-	<button onclick="topFunction()" id="btnToTop" title="Go to top" class="btn btn-outline-primary position-fixed m-3 rounded-circle"><i class="fa fa-arrow-up fa-2x" aria-hidden="true"></i></button>
+    <footer class="mt-3 bg-light text-center">
+        <small>@{ Html.RenderAction("_Copyright", "Configurations"); }</small>
+    </footer>
 
-	<footer class="mt-3">
-		<small>&copy;&nbsp;@{ Html.RenderAction("_Copyright", "Configurations"); }</small>
-	</footer>
+    <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
+            <div class="modal-content" id="modalContent">
+            </div>
+        </div>
+    </div>
 
-	<div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
-			<div class="modal-content" id="modalContent">
-			</div>
-		</div>
-	</div>
+    @Scripts.Render("~/bundles/jquery")
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    @Scripts.Render("~/bundles/js")
 
-	@Scripts.Render("~/bundles/jquery")
-	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-	@Scripts.Render("~/bundles/js")
-
-	@RenderSection("scripts", required: false)
-	<script>
+    @RenderSection("scripts", required: false)
+    <script>
         $(document).on('submit', '#SaveChangePassword', function (e) {
             e.preventDefault();
             callSubmitModal('@Url.Action("ChangePassword", "Users")',this);
             return false;
         });
-	</script>
+    </script>
 </body>
 </html>

@@ -1,15 +1,7 @@
-﻿@model E2E.Models.Tables.System_Configurations
+﻿@model string
 
 @{
     Layout = null;
 }
-@{
-    if (Model != null)
-    {
-    @Html.DisplayFor(m => m.Copyright)
-    }
-    else
-    {
-    <small>&copy; @DateTime.Now.Year - Thai Parkerizing</small>
-    }
-}
+
+@Model

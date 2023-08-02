@@ -1517,7 +1517,7 @@ namespace E2E.Models
                 }
                 return res;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1534,7 +1534,6 @@ namespace E2E.Models
                 InquiryTopic.Program = model.Program;
                 InquiryTopic.Description_TH = model.Description_TH;
                 InquiryTopic.Description_EN = model.Description_EN;
-
 
                 if (db.SaveChanges() > 0)
                 {
