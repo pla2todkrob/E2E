@@ -1970,20 +1970,20 @@ namespace E2E.Models
                     serviceDocuments = await db.ServiceDocuments
                         .Where(w => w.Service_Id == model.Service_Id)
                         .ToListAsync();
+
                     foreach (var item in serviceDocuments)
                     {
                         if (!string.IsNullOrEmpty(item.ServiceDocument_Name))
                         {
                             if (await Api_DeleteFile(item.ServiceDocument_Path))
                             {
-                                db.Entry(item).State = EntityState.Deleted;
-                                if (await db.SaveChangesAsync() > 0)
-                                {
-                                    continue;
-                                }
+                                continue;
                             }
                         }
                     }
+
+                    db.ServiceDocuments.RemoveRange(serviceDocuments);
+                    await db.SaveChangesAsync();
 
                     ServiceComments serviceComments = new ServiceComments();
                     if (!string.IsNullOrEmpty(model.Comment_Content))
