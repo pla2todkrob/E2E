@@ -6,15 +6,19 @@
 
 @using (Html.BeginForm("", "", FormMethod.Post, new { id = "RequestForm", name = "RequestForm" }))
 {
-    <a href="javascript:confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")','reloadPage')"><small>Clear conversations</small></a>
 
+    <div class="d-flex justify-content-between">
+        <a class="text-nowrap" href="javascript:confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")','reloadPage')"><small>Clear conversations</small></a>
+        <div class="d-flex flex-nowrap ">
+            <div><span class="badge badge-success mr-3" id="conversation" data-value="@Model.Conversation" data-max="@Model.MaxConversationValue">Conversation tokens:&nbsp;@Model.Conversation.ToString("N0")/@Model.MaxConversationValue.ToString("N0")</span></div>
+            <div><span class="badge badge-success mr-3" id="yourMonthly">Your tokens monthly:&nbsp;@Model.MonthlyYour.ToString("N0")</span></div>
+            <div><span class="badge badge-success" id="allMonthly" data-value="@Model.MonthlyAll" data-max="@Model.MaxMonthlyAllValue">All tokens monthly:&nbsp;@Model.MonthlyAll.ToString("N0")/@Model.MaxMonthlyAllValue.ToString("N0")</span></div>
+        </div>
+        
+    </div>
     <div class="form-group textarea-with-button w-100" id="questionArea">
         <textarea class="form-control" id="question" name="question" rows="3" placeholder="Enter your request"></textarea>
         <button class="btn btn-success button-inside-textarea" type="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
     </div>
-    <div class="d-flex justify-content-around">
-        <div><span class="badge badge-success" id="conversation" data-value="@Model.Conversation" data-max="@Model.MaxConversationValue">Conversation tokens:&nbsp;@Model.Conversation.ToString("N0")/@Model.MaxConversationValue.ToString("N0")</span></div>
-        <div><span class="badge badge-success" id="yourMonthly" >Your tokens monthly:&nbsp;@Model.MonthlyYour.ToString("N0")</span></div>
-        <div><span class="badge badge-success" id="allMonthly" data-value="@Model.MonthlyAll" data-max="@Model.MaxMonthlyAllValue">All tokens monthly:&nbsp;@Model.MonthlyAll.ToString("N0")/@Model.MaxMonthlyAllValue.ToString("N0")</span></div>
-    </div>
+
 }

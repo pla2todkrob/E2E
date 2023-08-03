@@ -6,7 +6,7 @@
     <script>
 
         $(function () {
-            callData('@Url.Action("OpenAI_History", "ChatBot")', '#historyArea').then(function () {
+            callData('@Url.Action("OpenAI_History", "ChatBot")', '#historyArea',setCopyText).then(function () {
                 reloadQuestion();
             });
         });
@@ -124,7 +124,7 @@
                         divCol1.append(iCogs);
                         divCol2 = $('<div>').addClass('col-10 col-md-11');
                         newId = 'conversation_'.concat(childLength + 1);
-                        let pCogs = $('<p>').addClass('text-prewrap text-break').attr('id', newId);
+                        let pCogs = $('<p>').addClass('text-prewrap text-break copyText').attr('id', newId);
                         divCite = $('<div>').addClass('text-right');
                         let citeCogs = $('<cite>').addClass('small mt-3');
                         divCite.append(citeCogs);

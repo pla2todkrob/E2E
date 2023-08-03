@@ -412,132 +412,127 @@ namespace E2E.Controllers
         public async Task<JsonResult> OpenAI_Request(string question)
         {
             ClsAjax clsAjax = new ClsAjax();
-            using (TransactionScope scope = new TransactionScope())
+            try
             {
-                try
+                if (string.IsNullOrEmpty(question))
                 {
-                    if (string.IsNullOrEmpty(question))
+                    return Json(null);
+                }
+                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                RestClientOptions options = new RestClientOptions("https://api.openai.com/")
+                {
+                    MaxTimeout = -1,
+                };
+                RestClient client = new RestClient(options);
+                RestRequest request = new RestRequest("v1/chat/completions", Method.Post);
+
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("Authorization", $"Bearer {ConfigurationManager.AppSettings["GPTkey"]}");
+                ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+                if (chatGPT == null)
+                {
+                    chatGPT = new ChatGPT()
                     {
-                        return Json(null);
-                    }
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    RestClientOptions options = new RestClientOptions("https://api.openai.com/")
-                    {
-                        MaxTimeout = -1,
+                        User_Id = userId
                     };
-                    RestClient client = new RestClient(options);
-                    RestRequest request = new RestRequest("v1/chat/completions", Method.Post);
+                    db.ChatGPTs.Add(chatGPT);
+                }
+                List<ChatGPTHistory> chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
+                var conversation = new List<dynamic>();
 
-                    request.AddHeader("Content-Type", "application/json");
-                    request.AddHeader("Authorization", $"Bearer {ConfigurationManager.AppSettings["GPTkey"]}");
-                    ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
-                    if (chatGPT == null)
+                foreach (var item in chatGPTHistories)
+                {
+                    conversation.Add(new { role = item.Role, content = item.Content });
+                }
+
+                // Append the user's new input to the conversation
+                conversation.Add(new { role = "user", content = question });
+
+                ChatGPTHistory chatGPTHistory = new ChatGPTHistory()
+                {
+                    Content = question,
+                    GPTId = chatGPT.GPTId,
+                    Role = "user"
+                };
+                db.ChatGPTHistories.Add(chatGPTHistory);
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = conversation
+                };
+
+                request.AddJsonBody(requestBody);
+
+                var response = await client.ExecuteAsync(request);
+                string answer = string.Empty;
+                decimal tokenUsage = 0;
+                string role = string.Empty;
+                dynamic jsonResponse = JObject.Parse(response.Content);
+                if (response.IsSuccessful)
+                {
+                    dynamic choices = jsonResponse.choices[0];
+                    if (choices.finish_reason == "incomplete")
                     {
-                        chatGPT = new ChatGPT()
-                        {
-                            User_Id = userId
-                        };
-                        db.ChatGPTs.Add(chatGPT);
+                        throw new Exception("AI's response was too long and got cut off.\nPlease try asking a shorter question or break your question up into smaller parts.");
                     }
-                    List<ChatGPTHistory> chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
-                    var conversation = new List<dynamic>();
-
-                    foreach (var item in chatGPTHistories)
+                    dynamic messages = choices.message;
+                    answer = messages.content;
+                    role = messages.role;
+                    dynamic usage = jsonResponse.usage;
+                    tokenUsage = usage.total_tokens;
+                    chatGPTHistory = new ChatGPTHistory()
                     {
-                        conversation.Add(new { role = item.Role, content = item.Content });
-                    }
-
-                    // Append the user's new input to the conversation
-                    conversation.Add(new { role = "user", content = question });
-
-                    ChatGPTHistory chatGPTHistory = new ChatGPTHistory()
-                    {
-                        Content = question,
+                        Content = answer,
                         GPTId = chatGPT.GPTId,
-                        Role = "user"
+                        Role = role
                     };
                     db.ChatGPTHistories.Add(chatGPTHistory);
-
-                    var requestBody = new
+                    chatGPT.TokenUsage = tokenUsage;
+                    if (await db.SaveChangesAsync() > 0)
                     {
-                        model = "gpt-3.5-turbo",
-                        messages = conversation
-                    };
-
-                    request.AddJsonBody(requestBody);
-
-                    var response = await client.ExecuteAsync(request);
-                    string answer = string.Empty;
-                    decimal tokenUsage = 0;
-                    string role = string.Empty;
-                    dynamic jsonResponse = JObject.Parse(response.Content);
-                    if (response.IsSuccessful)
-                    {
-                        dynamic choices = jsonResponse.choices[0];
-                        if (choices.finish_reason == "incomplete")
-                        {
-                            throw new Exception("AI's response was too long and got cut off.\nPlease try asking a shorter question or break your question up into smaller parts.");
-                        }
-                        dynamic messages = choices.message;
-                        answer = messages.content;
-                        role = messages.role;
-                        dynamic usage = jsonResponse.usage;
-                        tokenUsage = usage.total_tokens;
-                        chatGPTHistory = new ChatGPTHistory()
-                        {
-                            Content = answer,
-                            GPTId = chatGPT.GPTId,
-                            Role = role
-                        };
-                        db.ChatGPTHistories.Add(chatGPTHistory);
-                        chatGPT.TokenUsage = tokenUsage;
-                        if (await db.SaveChangesAsync() > 0)
-                        {
-                            scope.Complete();
-                            clsAjax.Message = chatGPTHistory.Content;
-                        }
+                        clsAjax.Message = chatGPTHistory.Content;
                     }
-                    else
+                }
+                else
+                {
+                    if (jsonResponse.error is string)
                     {
-                        if (jsonResponse.error is string)
+                        // If the error is a simple string message
+                        throw new Exception((string)jsonResponse.error);
+                    }
+                    else if (jsonResponse.error is JObject)
+                    {
+                        // If the error is an object with a message property
+                        dynamic errorObject = jsonResponse.error;
+                        if (errorObject.message != null)
                         {
-                            // If the error is a simple string message
-                            throw new Exception((string)jsonResponse.error);
-                        }
-                        else if (jsonResponse.error is JObject)
-                        {
-                            // If the error is an object with a message property
-                            dynamic errorObject = jsonResponse.error;
-                            if (errorObject.message != null)
-                            {
-                                throw new Exception(errorObject.message.ToString());
-                            }
-                            else
-                            {
-                                throw new Exception("Unknown error occurred.");
-                            }
+                            throw new Exception(errorObject.message.ToString());
                         }
                         else
                         {
                             throw new Exception("Unknown error occurred.");
                         }
                     }
-
-                    return Json(clsAjax, JsonRequestBehavior.AllowGet);
-                }
-                catch (Exception ex)
-                {
-                    scope.Dispose();
-                    clsAjax.Error = true;
-                    clsAjax.Message = ex.Message;
-                    while (ex.InnerException != null)
+                    else
                     {
-                        ex = ex.InnerException;
-                        clsAjax.Message += $"\n{ex.Message}";
+                        throw new Exception("Unknown error occurred.");
                     }
-
-                    return Json(clsAjax, JsonRequestBehavior.AllowGet);
                 }
+
+                return Json(clsAjax, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                clsAjax.Error = true;
+                clsAjax.Message = ex.Message;
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    clsAjax.Message += $"\n{ex.Message}";
+                }
+
+                return Json(clsAjax, JsonRequestBehavior.AllowGet);
             }
         }
 
