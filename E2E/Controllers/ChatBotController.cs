@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -377,10 +378,28 @@ namespace E2E.Controllers
             try
             {
                 Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                DateTime fromDate = DateTime.Today.AddDays(-(DateTime.Today.Day - 1));
 
-                return View(await db.ChatGPTs
-                    .Where(w => w.User_Id == userId && !w.IsEnd)
-                    .FirstOrDefaultAsync());
+                var chatGptQuery = db.ChatGPTs.Where(w => w.User_Id == userId);
+                var conversationTokenUsage = await chatGptQuery.Where(w => !w.IsEnd).Select(s => s.TokenUsage).FirstOrDefaultAsync();
+                var monthlyYourTokenUsage = await chatGptQuery
+    .Where(w => w.Create >= fromDate)
+    .Select(s => (decimal?)s.TokenUsage) // Use nullable decimal here
+    .SumAsync();
+
+                var monthlyAllTokenUsage = await db.ChatGPTs
+                    .Where(w => w.Create >= fromDate)
+                    .Select(s => (decimal?)s.TokenUsage) // Use nullable decimal here
+                    .SumAsync();
+
+                ClsGptToken clsGptToken = new ClsGptToken()
+                {
+                    Conversation = conversationTokenUsage,
+                    MonthlyYour = monthlyYourTokenUsage.GetValueOrDefault(),
+                    MonthlyAll = monthlyAllTokenUsage.GetValueOrDefault()
+                };
+
+                return View(clsGptToken);
             }
             catch (Exception ex)
             {
@@ -392,95 +411,133 @@ namespace E2E.Controllers
         [ValidateInput(false)]
         public async Task<JsonResult> OpenAI_Request(string question)
         {
-            try
+            ClsAjax clsAjax = new ClsAjax();
+            using (TransactionScope scope = new TransactionScope())
             {
-                if (string.IsNullOrEmpty(question))
+                try
                 {
-                    return Json(null);
-                }
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                RestClientOptions options = new RestClientOptions("https://api.openai.com/")
-                {
-                    MaxTimeout = -1,
-                };
-                RestClient client = new RestClient(options);
-                RestRequest request = new RestRequest("v1/chat/completions", Method.Post);
-
-                request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("Authorization", "Bearer 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");
-                ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
-                if (chatGPT == null)
-                {
-                    chatGPT = new ChatGPT()
+                    if (string.IsNullOrEmpty(question))
                     {
-                        User_Id = userId
-                    };
-                    db.ChatGPTs.Add(chatGPT);
-                }
-                List<ChatGPTHistory> chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
-                var conversation = new List<dynamic>();
-
-                foreach (var item in chatGPTHistories)
-                {
-                    conversation.Add(new { role = item.Role, content = item.Content });
-                }
-
-                // Append the user's new input to the conversation
-                conversation.Add(new { role = "user", content = question });
-
-                ChatGPTHistory chatGPTHistory = new ChatGPTHistory()
-                {
-                    Content = question,
-                    GPTId = chatGPT.GPTId,
-                    Role = "user"
-                };
-                db.ChatGPTHistories.Add(chatGPTHistory);
-
-                var requestBody = new
-                {
-                    model = "gpt-3.5-turbo",
-                    messages = conversation
-                };
-
-                request.AddJsonBody(requestBody);
-
-                var response = await client.ExecuteAsync(request);
-                string answer = string.Empty;
-                decimal tokenUsage = 0;
-                string role = string.Empty;
-                dynamic jsonResponse = JObject.Parse(response.Content);
-                if (response.IsSuccessful)
-                {
-                    dynamic choices = jsonResponse.choices[0];
-                    if (choices.finish_reason == "incomplete")
-                    {
-                        throw new Exception("AI's response was too long and got cut off.\nPlease try asking a shorter question or break your question up into smaller parts.");
+                        return Json(null);
                     }
-                    dynamic messages = choices.message;
-                    answer = messages.content;
-                    role = messages.role;
-                    dynamic usage = jsonResponse.usage;
-                    tokenUsage = usage.total_tokens;
-                    chatGPTHistory = new ChatGPTHistory()
+                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
+                    RestClientOptions options = new RestClientOptions("https://api.openai.com/")
                     {
-                        Content = answer,
+                        MaxTimeout = -1,
+                    };
+                    RestClient client = new RestClient(options);
+                    RestRequest request = new RestRequest("v1/chat/completions", Method.Post);
+
+                    request.AddHeader("Content-Type", "application/json");
+                    request.AddHeader("Authorization", $"Bearer {ConfigurationManager.AppSettings["GPTkey"]}");
+                    ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+                    if (chatGPT == null)
+                    {
+                        chatGPT = new ChatGPT()
+                        {
+                            User_Id = userId
+                        };
+                        db.ChatGPTs.Add(chatGPT);
+                    }
+                    List<ChatGPTHistory> chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
+                    var conversation = new List<dynamic>();
+
+                    foreach (var item in chatGPTHistories)
+                    {
+                        conversation.Add(new { role = item.Role, content = item.Content });
+                    }
+
+                    // Append the user's new input to the conversation
+                    conversation.Add(new { role = "user", content = question });
+
+                    ChatGPTHistory chatGPTHistory = new ChatGPTHistory()
+                    {
+                        Content = question,
                         GPTId = chatGPT.GPTId,
-                        Role = role
+                        Role = "user"
                     };
                     db.ChatGPTHistories.Add(chatGPTHistory);
-                    chatGPT.TokenUsage = tokenUsage;
-                    await db.SaveChangesAsync();
-                }
-                else
-                {
-                    throw new Exception(jsonResponse.error.message);
-                }
 
-                return Json(chatGPTHistory.Content, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception)
-            {
-                throw;
+                    var requestBody = new
+                    {
+                        model = "gpt-3.5-turbo",
+                        messages = conversation
+                    };
+
+                    request.AddJsonBody(requestBody);
+
+                    var response = await client.ExecuteAsync(request);
+                    string answer = string.Empty;
+                    decimal tokenUsage = 0;
+                    string role = string.Empty;
+                    dynamic jsonResponse = JObject.Parse(response.Content);
+                    if (response.IsSuccessful)
+                    {
+                        dynamic choices = jsonResponse.choices[0];
+                        if (choices.finish_reason == "incomplete")
+                        {
+                            throw new Exception("AI's response was too long and got cut off.\nPlease try asking a shorter question or break your question up into smaller parts.");
+                        }
+                        dynamic messages = choices.message;
+                        answer = messages.content;
+                        role = messages.role;
+                        dynamic usage = jsonResponse.usage;
+                        tokenUsage = usage.total_tokens;
+                        chatGPTHistory = new ChatGPTHistory()
+                        {
+                            Content = answer,
+                            GPTId = chatGPT.GPTId,
+                            Role = role
+                        };
+                        db.ChatGPTHistories.Add(chatGPTHistory);
+                        chatGPT.TokenUsage = tokenUsage;
+                        if (await db.SaveChangesAsync() > 0)
+                        {
+                            scope.Complete();
+                            clsAjax.Message = chatGPTHistory.Content;
+                        }
+                    }
+                    else
+                    {
+                        if (jsonResponse.error is string)
+                        {
+                            // If the error is a simple string message
+                            throw new Exception((string)jsonResponse.error);
+                        }
+                        else if (jsonResponse.error is JObject)
+                        {
+                            // If the error is an object with a message property
+                            dynamic errorObject = jsonResponse.error;
+                            if (errorObject.message != null)
+                            {
+                                throw new Exception(errorObject.message.ToString());
+                            }
+                            else
+                            {
+                                throw new Exception("Unknown error occurred.");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Unknown error occurred.");
+                        }
+                    }
+
+                    return Json(clsAjax, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+                    scope.Dispose();
+                    clsAjax.Error = true;
+                    clsAjax.Message = ex.Message;
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                        clsAjax.Message += $"\n{ex.Message}";
+                    }
+
+                    return Json(clsAjax, JsonRequestBehavior.AllowGet);
+                }
             }
         }
 

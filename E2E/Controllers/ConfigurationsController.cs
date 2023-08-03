@@ -15,7 +15,9 @@ namespace E2E.Controllers
     [AllowAnonymous]
     public class ConfigurationsController : Controller
     {
+        private static readonly ClsAssembly clsAssembly = new ClsAssembly();
         private readonly ClsManageService clsManageService = new ClsManageService();
+
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsContext db = new ClsContext();
         private readonly ClsManageBusinessCard jobCount = new ClsManageBusinessCard();
@@ -24,16 +26,7 @@ namespace E2E.Controllers
 
         public ActionResult _Copyright()
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            AssemblyName assemblyName = assembly.GetName();
-
-            string version = assemblyName.Version.ToString();
-            string productName = assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
-            string description = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
-            string company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>().Company;
-            string copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright;
-
-            return PartialView("_Copyright", $"{description} ({productName}) Version {version} {copyright} - {company}");
+            return PartialView("_Copyright", $"{clsAssembly.Description} ({clsAssembly.Product}) Version {clsAssembly.Version} {clsAssembly.Copyright} - {clsAssembly.Company}");
         }
 
         public ActionResult _Navbar()
@@ -65,12 +58,17 @@ namespace E2E.Controllers
 
         public ActionResult _NavbarBrand()
         {
-            System_Configurations system_Configurations = new System_Configurations();
-            system_Configurations = db.System_Configurations
+            string logo = db.System_Configurations
                 .OrderByDescending(o => o.CreateDateTime)
+                .Select(s => s.Configuration_Brand)
                 .FirstOrDefault();
 
-            return PartialView("_NavbarBrand", system_Configurations);
+            if (string.IsNullOrEmpty(logo))
+            {
+                logo = clsAssembly.Logo;
+            }
+
+            return PartialView("_NavbarBrand", logo);
         }
 
         public ActionResult _NavDepartment()
@@ -361,15 +359,6 @@ namespace E2E.Controllers
                         else
                         {
                             system_Configurations.Configuration_Brand = model.Configuration_Brand;
-                        }
-                        if (!string.IsNullOrEmpty(model.Copyright))
-                        {
-                            system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
-                        }
-
-                        if (!string.IsNullOrEmpty(model.SystemName))
-                        {
-                            system_Configurations.SystemName = model.SystemName.Trim();
                         }
 
                         system_Configurations.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);

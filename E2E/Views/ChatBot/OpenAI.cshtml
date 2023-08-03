@@ -14,27 +14,28 @@
         function reloadQuestion() {
             callData('@Url.Action("OpenAI_Request", "ChatBot")', '#questionArea').then(function () {
                 adjustHistoryHeight(document.getElementById("question"));
+
+                const badges = document.querySelectorAll(".badge-success");
+
+                badges.forEach((badge) => {
+                    const value = parseFloat(badge.dataset.value);
+                    const max = parseFloat(badge.dataset.max);
+
+                    if (value >= max) {
+                        $('#questionArea').fadeToggle();
+                    }
+                    else if (value > 0.9 * max) {
+                        badge.classList.remove("badge-success", "badge-warning");
+                        badge.classList.add("badge-danger");
+                        confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")', 'reloadPage');
+                    } else if (value > 0.45 * max) {
+                        badge.classList.remove("badge-success", "badge-danger");
+                        badge.classList.add("badge-warning");
+                    }
+                });
+
                 bottomFunction('html');
 
-                const totalElement = document.getElementById('totalToken');
-                const maxToken = 4096;
-                document.getElementById('maxToken').innerText = maxToken.toLocaleString(); // Use innerText to set the text content
-
-                const totalToken = parseFloat(totalElement.textContent.replace(/,/g, ''));
-
-                if (totalToken < maxToken * 0.5) {
-                    totalElement.classList.add('text-success');
-                } else if (totalToken <= maxToken * 0.7) {
-                    totalElement.classList.add('text-warning');
-                } else if (totalToken <= maxToken * 0.9) {
-                    totalElement.classList.add('text-danger');
-                }
-                else {
-                    swal('Request clear history', "Your chat history is nearing its limit.\nPlease clear the chat history.", 'warning').then(function () {
-                        confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")', 'reloadPage');
-                    });
-
-                }
             });
         }
 
@@ -137,13 +138,27 @@
                         bottomFunction('html');
                       },
                     success: function (json) {
-                        $('#'.concat(newId)).parent('div').find('cite').text(new Date().toLocaleString());
-                        typeWriter(json, newId, { disableTarget: 'question', scrollTarget: 'html', setLink: false });
+                        if (json.Error) {
+                            swal({
+                                title: 'Response error',
+                                text: json.Message,
+                                icon: 'error',
+                                dangerMode: true
+                            }).then(function () {
+                                location.reload();
+                            });
+                        }
+                        else {
+                            $('#'.concat(newId)).parent('div').find('cite').text(new Date().toLocaleString());
+                            typeWriter(json.Message, newId, { disableTarget: 'question', scrollTarget: 'html', setLink: false });
 
-                        reloadQuestion();
+                            reloadQuestion();
+                        }
+
                     },
-                    error: (error) => {
-                        console.error(error);
+                    error: function (xhr, status, error) {
+                        // Handle AJAX request error
+                        console.error('AJAX Error:', status, error);
                     }
                 });
             }

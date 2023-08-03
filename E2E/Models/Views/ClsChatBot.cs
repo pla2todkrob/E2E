@@ -266,4 +266,31 @@ namespace E2E.Models.Views
         public ChatBot ChatBot { get; set; }
         public List<ChatBotQuestion> ChatBotQuestions { get; set; } = new List<ChatBotQuestion>();
     }
+
+    public class ClsGptToken
+    {
+        private decimal conversation;
+        private decimal monthlyAll;
+        private decimal monthlyYour;
+
+        public decimal MaxConversationValue { get; set; } = 4096;
+        public decimal MaxMonthlyAllValue { get; set; } = 50000000;
+        public decimal Conversation
+        {
+            get { return conversation; }
+            set { conversation = Math.Min(value, MaxConversationValue); } // Limit the maximum value to 4096
+        }
+
+        public decimal MonthlyAll
+        {
+            get { return monthlyAll; }
+            set { monthlyAll = Math.Min(value, MaxMonthlyAllValue); } // Limit the maximum value to 50000000
+        }
+
+        public decimal MonthlyYour
+        {
+            get { return monthlyYour; }
+            set { monthlyYour = value; }
+        }
+    }
 }

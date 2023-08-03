@@ -403,6 +403,7 @@
     <Compile Include="Models\Tables\UserUploadHistory.cs" />
     <Compile Include="Models\Tables\WorkRootDocuments.cs" />
     <Compile Include="Models\Tables\WorkRoots.cs" />
+    <Compile Include="Models\Views\ClsAjax.cs" />
     <Compile Include="Models\Views\ClsAuditReport.cs" />
     <Compile Include="Models\Views\ClsBusinessCard.cs" />
     <Compile Include="Models\Views\ClsBusinessCardModel.cs" />
@@ -1138,6 +1139,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />

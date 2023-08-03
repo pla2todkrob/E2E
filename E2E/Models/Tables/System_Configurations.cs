@@ -21,9 +21,7 @@ namespace E2E.Models.Tables
         [Display(Name = "Point")]
         public int Configuration_Point { get; set; }
 
-        public string Copyright { get; set; }
         public DateTime CreateDateTime { get; set; }
-        public string SystemName { get; set; }
 
         [Index]
         public Guid User_Id { get; set; }
