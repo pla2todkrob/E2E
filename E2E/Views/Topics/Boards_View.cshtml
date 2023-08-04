@@ -35,23 +35,23 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(i => item.UserCode)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.Department)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.Count)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(i => item.LastTime)
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(i => item.UserCode)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Department)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.Count)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(i => item.LastTime)
+                        </td>
+                    </tr>
 
                 }
             </tbody>
@@ -60,9 +60,9 @@
 </div>
 <div class="card-footer">
     <div class="d-flex">
-        @if (!string.IsNullOrEmpty(Model.FirstOrDefault()?.Name.ToString()))
+        @if (!string.IsNullOrEmpty(Model.FirstOrDefault().Name.ToString()))
         {
-        <button class="btn btn-primary ml-auto" type="button" onclick="DownloadToExcel()">Export to Excel</button>
+            <button class="btn btn-primary ml-auto" type="button" onclick="DownloadToExcel()">Export to Excel</button>
         }
     </div>
 </div>
