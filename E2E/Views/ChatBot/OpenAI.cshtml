@@ -22,12 +22,19 @@
                     const max = parseFloat(badge.dataset.max);
 
                     if (value >= max) {
-                        $('#questionArea').fadeToggle();
+                        badge.classList.remove("badge-success", "badge-warning");
+                        badge.classList.add("badge-danger");
+
                     }
                     else if (value > 0.9 * max) {
                         badge.classList.remove("badge-success", "badge-warning");
                         badge.classList.add("badge-danger");
-                        confirmAndPerformAjaxRequest('@Url.Action("OpenAI_ClearConversation", "ChatBot")', 'reloadPage');
+                        swal({
+                            title: 'Please clear conversation',
+                            text: 'Your token amount is nearing the limit.',
+                            icon: 'warning',
+                            dangerMode: false
+                        });
                     } else if (value > 0.45 * max) {
                         badge.classList.remove("badge-success", "badge-danger");
                         badge.classList.add("badge-warning");
@@ -37,6 +44,11 @@
                 bottomFunction('html');
 
             });
+        }
+
+        function disabledRequest() {
+            $('#RequestForm').addClass('disabled');
+            $('#question').attr('disabled', true);
         }
 
         function adjustTextareaHeight(event) {
@@ -93,7 +105,7 @@
                     contentType: false,
                     beforeSend: function () {
                         checkEmptyChat();
-
+                        disabledRequest();
                         const ul = $('#histories');
 
                         let li = $('<li>').addClass('list-group-item');
@@ -113,7 +125,9 @@
                         li.append(divRow);
                         ul.append(li);
 
+
                         $('#question').val('');
+                        document.getElementById('question').style.height = 'auto';
 
                         const childLength = ul.find('li').length;
 

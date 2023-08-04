@@ -24,7 +24,13 @@
 
 @if (Model.ChatBotAnswers.Count > 0)
 {
-    <ul>
+    <div class="input-group mb-3">
+        <input type="search" id="searchInput" class="form-control" autocomplete="off" placeholder="Search for answers..." />
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
+        </div>
+    </div>
+    <ul id="answerUl">
         @foreach (var item in Model.ChatBotAnswers)
         {
             <li class="PreLine">@string.Format("{0}: {1}", item.ChatBotQuestion.Question, item.Answer)</li>

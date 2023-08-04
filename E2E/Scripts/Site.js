@@ -41,9 +41,12 @@ function setCopyText() {
     document.querySelectorAll('.copyText').forEach(item => {
         item.addEventListener('click', function () {
             const textToCopy = this.textContent;
+            const maxLength = 50; // กำหนดจำนวนตัวอักษรสูงสุดที่ต้องการแสดง
+            const shortenedText = textToCopy.length > maxLength ? textToCopy.substring(0, maxLength) + '...' : textToCopy;
+
             navigator.clipboard.writeText(textToCopy)
                 .then(() => {
-                    toastr.success(`Copied: ${textToCopy}`);
+                    toastr.success(`Copied: ${shortenedText}`);
                 })
                 .catch(err => {
                     toastr.error('Failed to copy text: ' + err);
