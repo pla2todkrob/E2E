@@ -163,11 +163,20 @@ async function preLineSetLink() {
         $(this).html(linkedContent); // update the html
     });
 }
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 async function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined, setLink: undefined }) {
     return new Promise((resolve, reject) => {
         let i = 0;
         const target = document.getElementById(targetId);
+
         if (option.setLink) {
             text = linkify(text);
         }
@@ -200,7 +209,7 @@ async function typeWriter(text, targetId, option = { disableTarget: undefined, s
                     disableTarget.classList.add("disabled");
                 }
                 const charsToType = text.substr(i, increase);
-                target.innerHTML += charsToType;
+                target.innerHTML += escapeHtml(charsToType);
                 i += increase;
                 if (scrollTarget) {
                     scrollTarget.scrollIntoView(false);
@@ -272,7 +281,7 @@ async function callDataWriteText(urlAjax, targetId, disableTarget = undefined) {
     const target = document.getElementById(targetId);
     target.innerHTML = '';
 
-    typeWriter(res, targetId, {disableTarget:disableTarget,setLink:true}).then(function () {
+    typeWriter(res, targetId, { disableTarget: disableTarget, setLink: true }).then(function () {
         setCopyText();
     });
 }
