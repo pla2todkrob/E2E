@@ -150,7 +150,7 @@
                         }
                         else {
                             $('#'.concat(newId)).parent('div').find('cite').text(new Date().toLocaleString());
-                            typeWriter(json.Message, newId, { disableTarget: 'question', scrollTarget: 'html', setLink: false }).then(function () {
+                            typeWriter(json.Message, newId, { disableTarget: 'question', scrollTarget: 'html'}).then(function () {
                                 setCopyText();
                             });
 

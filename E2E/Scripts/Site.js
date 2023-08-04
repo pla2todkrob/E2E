@@ -129,19 +129,15 @@ async function callSpin(active) {
 }
 
 function linkify(inputText) {
-    var replacedText;
+    var replacedText = inputText;
 
     // URLs starting with http://, https://, or ftp://
     var replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-    replacedText = inputText.replace(replacePattern1, function (match) {
-        return '<a href="' + match + '">' + match + '</a>';
-    });
+    replacedText = replacedText.replace(replacePattern1, '<a href="$1">$1</a>');
 
     // URLs starting with "www."
     var replacePattern2 = /(^|[^/])(www\.[\S]+(\b|$))/gim;
-    replacedText = replacedText.replace(replacePattern2, function (match, prefix) {
-        return prefix + '<a href="http://' + match + '">' + match + '</a>';
-    });
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2">$2</a>');
 
     // Change email addresses to mailto: links
     var replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z.]{2,6})/gim;
@@ -168,7 +164,7 @@ async function preLineSetLink() {
     });
 }
 
-async function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined, setLink: true }) {
+async function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined, setLink: undefined }) {
     return new Promise((resolve, reject) => {
         let i = 0;
         const target = document.getElementById(targetId);
@@ -276,7 +272,7 @@ async function callDataWriteText(urlAjax, targetId, disableTarget = undefined) {
     const target = document.getElementById(targetId);
     target.innerHTML = '';
 
-    typeWriter(res, targetId, disableTarget).then(function () {
+    typeWriter(res, targetId, {disableTarget:disableTarget,setLink:true}).then(function () {
         setCopyText();
     });
 }
