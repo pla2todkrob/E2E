@@ -39,10 +39,8 @@ $(function () {
 
 function setCopyText() {
     document.querySelectorAll('.copyText').forEach(item => {
-        console.log(item);
         item.addEventListener('click', function () {
             const textToCopy = this.textContent;
-            console.log(textToCopy);
             navigator.clipboard.writeText(textToCopy)
                 .then(() => {
                     toastr.success(`Copied: ${textToCopy}`);
