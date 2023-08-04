@@ -41,7 +41,6 @@ function setCopyText() {
     document.querySelectorAll('.copyText').forEach(item => {
         console.log(item);
         item.addEventListener('click', function () {
-
             const textToCopy = this.textContent;
             console.log(textToCopy);
             navigator.clipboard.writeText(textToCopy)
@@ -169,70 +168,73 @@ async function preLineSetLink() {
     });
 }
 
-function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined, setLink: true }) {
-    let i = 0;
-    const target = document.getElementById(targetId);
-    if (option.setLink) {
-        text = linkify(text);
-    }
-
-    const speed = 10;
-    const maxTime = 3000;
-    const totalTime = text.length * speed;
-    let increase = 1;
-    if (totalTime > maxTime) {
-        increase = Math.ceil(totalTime / maxTime);
-    }
-
-    let disableTarget = undefined;
-    let scrollTarget = undefined;
-
-    if (option.disableTarget) {
-        disableTarget = document.getElementById(option.disableTarget);
-    }
-
-    if (option.scrollTarget) {
-        scrollTarget = document.getElementById(option.scrollTarget);
-        if (!scrollTarget) {
-            scrollTarget = document.querySelector(option.scrollTarget);
+async function typeWriter(text, targetId, option = { disableTarget: undefined, scrollTarget: undefined, setLink: true }) {
+    return new Promise((resolve, reject) => {
+        let i = 0;
+        const target = document.getElementById(targetId);
+        if (option.setLink) {
+            text = linkify(text);
         }
-    }
 
-    function typeNextChars() {
-        if (i < text.length) {
-            if (disableTarget) {
-                disableTarget.classList.add("disabled");
-            }
-            const charsToType = text.substr(i, increase);
-            target.innerHTML += charsToType;
-            i += increase;
-            if (scrollTarget) {
-                scrollTarget.scrollIntoView(false);
-            }
-            else {
-                target.scrollIntoView(false);
-            }
-
-            setTimeout(function () {
-                typeNextChars();
-            }, speed);
+        const speed = 10;
+        const maxTime = 3000;
+        const totalTime = text.length * speed;
+        let increase = 1;
+        if (totalTime > maxTime) {
+            increase = Math.ceil(totalTime / maxTime);
         }
-        else {
-            if (disableTarget) {
-                disableTarget.classList.remove("disabled");
+
+        let disableTarget = undefined;
+        let scrollTarget = undefined;
+
+        if (option.disableTarget) {
+            disableTarget = document.getElementById(option.disableTarget);
+        }
+
+        if (option.scrollTarget) {
+            scrollTarget = document.getElementById(option.scrollTarget);
+            if (!scrollTarget) {
+                scrollTarget = document.querySelector(option.scrollTarget);
             }
-            if (scrollTarget) {
+        }
+
+        function typeNextChars() {
+            if (i < text.length) {
+                if (disableTarget) {
+                    disableTarget.classList.add("disabled");
+                }
+                const charsToType = text.substr(i, increase);
+                target.innerHTML += charsToType;
+                i += increase;
+                if (scrollTarget) {
+                    scrollTarget.scrollIntoView(false);
+                }
+                else {
+                    target.scrollIntoView(false);
+                }
+
                 setTimeout(function () {
-                    scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
+                    typeNextChars();
+                }, speed);
             }
             else {
-                target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                if (disableTarget) {
+                    disableTarget.classList.remove("disabled");
+                }
+                if (scrollTarget) {
+                    setTimeout(function () {
+                        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+                }
+                else {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+                resolve();
             }
         }
-    }
 
-    return typeNextChars();
+        return typeNextChars();
+    });
 }
 
 function getQueryString() {
@@ -274,7 +276,9 @@ async function callDataWriteText(urlAjax, targetId, disableTarget = undefined) {
     const target = document.getElementById(targetId);
     target.innerHTML = '';
 
-    typeWriter(res, targetId, disableTarget);
+    typeWriter(res, targetId, disableTarget).then(function () {
+        setCopyText();
+    });
 }
 
 // Helper function for creating a DataTable with the given options
