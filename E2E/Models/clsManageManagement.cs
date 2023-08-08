@@ -45,7 +45,6 @@ namespace E2E.Models
                     int Count = db.Master_DocumentVersions.Where(w => w.Document_Id == model.Master_Documents.Document_Id).Count() + 1;
 
                     FileName = FileName + "_V" + Count + "." + extension[1];
-                    //FileName = string.Concat("_", FileName);
 
                     var clsfile = await clsManageService.UploadFileToString(dir, file, FileName);
 

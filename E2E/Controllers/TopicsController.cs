@@ -27,7 +27,7 @@ namespace E2E.Controllers
             {
                 TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList(),
 
-                TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList()
+                TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ThenBy(t => t.TopicFile_Name).ToList()
             };
 
             return View(clsTopic);
@@ -246,9 +246,9 @@ namespace E2E.Controllers
             if (id.HasValue)
             {
                 clsTopic.Topics = db.Topics.Where(w => w.Topic_Id == id.Value).FirstOrDefault();
-                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.TopicGallery_Seq).ToList();
+                clsTopic.TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.TopicGallery_Seq).ThenBy(t => t.TopicGallery_Name).ToList();
                 clsTopic.TopicComments = db.TopicComments.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
-                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.TopicFile_Seq).ToList();
+                clsTopic.TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.TopicFile_Seq).ThenBy(t => t.TopicFile_Name).ToList();
                 clsTopic.TopicSections = db.TopicSections.Where(w => w.Topic_Id == id.Value).OrderBy(o => o.Create).ToList();
                 if (!clsTopic.Topics.IsPublic)
                 {
@@ -842,7 +842,7 @@ namespace E2E.Controllers
             {
                 TopicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicGallery_Seq).ToList(),
 
-                TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ToList()
+                TopicFiles = db.TopicFiles.Where(w => w.Topic_Id == id).OrderBy(o => o.TopicFile_Seq).ThenBy(t => t.TopicFile_Name).ToList()
             };
 
             return View(clsTopic);

@@ -47,14 +47,6 @@ namespace E2E.Models
 
                             if (CK_IMG)
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Galleries eForm_Galleries = new EForm_Galleries();
-                                eForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_Gallery_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Galleries != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
                                 ClsServiceFile clsServiceFile = new ClsServiceFile
                                 {
                                     FolderPath = dir,
@@ -66,27 +58,19 @@ namespace E2E.Models
                                 clsImag.OriginalPath = fileResponse.FileUrl;
                                 clsImag.ThumbnailPath = fileResponse.FileThumbnailUrl;
 
-                                clsImag = await clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, file.FileName);
 
                                 if (clsImag != null)
                                 {
-                                    Galleries_Save(eForms, clsImag, FileName);
+                                    Galleries_Save(eForms, clsImag, file.FileName);
                                 }
                             }
                             else
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Files eForm_Files = new EForm_Files();
-                                eForm_Files = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_File_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Files != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, file.FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(eForms, filepath, FileName);
+                                    File_Save(eForms, filepath, file.FileName);
                                 }
                             }
                         }
@@ -154,35 +138,18 @@ namespace E2E.Models
 
                             if (CK_IMG)
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Galleries eForm_Galleries = new EForm_Galleries();
-                                eForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_Gallery_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Galleries != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-
-                                clsImag = await clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, file.FileName);
                                 if (clsImag != null)
                                 {
-                                    Galleries_Save(EForms, clsImag, FileName);
+                                    Galleries_Save(EForms, clsImag, file.FileName);
                                 }
                             }
                             else
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Files eForm_Files = new EForm_Files();
-                                eForm_Files = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_File_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Files != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, file.FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(EForms, filepath, FileName);
+                                    File_Save(EForms, filepath, file.FileName);
                                 }
                             }
                         }

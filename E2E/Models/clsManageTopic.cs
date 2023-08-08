@@ -151,34 +151,18 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
                             if (file.ContentType.StartsWith("image"))
                             {
-                                string FileName = file.FileName;
-
-                                TopicGalleries topicGalleries = new TopicGalleries();
-                                topicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id && w.TopicGallery_Name == file.FileName).FirstOrDefault();
-                                if (topicGalleries != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                clsImag = await clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, file.FileName);
                                 if (clsImag != null)
                                 {
-                                    Galleries_Save(topics, clsImag, FileName);
+                                    Galleries_Save(topics, clsImag, file.FileName);
                                 }
                             }
                             else
                             {
-                                string FileName = file.FileName;
-
-                                TopicFiles topicFiles = new TopicFiles();
-                                topicFiles = db.TopicFiles.Where(w => w.Topic_Id == model.Topic_Id && w.TopicFile_Name == file.FileName).FirstOrDefault();
-                                if (topicFiles != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, file.FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(topics, filepath, FileName);
+                                    File_Save(topics, filepath, file.FileName);
                                 }
                             }
                         }
@@ -222,34 +206,18 @@ namespace E2E.Models
                             string dir = Path.Combine("Topic", model.Topic_Id.ToString());
                             if (files[i].ContentType.StartsWith("image"))
                             {
-                                string FileName = file.FileName;
-
-                                TopicGalleries topicGalleries = new TopicGalleries();
-                                topicGalleries = db.TopicGalleries.Where(w => w.Topic_Id == model.Topic_Id && w.TopicGallery_Name == file.FileName).FirstOrDefault();
-                                if (topicGalleries != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                clsImag = await clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, file.FileName);
                                 if (clsImag != null)
                                 {
-                                    Galleries_Save(topics, clsImag, FileName);
+                                    Galleries_Save(topics, clsImag, file.FileName);
                                 }
                             }
                             else
                             {
-                                string FileName = file.FileName;
-
-                                TopicFiles topicFiles = new TopicFiles();
-                                topicFiles = db.TopicFiles.Where(w => w.Topic_Id == model.Topic_Id && w.TopicFile_Name == file.FileName).FirstOrDefault();
-                                if (topicFiles != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, file.FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(topics, filepath, FileName);
+                                    File_Save(topics, filepath, file.FileName);
                                 }
                             }
                         }
