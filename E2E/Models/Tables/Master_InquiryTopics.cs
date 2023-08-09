@@ -11,7 +11,8 @@ namespace E2E.Models.Tables
             Create = DateTime.Now;
         }
 
-        public string Program { get; set; }
+        public virtual System_Program System_Program { get; set; }
+        public int? Program_Id { get; set; }
 
         public DateTime Create { get; set; }
 

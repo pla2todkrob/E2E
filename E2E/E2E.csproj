@@ -341,6 +341,7 @@
     <Compile Include="Models\Filter\ExceptionFilterAttribute.cs" />
     <Compile Include="Models\Filter\TimingFilterAttribute.cs" />
     <Compile Include="Models\Tables\ChatGPTHistory.cs" />
+    <Compile Include="Models\Tables\System_Program.cs" />
     <Compile Include="Models\Tables\PlantDetail.cs" />
     <Compile Include="Models\Tables\BusinessCardFiles.cs" />
     <Compile Include="Models\Tables\BusinessCards.cs" />

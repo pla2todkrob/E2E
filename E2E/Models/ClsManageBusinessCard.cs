@@ -855,7 +855,7 @@ namespace E2E.Models
                 double? Avg = res.ReportKPI_Users.Select(s => s.Average_Score).Average();
 
 
-                int CountTopic = db.Master_InquiryTopics.Where(w => w.Program == "BusinessCard").Count();
+                int CountTopic = db.Master_InquiryTopics.Where(w => w.Program_Id == 2).Count();
 
                 if (Avg != null)
                 {

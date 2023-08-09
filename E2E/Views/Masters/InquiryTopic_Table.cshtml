@@ -12,7 +12,7 @@
             <th class="fit">@Html.DisplayNameFor(m => m.InquiryTopic_Index)</th>
             <th>@Html.DisplayNameFor(m => m.Description_TH)</th>
             <th>@Html.DisplayNameFor(m => m.Description_EN)</th>
-            <th>@Html.DisplayNameFor(m => m.Program)</th>
+            <th>@Html.DisplayNameFor(m => m.System_Program.Program_Name)</th>
             <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
     </thead>
@@ -27,7 +27,7 @@
             <td>@Html.DisplayFor(i => item.InquiryTopic_Index)</td>
             <td>@Html.DisplayFor(i => item.Description_TH)</td>
             <td>@Html.DisplayFor(i => item.Description_EN)</td>
-            <td>@Html.DisplayFor(i => item.Program)</td>
+            <td>@Html.DisplayFor(i => item.System_Program.Program_Name)</td>
             <td>@Html.DisplayFor(i => item.Update)</td>
         </tr>
         }
