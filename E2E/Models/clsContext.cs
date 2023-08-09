@@ -45,6 +45,8 @@ namespace E2E.Models
         {
         }
 
+
+        public DbSet<System_Program> System_Programs { get; set; }
         public DbSet<BusinessCardFiles> BusinessCardFiles { get; set; }
         public DbSet<BusinessCards> BusinessCards { get; set; }
         public DbSet<ChatBotAnswer> ChatBotAnswers { get; set; }

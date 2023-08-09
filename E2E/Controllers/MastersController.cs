@@ -591,6 +591,13 @@ namespace E2E.Controllers
             return View();
         }
 
+        public ActionResult CHK_INDEX(int id)
+        {
+            int Count = db.Master_InquiryTopics.Where(w => w.Program_Id == id).Count() + 1;
+
+            return Json(Count, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpDelete]
         public ActionResult InquiryTopic_Delete(Guid id)
         {
@@ -653,6 +660,12 @@ namespace E2E.Controllers
             }
 
             ViewBag.IsNew = isNew;
+            ViewBag.ProgramList = db.System_Programs.Select(s => new SelectListItem() {
+
+                Text = s.Program_Name,
+                Value = s.Program_Id.ToString()
+
+            }).ToList();
 
             return View(master_InquiryTopics);
         }

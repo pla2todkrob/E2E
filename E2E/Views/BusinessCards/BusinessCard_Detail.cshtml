@@ -430,7 +430,7 @@ swal({
 }
 
 
-		$(document).on('submit', '#EditDetil_submit', function (e) {
+	$(document).on('submit', '#EditDetil_submit', function (e) {
 			e.preventDefault();
 			callSubmitPage('@Url.Action("BusinessCard_UpdateDetail", "BusinessCards")', this);
             return false;
