@@ -126,7 +126,7 @@ namespace E2E.Models
             FileResponse res = new FileResponse();
             string tokenKey = GetToken();
             Uri apiUrl = new Uri(GetApiUrl() + "api/Service_File/Delete_File");
-            fileUrl = HttpUtility.UrlDecode(fileUrl);
+            fileUrl = HttpUtility.UrlEncode(fileUrl);
 
             using (HttpClient client = new HttpClient())
             {
