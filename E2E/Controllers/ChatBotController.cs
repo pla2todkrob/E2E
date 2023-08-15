@@ -496,10 +496,10 @@ namespace E2E.Controllers
                 }
                 else
                 {
-                    if (jsonResponse.error is string)
+                    if (jsonResponse.error is string @string)
                     {
                         // If the error is a simple string message
-                        throw new Exception((string)jsonResponse.error);
+                        throw new Exception(@string);
                     }
                     else if (jsonResponse.error is JObject)
                     {
