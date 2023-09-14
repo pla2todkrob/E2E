@@ -11,12 +11,12 @@ namespace E2E.Models.Views
         public string Description { get; set; }
         public string DisplayName { get; set; }
         public string DistinguishedName { get; set; }
+        public string EmailAddress { get; set; }
         public Guid? Guid { get; set; }
         public string Name { get; set; }
         public string SamAccountName { get; set; }
         public SecurityIdentifier Sid { get; set; }
         public string StructuralObjectClass { get; set; }
-        public string UserPrincipalName { get; set; }
     }
 
     public class ClsUsers

@@ -133,7 +133,7 @@ namespace E2E.Controllers
                             if (!string.IsNullOrEmpty(adInfo.SamAccountName))
                             {
                                 users.Username = adInfo.SamAccountName;
-                                users.User_Email = adInfo.UserPrincipalName;
+                                users.User_Email = adInfo.EmailAddress;
                                 UserDetails userDetails = db.UserDetails.Where(w => w.User_Id == users.User_Id).FirstOrDefault();
                                 userDetails.Detail_Password = string.Empty;
                                 userDetails.Detail_ConfirmPassword = string.Empty;

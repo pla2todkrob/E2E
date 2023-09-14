@@ -519,7 +519,7 @@ namespace E2E.Models
 
                 users.Username = adInfo.SamAccountName;
 
-                string emailAd = adInfo.UserPrincipalName;
+                string emailAd = adInfo.EmailAddress;
                 if (string.IsNullOrEmpty(model.Users.User_Email))
                 {
                     users.User_Email = emailAd;
@@ -615,7 +615,7 @@ namespace E2E.Models
 
                 users.Username = adInfo.SamAccountName;
 
-                string emailAd = adInfo.UserPrincipalName;
+                string emailAd = adInfo.EmailAddress;
                 if (!string.IsNullOrEmpty(emailAd))
                 {
                     users.User_Email = emailAd;
@@ -1178,18 +1178,22 @@ namespace E2E.Models
                     Principal principal = searcher.FindOne();
                     if (principal != null)
                     {
-                        res = new ClsActiveDirectoryInfo()
+                        UserPrincipal userPrincipal = principal as UserPrincipal;
+                        if (userPrincipal != null)
                         {
-                            Description = principal.Description,
-                            DisplayName = principal.DisplayName,
-                            DistinguishedName = principal.DistinguishedName,
-                            Guid = principal.Guid,
-                            Name = principal.Name,
-                            SamAccountName = principal.SamAccountName,
-                            Sid = principal.Sid,
-                            StructuralObjectClass = principal.StructuralObjectClass,
-                            UserPrincipalName = principal.UserPrincipalName
-                        };
+                            res = new ClsActiveDirectoryInfo()
+                            {
+                                Description = userPrincipal.Description,
+                                DisplayName = userPrincipal.DisplayName,
+                                DistinguishedName = userPrincipal.DistinguishedName,
+                                Guid = userPrincipal.Guid,
+                                Name = userPrincipal.Name,
+                                SamAccountName = userPrincipal.SamAccountName,
+                                Sid = userPrincipal.Sid,
+                                StructuralObjectClass = userPrincipal.StructuralObjectClass,
+                                EmailAddress = userPrincipal.EmailAddress,
+                            };
+                        }
                     }
                 }
 
