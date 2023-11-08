@@ -6,6 +6,8 @@ namespace E2E.Models.Tables
 {
     public class ChatGPT
     {
+        public decimal ConversationCost { get; set; }
+
         [Index]
         public DateTime Create { get; set; } = DateTime.Now;
 

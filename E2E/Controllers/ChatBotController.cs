@@ -458,7 +458,7 @@ namespace E2E.Controllers
 
                 var requestBody = new
                 {
-                    model = "gpt-3.5-turbo",
+                    model = ConfigurationManager.AppSettings["GPTModel"],
                     messages = conversation
                 };
 
@@ -489,6 +489,7 @@ namespace E2E.Controllers
                     };
                     db.ChatGPTHistories.Add(chatGPTHistory);
                     chatGPT.TokenUsage = tokenUsage;
+                    chatGPT.ConversationCost = 0;
                     if (await db.SaveChangesAsync() > 0)
                     {
                         clsAjax.Message = chatGPTHistory.Content;
