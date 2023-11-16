@@ -390,6 +390,8 @@ namespace E2E.Models
 
             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
             bool found = linkUrl.Contains("Upload");
+            bool reSend = linkUrl.Contains("Resend_Email");
+
             linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
 
             string subject = string.Format("[Business Card][Require approve] {0}", Model.Key);
@@ -633,6 +635,16 @@ namespace E2E.Models
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
                 mail.SendCC = null;
+            }
+
+            //Resend
+            else if (reSend)
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
             }
 
             content += "</p>";
