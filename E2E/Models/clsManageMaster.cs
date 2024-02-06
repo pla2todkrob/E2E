@@ -904,7 +904,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Departments master_Departments = new Master_Departments();
                 master_Departments = db.Master_Departments
                     .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() &&
@@ -1062,7 +1062,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Divisions master_Divisions = new Master_Divisions();
                 master_Divisions = db.Master_Divisions
                     .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim())
@@ -1178,8 +1178,7 @@ namespace E2E.Models
                     Principal principal = searcher.FindOne();
                     if (principal != null)
                     {
-                        UserPrincipal userPrincipal = principal as UserPrincipal;
-                        if (userPrincipal != null)
+                        if (principal is UserPrincipal userPrincipal)
                         {
                             res = new ClsActiveDirectoryInfo()
                             {
@@ -1290,7 +1289,7 @@ namespace E2E.Models
             {
                 Guid? res = null;
 
-                FindModel:
+            FindModel:
                 Master_Grades master_Grades = new Master_Grades();
                 master_Grades = db.Master_Grades
                     .Where(w => w.Grade_Name.ToLower() == grade.ToLower().Trim() &&
@@ -1583,7 +1582,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_LineWorks master_LineWorks = new Master_LineWorks();
                 master_LineWorks = db.Master_LineWorks
                     .Where(w => w.LineWork_Name.ToLower() == val.ToLower().Trim())
@@ -1765,7 +1764,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Plants master_Plants = new Master_Plants();
                 master_Plants = db.Master_Plants
                     .Where(w => w.Plant_Name.ToLower() == val.ToLower().Trim())
@@ -1900,7 +1899,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-                FindModel:
+            FindModel:
                 System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
                 system_Prefix_EN = db.System_Prefix_ENs
                     .Where(w => w.Prefix_EN_Name.ToLower() == val.ToLower().Trim())
@@ -1957,7 +1956,7 @@ namespace E2E.Models
             try
             {
                 int? res = null;
-                FindModel:
+            FindModel:
                 System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
                 system_Prefix_TH = db.System_Prefix_THs
                     .Where(w => w.Prefix_TH_Name.ToLower() == val.ToLower().Trim())
@@ -2071,7 +2070,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Processes master_Processes = new Master_Processes();
                 master_Processes = db.Master_Processes
                     .Where(w => w.Process_Name.ToLower() == val.ToLower().Trim() &&
@@ -2254,7 +2253,7 @@ namespace E2E.Models
             try
             {
                 Guid? res = null;
-                FindModel:
+            FindModel:
                 Master_Sections master_Sections = new Master_Sections();
                 master_Sections = db.Master_Sections
                     .Where(w => w.Section_Name.ToLower() == val.ToLower().Trim() &&
@@ -2627,12 +2626,11 @@ namespace E2E.Models
                 bool res = new bool();
                 List<Users> users = db.Users
                     .Where(w => !userCodeList.Contains(w.User_Code)).ToList();
-
                 if (users.Count > 0)
                 {
                     foreach (var item in users)
                     {
-                        if (string.IsNullOrEmpty(GetEmailAD(item.User_Code)) && !db.Log_Logins.Any(a => a.User_Id == item.User_Id))
+                        if (User_CanDelete(item.User_Id))
                         {
                             db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
                         }
@@ -2660,6 +2658,16 @@ namespace E2E.Models
             {
                 throw;
             }
+        }
+
+        private bool User_CanDelete(Guid id)
+        {
+            if (db.Log_Logins.Any(a => a.User_Id == id) || db.Log_DbChanges.Any(a => a.User_Id == id) || db.Log_DbDeletes.Any(a => a.User_Id == id))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public ClsSaveResult Users_Delete(Guid id)

@@ -251,7 +251,7 @@ namespace E2E.Controllers
 
         public ActionResult UploadHistory()
         {
-            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
+            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).Take(10).ToList());
         }
 
         public ActionResult UserInfomation(string val)
