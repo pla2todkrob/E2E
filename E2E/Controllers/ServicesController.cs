@@ -333,19 +333,20 @@ namespace E2E.Controllers
                     .AsEnumerable()
                     .Select(s => new ClsServiceUserActionName()
                     {
-                        ActionBy = s.Action_User_Id.HasValue ? Users_GetName(s.Action_User_Id.Value) : "",
+                        ActionUserId = s.Action_User_Id,
                         Create = s.Create,
                         Subject = s.Service_Subject,
                         Duedate = s.Service_DueDate,
                         Estimate_time = s.Service_EstimateTime,
                         Key = s.Service_Key,
-                        Requester = Users_GetName(s.User_Id),
                         Update = s.Update,
                         ServiceId = s.Service_Id,
                         System_Priorities = s.System_Priorities,
                         System_Statuses = s.System_Statuses,
                         Is_OverDue = s.Is_OverDue
                     }).ToList();
+
+                clsServiceUserActionName.Where(w => w.ActionUserId.HasValue).ToList().ForEach(s => s.ActionBy = Users_GetName(s.ActionUserId));
 
                 return View(clsServiceUserActionName);
             }
@@ -2306,14 +2307,18 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public string Users_GetName(Guid id)
+        public string Users_GetName(Guid? id)
         {
             try
             {
+                if (!id.HasValue)
+                {
+                    return "";
+                }
+
                 return db.UserDetails
                     .Where(w => w.User_Id == id)
-                    .Select(s => new { Data = s.Detail_EN_FirstName })
-                    .Select(s => s.Data)
+                    .Select(s =>  s.Detail_EN_FirstName )
                     .FirstOrDefault();
             }
             catch (Exception)

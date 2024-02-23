@@ -6,6 +6,7 @@ namespace E2E.Models.Views
 {
     public class ClsServiceUserActionName
     {
+        public Guid? ActionUserId { get; set; }
         [Display(Name = "Action by")]
         public string ActionBy { get; set; }
 

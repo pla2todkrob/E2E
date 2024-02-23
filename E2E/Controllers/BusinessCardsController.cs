@@ -1080,7 +1080,7 @@ namespace E2E.Controllers
             //user
             if (authorized == 3 && GA == false)
             {
-                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized || w.UserRef_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             //mg user
             else if (authorized == 2 && GA == false)
