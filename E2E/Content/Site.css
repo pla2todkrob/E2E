@@ -16,21 +16,32 @@ img#img-table { height: 108px; width: 192px; }
 
 .row-card { margin-left: -20px; margin-right: -20px; }
 
-#btnToTop { right: 0; transition: 0.3s; }
+#btnToTop { right: 0; transition: 0.3s; z-index: 10000 }
 /* CSS code to define the "nav-hide" class */
-nav.navbar { transition: top 0.5s ease;z-index:1050;}
+nav.navbar { transition: top 0.5s ease; z-index: 1050; }
 
 .disabled { pointer-events: none; }
 
 .text-prewrap { white-space: pre-wrap; }
-
-
+.copyText { cursor: pointer; }
+    .copyText:hover { opacity: 0.8; }
+.bottom { bottom: 0; }
+.right { right: 0; }
+.left { left: 0; }
+.top { top: 0; }
 .dropdown-submenu { position: relative; }
-
-    .dropdown-submenu .dropdown-menu { top: 0; right: 100%; }
+#bottomArea { background: linear-gradient(180deg,rgb(255 255 255 / 0%) 20%,#fff 40%); }
+.dropdown-submenu .dropdown-menu { top: 0; right: 100%; }
 #qaList { left: 100%; transition: ease-in-out 0.5s; z-index: 1050; }
     #qaList.active { left: 0; }
 
     #qaList #closeArea { opacity: 0.4; cursor: zoom-out; }
     #qaList #listArea { opacity: 0.9; }
 #stickyBody { transition: top 0.5s ease; }
+.textarea-with-button { position: relative; display: inline-block; }
+
+    .textarea-with-button .form-control { padding-right: 45px; }
+
+.button-inside-textarea { position: absolute; top: 0; right: 0; bottom: 0; width: 40px; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+#spinner-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999999; }
+.card-body-scrollable { max-height: 100%; overflow-y: auto; /* Enables vertical scrollbar if needed */ }

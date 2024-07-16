@@ -4,9 +4,7 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "EditForm", name = "EditForm" }))
-{
-@Html.AntiForgeryToken()
+
 <div class="modal-header">
     <h5 class="modal-title" id="modalTitle">@Html.DisplayNameFor(m => m.ChatBotQuestion.Question):&nbsp;<span>@Html.DisplayFor(m => m.ChatBotQuestion.Question)</span></h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -14,14 +12,18 @@
     </button>
 </div>
 <div class="modal-body">
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-    @Html.HiddenFor(m => m.ChatBotAnswer_Id)
-    <div class="form-group">
-        @Html.LabelFor(m => m.Answer)
-        @Html.TextBoxFor(m => m.Answer, new { @class = "form-control" })
-    </div>
+    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "EditForm", name = "EditForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m => m.ChatBotAnswer_Id)
+        <div class="form-group">
+            @Html.LabelFor(m => m.Answer)
+            @Html.TextBoxFor(m => m.Answer, new { @class = "form-control" })
+        </div>
+    }
 </div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+    <button type="submit" class="btn btn-primary" form="EditForm"><i class="fa fa-check" aria-hidden="true"></i></button>
 </div>
-}
+

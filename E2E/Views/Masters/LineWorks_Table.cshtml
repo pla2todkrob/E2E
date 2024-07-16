@@ -7,33 +7,22 @@
 <table class="table table-bordered table-hover table-striped nowrap">
     <thead>
         <tr>
-            <th class="fit"></th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.Active)</th>
             <th>@Html.DisplayNameFor(m => m.LineWork_Name)</th>
             <th>@Html.DisplayNameFor(m => m.System_Authorize.Authorize_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Active)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+            <th>@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
         <tr>
-            <td>
-                <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("LineWorks_Form","Masters",new { id = Html.ValueFor(m => item.LineWork_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-            </td>
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td>@Html.DisplayFor(i => item.LineWork_Name)</td>
-            <td>
-                @{
-                        if (item.System_Authorize != null)
-                        {
-                    @Html.DisplayFor(i => item.System_Authorize.Authorize_Name)
-                        }
-                }
-            </td>
-            <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
-            <td>@Html.DisplayFor(i => item.Update)</td>
+            <td class="fit">@Html.DisplayFor(i => item.Create)</td>
+            <td class="fit text-center">@Html.DisplayFor(i => item.Active)</td>
+            <td class="text-nowrap">@Html.DisplayFor(i => item.LineWork_Name)</td>
+            <td class="text-nowrap">@Html.DisplayFor(i => item.System_Authorize.Authorize_Name)</td>
+            <td class="fit">@Html.DisplayFor(i => item.Update)</td>
         </tr>
         }
     </tbody>

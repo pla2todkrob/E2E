@@ -1,5 +1,5 @@
 ﻿$(function () {
-    adjustHeight().then(t => {
+    adjustHeight().then(function () {
         $(window).resize(function () {
             adjustHeight();
         });
@@ -201,12 +201,14 @@ async function resendEmail(urlAjax) {
                     url: urlAjax,
                     async: true,
                     success: function (res) {
-                        return swal({
+                        swal({
                             title: res.Title,
                             text: res.Text,
                             icon: res.Icon,
                             button: res.Button,
                             dangerMode: res.DangerMode
+                        }).then(function () {
+                            location.reload(true);
                         });
                     }
                 });

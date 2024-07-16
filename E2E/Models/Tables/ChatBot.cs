@@ -18,9 +18,8 @@ namespace E2E.Models.Tables
         [Index]
         public DateTime Create { get; set; }
 
-        [Index(IsUnique = true), StringLength(100)]
         public string Group { get; set; }
-
+        public string Owner { get; set; }
         public DateTime? Update { get; set; }
     }
 }

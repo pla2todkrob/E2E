@@ -5,17 +5,16 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class EFormsController : Controller
+    public class EFormsController : BaseController
     {
         private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsManageEForm data = new ClsManageEForm();
-        private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
 
         public ActionResult _FileCollections(Guid id)
         {
@@ -34,7 +33,7 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Approve_Forms(Guid id, bool? res = null)
+        public async Task<ActionResult> Approve_Forms(Guid id, bool? res = null)
         {
             try
             {
@@ -45,7 +44,7 @@ namespace E2E.Controllers
                 {
                     eForms = db.EForms.Find(id);
                     eForms.Status_Id = 3;
-                    eForms.ActionUserId = Guid.Parse(HttpContext.User.Identity.Name);
+                    eForms.ActionUserId = loginId;
 
                     swal.DangerMode = false;
                     swal.Icon = "success";
@@ -56,7 +55,7 @@ namespace E2E.Controllers
 
                     string status = db.System_Statuses.Find(eForms.Status_Id).Status_Name.ToString();
 
-                    EmailForms(id, status);
+                    await EmailForms(id, status);
 
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
@@ -64,7 +63,7 @@ namespace E2E.Controllers
                 {
                     eForms = db.EForms.Find(id);
                     eForms.Status_Id = 6;
-                    eForms.ActionUserId = Guid.Parse(HttpContext.User.Identity.Name);
+                    eForms.ActionUserId = loginId;
 
                     swal.DangerMode = false;
                     swal.Icon = "success";
@@ -75,7 +74,7 @@ namespace E2E.Controllers
 
                     string status = db.System_Statuses.Find(eForms.Status_Id).Status_Name.ToString();
 
-                    EmailForms(id, status);
+                    await EmailForms(id, status);
 
                     return Json(swal, JsonRequestBehavior.AllowGet);
                 }
@@ -120,14 +119,14 @@ namespace E2E.Controllers
         }
 
         [HttpDelete]
-        public ActionResult Delete_EForm(Guid id)
+        public async Task<ActionResult> Delete_EForm(Guid id)
         {
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (data.Delete_Attached(id))
+                    if (await data.Delete_Attached(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -145,28 +144,21 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
         }
 
-        public ActionResult DeleteFiles(Guid id)
+        public async Task<ActionResult> DeleteFiles(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.DeleteFile(id))
+                    if (await data.DeleteFile(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -178,28 +170,21 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult DeleteGallery(Guid id)
+        public async Task<ActionResult> DeleteGallery(Guid id)
         {
             ClsSwal swal = new ClsSwal();
-            using (TransactionScope scope = new TransactionScope())
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    if (data.DeleteGallery(id))
+                    if (await data.DeleteGallery(id))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -211,14 +196,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -227,9 +205,8 @@ namespace E2E.Controllers
 
         public ActionResult EForms_Content(Guid? id)
         {
-            Guid id_emp = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.Usercode = db.Users
-                .Where(w => w.User_Id == id_emp)
+                .Where(w => w.User_Id == loginId)
                 .Select(s => s.User_Code)
                 .FirstOrDefault();
 
@@ -271,7 +248,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult EForms_Create(EForms model)
+        public async Task<ActionResult> EForms_Create(EForms model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -281,11 +258,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (data.EForm_Save(model, Request.Files))
+                        if (await data.EForm_Save(model, Request.Files))
                         {
                             scope.Complete();
 
@@ -304,14 +281,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -345,9 +315,8 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
                 ViewBag.Usercode = db.Users
-                    .Where(w => w.User_Id == id)
+                    .Where(w => w.User_Id == loginId)
                     .Select(s => s.User_Code)
                     .FirstOrDefault();
 
@@ -357,7 +326,7 @@ namespace E2E.Controllers
 
                 if (res == 2)
                 {
-                    query = db.EForms.Where(w => w.User_Id == id).OrderByDescending(o => o.Create);
+                    query = db.EForms.Where(w => w.User_Id == loginId).OrderByDescending(o => o.Create);
                     ViewBag.MyForm = true;
                 }
                 //if (res == 3)
@@ -377,8 +346,7 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.RoleId = db.Users.Where(w => w.User_Id == UserId).Select(s => s.Role_Id).FirstOrDefault();
+                ViewBag.RoleId = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Role_Id).FirstOrDefault();
 
                 IQueryable<EForms> query = db.EForms.Where(w => w.EForm_Start <= DateTime.Today && w.Status_Id == 3 && (!w.EForm_End.HasValue || w.EForm_End >= DateTime.Today)).OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t => t.EForm_Start);
 
@@ -403,7 +371,7 @@ namespace E2E.Controllers
             }
         }
 
-        public void EmailForms(Guid id, string status)
+        public async Task EmailForms(Guid id, string status)
         {
             try
             {
@@ -424,7 +392,7 @@ namespace E2E.Controllers
                 clsMail.SendToId = sendTo;
                 clsMail.Subject = subject;
                 clsMail.Body = content;
-                clsMail.SendMail(clsMail);
+                await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -482,14 +450,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -521,7 +482,6 @@ namespace E2E.Controllers
 
         public List<SelectListItem> SelectListItems_Category_Name()
         {
-            Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
             var DeptDistinct = db.Master_Departments.Select(s => s.Department_Name).Distinct();
             List<SelectListItem> item = new List<SelectListItem>
             {

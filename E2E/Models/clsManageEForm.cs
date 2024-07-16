@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -16,7 +17,7 @@ namespace E2E.Models
         private readonly ClsContext db = new ClsContext();
         private ClsImage clsImag = new ClsImage();
 
-        protected bool EForm_Insert(EForms model, HttpFileCollectionBase files)
+        protected async Task<bool> EForm_Insert(EForms model, HttpFileCollectionBase files)
         {
             try
             {
@@ -42,50 +43,34 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "EForm/" + eForms.EForm_Id;
+                            string dir = Path.Combine("EForm", eForms.EForm_Id.ToString());
 
                             if (CK_IMG)
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Galleries eForm_Galleries = new EForm_Galleries();
-                                eForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_Gallery_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Galleries != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
                                 ClsServiceFile clsServiceFile = new ClsServiceFile
                                 {
                                     FolderPath = dir,
                                     Filename = file.FileName
                                 };
 
-                                FileResponse fileResponse = clsApi.UploadFile(clsServiceFile, file);
+                                FileResponse fileResponse = await clsApi.UploadFile(clsServiceFile, file);
 
                                 clsImag.OriginalPath = fileResponse.FileUrl;
                                 clsImag.ThumbnailPath = fileResponse.FileThumbnailUrl;
 
-                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, file.FileName);
 
                                 if (clsImag != null)
                                 {
-                                    Galleries_Save(eForms, clsImag, FileName);
+                                    Galleries_Save(eForms, clsImag, file.FileName);
                                 }
                             }
                             else
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Files eForm_Files = new EForm_Files();
-                                eForm_Files = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_File_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Files != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, file.FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(eForms, filepath, FileName);
+                                    File_Save(eForms, filepath, file.FileName);
                                 }
                             }
                         }
@@ -110,7 +95,7 @@ namespace E2E.Models
                     clsMail.SendToIds = sendTo;
                     clsMail.Subject = subject;
                     clsMail.Body = content;
-                    res = clsMail.SendMail(clsMail, files);
+                    res = await clsMail.SendMail(clsMail, files);
                 }
 
                 return res;
@@ -121,7 +106,7 @@ namespace E2E.Models
             }
         }
 
-        protected bool EForm_Update(EForms model, HttpFileCollectionBase files)
+        protected async Task<bool> EForm_Update(EForms model, HttpFileCollectionBase files)
         {
             try
             {
@@ -149,39 +134,22 @@ namespace E2E.Models
                             HttpPostedFileBase file = files[i];
 
                             bool CK_IMG = IsRecognisedImageFile(file.FileName);
-                            string dir = "EForm/" + EForms.EForm_Id;
+                            string dir = Path.Combine("EForm", EForms.EForm_Id.ToString());
 
                             if (CK_IMG)
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Galleries eForm_Galleries = new EForm_Galleries();
-                                eForm_Galleries = db.EForm_Galleries.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_Gallery_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Galleries != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-
-                                clsImag = clsManageService.UploadImageToString(dir, file, FileName);
+                                clsImag = await clsManageService.UploadImageToString(dir, file, file.FileName);
                                 if (clsImag != null)
                                 {
-                                    Galleries_Save(EForms, clsImag, FileName);
+                                    Galleries_Save(EForms, clsImag, file.FileName);
                                 }
                             }
                             else
                             {
-                                string FileName = file.FileName;
-
-                                EForm_Files eForm_Files = new EForm_Files();
-                                eForm_Files = db.EForm_Files.Where(w => w.EForm_Id == model.EForm_Id && w.EForm_File_Name == file.FileName).FirstOrDefault();
-                                if (eForm_Files != null)
-                                {
-                                    FileName = string.Concat("_", file.FileName);
-                                }
-                                string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                                string filepath = await clsManageService.UploadFileToString(dir, file, file.FileName);
                                 if (filepath != "")
                                 {
-                                    File_Save(EForms, filepath, FileName);
+                                    File_Save(EForms, filepath, file.FileName);
                                 }
                             }
                         }
@@ -221,7 +189,7 @@ namespace E2E.Models
             }
         }
 
-        public bool Delete_Attached(Guid id)
+        public async Task<bool> Delete_Attached(Guid id)
         {
             try
             {
@@ -236,7 +204,7 @@ namespace E2E.Models
                 {
                     foreach (var item in clsEForm.EForm_Files)
                     {
-                        DeleteFile(item.EForm_File_Id, false);
+                        await DeleteFile(item.EForm_File_Id, false);
                     }
                 }
 
@@ -247,11 +215,11 @@ namespace E2E.Models
                 {
                     foreach (var item in clsEForm.EForm_Galleries)
                     {
-                        DeleteGallery(item.EForm_Gallery_Id, false);
+                        await DeleteGallery(item.EForm_Gallery_Id, false);
                     }
                 }
 
-                res = EForm_Delete(id, FilePath);
+                res = await EForm_Delete(id, FilePath);
 
                 return res;
             }
@@ -261,7 +229,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteFile(Guid id, bool status = true)
+        public async Task<bool> DeleteFile(Guid id, bool status = true)
         {
             try
             {
@@ -275,7 +243,7 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        clsManageService.Api_DeleteFile(Files.EForm_File_Path);
+                        await clsManageService.Api_DeleteFile(Files.EForm_File_Path);
                     }
 
                     res = true;
@@ -289,7 +257,7 @@ namespace E2E.Models
             }
         }
 
-        public bool DeleteGallery(Guid id, bool status = true)
+        public async Task<bool> DeleteGallery(Guid id, bool status = true)
         {
             try
             {
@@ -303,8 +271,8 @@ namespace E2E.Models
                 {
                     if (status)
                     {
-                        clsManageService.Api_DeleteFile(Galleries.EForm_Gallery_Original);
-                        clsManageService.Api_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
+                        await clsManageService.Api_DeleteFile(Galleries.EForm_Gallery_Original);
+                        await clsManageService.Api_DeleteFile(Galleries.EForm_Gallery_Thumbnail);
                     }
                     res = true;
                 }
@@ -317,7 +285,7 @@ namespace E2E.Models
             }
         }
 
-        public bool EForm_Delete(Guid id, List<string> File_ = null)
+        public async Task<bool> EForm_Delete(Guid id, List<string> File_ = null)
         {
             try
             {
@@ -332,7 +300,7 @@ namespace E2E.Models
                     {
                         foreach (var item in File_)
                         {
-                            clsManageService.Api_DeleteFile(item);
+                            await clsManageService.Api_DeleteFile(item);
                         }
                     }
                     res = true;
@@ -364,7 +332,7 @@ namespace E2E.Models
             }
         }
 
-        public bool EForm_Save(EForms model, HttpFileCollectionBase files)
+        public async Task<bool> EForm_Save(EForms model, HttpFileCollectionBase files)
         {
             try
             {
@@ -375,11 +343,11 @@ namespace E2E.Models
 
                 if (eForms != null)
                 {
-                    res = EForm_Update(model, files);
+                    res = await EForm_Update(model, files);
                 }
                 else
                 {
-                    res = EForm_Insert(model, files);
+                    res = await EForm_Insert(model, files);
                 }
 
                 return res;

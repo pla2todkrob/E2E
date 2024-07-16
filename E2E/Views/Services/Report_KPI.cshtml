@@ -20,6 +20,24 @@
 
         });
 
+        function callOverdueModal() {
+            $.ajax({
+                url: '@Url.Action("Report_KPI_Overdue", "Services")',
+                data: {
+                    filter:getQueryString()
+                },
+                async: true,
+                success: function (res) {
+                    $('#modalContent').parent().addClass('modal-xl');
+
+                    $('#modalContent').html(res);
+
+                    $('#modalArea').modal('show');
+                }
+            });
+            return false;
+        }
+
         function callUnsatisfiedModal() {
             $.ajax({
                 url: '@Url.Action("Report_KPI_Unsatisfied", "Services")',
@@ -31,24 +49,14 @@
                     $('#modalContent').parent().addClass('modal-xl');
 
                     $('#modalContent').html(res);
-                    $('#modalContent').find('select').each(function () {
-                        $(this).select2({
-                            theme: 'bootstrap4',
-                            width: '100%'
-                        });
-                    });
-                    $('#modalContent').find('table').each(function () {
-                        $(this).DataTable({
-                            "columnDefs": { targets: [0, 1], type: 'date' }
-                        });
-                    });
+
                     $('#modalArea').modal('show');
                 }
             });
             return false;
         }
 
-        function callSatisfactionModal(id) {
+        function callUserTaskModal(id) {
             $.ajax({
                 url: '@Url.Action("Report_KPI_View", "Services")',
                 data: {
@@ -60,17 +68,7 @@
                     $('#modalContent').parent().addClass('modal-xl');
 
                     $('#modalContent').html(res);
-                    $('#modalContent').find('select').each(function () {
-                        $(this).select2({
-                            theme: 'bootstrap4',
-                            width: '100%'
-                        });
-                    });
-                    $('#modalContent').find('table').each(function () {
-                        $(this).DataTable({
-                            "columnDefs": { targets: [0, 1], type: 'date' }
-                        });
-                    });
+
                     $('#modalArea').modal('show');
                 }
             });
@@ -89,33 +87,29 @@
                     $('#modalContent').parent().addClass('modal-xl');
 
                     $('#modalContent').html(res);
-                    $('#modalContent').find('select').each(function () {
-                        $(this).select2({
-                            theme: 'bootstrap4',
-                            width: '100%'
-                        });
-                    });
-                    $('#modalContent').find('table').each(function () {
-                        $(this).DataTable({
-                            "columnDefs": { targets: [0, 1], type: 'date' }
-                        });
-                    });
+
                     $('#modalArea').modal('show');
                 }
             });
             return false;
         }
 
-        function reloadTable() {
-            callFilter('@Url.Action("Report_KPI_Filter", "Services")');
-
-            callTable_Normal('@Url.Action("Report_KPI_Table", "Services")');
+       function reloadTable() {
+           callFilter('@Url.Action("Report_KPI_Filter", "Services")').then(function () {
+               callTable_Normal('@Url.Action("Report_KPI_Table", "Services")');
+           });
 
         }
     </script>
 }
 
 <div class="mb-3 d-flex">
+    <div>
+        <button type="button" class="btn btn-light" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetClosePrevious","Services")','reloadTable')">
+            <i class="fa fa-th-list mr-2" aria-hidden="true"></i>
+            Closing of previous months'
+        </button>
+    </div>
     <div class="ml-auto" id="filter"></div>
 </div>
 <div id="datalist"></div>

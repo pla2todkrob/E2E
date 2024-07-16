@@ -19,7 +19,7 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("AllRequest_Table", "Services")', true, false,[0,4]);
+            callTable_NoSort('@Url.Action("AllRequest_Table", "Services")');
         }
     </script>
 }
@@ -34,8 +34,4 @@
     </nav>
 }
 
-<div class="card shadow">
-    <div class="card-body">
-        <div class="row" id="datalist"></div>
-    </div>
-</div>
+<div class="card shadow" id="datalist"></div>

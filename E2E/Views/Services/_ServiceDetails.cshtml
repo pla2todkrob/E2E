@@ -1,0 +1,53 @@
+﻿@model E2E.Models.Views.ClsServices
+
+@{
+    Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+}
+@if (Model.Services.Action_User_Id.HasValue && userId == Model.Services.Action_User_Id.Value)
+{
+<div class="d-flex justify-content-end mb-3">
+    @if (!Model.Services.Is_MustBeApproved && Model.Services.Status_Id == 1)
+        {
+    <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Must approved</button>
+        }
+    @if (Model.Services.Ref_Service_Id.HasValue && !Model.Services.Is_FreePoint && Model.Services.Action_User_Id == userId)
+        {
+    <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services", new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
+        }
+</div>
+}
+
+<dl class="row">
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Create)</dt>
+    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Create)</dd>
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Statuses.Status_Name)</dt>
+    <dd class="col-8 col-md-9">
+        <span class="@Model.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => m.Services.System_Statuses.Status_Name)</span>
+    </dd>
+
+    <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
+    <dd class="col-12 col-md-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
+    <dd class="col-8 col-md-9"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
+    <dd class="col-8 col-md-9"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
+    <dd class="col-8 col-md-9">
+        <blockquote class="blockquote">
+            <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
+            <em class="blockquote-footer small">
+                @Html.ValueFor(m => m.Services.Users.Master_Plants.Plant_Name),
+                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),
+                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+            </em>
+        </blockquote>
+    </dd>
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Contact)</dt>
+    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Service_Contact)</dd>
+
+    @if (Model.Services.Update.HasValue)
+    {
+    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
+    }
+</dl>

@@ -6,18 +6,18 @@
 }
 
 @section breadcrumb{
-	<nav aria-label="breadcrumb">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
-			<li class="breadcrumb-item"><a href="@Url.Action("Index", "BusinessCards")">Business card</a></li>
-			<li class="breadcrumb-item "><span class="@Model.System_Statuses.Status_Class">@Html.DisplayFor(i => Model.System_Statuses.Status_Name)</span> [@Model.Key]</li>
-		</ol>
-	</nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "BusinessCards")">Business card</a></li>
+            <li class="breadcrumb-item "><span class="@Model.System_Statuses.Status_Class">@Html.DisplayFor(i => Model.System_Statuses.Status_Name)</span> [@Model.Key]</li>
+        </ol>
+    </nav>
 }
 
 @section scripts{
 
-	<script>
+    <script>
 
 	$(function () {
 			reloadTable();
@@ -32,7 +32,13 @@
 	function reloadTable() {
 
 			callTable('@Url.Action("UploadHistory", "BusinessCards", new { id = Model.BusinessCard_Id })', false, false, [0], '#datalistUpload');
-			callTable('@Url.Action("LogStatus", "BusinessCards", new { id = Model.BusinessCard_Id })', false, false, [0], '#datalistLog');
+		callTable('@Url.Action("LogStatus", "BusinessCards", new { id = Model.BusinessCard_Id })', false, false, [0], '#datalistLog');
+
+		    var orderBusinessCard = @Html.Raw(Json.Encode(ViewBag.OrderBusinessCard));
+
+		if (orderBusinessCard== 7) {
+					callData('@Url.Action("_SatisfactionResultsCard", "BusinessCards", new { id = Model.BusinessCard_Id })', '#datalistScore');
+		}
 
 		}
 
@@ -105,42 +111,44 @@ swal({
 
 		}
 
-	function ManagerGaApprove(id) {
-		let SelectId = $('#SelectId').val();
-	swal({
-		title: "Are you sure?",
-		text: "You are about to approve this item!",
-		icon: "warning",
-		buttons: true
-
-	})
-	.then((willApprove) => {
-		if (willApprove) {
-		var UrlAction = '@Url.Action("ManagerGaApprove", "BusinessCards")';
-			$.ajax({
-				url: UrlAction,
-				data: {
-					id: id,
-					SelectId: SelectId
-				},
-				success: function (res) {
-
-				swal({
-				title: res.Title,
-				text: res.Text,
-				icon: res.Icon,
-					dangerMode: res.DangerMode
-				}).then(() => {
-
-					window.location.href = '@Url.Action("Index", "BusinessCards")';
-
-				});
-				}
-			});
-			}
-
-		});
-	}
+    function ManagerGaApprove(id) {
+  swal({
+    title: "Are you sure?",
+    text: "You are about to approve this item!",
+    icon: "warning",
+    buttons: true,
+    dangerMode: true,
+    content: {
+      element: "input",
+      attributes: {
+        placeholder: "Please enter Remark",
+        type: "text",
+      },
+    },
+  }).then((willApprove) => {
+    var remark = $('.swal-content__input').val();
+    if (willApprove && remark) {
+      var UrlAction = '@Url.Action("ManagerGaApprove", "BusinessCards")';
+      var SelectId = $('#SelectId').val();
+      $.ajax({
+        url: UrlAction,
+        data: { id: id, SelectId: SelectId, remark: remark },
+        success: function (res) {
+          swal({
+            title: res.Title,
+            text: res.Text,
+            icon: res.Icon,
+            dangerMode: res.DangerMode
+          }).then(() => {
+            window.location.href = '@Url.Action("Index", "BusinessCards")';
+          });
+        }
+      });
+    } else {
+      swal("Remark is required!", "", "error");
+    }
+  });
+}
 
 	function ManagerGaReject(id) {
 
@@ -354,39 +362,6 @@ swal({
 
 		}
 
-    function UserClose(id) {
-
-	swal({
-		title: "Are you sure?",
-		text: "You are about to Close this item!",
-		icon: "warning",
-		buttons: true,
-		dangerMode: true,
-	})
-	.then((willApprove) => {
-		if (willApprove) {
-		var UrlAction = '@Url.Action("UserClose", "BusinessCards")';
-			$.ajax({
-				url: UrlAction,
-				data: { id: id },
-				success: function (res) {
-
-			swal({
-				title: res.Title,
-				text: res.Text,
-				icon: res.Icon,
-				dangerMode: res.DangerMode
-			}).then(() => {
-				 window.location.href = '@Url.Action("Index", "BusinessCards")';
-			});
-
-					}
-				});
-			}
-
-		});
-		}
-
     function Cancel(id) {
 
 		swal({
@@ -420,257 +395,356 @@ swal({
 
 		}
 
-		function Resend_Email(id) {
+    function Resend_Email(id) {
+    var UrlAction = '@Url.Action("Resend_Email", "BusinessCards")';
+    console.log(id);
 
-			var UrlAction = '@Url.Action("Resend_Email", "BusinessCards")';
-			console.log(id);
-    $.ajax({
-      url: UrlAction,
-		data: { id: id},
-		success: function (res) {
-
-			swal({
-				title: res.Title,
-				text: res.Text,
-				icon: res.Icon,
-				dangerMode: res.DangerMode
-			})
-
-      }
+    swal({
+        title: "Confirmation",
+        text: "Are you sure you want to resend the email?",
+        icon: "warning",
+        buttons: {
+            cancel: "No",
+            confirm: "Yes"
+        }
+    }).then(function (confirmed) {
+        if (confirmed) {
+            $.ajax({
+                url: UrlAction,
+                data: { id: id },
+                success: function (res) {
+                    swal({
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        dangerMode: res.DangerMode
+                    });
+                }
+            });
+        }
     });
+}
 
-		}
+	$(document).on('submit', '#EditDetilForm', function (e) {
+			e.preventDefault();
+			callSubmitPage('@Url.Action("BusinessCard_UpdateDetail", "BusinessCards")', this);
+            return false;
+		});
 
-	</script>
+    function SaveCloseFormCards() {
+            let arr = [];
+
+            swal({
+                title: "Are you sure?",
+                text: "If the score is already given, it cannot be changed!",
+                icon: "warning",
+                buttons: true,
+            })
+                .then((cf) => {
+                    if (cf) {
+						var id_businessCard = $('#BusinessCards_BusinessCard_Id').val();
+                        $('.score-group').find('.score').each(function () {
+                            var obj = {};
+                            obj.id = $(this).attr('id');
+                            obj.score = $(this).find('input[name=' + obj.id + ']:checked').val();
+                            arr.push(obj);
+                        });
+
+                        $.ajax({
+                            type: "POST",
+							data: { id: id_businessCard, score: arr },
+                            url: '@Url.Action("SetClose","BusinessCards")',
+                            success: function (res) {
+                                swal({
+                                    title: res.Title,
+                                    text: res.Text,
+                                    icon: res.Icon,
+                                    button: res.Button,
+                                    dangerMode: res.DangerMode
+                                }).then(function () {
+                                    if (res.Icon == 'success') {
+                                        location.reload();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+            return false;
+        }
+    </script>
 }
 
 <div class="container" id="DetailArea">
 
-	@if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 4 && ViewBag.GA && ViewBag.UserCHK != true)
+    @if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 4 && ViewBag.GA && ViewBag.UserCHK != true)
 	{
-		<div class="d-flex mb-3">
-			<div class="mr-auto">
+    <div class="d-flex mb-3">
+        <div class="mr-auto">
 
-				<button type="button" onclick="location.href='@Url.Action("DownloadPDF","BusinessCards", new { id = Model.BusinessCard_Id})'" class="btn btn-primary"><i class="fa fa-download"></i>&nbsp;Generate&nbsp;file</button>
-			</div>
-			<div class="ml-auto">
-				<button id="btn_Upload" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_UploadFile","BusinessCards", new { id = Model.BusinessCard_Id })')"><i class="fa fa-plus"></i></button>
-			</div>
-		</div>
+            <button type="button" onclick="location.href='@Url.Action("DownloadPDF","BusinessCards", new { id = Model.BusinessCard_Id})'" class="btn btn-primary"><i class="fa fa-download"></i>&nbsp;Generate&nbsp;file</button>
+        </div>
+        <div class="ml-auto">
+            <button id="btn_Upload" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_UploadFile","BusinessCards", new { id = Model.BusinessCard_Id })')"><i class="fa fa-plus"></i></button>
+        </div>
+    </div>
 
 	}
 
-	<div class="card mb-3">
+    <div class="card mb-3">
+        @{
 
-		<div class="form-row mt-3">
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Name(TH):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
-			</div>
+		if (Model.User_id == UserID && ViewBag.OrderBusinessCard != 7)
+		{
+            <div class="col-12 mt-3">
 
-			<div class="form-group col-5">
-				@Html.Label("Surname(TH):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
-			</div>
+                <div class="d-flex">
+                    <div class="ml-auto">
+                        <button class="btn btn-outline-secondary" onclick="callModal('@Url.Action("BusinessCard_EditPhone", "BusinessCards", new { id = Model.BusinessCard_Id })')"><i class="fa fa-pencil"></i></button>
+                    </div>
+                </div>
+            </div>
+		}
+		else
+		{
+            <div class="col-12 mt-4"></div>
+		}
 
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Name(EN):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
-			</div>
+        }
 
-			<div class="form-group col-5">
-				@Html.Label("Surname(EN):")
-				@Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
-			</div>
+        <div class="form-row">
+            <div class="form-group offset-2 col-5">
+                @Html.Label("Name(TH):")
+                @Html.DisplayFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
+            </div>
 
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Department:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
-			</div>
+            <div class="form-group col-5">
+                @Html.Label("Surname(TH):")
+                @Html.DisplayFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
+            </div>
 
-			<div class="form-group col-5">
-				@Html.Label("Position:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
-			</div>
+            <div class="form-group offset-2 col-5">
+                @Html.Label("Name(EN):")
+                @Html.DisplayFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
+            </div>
 
-			@*<div class="form-group col-12">
-					@Html.Label("Both Sided:")
-					@Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
-				</div>*@
+            <div class="form-group col-5">
+                @Html.Label("Surname(EN):")
+                @Html.DisplayFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
+            </div>
 
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Location:")
-				@Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
-			</div>
+            <div class="form-group offset-2 col-5">
+                @Html.Label("Department:")
+                @Html.DisplayFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
+            </div>
 
-			<div class="form-group col-5">
-				@Html.Label("Tel:")
-				@Html.DisplayFor(m => m.Tel_Internal, new { @class = "form-control" })
-			</div>
+            <div class="form-group col-5">
+                @Html.Label("Position:")
+                @Html.DisplayFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
+            </div>
 
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Mobile:")
-				@Html.DisplayFor(m => m.Tel_External, new { @class = "form-control" })
-			</div>
+            @*<div class="form-group col-12">
+                    @Html.Label("Both Sided:")
+                    @Html.CheckBoxFor(m => m.BothSided, new { @disabled = "disabled" })
+                </div>*@
 
-			<div class="form-group col-5">
-				@Html.Label("Email:")
-				@Html.DisplayFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
-			</div>
+            <div class="form-group offset-2 col-5">
+                @Html.Label("Location:")
+                @Html.DisplayFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
+            </div>
 
-			<div class="form-group offset-2 col-5">
-				@Html.Label("Amount:")
-				@Html.DisplayFor(m => m.Amount, new { type = "number", @class = "form-control" })
-			</div>
+            <div class="form-group col-5">
+                @Html.Label("Tel:")
+                @Html.DisplayFor(m => m.Tel_Internal, new { @class = "form-control" })
+            </div>
 
-			@*ปุ่ม Resend*@
-			@if (ViewBag.OrderBusinessCard == 1  && UserID == Model.User_id || ViewBag.OrderBusinessCard == 2 || ViewBag.OrderBusinessCard == 4 && ViewBag.CountFileUpload > 0 || ViewBag.OrderBusinessCard == 6)
-			{
-				<div class="form-group col-5">
-					<button class="btn btn-outline-info" onclick="Resend_Email('@Model.BusinessCard_Id')"><i class="fa fa-envelope"></i> Resend</button>
-				</div>
+            <div class="form-group offset-2 col-5">
+                @Html.Label("Mobile:")
+                @Html.DisplayFor(m => m.Tel_External, new { @class = "form-control" })
+            </div>
 
-			}
+            <div class="form-group col-5">
+                @Html.Label("Email:")
+                @Html.DisplayFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
+            </div>
 
+            <div class="form-group offset-2 col-5">
+                @Html.Label("Amount:")
+                @Html.DisplayFor(m => m.Amount, new { type = "number", @class = "form-control" })
+            </div>
 
-		</div>
-	</div>
-	@{
+            @*ปุ่ม Resend*@
+            @if (ViewBag.OrderBusinessCard == 1 && UserID == Model.User_id || ViewBag.OrderBusinessCard == 2 || ViewBag.OrderBusinessCard == 4 && ViewBag.CountFileUpload > 0 || ViewBag.OrderBusinessCard == 6)
+		{
+            <div class="form-group col-5">
+                <button class="btn btn-outline-info" onclick="Resend_Email('@Model.BusinessCard_Id')"><i class="fa fa-envelope"></i> Resend</button>
+            </div>
+
+		}
+        </div>
+    </div>
+    @{
 
 		if (ViewBag.authorized == 2 && ViewBag.OrderBusinessCard == 1 && ViewBag.DeptCHK)
 		{
 
-			<div class="d-flex">
-				<button id="Mgu_Approve" class="btn btn-primary ml-auto" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
-				<button id="Mgu_Reject" class="btn btn-danger ml-3" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
-			</div>
+        <div class="d-flex">
+            <button id="Mgu_Approve" class="btn btn-primary ml-auto" type="button" onclick="ManagerUserApprove('@Model.BusinessCard_Id')">Approve</button>
+            <button id="Mgu_Reject" class="btn btn-danger ml-3" type="button" onclick="ManagerUserReject('@Model.BusinessCard_Id')">Reject</button>
+        </div>
 		}
 
 		if (ViewBag.authorized == 2 && ViewBag.OrderBusinessCard == 2 && ViewBag.GA)
 		{
-			<div class="form-group col-12">
-				@Html.LabelFor(m => m.UserAction)
-				@Html.DropDownListFor(m => m.UserAction, new SelectList(ViewBag.UserCardList, "Value", "Text"), "- Select -", new { id = "SelectId", @class = "form-control" })
-			</div>
+        <div class="form-group col-12">
+            @Html.LabelFor(m => m.UserAction)
+            @Html.DropDownListFor(m => m.UserAction, new SelectList(ViewBag.UserCardList, "Value", "Text"), "- Select -", new { id = "SelectId", @class = "form-control" })
+        </div>
 
-			<div class="d-flex">
-				<button id="MgGA_Approve" class="btn btn-primary ml-auto" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">Assign</button>
-				<button id="MgGA_Reject" class="btn btn-danger ml-3" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">Reject</button>
-			</div>
+        <div class="d-flex">
+            <button id="MgGA_Approve" class="btn btn-primary ml-auto" type="button" onclick="ManagerGaApprove('@Model.BusinessCard_Id')">Assign</button>
+            <button id="MgGA_Reject" class="btn btn-danger ml-3" type="button" onclick="ManagerGaReject('@Model.BusinessCard_Id')">Reject</button>
+        </div>
 		}
 
 		if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 3 && ViewBag.GA)
 		{
 
-			<div class="d-flex">
-				<button id="Staff_Start " class="btn btn-primary ml-auto" type="button" onclick="StaffStart('@Model.BusinessCard_Id')">Start</button>
-				<button id="Staff_Undo" class="btn btn-danger ml-3" type="button" onclick="StaffUndo('@Model.BusinessCard_Id')">Undo</button>
-			</div>
+        <div class="d-flex">
+            <button id="Staff_Start " class="btn btn-primary ml-auto" type="button" onclick="StaffStart('@Model.BusinessCard_Id')">Start</button>
+            <button id="Staff_Undo" class="btn btn-danger ml-3" type="button" onclick="StaffUndo('@Model.BusinessCard_Id')">Undo</button>
+        </div>
 		}
-	}
+    }
 
-	@if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 5 && ViewBag.GA || ViewBag.UserCHK == true && ViewBag.OrderBusinessCard == 5 && ViewBag.GA)
+    @if (ViewBag.authorized == 3 && ViewBag.OrderBusinessCard == 5 && ViewBag.GA || ViewBag.UserCHK == true && ViewBag.OrderBusinessCard == 5 && ViewBag.GA)
 	{
 
-		<div class="d-flex">
-			<button id="Staff_Completed" class="btn btn-success ml-auto" type="button" onclick="StaffComplete('@Model.BusinessCard_Id')">Completed</button>
-		</div>
+    <div class="d-flex">
+        <button id="Staff_Completed" class="btn btn-success ml-auto" type="button" onclick="StaffComplete('@Model.BusinessCard_Id')">Completed</button>
+    </div>
 	}
 
-	@if (ViewBag.OrderBusinessCard == 6 && Model.User_id == UserID)
+    @if (ViewBag.OrderBusinessCard == 6 && Model.User_id == UserID)
 	{
-		<div class="d-flex">
-			<button id="User_Undo" class="btn btn-danger ml-auto" type="button" onclick="UserUndo('@Model.BusinessCard_Id')">Undo</button>
-			<button id="User_Close" class="btn btn-secondary ml-3" type="button" onclick="UserClose('@Model.BusinessCard_Id')">Closed</button>
-		</div>
+    <div class="d-flex">
+        <button id="User_Undo" class="btn btn-danger ml-auto" type="button" onclick="UserUndo('@Model.BusinessCard_Id')">Undo</button>
+        @*<button id="User_Close" class="btn btn-secondary ml-3" type="button" onclick="UserClose('@Model.BusinessCard_Id')">Closed</button>*@
+        <button id="User_Close" class="btn btn-secondary ml-3" type="button" onclick="callModal('@Url.Action("SetColse", "BusinessCards", new { id = Model.BusinessCard_Id })')">Closed</button>
+    </div>
 	}
 
-	@if (ViewBag.OrderBusinessCard == 1 && Model.User_id == UserID)
+    @if (ViewBag.OrderBusinessCard == 1 && Model.User_id == UserID)
 	{
-		<div class="d-flex">
-			<button id="Cancel" class="btn btn-secondary ml-auto mt-3" type="button" onclick="Cancel('@Model.BusinessCard_Id')">Cancel</button>
-		</div>
+    <div class="d-flex">
+        <button id="Cancel" class="btn btn-secondary ml-auto mt-3" type="button" onclick="Cancel('@Model.BusinessCard_Id')">Cancel</button>
+    </div>
 
 	}
 </div>
 
 <ul class="nav nav-tabs" id="CardsDetail" role="tablist">
-	@{
+    @{
 		//staff ga
 		if (ViewBag.OrderBusinessCard >= 4 && ViewBag.GA || Model.User_id == UserID && ViewBag.OrderBusinessCard >= 4)
 		{
-			<li class="nav-item">
-				<a class="nav-link active" id="Upload-tab" data-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="false">
-					Upload File
-				</a>
-			</li>
+        <li class="nav-item">
+            <a class="nav-link active" id="Upload-tab" data-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="false">
+                Upload File
+            </a>
+        </li>
 
-			<li class="nav-item">
-				<a class="nav-link" id="Log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log" aria-selected="false">
-					Log Status
-				</a>
-			</li>
+        <li class="nav-item">
+            <a class="nav-link" id="Log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log" aria-selected="false">
+                Log Status
+            </a>
+        </li>
 		}
 		else
 		{
 
-			<li class="nav-item">
-				<a class="nav-link active" id="Log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log" aria-selected="false">
-					Log Status
-				</a>
-			</li>
+        <li class="nav-item">
+            <a class="nav-link active" id="Log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log" aria-selected="false">
+                Log Status
+            </a>
+        </li>
+
 		}
 
-	}
+		if (ViewBag.OrderBusinessCard == 7)
+		{
+        <li class="nav-item">
+            <a class="nav-link " id="Score-tab" data-toggle="tab" href="#Score" role="tab" aria-controls="Score" aria-selected="false">
+                Assessment Score
+            </a>
+        </li>
+		}
+
+    }
 </ul>
 
 <div class="tab-content" id="myTabContent">
 
-	@{
+    @{
 		//staff ga
 		if (ViewBag.OrderBusinessCard >= 4 && ViewBag.GA || Model.User_id == UserID && ViewBag.OrderBusinessCard >= 4)
 		{
-			<div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+        <div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
 
-				<div class="card">
+            <div class="card">
 
-					<div class="card-body">
-						<div class="row" id="datalistUpload"></div>
-					</div>
-				</div>
-			</div>
+                <div class="card-body">
+                    <div class="row" id="datalistUpload"></div>
+                </div>
+            </div>
+        </div>
 
-			<div class="tab-pane fade" id="log" role="tabpanel" aria-labelledby="log-tab">
+        <div class="tab-pane fade" id="log" role="tabpanel" aria-labelledby="log-tab">
 
-				<div class="card">
+            <div class="card">
 
-					<div class="card-body">
-						<div class="row" id="datalistLog"></div>
-					</div>
-				</div>
-			</div>
+                <div class="card-body">
+                    <div class="row" id="datalistLog"></div>
+                </div>
+            </div>
+        </div>
 		}
 		else
 		{
-			<div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+        <div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
 
-				<div class="card">
+            <div class="card">
 
-					<div class="card-body">
-						<div class="row" id="datalistUpload"></div>
-					</div>
-				</div>
-			</div>
+                <div class="card-body">
+                    <div class="row" id="datalistUpload"></div>
+                </div>
+            </div>
+        </div>
 
-			<div class="tab-pane fade show active" id="log" role="tabpanel" aria-labelledby="log-tab">
+        <div class="tab-pane fade show active" id="log" role="tabpanel" aria-labelledby="log-tab">
 
-				<div class="card">
+            <div class="card">
 
-					<div class="card-body">
-						<div class="row" id="datalistLog"></div>
-					</div>
-				</div>
-			</div>
+                <div class="card-body">
+                    <div class="row" id="datalistLog"></div>
+                </div>
+            </div>
+        </div>
 		}
-	}
+
+		if (ViewBag.OrderBusinessCard == 7)
+		{
+        <div class="tab-pane fade" id="Score" role="tabpanel" aria-labelledby="Score-tab">
+
+            <div class="card">
+
+                <div class="card-body">
+                    <div class="row" id="datalistScore"></div>
+                </div>
+            </div>
+        </div>
+
+		}
+    }
 </div>

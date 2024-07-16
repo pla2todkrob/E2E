@@ -230,7 +230,7 @@ $(document).on('submit', '#SaveReply', function (e) {
                         @if (userId.HasValue)
                                     {
                         <div class="ml-auto">
-                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })',true)"><i class="fa fa-commenting-o"></i></button> @*Reply*@
+                            <button class="btn btn-light" type="button" onclick="callModal('@Url.Action("Boards_Reply","Topics",new { comment_id = Html.ValueFor(w => item.TopicComment_Id) })', {bigSize:true})"><i class="fa fa-commenting-o"></i></button> @*Reply*@
                             @{
                                                 if (Guid.Equals(item.User_Id, userId))
                                                 {

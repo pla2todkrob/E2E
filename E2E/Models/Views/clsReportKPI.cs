@@ -23,11 +23,12 @@ namespace E2E.Models.Views
         public ReportKPI_Filter()
         {
             Date_To = DateTime.Today;
+            Date_From = new DateTime(Date_To.Year, Date_To.Month, 1);
         }
 
         [Display(Name = "From"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
-        public DateTime? Date_From { get; set; }
+        public DateTime Date_From { get; set; }
 
         [Display(Name = "To"), DataType(DataType.Date)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:d}")]
@@ -35,33 +36,17 @@ namespace E2E.Models.Views
 
         public ReportKPI_Filter DeserializeFilter(string filter)
         {
-            try
-            {
-                ReportKPI_Filter res = JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
-                if (!res.Date_From.HasValue)
-                {
-                    res.Date_From = new DateTime(res.Date_To.Year, res.Date_To.Month, 1);
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return JsonConvert.DeserializeObject<ReportKPI_Filter>(filter);
         }
     }
 
     public class ReportKPI_Overview
     {
-        [Display(Name = "Close")]
-        public int Close_Count { get; set; }
-
         [Display(Name = "Complete")]
         public int Complete_Count { get; set; }
 
-        [Display(Name = "In progress")]
-        public int Inprogress_Count { get; set; }
+        [Display(Name = "Close")]
+        public int Close_Count { get; set; }
 
         [Display(Name = "Ontime")]
         public int OnTime_Count { get; set; }
@@ -72,9 +57,6 @@ namespace E2E.Models.Views
 
         [Display(Name = "Over due")]
         public int OverDue_Count { get; set; }
-
-        [Display(Name = "Pending")]
-        public int Pending_Count { get; set; }
 
         [Display(Name = "Satisfied %")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:p}")]
@@ -99,17 +81,11 @@ namespace E2E.Models.Views
         [Display(Name = "Complete")]
         public int Complete_Count { get; set; }
 
-        [Display(Name = "In progress")]
-        public int Inprogress_Count { get; set; }
-
         [Display(Name = "Join team")]
         public int JoinTeam_Count { get; set; }
 
         [Display(Name = "Over due")]
         public int OverDue_Count { get; set; }
-
-        [Display(Name = "Pending")]
-        public int Pending_Count { get; set; }
 
         [Display(Name = "Point")]
         public int SuccessPoint { get; set; }
@@ -125,6 +101,29 @@ namespace E2E.Models.Views
 
     public class ReportKPI_User_Views
     {
+        public DateTime? Update { get; set; }
+
+        [Display(Name = "Point")]
+        public int Priority_Point { get; set; }
+
+        [Display(Name = "Average")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
+        public double? Satisfaction_Average { get; set; }
+
+        public Guid Service_Id { get; set; }
+        public string Service_Key { get; set; }
+
+        [Display(Name = "Subject")]
+        public string Service_Subject { get; set; }
+
+        public string Status_Class { get; set; }
+
+        [Display(Name = "Status")]
+        public string Status_Name { get; set; }
+    }
+
+    public class ReportKPI_User_Cards_Views
+    {
         public DateTime Create { get; set; }
 
         [Display(Name = "Point")]
@@ -133,6 +132,23 @@ namespace E2E.Models.Views
         [Display(Name = "Average")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
         public double? Satisfaction_Average { get; set; }
+
+        public Guid BusinessCard_Id { get; set; }
+        public string Key { get; set; }
+
+        [Display(Name = "Subject")]
+        public string Status_Class { get; set; }
+
+        [Display(Name = "Status")]
+        public string Status_Name { get; set; }
+    }
+
+    public class ReportKPI_Overdue
+    {
+        public Guid User_Id { get; set; }
+
+        [Display(Name = "User")]
+        public string User_Name { get; set; }
 
         public Guid Service_Id { get; set; }
         public string Service_Key { get; set; }

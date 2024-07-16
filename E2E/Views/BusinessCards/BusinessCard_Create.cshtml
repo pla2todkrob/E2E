@@ -19,8 +19,7 @@
     });
 </script>
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "Create_submit", @class = "was-validated", enctype = "multipath/form-data" }))
-{
+
 
 <div class="modal-header">
     <h5 class="modal-title">Create</h5>
@@ -29,87 +28,88 @@
     </button>
 </div>
 <div class="modal-body">
+    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "Create_submit",name= "Create_submit", @class = "was-validated", enctype = "multipath/form-data" }))
+    {
+        <div class="form-row">
+            <div class="form-group col-12">
+                @Html.LabelFor(m => m.UserDetails.Users)
+                @Html.DropDownListFor(m => m.User_id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-6">
+                @Html.Label("Name(TH)")
+                @Html.TextBoxFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
+            </div>
 
-    <div class="form-row">
-        <div class="form-group col-12">
-            @Html.LabelFor(m => m.UserDetails.Users)
-            @Html.DropDownListFor(m => m.User_id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select User", new { @class = "form-control" })
+            <div class="form-group col-6">
+                @Html.Label("Surname(TH)")
+                @Html.TextBoxFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Name(EN)")
+                @Html.TextBoxFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Surname(EN)")
+                @Html.TextBoxFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Department")
+                @Html.TextBoxFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Position")
+                @Html.TextBoxFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
+            </div>
+
+            @*<div class="form-group col-12">
+                    @Html.Label("Both Sided")
+                    @Html.CheckBoxFor(m => m.BothSided)
+                </div>*@
+
+            <div class="form-group col-6">
+                @Html.Label("Location")
+                @Html.TextBoxFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Email")
+                @Html.TextBoxFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Extension number")
+                @Html.TextBoxFor(m => m.Tel_Internal, new { placeholder = "Numbers 4 digits", @class = "form-control", pattern = @"\d{1,4}" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Mobile")
+                @Html.TextBoxFor(m => m.Tel_External, new { placeholder = "Numbers only", @class = "form-control", type = "number" })
+            </div>
+
+            <div class="form-group col-6">
+                @Html.Label("Amount")
+                @Html.TextBoxFor(m => m.Amount, new { Value = "", placeholder = "Min:50 , Max:100", min = "50", max = "100", step = "50", type = "number", @required = "required", @class = "form-control" })
+
+                <span style="color:red;" class="small">
+                    Minimum request: 50, maximum: 100 per request.
+                </span>
+            </div>
+
+            @*<div class="form-group col-6">
+                    @Html.Label("Due date")
+
+                    @Html.TextBoxFor(m => m.DueDate, new { Value = "", type = "date", @required = "required", @class = "form-control" })
+                </div>*@
         </div>
-        <div class="form-group col-6">
-            @Html.Label("Name(TH)")
-            @Html.TextBoxFor(m => m.UserDetails.Detail_TH_FirstName, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Surname(TH)")
-            @Html.TextBoxFor(m => m.UserDetails.Detail_TH_LastName, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Name(EN)")
-            @Html.TextBoxFor(m => m.UserDetails.Detail_EN_FirstName, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Surname(EN)")
-            @Html.TextBoxFor(m => m.UserDetails.Detail_EN_LastName, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Department")
-            @Html.TextBoxFor(m => m.UserDetails.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Position")
-            @Html.TextBoxFor(m => m.UserDetails.Users.Master_Grades.Grade_Position, new { @class = "form-control" })
-        </div>
-
-        @*<div class="form-group col-12">
-                @Html.Label("Both Sided")
-                @Html.CheckBoxFor(m => m.BothSided)
-            </div>*@
-
-        <div class="form-group col-6">
-            @Html.Label("Location")
-            @Html.TextBoxFor(m => m.UserDetails.Users.Master_Plants.Plant_Name, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Email")
-            @Html.TextBoxFor(m => m.UserDetails.Users.User_Email, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Extension number")
-            @Html.TextBoxFor(m => m.Tel_Internal, new { placeholder = "Sample: 6xxx" ,@class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Mobile")
-            @Html.TextBoxFor(m => m.Tel_External, new { placeholder = "Sample: 08xxxxxxxx", @class = "form-control" })
-        </div>
-
-        <div class="form-group col-6">
-            @Html.Label("Amount")
-
-            @Html.TextBoxFor(m => m.Amount, new { Value = "", placeholder = "Min:50 , Max:200", min = "50", max = "200", step = "50", type = "number", @required = "required", @class = "form-control" })
-
-            <span style="color:red;" class="small">
-                Grade 8 - 5 can request maximum of 100 cards per request.
-            </span>
-        </div>
-
-        @*<div class="form-group col-6">
-                @Html.Label("Due date")
-
-                @Html.TextBoxFor(m => m.DueDate, new { Value = "", type = "date", @required = "required", @class = "form-control" })
-            </div>*@
+    }
     </div>
-</div>
 
 <div class="modal-footer">
-    <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i></button>
+    <button type="submit" class="btn btn-primary" form="Create_submit"><i class="fa fa-check"></i></button>
 </div>
 
-}
+

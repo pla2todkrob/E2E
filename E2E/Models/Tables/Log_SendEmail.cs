@@ -14,14 +14,10 @@ namespace E2E.Models.Tables
 
         public DateTime Create { get; set; }
 
-        public string SendEmail_ClassName { get; set; }
-
         public string SendEmail_Content { get; set; }
 
         [Key]
         public Guid SendEmail_Id { get; set; }
-
-        public string SendEmail_MethodName { get; set; }
         public Guid SendEmail_Ref_Id { get; set; }
         public string SendEmail_Subject { get; set; }
 

@@ -4,6 +4,7 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -11,21 +12,17 @@ using System.Web.Mvc;
 namespace E2E.Controllers
 {
     [AllowAnonymous]
-    public class ConfigurationsController : Controller
+    public class ConfigurationsController : BaseController
     {
+        private static readonly ClsAssembly clsAssembly = new ClsAssembly();
         private readonly ClsManageService clsManageService = new ClsManageService();
-        private readonly ClsManageService data = new ClsManageService();
-        private readonly ClsContext db = new ClsContext();
         private readonly ClsManageBusinessCard jobCount = new ClsManageBusinessCard();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ClsUsers users = new ClsUsers();
 
         public ActionResult _Copyright()
         {
-            System_Configurations system_Configurations = new System_Configurations();
-
-            system_Configurations = db.System_Configurations.OrderByDescending(o => o.CreateDateTime).FirstOrDefault();
-            return PartialView("_Copyright", system_Configurations);
+            return PartialView("_Copyright", $"{clsAssembly.Description} ({clsAssembly.Product}) Version {clsAssembly.Version} {clsAssembly.Copyright} - {clsAssembly.Company}");
         }
 
         public ActionResult _Navbar()
@@ -35,14 +32,13 @@ namespace E2E.Controllers
                 Admin = null
             };
 
-            if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+            if (HttpContext.User.Identity.IsAuthenticated)
             {
-                res.ChangeDue = data.ServiceChangeDues_ListCount().Count;
-                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
-                if (db.Users.Any(a => a.User_Id == id))
+                res.ChangeDue = clsManageService.ServiceChangeDues_ListCount().Count;
+                if (db.Users.Any(a => a.User_Id == loginId))
                 {
                     res.Admin = db.Users
-                    .Where(w => w.User_Id == id)
+                    .Where(w => w.User_Id == loginId)
                     .Select(s => s.Role_Id)
                     .FirstOrDefault();
                 }
@@ -57,12 +53,17 @@ namespace E2E.Controllers
 
         public ActionResult _NavbarBrand()
         {
-            System_Configurations system_Configurations = new System_Configurations();
-            system_Configurations = db.System_Configurations
+            string logo = db.System_Configurations
                 .OrderByDescending(o => o.CreateDateTime)
+                .Select(s => s.Configuration_Brand)
                 .FirstOrDefault();
 
-            return PartialView("_NavbarBrand", system_Configurations);
+            if (string.IsNullOrEmpty(logo))
+            {
+                logo = clsAssembly.Logo;
+            }
+
+            return PartialView("_NavbarBrand", logo);
         }
 
         public ActionResult _NavDepartment()
@@ -70,19 +71,14 @@ namespace E2E.Controllers
             try
             {
                 int? res = null;
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                if (HttpContext.User.Identity.IsAuthenticated)
                 {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    if (db.Users.Any(a => a.User_Id == userId))
+                    if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
+                        Guid deptId = db.Users.Find(loginId).Master_Processes.Master_Sections.Department_Id;
 
-                        int authorIndex = db.Users
-                            .Where(w => w.User_Id == userId)
-                            .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                            .FirstOrDefault();
 
-                        if (authorIndex != 3)
+                        if (authId != 3)
                         {
                             res = db.Services
                                 .Where(w => w.Is_MustBeApproved &&
@@ -111,22 +107,14 @@ namespace E2E.Controllers
             {
                 int? res = null;
 
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                if (HttpContext.User.Identity.IsAuthenticated)
                 {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    if (db.Users.Any(a => a.User_Id == userId))
+                    if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        Guid deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
+                        
 
-                        int authorIndex = db.Users
-                            .Where(w => w.User_Id == userId)
-                            .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                            .FirstOrDefault();
-
-                        var val = db.UserDetails.Where(w => w.User_Id == userId).Select(s => s.Users.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
-
-                        ViewBag.Author = val;
-                        string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                        ViewBag.Author = authId;
+                        string deptName = db.Users.Find(loginId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                         List<Guid> userIdList = db.Users
                             .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
                         res = db.EForms.Where(w => w.Status_Id == 1 && userIdList.Contains(w.User_Id)).ToList().Count();
@@ -151,16 +139,12 @@ namespace E2E.Controllers
 
             try
             {
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                if (HttpContext.User.Identity.IsAuthenticated)
                 {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    if (db.Users.Any(a => a.User_Id == userId))
+                    if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        int authur = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                    .FirstOrDefault();
-                        if (authur == 2)
+                        
+                        if (authId == 2)
                         {
                             res = true;
                         }
@@ -179,6 +163,18 @@ namespace E2E.Controllers
             return PartialView("_NavManagement", res);
         }
 
+        public ActionResult _NavReport()
+        {
+            try
+            {
+                return PartialView("_NavReport");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public ActionResult _NavService()
         {
             ClsJobCount clsJobCount = new ClsJobCount();
@@ -186,25 +182,21 @@ namespace E2E.Controllers
             {
                 int? res = null;
 
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                if (HttpContext.User.Identity.IsAuthenticated)
                 {
-                    Guid? userId = Guid.Parse(HttpContext.User.Identity.Name);
 
-                    if (db.Users.Any(a => a.User_Id == userId))
+                    if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        int authorIndex = db.Users
-                        .Where(w => w.User_Id == userId)
-                        .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                        .FirstOrDefault();
+                        
 
-                        if (authorIndex == 3)
+                        if (authId == 3)
                         {
-                            res = new ClsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                            res = clsManageService.Services_GetWaitActionCount(loginId);
                         }
                         else
                         {
-                            res = new ClsManageService().Services_GetWaitCommitCount();
-                            res += new ClsManageService().Services_GetWaitActionCount(Guid.Parse(HttpContext.User.Identity.Name));
+                            res = clsManageService.Services_GetWaitCommitCount();
+                            res += clsManageService.Services_GetWaitActionCount(loginId);
                         }
                     }
                     else
@@ -212,9 +204,9 @@ namespace E2E.Controllers
                         users.RemoveCookie();
                     }
 
-                    clsJobCount.business = jobCount.CountJob(userId.Value);
-                    clsJobCount.service = res;
-                    clsJobCount.total = clsJobCount.business + clsJobCount.service;
+                    clsJobCount.Business = jobCount.CountJob(loginId);
+                    clsJobCount.Service = res;
+                    clsJobCount.Total = clsJobCount.Business + clsJobCount.Service;
                 }
                 return PartialView("_NavService", clsJobCount);
             }
@@ -229,13 +221,12 @@ namespace E2E.Controllers
             try
             {
                 ClsUsers clsUsers = new ClsUsers();
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                if (HttpContext.User.Identity.IsAuthenticated)
                 {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    if (db.Users.Any(a => a.User_Id == userId))
+                    if (db.Users.Any(a => a.User_Id == loginId))
                     {
                         clsUsers = db.Users
-                        .Where(w => w.User_Id == userId)
+                        .Where(w => w.User_Id == loginId)
                         .AsEnumerable()
                         .Select(s => new ClsUsers()
                         {
@@ -290,14 +281,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -311,7 +295,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Table(System_Configurations model)
+        public async Task<ActionResult> Table(System_Configurations model)
         {
             ClsSwal swal = new ClsSwal();
             bool res = new bool();
@@ -323,7 +307,7 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
@@ -334,22 +318,13 @@ namespace E2E.Controllers
                             HttpPostedFileBase file = files[0];
                             string dir = "Configurations/" + system_Configurations.Configuration_Id;
                             string FileName = file.FileName;
-                            string filepath = clsManageService.UploadFileToString(dir, file, FileName);
+                            string filepath = await clsManageService.UploadFileToString(dir, file, FileName);
 
                             system_Configurations.Configuration_Brand = filepath;
                         }
                         else
                         {
                             system_Configurations.Configuration_Brand = model.Configuration_Brand;
-                        }
-                        if (!string.IsNullOrEmpty(model.Copyright))
-                        {
-                            system_Configurations.Copyright = model.Copyright.Trim('©').Trim();
-                        }
-
-                        if (!string.IsNullOrEmpty(model.SystemName))
-                        {
-                            system_Configurations.SystemName = model.SystemName.Trim();
                         }
 
                         system_Configurations.User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
@@ -380,14 +355,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }

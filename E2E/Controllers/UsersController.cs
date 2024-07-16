@@ -10,10 +10,9 @@ using System.Web.Security;
 
 namespace E2E.Controllers
 {
-    public class UsersController : Controller
+    public class UsersController : BaseController
     {
         private readonly ClsManageMaster data = new ClsManageMaster();
-        private readonly ClsContext db = new ClsContext();
 
         public ActionResult ChangePassword()
         {
@@ -21,7 +20,7 @@ namespace E2E.Controllers
             {
                 ClsPassword clsPassword = new ClsPassword
                 {
-                    User_Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name)
+                    User_Id = loginId
                 };
 
                 return View(clsPassword);
@@ -61,14 +60,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -110,7 +102,7 @@ namespace E2E.Controllers
             try
             {
                 ViewBag.ReturnUrl = Request.QueryString["ReturnUrl"];
-                if (!string.IsNullOrEmpty(HttpContext.User.Identity.Name))
+                if (HttpContext.User.Identity.IsAuthenticated)
                 {
                     if (!string.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
                     {
@@ -145,7 +137,10 @@ namespace E2E.Controllers
                     {
                         throw new Exception(string.Format("Username {0} not found", model.Username));
                     }
-
+                    else if (!users.Active)
+                    {
+                        new Exception("This account has been suspended.\nPlease contact the system administrator.");
+                    }
                     UserDetails userDetails = db.UserDetails
                         .Where(w => w.User_Id == users.User_Id)
                         .FirstOrDefault();
@@ -206,13 +201,7 @@ namespace E2E.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError(ex.TargetSite.Name, ex.Message);
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        ModelState.AddModelError(inner.TargetSite.Name, inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    ModelState.AddModelError(ex.TargetSite.Name, ex.GetBaseException().Message);
                 }
             }
 
@@ -222,8 +211,7 @@ namespace E2E.Controllers
         public ActionResult ShowChangePassword()
         {
             bool res = new bool();
-            var id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
-            var Password = db.UserDetails.Where(w => w.User_Id == id).Select(s => s.Detail_Password).FirstOrDefault();
+            var Password = db.UserDetails.Where(w => w.User_Id == loginId).Select(s => s.Detail_Password).FirstOrDefault();
 
             if (!string.IsNullOrEmpty(Password))
             {
@@ -248,7 +236,7 @@ namespace E2E.Controllers
 
         public ActionResult UploadHistory()
         {
-            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).ToList());
+            return PartialView("_UploadHistory", db.UserUploadHistories.OrderByDescending(o => o.Create).Take(10).ToList());
         }
 
         public ActionResult UserInfomation(string val)

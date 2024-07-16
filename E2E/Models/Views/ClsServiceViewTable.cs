@@ -4,8 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace E2E.Models.Views
 {
-    public class ClsServiceUserActionName
+    public class ClsServiceViewTable
     {
+        public Guid? ActionUserId { get; set; }
+
         [Display(Name = "Action by")]
         public string ActionBy { get; set; }
 
@@ -25,5 +27,6 @@ namespace E2E.Models.Views
         public System_Priorities System_Priorities { get; set; }
         public System_Statuses System_Statuses { get; set; }
         public DateTime? Update { get; set; }
+        public bool Marker { get; set; }
     }
 }

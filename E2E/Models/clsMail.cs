@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace E2E.Models
@@ -33,19 +35,20 @@ namespace E2E.Models
         public List<string> SendToStrs { get; set; }
         public string Subject { get; set; }
 
-        public bool ResendMail(Guid logId)
+        public async Task<bool> ResendMail(Guid refId)
         {
             try
             {
                 bool res = new bool();
-                Log_SendEmail log_SendEmail = new Log_SendEmail();
-                log_SendEmail = db.Log_SendEmails.Find(logId);
+                Log_SendEmail log_SendEmail = await db.Log_SendEmails
+                    .Where(w => w.SendEmail_Ref_Id == refId)
+                    .FirstOrDefaultAsync();
 
                 ClsMail clsMail = new ClsMail();
 
                 List<Log_SendEmailTo> log_SendEmailTos = new List<Log_SendEmailTo>();
                 log_SendEmailTos = db.Log_SendEmailTos
-                    .Where(w => w.SendEmail_Id == logId)
+                    .Where(w => w.SendEmail_Id == log_SendEmail.SendEmail_Id)
                     .ToList();
                 foreach (var item in log_SendEmailTos)
                 {
@@ -70,8 +73,20 @@ namespace E2E.Models
 
                 clsMail.Subject = log_SendEmail.SendEmail_Subject;
                 clsMail.Body = log_SendEmail.SendEmail_Content;
+                clsMail.SendFrom = log_SendEmail.User_Id;
 
-                res = SendMail(clsMail);
+                res = await SendMail(clsMail);
+                if (res)
+                {
+                    ServiceComments comments = new ServiceComments()
+                    {
+                        Comment_Content = "The system has sent an email to the service requestor again to have the service requestor close the job.",
+                        Service_Id = refId,
+                        User_Id = log_SendEmail.User_Id
+                    };
+                    db.ServiceComments.Add(comments);
+                    await db.SaveChangesAsync();
+                }
 
                 return res;
             }
@@ -81,7 +96,7 @@ namespace E2E.Models
             }
         }
 
-        public bool SendMail(ClsMail model, HttpFileCollectionBase files = null)
+        public async Task<bool> SendMail(ClsMail model, HttpFileCollectionBase files = null)
         {
             try
             {
@@ -277,10 +292,11 @@ namespace E2E.Models
                     }
                 }
 
-                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                Guid userId = (HttpContext.Current?.User?.Identity?.IsAuthenticated == true)
+                    ? Guid.Parse(HttpContext.Current.User.Identity.Name)
+                    : model.SendFrom;
 
-                UserDetails userDetails = new UserDetails();
-                userDetails = db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefault();
+                UserDetails userDetails = await db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefaultAsync();
 
                 string strBody = "<html>";
                 strBody += "<head>";
@@ -296,7 +312,7 @@ namespace E2E.Models
                 clsServiceEmail.Subject = model.Subject;
                 clsServiceEmail.SendFrom = userDetails.Users.User_Email;
 
-                return clsApi.SendMail(clsServiceEmail, files);
+                return await clsApi.SendMail(clsServiceEmail, files);
             }
             catch (Exception)
             {

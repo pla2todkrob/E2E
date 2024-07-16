@@ -5,23 +5,23 @@
 }
 <a class="nav-link dropdown-toggle" href="#" id="dropdown_request" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span>Request</span>
-    @if (Model.total.HasValue)
+    @if (Model.Total.HasValue)
     {
-        if (Model.total > 0)
+        if (Model.Total > 0)
         {
-            <span id="count" class="badge badge-pill badge-warning">@Model.total</span>
+    <span id="count" class="badge badge-pill badge-warning">@Model.Total</span>
         }
     }
 </a>
 
 <div class="dropdown-menu" aria-labelledby="dropdown_request">
-    <a class="dropdown-item" href="@Url.Action("Index", "Services")">Service <span class="badge badge-pill badge-warning">@Model.service</span></a>
+    <a class="dropdown-item" href="@Url.Action("Index", "Services")">Service <span class="badge badge-pill badge-warning">@Model.Service</span></a>
     <a class="dropdown-item" href="@Url.Action("Index", "BusinessCards")">
-        BusinessCard&nbsp;
+        Business Card&nbsp;
         @{
-            if (Model.business > 0)
+            if (Model.Business > 0)
             {
-                <span class="badge badge-pill badge-warning">@Model.business</span>
+            <span class="badge badge-pill badge-warning">@Model.Business</span>
             }
         }
     </a>

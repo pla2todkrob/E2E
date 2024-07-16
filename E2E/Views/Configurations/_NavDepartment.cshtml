@@ -1,18 +1,19 @@
 ﻿@model int?
 
 @{
-    Layout = null;
+	Layout = null;
 }
 <a class="nav-link dropdown-toggle" href="#" id="dropdown_department" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span>Department</span>
     @if (Model.HasValue)
-    {
-        if (Model.Value > 0)
-        {
+	{
+		if (Model.Value > 0)
+		{
     <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
-        }
-    }
+		}
+	}
 </a>
+
 <div class="dropdown-menu" aria-labelledby="dropdown_department">
     <a class="dropdown-item" href="@Url.Action("AllTask","Services")">All task</a>
     <a class="dropdown-item" href="@Url.Action("AllRequest","Services")">All request</a>
@@ -21,14 +22,14 @@
         <div class="d-flex justify-content-between align-items-center">
             <span>Approve</span>
             @if (Model.HasValue)
-            {
-                if (Model.Value > 0)
-                {
+			{
+				if (Model.Value > 0)
+				{
             <span id="count" class="badge badge-pill badge-warning">@Model.Value</span>
-                }
-            }
+				}
+			}
         </div>
     </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="@Url.Action("Report_KPI","Services")">Report KPI</a>
+    @*<div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="@Url.Action("Report_KPI","Services")">Report KPI</a>*@
 </div>

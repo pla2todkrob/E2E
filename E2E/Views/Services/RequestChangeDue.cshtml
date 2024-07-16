@@ -12,7 +12,7 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("RequestChangeDue_Table", "Services")', true, true,[1,4,5,8]);
+            callTable_Normal('@Url.Action("RequestChangeDue_Table", "Services")');
         }
     </script>
 }
@@ -29,6 +29,6 @@
 
 <div class="card shadow">
     <div class="card-body">
-        <div class="row" id="datalist"></div>
+        <div class="table-responsive" id="datalist"></div>
     </div>
 </div>

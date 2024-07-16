@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
@@ -15,25 +16,23 @@ using System.Web.Mvc;
 namespace E2E.Controllers
 {
     [Authorize]
-    public class BusinessCardsController : Controller
+    public class BusinessCardsController : BaseController
     {
         private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
-        private readonly ClsContext db = new ClsContext();
-
-        private static Guid? UserAuthorized { get; set; }
+        private readonly ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
+        private readonly ClsManageMaster master = new ClsManageMaster();
 
         public ActionResult BusinessCard_Create(Guid? id)
         {
             ClsBusinessCard businessCards;
             if (!id.HasValue)
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 businessCards = new ClsBusinessCard()
                 {
-                    User_id = userId,
-                    UserDetails = db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefault()
+                    User_id = loginId,
+                    UserDetails = db.UserDetails.Where(w => w.User_Id == loginId).FirstOrDefault()
                 };
             }
             else
@@ -50,7 +49,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ActionResult BusinessCard_Create(ClsBusinessCard Model)
+        public async Task<ActionResult> BusinessCard_Create(ClsBusinessCard Model)
         {
             ClsSwal swal = new ClsSwal();
             if (Model.User_id.HasValue)
@@ -60,11 +59,11 @@ namespace E2E.Controllers
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.MaxValue
                 };
-                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-                        if (dataCard.BusinessCard_SaveCreate(Model))
+                        if (await dataCard.BusinessCard_SaveCreate(Model))
                         {
                             scope.Complete();
                             swal.DangerMode = false;
@@ -82,14 +81,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -121,16 +113,15 @@ namespace E2E.Controllers
 
         public ActionResult BusinessCard_Detail(Guid id)
         {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.UserCardList = dataCard.SelectListItems_CardGroup();
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            ViewBag.GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
             ViewBag.OrderBusinessCard = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.System_Statuses.OrderBusinessCard).FirstOrDefault();
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            ViewBag.authorized = authId;
             ViewBag.UserCHK = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id && a.Confirm == true);
             ViewBag.CountFileUpload = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).Count();
             ViewBag.DeptCHK = dataCard.Same_department_check(id);
 
-           var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
+            var clsBusinessCard = QueryClsBusinessCard().Where(w => w.BusinessCard_Id == id);
 
             return View(clsBusinessCard.FirstOrDefault());
         }
@@ -160,6 +151,55 @@ namespace E2E.Controllers
         public ActionResult BusinessCard_UploadFile(Guid id)
         {
             return View(id);
+        }
+
+        public ActionResult BusinessCard_EditPhone(Guid id)
+        {
+            var BusinessCard = db.BusinessCards.Find(id);
+
+            return View(BusinessCard);
+        }
+
+        public ActionResult BusinessCard_UpdateDetail(BusinessCards model)
+        {
+            ClsSwal swal = new ClsSwal();
+            TransactionOptions options = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.MaxValue
+            };
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            {
+                try
+                {
+                    BusinessCards businessCards = db.BusinessCards.Find(model.BusinessCard_Id);
+                    businessCards.Tel_External = model.Tel_External;
+                    businessCards.Tel_Internal = model.Tel_Internal;
+                    businessCards.Update = DateTime.Now;
+
+                    if (db.SaveChanges() > 0)
+                    {
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.GetBaseException().Message;
+                }
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Cancel(Guid? id)
@@ -197,14 +237,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -366,8 +399,8 @@ namespace E2E.Controllers
                 double xLeft_txt = 35.433070866142;
                 double xRight_txt = 297.63779527559;
 
-                PdfSharp.Drawing.XImage LogoTPs = PdfSharp.Drawing.XImage.FromStream(LogoTP());
-                PdfSharp.Drawing.XImage QrCodeTPs = PdfSharp.Drawing.XImage.FromStream(QrCodeTP());
+                PdfSharp.Drawing.XImage LogoTPs = XImage.FromStream(LogoTP());
+                PdfSharp.Drawing.XImage QrCodeTPs = XImage.FromStream(QrCodeTP());
                 //806.45669291339
                 graphics.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
                 //graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
@@ -507,9 +540,8 @@ namespace E2E.Controllers
         // GET: BusinessCards
         public ActionResult Index()
         {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            ViewBag.GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            ViewBag.authorized = authId;
             return View();
         }
 
@@ -544,7 +576,7 @@ namespace E2E.Controllers
             return View(clsLog_Businesses.OrderByDescending(O => O.Create));
         }
 
-        public ActionResult ManagerGaApprove(Guid? id, Guid? SelectId)
+        public async Task<ActionResult> ManagerGaApprove(Guid? id, Guid? SelectId, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -552,7 +584,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -565,7 +597,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards);
-                        dataCard.SendMail(businessCards, SelectId);
+                        await dataCard.SendMail(businessCards, SelectId, null, "", remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -582,21 +614,14 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ManagerGaReject(Guid? id, string remark)
+        public async Task<ActionResult> ManagerGaReject(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -604,7 +629,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -616,7 +641,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards, remark);
-                        dataCard.SendMail(businessCards, null, null, "", remark);
+                        await dataCard.SendMail(businessCards, null, null, "", remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -633,21 +658,14 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ManagerUserApprove(Guid? id)
+        public async Task<ActionResult> ManagerUserApprove(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -655,7 +673,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -682,7 +700,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards);
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -699,21 +717,14 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ManagerUserReject(Guid? id, string remark)
+        public async Task<ActionResult> ManagerUserReject(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -721,7 +732,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -733,7 +744,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards, remark);
-                        dataCard.SendMail(businessCards, null, null, "", remark);
+                        await dataCard.SendMail(businessCards, null, null, "", remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -750,14 +761,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -805,7 +809,52 @@ namespace E2E.Controllers
             return clsBusinessCards;
         }
 
-        public ActionResult StaffComplete(Guid? id)
+        public async Task<ActionResult> Resend_Email(Guid id)
+        {
+            ClsSwal swal = new ClsSwal();
+
+            try
+            {
+                BusinessCards businessCards = db.BusinessCards.Find(id);
+
+                if (businessCards != null)
+                {
+                    await dataCard.SendMail(businessCards, null, null, "", "");
+                    dataCard.BusinessCard_SaveLog(businessCards, "", true);
+                    swal.DangerMode = false;
+                    swal.Icon = "success";
+                    swal.Text = "Email send successfully";
+                    swal.Title = "Successful";
+                }
+                else
+                {
+                    swal.Icon = "warning";
+                    swal.Text = "Send email failed";
+                    swal.Title = "Warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                swal.Title = ex.Source;
+                swal.Text = ex.GetBaseException().Message;
+            }
+
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public bool Chk_OverDue(BusinessCards model)
+        {
+            bool res = new bool();
+
+            if (model.Update > model.DueDate)
+            {
+                res = true;
+            }
+
+            return res;
+        }
+
+        public async Task<ActionResult> StaffComplete(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -813,17 +862,18 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     BusinessCards businessCards = db.BusinessCards.Find(id);
                     businessCards.Status_Id = 3;
                     businessCards.Update = DateTime.Now;
+                    businessCards.Is_OverDue = Chk_OverDue(businessCards);
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -841,14 +891,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -891,21 +934,14 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult StaffUndo(Guid? id, string remark)
+        public async Task<ActionResult> StaffUndo(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -913,7 +949,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -924,7 +960,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, null, "", remark, "7");
+                        await dataCard.SendMail(businessCards, null, null, "", remark, "7");
                         dataCard.BusinessCard_SaveLog(businessCards, remark, true);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -942,14 +978,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -958,15 +987,15 @@ namespace E2E.Controllers
 
         public ActionResult Table_AllRequest()
         {
-            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            Guid MyDeptId = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
             //user
             if (authorized == 3 && GA == false)
             {
-                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == loginId || w.UserRef_id == loginId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             //mg user
             else if (authorized == 2 && GA == false)
@@ -981,7 +1010,7 @@ namespace E2E.Controllers
             // staff ga
             else if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == loginId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
@@ -989,8 +1018,8 @@ namespace E2E.Controllers
 
         public ActionResult Table_AllTask()
         {
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
 
@@ -1005,9 +1034,9 @@ namespace E2E.Controllers
 
         public ActionResult Table_Approval()
         {
-            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            Guid MyDeptId = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
 
@@ -1027,28 +1056,28 @@ namespace E2E.Controllers
 
         public ActionResult Table_MyTask()
         {
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
 
             //staff ga
             if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.UserAction == loginId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
         }
 
         [HttpPost]
-        public ActionResult Upload(HttpPostedFileBase file, Guid? id)
+        public async Task<ActionResult> Upload(HttpPostedFileBase file, Guid? id)
         {
             ClsSwal swal = new ClsSwal();
 
             try
             {
-                using (TransactionScope scope = new TransactionScope())
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     if (file != null && file.ContentLength > 0 && id.HasValue)
                     {
@@ -1062,12 +1091,12 @@ namespace E2E.Controllers
                             FileName = string.Concat("_", file.FileName);
                         }
 
-                        string filepath = data.UploadFileToString(dir, file, FileName);
+                        string filepath = await data.UploadFileToString(dir, file, FileName);
 
                         if (!string.IsNullOrEmpty(filepath))
                         {
                             var sql = db.BusinessCards.Find(id);
-                            if (dataCard.BusinessCard_SaveFile(filepath, sql))
+                            if (await dataCard.BusinessCard_SaveFile(filepath, sql))
                             {
                                 scope.Complete();
                                 swal.DangerMode = false;
@@ -1088,14 +1117,7 @@ namespace E2E.Controllers
             catch (Exception ex)
             {
                 swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                swal.Text = ex.GetBaseException().Message;
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1108,26 +1130,27 @@ namespace E2E.Controllers
             return View(res);
         }
 
-        public ActionResult UserClose(Guid? id)
+        public ActionResult SetColse(Guid id)
+        {
+            ClsInquiryTopics clsInquiryTopics = new ClsInquiryTopics
+            {
+                BusinessCards = db.BusinessCards.Find(id),
+                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w => w.Program_Id == 2).OrderBy(o => o.InquiryTopic_Index).ToList()
+            };
+
+            return View(clsInquiryTopics);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SetClose(Guid id, List<ClsEstimate> score)
         {
             ClsSwal swal = new ClsSwal();
-            TransactionOptions options = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.MaxValue
-            };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    BusinessCards businessCards = db.BusinessCards.Find(id);
-                    businessCards.Status_Id = 4;
-                    businessCards.Update = DateTime.Now;
-
-                    if (db.SaveChanges() > 0)
+                    if (await dataCard.SaveEstimate(id, score))
                     {
-                        dataCard.SendMail(businessCards);
-                        dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -1144,21 +1167,32 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
-
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult UserConfirmApprove(Guid? id)
+        public ActionResult Report_KPI_Unsatisfied(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(dataCard.ClsReport_KPI_Unsatisfied(_Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult _SatisfactionResultsCard(Guid id)
+        {
+            return PartialView("_SatisfactionResultsCard", dataCard.ClsSatisfactionCard_View(id));
+        }
+
+        public async Task<ActionResult> UserConfirmApprove(Guid? id)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1166,7 +1200,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1180,7 +1214,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards);
+                        await dataCard.SendMail(businessCards);
                         dataCard.BusinessCard_SaveLog(businessCards);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1198,21 +1232,14 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult UserConfirmCancel(Guid? id, string remark)
+        public async Task<ActionResult> UserConfirmCancel(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1220,7 +1247,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1235,7 +1262,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
+                        await dataCard.SendMail(businessCards, null, businessCardFiles, "", remark);
                         dataCard.BusinessCard_SaveLog(businessCards, remark);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1253,21 +1280,14 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult UserUndo(Guid? id, string remark)
+        public async Task<ActionResult> UserUndo(Guid? id, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -1275,7 +1295,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -1285,7 +1305,7 @@ namespace E2E.Controllers
 
                     if (db.SaveChanges() > 0)
                     {
-                        dataCard.SendMail(businessCards, null, null, "", remark, "9");
+                        await dataCard.SendMail(businessCards, null, null, "", remark, "9");
                         dataCard.BusinessCard_SaveLog(businessCards, remark, true);
                         scope.Complete();
                         swal.DangerMode = false;
@@ -1303,58 +1323,65 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Resend_Email(Guid id)
+        public ActionResult Report_KPI(ReportKPI_Filter model)
         {
-            ClsSwal swal = new ClsSwal();
-
             try
             {
-                BusinessCards businessCards = db.BusinessCards.Find(id);
-
-                if (businessCards != null)
-                {
-                    dataCard.SendMail(businessCards, null, null, "", "");
-                    dataCard.BusinessCard_SaveLog(businessCards, "", true);
-                    swal.DangerMode = false;
-                    swal.Icon = "success";
-                    swal.Text = "Email send successfully";
-                    swal.Title = "Successful";
-                }
-                else
-                {
-                    swal.Icon = "warning";
-                    swal.Text = "Send email failed";
-                    swal.Title = "Warning";
-                }
+                return View(model);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                throw;
             }
+        }
 
-            return Json(swal, JsonRequestBehavior.AllowGet);
+        public ActionResult Report_KPI_View(Guid id, string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(dataCard.ReportKPI_User_Views(id, _Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI_Table(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(dataCard.ClsReportKPI_ViewList(_Filter));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ActionResult Report_KPI_Filter(string filter)
+        {
+            try
+            {
+                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
+
+                return View(_Filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

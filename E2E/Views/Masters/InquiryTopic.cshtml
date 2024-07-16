@@ -18,8 +18,28 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("InquiryTopic_Table", "Masters")', true, true, [1,5]);
+            callTable_Normal('@Url.Action("InquiryTopic_Table", "Masters")');
         }
+
+		$(document.body).on('change', "#Program_Id", function (e) {
+
+            var UrlAction = '@Url.Action("CHK_INDEX", "Masters")';
+            var id = $("#Program_Id option:selected").val();
+
+			if (id) {
+				$.ajax({
+					url: UrlAction,
+					data: { id: id },
+					success: function (res) {
+
+						$('#InquiryTopic_Index').val(res);
+						console.log(res);
+
+					}
+				});
+			}
+
+		});
     </script>
 }
 
@@ -42,7 +62,7 @@
         </div>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist">
+        <div class="table-responsive" id="datalist">
         </div>
     </div>
 </div>

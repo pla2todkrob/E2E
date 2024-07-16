@@ -6,28 +6,38 @@
 
 @if (Model.Parents.Count > 0)
 {
-    <ol class="breadcrumb mb-3">
-        <li class="breadcrumb-item"><a href="javascript:reloadTable()"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></li>
-        @foreach (var item in Model.Parents)
+<ol class="breadcrumb mb-3">
+    <li class="breadcrumb-item"><a href="javascript:reloadTable()"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></li>
+    @foreach (var item in Model.Parents)
         {
             if (item.Value.Key != Model.Parents.LastOrDefault().Value.Key)
             {
-                <li class="breadcrumb-item"><a href="javascript:reloadTable('@item.Value.Value',false,false)">@item.Key</a></li>
+    <li class="breadcrumb-item"><a href="javascript:reloadTable('@item.Value.Value',false,false)">@item.Key</a></li>
             }
             else
             {
-                <li class="breadcrumb-item">@item.Key</li>
+    <li class="breadcrumb-item">@item.Key</li>
             }
         }
-    </ol>
+</ol>
 }
 
 @if (Model.ChatBotAnswers.Count > 0)
 {
-    <ul>
-        @foreach (var item in Model.ChatBotAnswers)
+<div class="input-group mb-3">
+    <input type="search" id="searchInput" class="form-control" autocomplete="off" placeholder="Search for answers..." />
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
+    </div>
+</div>
+<ul id="answerUl">
+    @foreach (var item in Model.ChatBotAnswers)
         {
-            <li class="PreLine">@string.Format("{0}: {1}", item.ChatBotQuestion.Question, item.Answer)</li>
+    <li class="PreLine">@string.Format("{0}: {1}", item.ChatBotQuestion.Question, item.Answer)</li>
         }
-    </ul>
+</ul>
+}
+else
+{
+
 }

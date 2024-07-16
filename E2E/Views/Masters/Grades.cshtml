@@ -4,22 +4,10 @@
 
 @section scripts{
 
-    <script src="~/Asset/Master.js"></script>
     <script>
         $(function () {
-            reloadTable();
-
+            callTable_Normal('@Url.Action("Grades_Table", "Masters")');
         });
-
-        $(document).on('submit', '#SaveForm', function (e) {
-            e.preventDefault();
-            callSubmitModal('@Url.Action("Grades_Form", "Masters")', this);
-            return false;
-        });
-
-        function reloadTable() {
-            callTable('@Url.Action("Grades_Table", "Masters")', true, true, [1,6]);
-        }
     </script>
 }
 
@@ -28,22 +16,17 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
             <li class="breadcrumb-item active">Master</li>
-            <li class="breadcrumb-item active" aria-current="page">Grades</li>
+            <li class="breadcrumb-item active" aria-current="page">Grade</li>
         </ol>
     </nav>
 }
 
 <div class="card shadow">
     <div class="card-header">
-        <div class="d-flex">
-            <div class="mr-auto"></div>
-            <div class="ml-auto">
-                <button class="btn btn-primary" onclick="callModal('@Url.Action("Grades_Form","Masters")')"><i class="fa fa-plus"></i></button>
-            </div>
-        </div>
+        <h2 class="card-title">Grade</h2>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist">
+        <div class="table-responsive" id="datalist">
         </div>
     </div>
 </div>

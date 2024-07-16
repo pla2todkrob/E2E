@@ -1,9 +1,11 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -14,11 +16,10 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class ChatBotController : Controller
+    public class ChatBotController : BaseController
     {
         private readonly ClsChatBot chatBot = new ClsChatBot();
         private readonly ClsApi clsApi = new ClsApi();
-        private readonly ClsContext db = new ClsContext();
         private readonly ClsManageMaster master = new ClsManageMaster();
         public string SessionQuestionName { get; set; } = "QuestionLv";
 
@@ -57,13 +58,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.TargetSite.Name;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Text = inner.Message;
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -117,6 +112,7 @@ namespace E2E.Controllers
                         chatbotQA.ChatBotAnswers = questions.Count > 0
                             ? await chatBot.GetAnswersAsync(id.Value)
                             : await db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id)
+                            .OrderBy(o => o.Answer)
                                 .ToListAsync();
 
                         ChatBotQuestion currentQuestion = db.ChatBotQuestions.Find(id);
@@ -183,7 +179,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost]
-        public ActionResult ImportExcel()
+        public async Task<ActionResult> ImportExcel()
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -191,7 +187,7 @@ namespace E2E.Controllers
                 IsolationLevel = IsolationLevel.ReadCommitted,
                 Timeout = TimeSpan.MaxValue
             };
-            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -206,17 +202,17 @@ namespace E2E.Controllers
                             {
                                 FolderPath = "ChatBot"
                             };
-                            FileResponse fileResponse = clsApi.UploadFile(clsServiceFile, file);
+                            FileResponse fileResponse = await clsApi.UploadFile(clsServiceFile, file);
                             ChatBotUploadHistory chatBotUploadHistory = new ChatBotUploadHistory
                             {
                                 ChatBotUploadHistoryFile = fileResponse.FileUrl,
                                 ChatBotUploadHistoryFileName = Path.GetFileName(fileResponse.FileUrl),
                                 User_Id = Guid.Parse(HttpContext.User.Identity.Name)
                             };
-                            db.Entry(chatBotUploadHistory).State = System.Data.Entity.EntityState.Added;
+                            db.Entry(chatBotUploadHistory).State = EntityState.Added;
                             if (db.SaveChanges() > 0)
                             {
-                                if (chatBot.SaveChatBotLearn(fileResponse.FileUrl))
+                                if (await chatBot.SaveChatBotLearn(fileResponse.FileUrl))
                                 {
                                     scope.Complete();
                                     swal.Icon = "success";
@@ -237,13 +233,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.TargetSite.Name;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Text = inner.Message;
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -286,12 +276,10 @@ namespace E2E.Controllers
                 chatbotQA.ChatBotAnswers = chatbotQA.ChatBotQuestions.Count > 0
                                            ? await chatBot.GetAnswersAsync(id)
                                            : await db.ChatBotAnswers.Where(a => a.ChatBotQuestion_Id == id)
+                                           .OrderBy(o => o.Answer)
                                            .ToListAsync();
 
-                return this.Json(chatbotQA, JsonRequestBehavior.AllowGet, new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                });
+                return Json(chatbotQA, JsonRequestBehavior.AllowGet);
             }
             catch (Exception)
             {
@@ -317,6 +305,212 @@ namespace E2E.Controllers
         public ActionResult OpenAI()
         {
             return View();
+        }
+
+        public async Task<JsonResult> OpenAI_ClearConversation()
+        {
+            ClsSwal swal = new ClsSwal();
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == loginId && !w.IsEnd).FirstOrDefaultAsync();
+                    chatGPT.IsEnd = true;
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        scope.Complete();
+                        swal.Icon = "success";
+                        swal.Text = "ล้างประวัติการแชทเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                        swal.DangerMode = false;
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "ไม่พบประวัติการแชท";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.TargetSite.Name;
+                    swal.Text = ex.GetBaseException().Message;
+                }
+            }
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<ActionResult> OpenAI_History()
+        {
+            List<ChatGPTHistory> chatGPTHistories = new List<ChatGPTHistory>();
+            ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == loginId && !w.IsEnd).FirstOrDefaultAsync();
+            if (chatGPT != null)
+            {
+                chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
+            }
+            return View(chatGPTHistories);
+        }
+
+        public async Task<ActionResult> OpenAI_Request()
+        {
+            try
+            {
+                DateTime fromDate = DateTime.Today.AddDays(-(DateTime.Today.Day - 1));
+
+                var chatGptQuery = db.ChatGPTs.Where(w => w.User_Id == loginId);
+                var conversationTokenUsage = await chatGptQuery.Where(w => !w.IsEnd).Select(s => s.TokenUsage).FirstOrDefaultAsync();
+                var monthlyYourTokenUsage = await chatGptQuery
+    .Where(w => w.Create >= fromDate)
+    .Select(s => (decimal?)s.TokenUsage) // Use nullable decimal here
+    .SumAsync();
+
+                var monthlyAllTokenUsage = await db.ChatGPTs
+                    .Where(w => w.Create >= fromDate)
+                    .Select(s => (decimal?)s.TokenUsage) // Use nullable decimal here
+                    .SumAsync();
+
+                ClsGptToken clsGptToken = new ClsGptToken()
+                {
+                    Conversation = conversationTokenUsage,
+                    MonthlyYour = monthlyYourTokenUsage.GetValueOrDefault(),
+                    MonthlyAll = monthlyAllTokenUsage.GetValueOrDefault()
+                };
+
+                return View(clsGptToken);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpPost]
+        [ValidateInput(false)]
+        public async Task<JsonResult> OpenAI_Request(string question)
+        {
+            ClsAjax clsAjax = new ClsAjax();
+            try
+            {
+                if (string.IsNullOrEmpty(question))
+                {
+                    return Json(null);
+                }
+                RestClientOptions options = new RestClientOptions("https://api.openai.com/")
+                {
+                    MaxTimeout = -1,
+                };
+                RestClient client = new RestClient(options);
+                RestRequest request = new RestRequest("v1/chat/completions", Method.Post);
+
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("Authorization", $"Bearer {ConfigurationManager.AppSettings["GPTkey"]}");
+                ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == loginId && !w.IsEnd).FirstOrDefaultAsync();
+                if (chatGPT == null)
+                {
+                    chatGPT = new ChatGPT()
+                    {
+                        User_Id = loginId
+                    };
+                    db.ChatGPTs.Add(chatGPT);
+                }
+                List<ChatGPTHistory> chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
+                var conversation = new List<dynamic>();
+
+                foreach (var item in chatGPTHistories)
+                {
+                    conversation.Add(new { role = item.Role, content = item.Content });
+                }
+
+                // Append the user's new input to the conversation
+                conversation.Add(new { role = "user", content = question });
+
+                ChatGPTHistory chatGPTHistory = new ChatGPTHistory()
+                {
+                    Content = question,
+                    GPTId = chatGPT.GPTId,
+                    Role = "user"
+                };
+                db.ChatGPTHistories.Add(chatGPTHistory);
+
+                var requestBody = new
+                {
+                    model = ConfigurationManager.AppSettings["GPTModel"],
+                    messages = conversation
+                };
+
+                request.AddJsonBody(requestBody);
+
+                var response = await client.ExecuteAsync(request);
+                string answer = string.Empty;
+                decimal tokenUsage = 0;
+                string role = string.Empty;
+                dynamic jsonResponse = JObject.Parse(response.Content);
+                if (response.IsSuccessful)
+                {
+                    dynamic choices = jsonResponse.choices[0];
+                    if (choices.finish_reason == "incomplete")
+                    {
+                        throw new Exception("AI's response was too long and got cut off.\nPlease try asking a shorter question or break your question up into smaller parts.");
+                    }
+                    dynamic messages = choices.message;
+                    answer = messages.content;
+                    role = messages.role;
+                    dynamic usage = jsonResponse.usage;
+                    tokenUsage = usage.total_tokens;
+                    chatGPTHistory = new ChatGPTHistory()
+                    {
+                        Content = answer,
+                        GPTId = chatGPT.GPTId,
+                        Role = role
+                    };
+                    db.ChatGPTHistories.Add(chatGPTHistory);
+                    chatGPT.TokenUsage = tokenUsage;
+                    chatGPT.ConversationCost = 0;
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        clsAjax.Message = chatGPTHistory.Content;
+                    }
+                }
+                else
+                {
+                    if (jsonResponse.error is string @string)
+                    {
+                        // If the error is a simple string message
+                        throw new Exception(@string);
+                    }
+                    else if (jsonResponse.error is JObject)
+                    {
+                        // If the error is an object with a message property
+                        dynamic errorObject = jsonResponse.error;
+                        if (errorObject.message != null)
+                        {
+                            throw new Exception(errorObject.message.ToString());
+                        }
+                        else
+                        {
+                            throw new Exception("Unknown error occurred.");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown error occurred.");
+                    }
+                }
+
+                return Json(clsAjax, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                clsAjax.Error = true;
+                clsAjax.Message = ex.Message;
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    clsAjax.Message += $"\n{ex.Message}";
+                }
+
+                return Json(clsAjax, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult UploadHistory()

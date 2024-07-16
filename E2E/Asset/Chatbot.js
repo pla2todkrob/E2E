@@ -1,12 +1,34 @@
 ﻿function performSearch() {
     var searchText = $('#searchInput').val().toLowerCase();
+    var isResultFound = false;
+    var displayedItems = [];
 
     $('#answerUl > li').each(function () {
         var currentLiText = $(this).text(),
             showCurrentLi = currentLiText.toLowerCase().indexOf(searchText) !== -1;
 
         $(this).toggle(showCurrentLi);
+
+        if (showCurrentLi) {
+            isResultFound = true;
+            displayedItems.push($(this));
+        }
     });
+
+    $('#searchInput').val('');
+
+    if (!isResultFound) {
+        swal({
+            title: "ไม่พบผลลัพธ์",
+            text: "ไม่พบข้อมูลที่คุณกำลังค้นหา",
+            icon: "warning",
+            closeOnClickOutside: false,
+            closeOnEsc: false,
+        }).then((result) => {
+            performSearch();
+            console.log(displayedItems);
+        });
+    }
 }
 
 $(document).on('keypress', '#searchInput', function (event) {

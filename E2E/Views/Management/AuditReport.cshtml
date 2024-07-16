@@ -1,6 +1,6 @@
 ﻿@{
-	ViewBag.Title = "Audit report";
-	Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+    ViewBag.Title = "Audit report";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
 }
 
 @section breadcrumb{
@@ -18,17 +18,17 @@
         var checkList = [];
         $(function () {
 
-            reloadTable();
-            toggleTool();
+           reloadTable();
+           toggleTool();
 
         });
 
-        function reloadTable() {
-            callFilter('@Url.Action("AuditReport_Filter", "Management")');
-
-            callTable('@Url.Action("AuditReport_Table", "Management")', true, true, [1, 5]).then(function () {
-                    checkList = [];
-            });
+       function reloadTable() {
+           callFilter('@Url.Action("AuditReport_Filter", "Management")').then(function () {
+               callTable('@Url.Action("AuditReport_Table", "Management")', true, true, [1, 5]).then(function () {
+                   checkList = [];
+               });
+           });
         }
 
         function getCheckedVal(element) {
@@ -41,7 +41,7 @@
             toggleTool();
         }
 
-        function toggleTool() {
+       function toggleTool() {
             if (checkList.length > 0) {
                 $('#actionTool').fadeIn();
             }

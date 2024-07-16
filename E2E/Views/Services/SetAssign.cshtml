@@ -4,9 +4,7 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "AssignForm" }))
-{
-@Html.AntiForgeryToken()
+
 <div class="modal-header">
     <h5 class="modal-title">Set Assign</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -14,13 +12,17 @@
     </button>
 </div>
 <div class="modal-body">
-    @Html.HiddenFor(m => m.Service_Id)
-    <div class="form-group">
-        @Html.LabelFor(m => m.User_Id)
-        @Html.DropDownListFor(m => m.User_Id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select user", new { @class = "form-control", required = "required" })
-    </div>
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "AssignForm", name = "AssignForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Service_Id)
+        <div class="form-group">
+            @Html.LabelFor(m => m.User_Id)
+            @Html.DropDownListFor(m => m.User_Id, new SelectList(ViewBag.UserList, "Value", "Text"), "Select user", new { @class = "form-control", required = "required" })
+        </div>
+    }
 </div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" class="btn btn-primary" form="AssignForm">Save</button>
 </div>
-}
+

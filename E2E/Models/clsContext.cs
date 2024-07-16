@@ -1,8 +1,8 @@
 ﻿using E2E.Models.Tables;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
 using System.Configuration;
+using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Web;
@@ -45,12 +45,15 @@ namespace E2E.Models
         {
         }
 
+        public DbSet<System_Program> System_Programs { get; set; }
         public DbSet<BusinessCardFiles> BusinessCardFiles { get; set; }
         public DbSet<BusinessCards> BusinessCards { get; set; }
         public DbSet<ChatBotAnswer> ChatBotAnswers { get; set; }
         public DbSet<ChatBotQuestion> ChatBotQuestions { get; set; }
         public DbSet<ChatBot> ChatBots { get; set; }
         public DbSet<ChatBotUploadHistory> ChatBotUploadHistories { get; set; }
+        public DbSet<ChatGPTHistory> ChatGPTHistories { get; set; }
+        public DbSet<ChatGPT> ChatGPTs { get; set; }
         public DbSet<EForm_Files> EForm_Files { get; set; }
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
         public DbSet<EForms> EForms { get; set; }
@@ -77,6 +80,10 @@ namespace E2E.Models
         public DbSet<SatisfactionDetails> SatisfactionDetails { get; set; }
 
         public DbSet<Satisfactions> Satisfactions { get; set; }
+
+        public DbSet<SatisfactionDetails_BusinessCards> SatisfactionDetails_BusinessCards { get; set; }
+
+        public DbSet<Satisfactions_BusinessCards> Satisfactions_BusinessCards { get; set; }
 
         public DbSet<ServiceChangeDueDate> ServiceChangeDueDates { get; set; }
 

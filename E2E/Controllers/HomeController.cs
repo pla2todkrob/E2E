@@ -9,9 +9,8 @@ using System.Web.Mvc;
 namespace E2E.Controllers
 {
     [AllowAnonymous]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly ClsContext db = new ClsContext();
 
         public ActionResult ChangeFileUrl()
         {

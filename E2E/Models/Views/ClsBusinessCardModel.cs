@@ -6,7 +6,7 @@ namespace E2E.Models.Views
     {
         public string Address1 { get; set; }
         public string Address2 { get; set; }
-        public BusinessCards businessCards { get; set; }
+        public BusinessCards BusinessCards { get; set; }
         public string Company_en { get; set; }
         public string Company_th { get; set; }
         public string Company_Web { get; set; }
@@ -22,7 +22,7 @@ namespace E2E.Models.Views
         public string NameTH { get; set; }
         public string Office_Number { get; set; }
         public string Parent_company { get; set; }
-        public PlantDetail plantDetail { get; set; }
+        public PlantDetail PlantDetail { get; set; }
         public string Position { get; set; }
     }
 }

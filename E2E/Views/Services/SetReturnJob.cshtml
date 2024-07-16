@@ -4,9 +4,7 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "ReturnForm" }))
-{
-@Html.AntiForgeryToken()
+
 <div class="modal-header">
     <h5 class="modal-title">Set return job</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -14,13 +12,17 @@
     </button>
 </div>
 <div class="modal-body">
-    @Html.HiddenFor(m => m.Service_Id)
-    <div class="form-group">
-        @Html.LabelFor(m => m.Comment_Content)
-        @Html.TextAreaFor(m => m.Comment_Content, new { @class = "form-control", required = "required" })
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "ReturnForm", name = "ReturnForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Service_Id)
+        <div class="form-group">
+            @Html.LabelFor(m => m.Comment_Content)
+            @Html.TextAreaFor(m => m.Comment_Content, new { @class = "form-control", required = "required" })
+        </div>
+    }
     </div>
-</div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-danger">Save</button>
+    <button type="submit" class="btn btn-danger" form="ReturnForm">Save</button>
 </div>
-}
+

@@ -1,0 +1,49 @@
+﻿@model IEnumerable<E2E.Models.Views.ReportKPI_User_Cards_Views>
+
+@{
+	Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">Total finished: @Model.Count() tasks.</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <table class="table table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m.Create)</th>
+                    <th>@Html.DisplayNameFor(m => m.Status_Name)</th>
+                    <th>@Html.DisplayNameFor(m => m.Key)</th>
+                    <th>@Html.DisplayNameFor(m => m.Satisfaction_Average)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+				{
+                <tr>
+                    <td class="fit">@Html.DisplayFor(m => item.Create)</td>
+                    <td class="fit text-center"><span class="@item.Status_Class">@Html.DisplayFor(m => item.Status_Name)</span></td>
+                    <td>
+                        <a href="@Url.Action("BusinessCard_Detail","BusinessCards",new { id=item.BusinessCard_Id })" target="_blank">@Html.DisplayFor(m => item.Key)</a>
+                    </td>
+                    @{
+
+							if (item.Satisfaction_Average < 4)
+							{
+                        <td class="fit text-center" style="color: #F44336">@Html.DisplayFor(m => item.Satisfaction_Average)</td>
+							}
+							else
+							{
+                        <td class="fit text-center">@Html.DisplayFor(m => item.Satisfaction_Average)</td>
+							}
+                    }
+                </tr>
+				}
+            </tbody>
+        </table>
+    </div>
+</div>

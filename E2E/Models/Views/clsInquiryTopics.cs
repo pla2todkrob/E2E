@@ -16,5 +16,8 @@ namespace E2E.Models.Views
         public SatisfactionDetails SatisfactionDetails { get; set; }
         public Satisfactions Satisfactions { get; set; }
         public Services Services { get; set; }
+
+        public BusinessCards BusinessCards { get; set; }
+        public Satisfactions_BusinessCards Satisfactions_BusinessCards { get; set; }
     }
 }

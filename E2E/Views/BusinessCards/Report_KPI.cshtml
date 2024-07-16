@@ -1,0 +1,90 @@
+﻿@{
+	ViewBag.Title = "Report KPI";
+	Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+}
+
+@section breadcrumb{
+    <nav aria-label="breadcrumb ">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","BusinessCards")">Business Card</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Business Card KPI</li>
+        </ol>
+    </nav>
+}
+
+@section scripts{
+    <script>
+        $(function () {
+            reloadTable();
+
+        });
+
+		function callUserTaskModal(id) {
+            $.ajax({
+                url: '@Url.Action("Report_KPI_View", "BusinessCards")',
+                data: {
+                    id: id,
+                    filter:getQueryString()
+                },
+                async: true,
+                success: function (res) {
+                    $('#modalContent').parent().addClass('modal-xl');
+
+                    $('#modalContent').html(res);
+                    $('#modalContent').find('select').each(function () {
+                        $(this).select2({
+                            theme: 'bootstrap4',
+                            width: '100%'
+                        });
+                    });
+                    $('#modalContent').find('table').each(function () {
+                        $(this).DataTable({
+                            "columnDefs": { targets: [0, 1], type: 'date' }
+                        });
+                    });
+                    $('#modalArea').modal('show');
+                }
+            });
+            return false;
+        }
+
+        function callUnsatisfiedModal() {
+            $.ajax({
+                url: '@Url.Action("Report_KPI_Unsatisfied", "BusinessCards")',
+                data: {
+                    filter:getQueryString()
+                },
+                async: true,
+                success: function (res) {
+                    $('#modalContent').parent().addClass('modal-xl');
+
+                    $('#modalContent').html(res);
+                    $('#modalContent').find('select').each(function () {
+                        $(this).select2({
+                            theme: 'bootstrap4',
+                            width: '100%'
+                        });
+                    });
+                    $('#modalContent').find('table').each(function () {
+
+                    });
+                    $('#modalArea').modal('show');
+                }
+            });
+            return false;
+        }
+
+       function reloadTable() {
+           callFilter('@Url.Action("Report_KPI_Filter", "BusinessCards")').then(function () {
+               callTable_Normal('@Url.Action("Report_KPI_Table", "BusinessCards")');
+           });
+
+        }
+    </script>
+}
+
+<div class="mb-3 d-flex">
+    <div class="ml-auto" id="filter"></div>
+</div>
+<div id="datalist"></div>
