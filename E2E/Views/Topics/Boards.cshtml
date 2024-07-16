@@ -36,9 +36,9 @@
         });
 
         function reloadTable() {
-            callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=1})').then(function () {
+            callTable_Normal('@Url.Action("Boards_Table", "Topics",new { res=1})').then(function () {
                 callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=0})',  '#datalist2').then(function () {
-                    callTable_NoSort('@Url.Action("Boards_Table", "Topics",new { res=3})', '#datalist3');
+                    callTable_Normal('@Url.Action("Boards_Table", "Topics",new { res=3})', '#datalist3');
                 });
             });
         }
@@ -92,7 +92,7 @@
         <h4 class="card-title">Annouce</h4>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist"></div>
+        <div class="table-responsive" id="datalist"></div>
     </div>
 </div>
 
@@ -119,6 +119,6 @@
         <h4 class="card-title">Top rates</h4>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist3"></div>
+        <div class="table-responsive" id="datalist3"></div>
     </div>
 </div>

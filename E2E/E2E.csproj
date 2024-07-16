@@ -209,6 +209,7 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Security" />
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
@@ -302,6 +303,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\BusinessCardsController.cs" />
     <Compile Include="Controllers\ChatBotController.cs" />
     <Compile Include="Controllers\ConfigurationsController.cs" />
@@ -315,7 +317,6 @@
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
-    <Compile Include="Controllers\VoidController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -333,7 +334,6 @@
     <Compile Include="Models\ClsManageTopic.cs" />
     <Compile Include="Models\ClsServiceEmail.cs" />
     <Compile Include="Models\ClsServiceFile.cs" />
-    <Compile Include="Models\ClsServiceFTP.cs" />
     <Compile Include="Models\Filter\ClearCacheFilterAttribute.cs" />
     <Compile Include="Models\Filter\CompressionFilterAttribute.cs" />
     <Compile Include="Models\Filter\ExceptionFilterAttribute.cs" />
@@ -431,7 +431,7 @@
     <Compile Include="Models\Views\ClsServiceComments.cs" />
     <Compile Include="Models\Views\ClsServices.cs" />
     <Compile Include="Models\Views\ClsServiceTeams.cs" />
-    <Compile Include="Models\Views\ClsServiceUserActionName.cs" />
+    <Compile Include="Models\Views\ClsServiceViewTable.cs" />
     <Compile Include="Models\Views\ClsSwal.cs" />
     <Compile Include="Models\Views\ClsTopic.cs" />
     <Compile Include="Models\Views\ClsTopicView.cs" />
@@ -959,14 +959,8 @@
     <Content Include="Views\Masters\Processes.cshtml" />
     <Content Include="Views\Masters\Processes_Table.cshtml" />
     <Content Include="Views\Masters\Users_Form.cshtml" />
-    <Content Include="Views\Masters\LineWorks_Form.cshtml" />
-    <Content Include="Views\Masters\Grades_Form.cshtml" />
     <Content Include="Views\Masters\Plants_Form.cshtml" />
-    <Content Include="Views\Masters\Divisions_Form.cshtml" />
     <Content Include="Views\Users\Login.cshtml" />
-    <Content Include="Views\Masters\Departments_Form.cshtml" />
-    <Content Include="Views\Masters\Sections_Form.cshtml" />
-    <Content Include="Views\Masters\Processes_Form.cshtml" />
     <Content Include="Views\Configurations\_Profile.cshtml" />
     <Content Include="Views\Topics\Boards.cshtml" />
     <Content Include="Views\Topics\Boards_Table.cshtml" />
@@ -1116,9 +1110,13 @@
     <Content Include="Views\BusinessCards\SetColse.cshtml" />
     <Content Include="Views\BusinessCards\_SatisfactionResultsCard.cshtml" />
     <Content Include="Views\BusinessCards\Report_KPI_Unsatisfied.cshtml" />
+    <Content Include="Views\Services\Report_KPI_Overdue.cshtml" />
+    <Content Include="Views\Services\_ServiceDetails.cshtml" />
+    <Content Include="Views\Services\_ServiceActions.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Base\" />
     <Folder Include="Views\Void\" />
   </ItemGroup>
   <ItemGroup>

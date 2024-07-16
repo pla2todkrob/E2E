@@ -150,15 +150,49 @@
             return false;
         });
 
+        $(document).on('submit', '#SetInProgressForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("SetInProgress", "Services")', this);
+            return false;
+        });
+
         $(document).on('submit', '#CompleteForm', function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("SetComplete", "Services")',this);
+            let alertText = 'This information will be saved to the database.';
+            @{
+                if (Model.Services.Service_DueDate.Value < DateTime.Today)
+                {
+                    @:alertText = 'The due date is @Model.Services.Service_DueDate.Value.ToString("d").\nNow Overdue, are you sure you want to save?';
+                }
+            }
+            callSubmitPage('@Url.Action("SetComplete", "Services")', this, {text:alertText});
             return false;
         });
 
         $(document).on('submit', '#SaveDocumentForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("ServiceInfomation_Document", "Services")',this);
+            return false;
+        });
+
+        $(document).on('submit', '#RequestForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
+            return false;
+        });
+        $(document).on('submit', "#MustApproveForm", function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetMustApprove", "Services")', this,'@Url.Action("Index", "Services")');
+            return false;
+        });
+        $(document).on('submit', '#ReturnAssignForm', function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetReturnAssign", "Services")', this,'@Url.Action("Index", "Services")');
+            return false;
+        });
+        $(document).on('submit', '#RequestChangeDueForm', function (e) {
+            e.preventDefault();
+            callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
             return false;
         });
     </script>
@@ -183,153 +217,11 @@
 <div class="row mb-3">
     <div class="col-lg-7 mb-3 mb-lg-0">
         <div class="card" id="serviceInfo">
-            <div class="card-header">
-                <div class="d-flex justify-content-between">
-                    <h5 class="card-title">Service detail</h5>
-                    @if (Model.Services.Ref_Service_Id.HasValue)
-                    {
-                        if (!Model.Services.Is_FreePoint)
-                        {
-                            if (Model.Services.Action_User_Id.HasValue)
-                            {
-                                if (Model.Services.Action_User_Id.Equals(userId))
-                                {
-                                    <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
-                                }
-                            }
-                        }
-                    }
-                </div>
-            </div>
             <div class="card-body">
-                <dl class="row">
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Statuses.Status_Name)</dt>
-                    <dd class="col-8 col-md-9">
-                        <span class="@Model.Services.System_Statuses.Status_Class">@Html.DisplayFor(m => m.Services.System_Statuses.Status_Name)</span>&nbsp;
-                    </dd>
-                    @if (Model.Services.Update.HasValue)
-                    {
-                        <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                        <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
-                    }
-                    <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Description)</dt>
-                    <dd class="col-12 col-md-9"><span class="PreLine">@Html.DisplayFor(m => m.Services.Service_Description)</span></dd>
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.User_Name)</dt>
-                    <dd class="col-8 col-md-9">
-                        <blockquote class="blockquote">
-                            <small class="text-primary font-weight-bold">@Html.DisplayFor(m => m.User_Name)</small>
-                            <em class="blockquote-footer small">
-                                @Html.ValueFor(m => m.Services.Users.Master_Plants.Plant_Name),&nbsp;
-                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Name),&nbsp;
-                                @Html.ValueFor(m => m.Services.Users.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                            </em>
-                        </blockquote>
-                    </dd>
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_Contact)</dt>
-                    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Service_Contact)</dd>
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.System_Priorities.Priority_Name)</dt>
-                    <dd class="col-8 col-md-9"><span class="@Model.Services.System_Priorities.Priority_Class">@Html.DisplayFor(m => m.Services.System_Priorities.Priority_Name)</span></dd>
-                    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Service_DueDate)</dt>
-                    <dd class="col-8 col-md-9"><b>@Html.DisplayFor(m => m.Services.Service_DueDate)</b></dd>
-                    <dt class="col-4 col-md-3">Files</dt>
-                    <dd class="col-8 col-md-9">
-                        @Model.ServiceFiles.Count Attachments
-                        <ul class="list-unstyled">
-                            @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
-                            {
-                                <li>
-                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                                </li>
-
-                            }
-                        </ul>
-                    </dd>
-                    @{
-
-                        if (Model.Services.Action_User_Id.HasValue)
-                        {
-                            <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Action_Name)</dt>
-                            <dd class="col-12 col-md-9"><b class="text-info">@Html.DisplayFor(m => m.Action_Name)</b></dd>
-                            if (Model.Services.WorkRoot_Id.HasValue)
-                            {
-                                <dt class="col-12 col-md-3">@Html.DisplayNameFor(m => m.Services.WorkRoots.WorkRoot_Name)</dt>
-                                <dd class="col-12 col-md-9">@Html.DisplayFor(m => m.Services.WorkRoots.WorkRoot_Name)</dd>
-                            }
-                            <dt class="col-12 col-md-3">Team</dt>
-                            <dd class="col-12 col-md-9">
-                                @if (Model.ClsServiceTeams.Count > 0)
-                                {
-                                    <ul>
-                                        @foreach (var item in Model.ClsServiceTeams)
-                                        {
-                                            <li>
-                                                <div class="d-flex justify-content-between">
-                                                    @item.User_Name
-                                                    @if (Model.Services.Status_Id == 2 && Model.Services.Action_User_Id.Value == userId)
-                                                    {
-                                                        <a href="#" class="text-danger" onclick="callDeleteItem('@Url.Action("_DeleteTeam","Services",new { id = item.ServiceTeams.Team_Id })',true)"><i class="fa fa-trash"></i></a>
-                                                    }
-                                                </div>
-                                            </li>
-                                        }
-                                    </ul>
-
-                                }
-                                @if (Model.Services.Action_User_Id.Value == userId && Model.Services.Status_Id == 2)
-                                {
-                                    Html.RenderAction("_AddTeam", "Services", new { id = Model.Services.Service_Id });
-                                }
-                            </dd>
-                        }
-                    }
-                </dl>
-                @if (Model.Services.WorkRoot_Id.HasValue)
-                {
-                    Html.RenderAction("_DocumentList", "Services", new { id = Model.Services.Service_Id });
-                }
+                @Html.Partial("_ServiceDetails", Model)
             </div>
             <div class="card-footer">
-                <div class="d-flex">
-                    @{
-                        if (ViewBag.AuthorizeIndex < 3)
-                        {
-                            if (Model.Services.Status_Id < 3)
-                            {
-                                <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
-                            }
-
-                        }
-                        if (Model.Services.Action_User_Id == userId)
-                        {
-                            if (Model.Services.Status_Id == 2)
-                            {
-                                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
-                                <div class="ml-auto">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
-                                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
-                                </div>
-
-                            }
-
-                            if (Model.Services.Status_Id == 3)
-                            {
-
-                                <button class="btn btn-outline-info" type="button" onclick="resendEmail('@Url.Action("ResendEmail","Services",new { id=Model.Services.Service_Id,method="Services_SetComplete" })')"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;Resend</button>
-                            }
-                        }
-                        if (Model.Services.User_Id == userId)
-                        {
-                            if (Model.Services.Status_Id == 3)
-                            {
-                                <button type="button" class="btn btn-outline-success ml-auto" onclick="callModalPoint('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
-                            }
-                        }
-                    }
-                </div>
-                @if (Model.Services.Status_Id == 4)
-                {
-                    Html.RenderAction("_SatisfactionResults", "Services", new { id = Model.Services.Service_Id });
-                }
+                @Html.Partial("_ServiceActions", Model)
             </div>
         </div>
     </div>
@@ -341,7 +233,7 @@
             <div class="card-body overflow-auto" id="commentHis"></div>
             @if (Model.Services.Status_Id < 4)
             {
-                <div class="card-footer" id="commentNew"></div>
+            <div class="card-footer" id="commentNew"></div>
             }
         </div>
     </div>

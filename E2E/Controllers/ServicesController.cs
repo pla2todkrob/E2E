@@ -3,11 +3,11 @@ using E2E.Models.Tables;
 using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -16,11 +16,9 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class ServicesController : Controller
+    public class ServicesController : BaseController
     {
         private readonly ClsManageService data = new ClsManageService();
-        private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
         private readonly ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
@@ -68,14 +66,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -127,14 +118,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -179,14 +163,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -244,13 +221,36 @@ namespace E2E.Controllers
         {
             try
             {
-                ViewBag.Is_MustBeApproved = db.Services.Where(w => w.Service_Id == id).Select(s => s.Is_MustBeApproved).FirstOrDefault();
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.AuthorizeIndex = db.Users
-                .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                var gradeName = db.Users
+                .Where(w => w.User_Id == loginId)
+                .Select(s => s.Master_Grades.Grade_Name)
                 .FirstOrDefault();
 
+                // Split the grade name into character and number parts
+                string gradeChar = new string(gradeName.TakeWhile(char.IsLetter).ToArray());
+                string gradeNumStr = new string(gradeName.SkipWhile(char.IsLetter).ToArray());
+
+                // Convert the numeric part to an integer
+                if (!int.TryParse(gradeNumStr, out int gradeNum))
+                {
+                    throw new Exception("Invalid grade number format.");
+                }
+
+                // Create an anonymous type object to hold the split values
+                var userClass = new
+                {
+                    GradeChar = gradeChar,
+                    GradeNum = gradeNum
+                };
+
+                bool canAssign = false;
+                if (userClass.GradeChar != "M" && userClass.GradeNum <= 6)
+                {
+                    canAssign = true;
+                }
+
+                ViewBag.CanAssign = canAssign;
+                ViewBag.AuthorizeIndex = authId;
                 ClsServices clsServices = data.ClsServices_View(id);
 
                 if (clsServices.Services.Status_Id != 1)
@@ -312,13 +312,81 @@ namespace E2E.Controllers
         {
             try
             {
-                return View(data.Services_GetDepartmentRequest());
+                // Step 1: Retrieve all requests
+                var requests = data.Services_GetAllRequest_IQ()
+                    .Select(s => new
+                    {
+                        s.Create,
+                        s.Service_Subject,
+                        s.Service_DueDate,
+                        s.Service_EstimateTime,
+                        s.Service_Key,
+                        s.Update,
+                        s.Service_Id,
+                        s.System_Priorities,
+                        s.System_Statuses,
+                        s.Is_OverDue,
+                        s.User_Id
+                    })
+                    .ToList();
+
+                // Step 2: Fetch user details for the required user IDs
+                var userIds = requests
+                    .Select(t => t.User_Id)
+                    .Distinct()
+                    .ToList();
+
+                var userDetails = db.UserDetails
+                    .Where(u => userIds.Contains(u.User_Id))
+                    .ToDictionary(u => u.User_Id, u => u.Detail_EN_FirstName);
+
+                // Step 3: Join the requests and user details in memory
+                var clsServiceViewTables = requests.Select(s => new ClsServiceViewTable()
+                {
+                    Create = s.Create,
+                    Subject = s.Service_Subject,
+                    Duedate = s.Service_DueDate,
+                    Estimate_time = s.Service_EstimateTime,
+                    Key = s.Service_Key,
+                    Update = s.Update,
+                    ServiceId = s.Service_Id,
+                    System_Priorities = s.System_Priorities,
+                    System_Statuses = s.System_Statuses,
+                    Is_OverDue = s.Is_OverDue,
+                    Requester = userDetails.ContainsKey(s.User_Id) ? userDetails[s.User_Id] : null,
+                    Marker = loginId == s.User_Id
+                }).ToList();
+
+                // Step 4: Group requests by System_Statuses
+                var groupedRequests = clsServiceViewTables
+                    .GroupBy(t => t.System_Statuses.Status_Id)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // Fetch System_Statuses based on the existing keys
+                var systemStatusesDict = db.System_Statuses
+                    .Where(ss => groupedRequests.Keys.Contains(ss.Status_Id))
+                    .ToDictionary(ss => ss.Status_Id, ss => ss);
+
+                // Create a Dictionary<System_Statuses, List<ClsServiceUserActionName>>
+                var groupedTasks = groupedRequests
+                    .ToDictionary(g => systemStatusesDict[g.Key], g => g.Value);
+
+                var model = new AllServiceViewModel
+                {
+                    GroupedTasks = groupedTasks,
+                    AllStatuses = systemStatusesDict.Values.ToList()
+                };
+
+                return View(model);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                // Log exception
+                // throw;
+                return View("Error", new HandleErrorInfo(ex, "Services", "AllRequest_Table"));
             }
         }
+
 
         public ActionResult AllTask()
         {
@@ -329,30 +397,82 @@ namespace E2E.Controllers
         {
             try
             {
-                List<ClsServiceUserActionName> clsServiceUserActionName = data.Services_GetAllTask_IQ()
-                    .AsEnumerable()
-                    .Select(s => new ClsServiceUserActionName()
+                // Step 1: Retrieve all tasks with related data included
+                var tasks = data.Services_GetAllTask_IQ()
+                    .Where(s => s.Action_User_Id.HasValue) // Filter tasks with Action_User_Id
+                    .Select(s => new
                     {
-                        ActionUserId = s.Action_User_Id,
-                        Create = s.Create,
-                        Subject = s.Service_Subject,
-                        Duedate = s.Service_DueDate,
-                        Estimate_time = s.Service_EstimateTime,
-                        Key = s.Service_Key,
-                        Update = s.Update,
-                        ServiceId = s.Service_Id,
-                        System_Priorities = s.System_Priorities,
-                        System_Statuses = s.System_Statuses,
-                        Is_OverDue = s.Is_OverDue
-                    }).ToList();
+                        s.Action_User_Id,
+                        s.Create,
+                        s.Service_Subject,
+                        s.Service_DueDate,
+                        s.Service_EstimateTime,
+                        s.Service_Key,
+                        s.Update,
+                        s.Service_Id,
+                        s.System_Priorities,
+                        s.System_Statuses,
+                        s.Is_OverDue
+                    })
+                    .AsNoTracking()
+                    .ToList();
 
-                clsServiceUserActionName.Where(w => w.ActionUserId.HasValue).ToList().ForEach(s => s.ActionBy = Users_GetName(s.ActionUserId));
+                // Step 2: Fetch user details for the required user IDs
+                var userIds = tasks
+                    .Select(t => t.Action_User_Id.Value)
+                    .Distinct()
+                    .ToList();
 
-                return View(clsServiceUserActionName);
+                var userDetails = db.UserDetails
+                    .Where(u => userIds.Contains(u.User_Id))
+                    .AsNoTracking()
+                    .ToDictionary(u => u.User_Id, u => u.Detail_EN_FirstName);
+
+                // Step 3: Join the tasks and user details in memory
+                var clsServiceViewTables = tasks.Select(s => new ClsServiceViewTable()
+                {
+                    ActionUserId = s.Action_User_Id,
+                    Create = s.Create,
+                    Subject = s.Service_Subject,
+                    Duedate = s.Service_DueDate,
+                    Estimate_time = s.Service_EstimateTime,
+                    Key = s.Service_Key,
+                    Update = s.Update,
+                    ServiceId = s.Service_Id,
+                    System_Priorities = s.System_Priorities,
+                    System_Statuses = s.System_Statuses,
+                    Is_OverDue = s.Is_OverDue,
+                    ActionBy = userDetails.ContainsKey(s.Action_User_Id.Value) ? userDetails[s.Action_User_Id.Value] : null,
+                    Marker = loginId == s.Action_User_Id.Value
+                }).ToList();
+
+                // Step 4: Group tasks by System_Statuses
+                var groupedTasksById = clsServiceViewTables
+                    .GroupBy(t => t.System_Statuses.Status_Id)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // Fetch System_Statuses based on the existing keys
+                var systemStatusesDict = db.System_Statuses
+                    .Where(ss => groupedTasksById.Keys.Contains(ss.Status_Id))
+                    .AsNoTracking()
+                    .ToDictionary(ss => ss.Status_Id, ss => ss);
+
+                // Create a Dictionary<System_Statuses, List<ClsServiceUserActionName>>
+                var groupedTasks = groupedTasksById
+                    .ToDictionary(g => systemStatusesDict[g.Key], g => g.Value);
+
+                var model = new AllServiceViewModel
+                {
+                    GroupedTasks = groupedTasks,
+                    AllStatuses = systemStatusesDict.Values.ToList()
+                };
+
+                return View(model);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                // Log exception
+                return View("Error", new HandleErrorInfo(ex, "Services", "AllTask_Table"));
             }
         }
 
@@ -365,11 +485,7 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.AuthorizeIndex = db.Users
-                .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                .FirstOrDefault();
+                ViewBag.AuthorizeIndex = authId;
                 return View(data.ClsServices_View(id));
             }
             catch (Exception)
@@ -406,9 +522,7 @@ namespace E2E.Controllers
         {
             ClsSwal res = new ClsSwal();
 
-            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-
-            var ID_service = data.Service_CHK_CloseJob(userId);
+            var ID_service = data.Service_CHK_CloseJob(loginId);
 
             if (ID_service != null)
             {
@@ -422,14 +536,13 @@ namespace E2E.Controllers
             return Json(res, JsonRequestBehavior.AllowGet);
         }
 
-        public bool Check_ReferenceClose_Job(Guid userId)
+        public bool Check_ReferenceClose_Job(Guid id)
         {
             bool res = new bool();
 
-            Guid Id = Guid.Parse(HttpContext.User.Identity.Name);
-            if (Id != userId)
+            if (id != loginId)
             {
-                var ID_service = data.Service_CHK_CloseJob(userId);
+                var ID_service = data.Service_CHK_CloseJob(id);
 
                 if (ID_service != null)
                 {
@@ -493,14 +606,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -555,14 +661,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
@@ -620,14 +719,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -639,8 +731,9 @@ namespace E2E.Controllers
             ClsApi clsApi = new ClsApi();
             ClsServiceFile clsServiceFile = new ClsServiceFile();
             string ZipName = string.Format("{0}_{1}.zip", key, Urls.Count());
-            ZipName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ZipName);
-            using (FileStream zipToCreate = new FileStream(ZipName, FileMode.Create))
+            string zipPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ZipName);
+
+            using (FileStream zipToCreate = new FileStream(zipPath, FileMode.Create))
             {
                 using (ZipArchive archive = new ZipArchive(zipToCreate, ZipArchiveMode.Create))
                 {
@@ -661,25 +754,37 @@ namespace E2E.Controllers
                         }
                     }
                 }
-
-                byte[] fileBytes = System.IO.File.ReadAllBytes(ZipName);
-                HttpPostedFileBase objFile = (HttpPostedFileBase)new MemoryPostedFile(fileBytes);
-
-                clsServiceFile.FolderPath = Path.Combine("Service", key, "DocumentControls");
-                clsServiceFile.Filename = Path.GetFileName(ZipName);
-
-                //เก็บไฟล์ที่ User Download ไว้
-                var res = await clsApi.UploadFile(clsServiceFile, objFile);
-                if (res.IsSuccess)
-                {
-                    System.IO.File.Delete(ZipName);
-                }
-                Response.ContentType = "application/zip";
-                Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(ZipName));
-                Response.BufferOutput = true;
-                Response.OutputStream.Write(fileBytes, 0, fileBytes.Length);
-                Response.End();
             }
+
+            // Read the zip file into a MemoryStream
+            byte[] fileBytes;
+            using (FileStream zipToRead = new FileStream(zipPath, FileMode.Open))
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    zipToRead.CopyTo(ms);
+                    fileBytes = ms.ToArray();
+                }
+            }
+
+            // Create a FileStreamPostedFile instance
+            HttpPostedFileBase objFile = new FileStreamPostedFile(new MemoryStream(fileBytes), Path.GetFileName(ZipName), "application/zip");
+            clsServiceFile.FolderPath = Path.Combine("Service", key, "DocumentControls");
+            clsServiceFile.Filename = Path.GetFileName(ZipName);
+
+            // Upload the file
+            var res = await clsApi.UploadFile(clsServiceFile, objFile);
+            if (res.IsSuccess)
+            {
+                System.IO.File.Delete(zipPath);
+            }
+
+            // Set response headers and send the file
+            Response.ContentType = "application/zip";
+            Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(ZipName));
+            Response.BufferOutput = true;
+            Response.OutputStream.Write(fileBytes, 0, fileBytes.Length);
+            Response.End();
         }
 
         public async Task DownloadDocumentControl(Guid id)
@@ -701,15 +806,13 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-
                 ViewBag.PriorityList = data.SelectListItems_Priority();
-                ViewBag.RefServiceList = data.SelectListItems_RefService(userId);
+                ViewBag.RefServiceList = data.SelectListItems_RefService(loginId);
                 ViewBag.UserList = data.SelectListItems_User();
                 bool isNew = true;
                 Services services = new Services
                 {
-                    User_Id = userId
+                    User_Id = loginId
                 };
                 if (id.HasValue)
                 {
@@ -769,14 +872,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -828,14 +924,7 @@ namespace E2E.Controllers
                 {
                     scope.Rollback();
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -901,14 +990,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -969,11 +1051,7 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.AuthorizeIndex = db.Users
-                .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                .FirstOrDefault();
+                ViewBag.AuthorizeIndex = authId;
             }
             catch (Exception)
             {
@@ -987,9 +1065,9 @@ namespace E2E.Controllers
         {
             try
             {
-                List<ClsServiceUserActionName> clsServiceUserActionName = data.Services_GetWaitAction_IQ(Guid.Parse(HttpContext.User.Identity.Name))
+                List<ClsServiceViewTable> clsServiceViewTables = data.Services_GetWaitAction_IQ(loginId)
                     .AsEnumerable()
-                     .Select(s => new ClsServiceUserActionName()
+                     .Select(s => new ClsServiceViewTable()
                      {
                          ActionBy = s.Action_User_Id.HasValue ? Users_GetName(s.Action_User_Id.Value) : "",
                          Create = s.Create,
@@ -1004,9 +1082,9 @@ namespace E2E.Controllers
                          System_Statuses = s.System_Statuses
                      }).ToList();
 
-                ViewBag.UserNames = Users_GetName(Guid.Parse(HttpContext.User.Identity.Name));
+                ViewBag.UserNames = Users_GetName(loginId);
 
-                return View(clsServiceUserActionName);
+                return View(clsServiceViewTables);
             }
             catch (Exception)
             {
@@ -1060,97 +1138,16 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult RenameFolder()
+        public ActionResult Report_KPI()
         {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                try
-                {
-                    var serviceList = db.Services
-                        .Select(s => new
-                        {
-                            Id = s.Service_Id,
-                            Key = s.Service_Key
-                        }).ToList();
-
-                    foreach (var item in serviceList)
-                    {
-                        List<ServiceFiles> serviceFiles = new List<ServiceFiles>();
-                        serviceFiles = db.ServiceFiles
-                            .Where(w => w.Service_Id == item.Id && w.ServiceFile_Path.Contains(item.Id.ToString()))
-                            .ToList();
-                        if (serviceFiles.Count > 0)
-                        {
-                            foreach (var item2 in serviceFiles)
-                            {
-                                item2.ServiceFile_Path = item2.ServiceFile_Path.Replace(item.Id.ToString(), item.Key);
-                                db.Entry(item2).State = System.Data.Entity.EntityState.Modified;
-                            }
-                        }
-
-                        List<Guid> serviceCommentsIds = new List<Guid>();
-                        serviceCommentsIds = db.ServiceComments
-                            .Where(w => w.Service_Id == item.Id)
-                            .Select(s => s.ServiceComment_Id)
-                            .ToList();
-                        List<ServiceCommentFiles> serviceCommentFiles = new List<ServiceCommentFiles>();
-                        serviceCommentFiles = db.ServiceCommentFiles
-                            .Where(w => serviceCommentsIds.Contains(w.ServiceComment_Id) && w.ServiceCommentFile_Path.Contains(item.Id.ToString()))
-                            .ToList();
-                        if (serviceCommentFiles.Count > 0)
-                        {
-                            foreach (var item2 in serviceCommentFiles)
-                            {
-                                item2.ServiceCommentFile_Path = item2.ServiceCommentFile_Path.Replace(item.Id.ToString(), item.Key);
-                                db.Entry(item2).State = System.Data.Entity.EntityState.Modified;
-                            }
-                        }
-                    }
-
-                    if (db.SaveChanges() > 0)
-                    {
-                        if (ftp.Ftp_RenameFolder("Service"))
-                        {
-                            scope.Complete();
-                        }
-                    }
-
-                    return RedirectToAction("Index");
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-            }
-        }
-
-        public ActionResult Report_KPI(ReportKPI_Filter model)
-        {
-            try
-            {
-                return View(model);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return View();
         }
 
         public ActionResult Report_KPI_Filter(string filter)
         {
             try
             {
-                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
-
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.AuthorizeId = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                    .FirstOrDefault();
-
-                ViewBag.UserList = data.SelectListItems_UsersDepartment();
-
-                return View(_Filter);
+                return View(reportKPI_Filter.DeserializeFilter(filter));
             }
             catch (Exception)
             {
@@ -1162,9 +1159,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
-
-                return View(data.Services_ViewJoinTeamList(id, _Filter));
+                return View(data.Services_ViewJoinTeamList(id, reportKPI_Filter.DeserializeFilter(filter)));
             }
             catch (Exception)
             {
@@ -1176,9 +1171,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
-
-                return View(data.ClsReportKPI_ViewList(_Filter));
+                return View(data.ClsReportKPI_ViewList(reportKPI_Filter.DeserializeFilter(filter)));
             }
             catch (Exception)
             {
@@ -1190,9 +1183,7 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
-
-                return View(data.ClsReport_KPI_Unsatisfied(_Filter));
+                return View(data.ClsReport_KPI_Unsatisfied(reportKPI_Filter.DeserializeFilter(filter)));
             }
             catch (Exception)
             {
@@ -1204,14 +1195,17 @@ namespace E2E.Controllers
         {
             try
             {
-                ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
-
-                return View(data.ReportKPI_User_Views(id, _Filter));
+                return View(data.ReportKPI_User_Views(id, reportKPI_Filter.DeserializeFilter(filter)));
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public ActionResult Report_KPI_Overdue(string filter)
+        {
+            return View(data.ClsReportKPI_OverdueList(reportKPI_Filter.DeserializeFilter(filter)));
         }
 
         public ActionResult RequestChangeDue()
@@ -1244,14 +1238,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1282,14 +1269,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1326,14 +1306,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1364,14 +1337,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1391,49 +1357,30 @@ namespace E2E.Controllers
             }
         }
 
-        public async Task<JsonResult> ResendEmail(Guid id, string method)
+        public async Task<JsonResult> ResendEmail(Guid id)
         {
             ClsSwal swal = new ClsSwal();
             try
             {
-                Log_SendEmail log_SendEmail = new Log_SendEmail();
-                log_SendEmail = db.Log_SendEmails
-                    .Where(w => w.SendEmail_MethodName == method && w.SendEmail_Ref_Id == id)
-                    .FirstOrDefault();
-                if (log_SendEmail != null)
+                Services services = await db.Services.FindAsync(id);
+                if (await mail.ResendMail(services.Service_Id))
                 {
-                    if (await mail.ResendMail(log_SendEmail.SendEmail_Id))
-                    {
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ส่งอีเมลอีกครั้งเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Icon = "warning";
-                        swal.Text = "ส่งอีเมลอีกครั้งไม่สำเร็จ";
-                        swal.Title = "Warning";
-                    }
+                    swal.DangerMode = false;
+                    swal.Icon = "success";
+                    swal.Text = "ส่งอีเมลอีกครั้งเรียบร้อยแล้ว";
+                    swal.Title = "Successful";
                 }
                 else
                 {
                     swal.Icon = "warning";
-                    swal.Text = "ไม่พบประวัติการส่งอีเมล";
+                    swal.Text = "ส่งอีเมลอีกครั้งไม่สำเร็จ";
                     swal.Title = "Warning";
                 }
             }
             catch (Exception ex)
             {
                 swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                swal.Text = ex.GetBaseException().Message;
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1443,12 +1390,7 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.AuthorizeIndex = db.Users
-                .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                .FirstOrDefault();
-
+                ViewBag.AuthorizeIndex = authId;
                 return View(data.ClsServices_View(id));
             }
             catch (Exception)
@@ -1509,14 +1451,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -1589,14 +1524,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1607,8 +1535,10 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                string deptName = db.Users
+                    .Where(w => w.User_Id == loginId)
+                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
+                    .FirstOrDefault();
                 List<Guid> depIds = db.Master_Departments
                     .Where(w => w.Department_Name == deptName)
                     .Select(s => s.Department_Id)
@@ -1665,14 +1595,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -1773,14 +1696,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1823,19 +1739,43 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+        public async Task<JsonResult> SetClosePrevious()
+        {
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                ClsSwal swal = new ClsSwal();
+                try
+                {
+                    var services = await db.Services.Where(s => s.Status_Id == 3 && s.Update.Value.Month < DateTime.Now.Month).ToListAsync();
 
+                    foreach (var service in services)
+                    {
+                        await data.Services_SetClose(service.Service_Id, true);
+                    }
+
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        scope.Complete();
+                        swal.Text = "ปิดงานที่ผู้ใช้ไม่ได้ปิดในเดือนก่อนๆ เรียบร้อยแล้ว";
+                        swal.Icon = "success";
+                        swal.DangerMode = false;
+                        swal.Title = "Successful";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Text = ex.GetBaseException().Message;
+                }
+
+                return Json(swal, JsonRequestBehavior.AllowGet);
+            }
+
+        }
         public ActionResult SetComplete(Guid id)
         {
             ServiceComments serviceComments = new ServiceComments
@@ -1878,14 +1818,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1916,14 +1849,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1933,9 +1859,10 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                string secName = db.Users.Find(userId)
-                    .Master_Processes.Master_Sections.Section_Name;
+                string secName = db.Users.Where(w => w.User_Id == loginId)
+                    .Select(s => s.Master_Processes.Master_Sections.Section_Name)
+                    .FirstOrDefault();
+
                 List<Guid> secIds = db.Master_Sections
                     .Where(w => w.Section_Name == secName)
                     .Select(s => s.Section_Id)
@@ -1987,14 +1914,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -2033,7 +1953,7 @@ namespace E2E.Controllers
                 .Select(s => s.User_Id)
                 .ToList();
 
-            ViewBag.sendTo = db.UserDetails.Where(w => sendTo.Contains(w.User_Id)).Select(s => s.Detail_EN_FirstName + " " + s.Detail_EN_LastName);
+            ViewBag.sendTo = db.UserDetails.Where(w => sendTo.Contains(w.User_Id)).Select(s => s.Detail_EN_FirstName + " " + s.Detail_EN_LastName).ToList();
 
             var result = ViewBag.sendTo;
 
@@ -2066,14 +1986,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -2139,14 +2052,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -2196,14 +2102,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -2245,14 +2144,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -2294,14 +2186,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -2318,7 +2203,7 @@ namespace E2E.Controllers
 
                 return db.UserDetails
                     .Where(w => w.User_Id == id)
-                    .Select(s =>  s.Detail_EN_FirstName )
+                    .Select(s => s.Detail_EN_FirstName)
                     .FirstOrDefault();
             }
             catch (Exception)
@@ -2345,4 +2230,10 @@ public class MemoryPostedFile : HttpPostedFileBase
     public override string FileName { get; }
 
     public override Stream InputStream { get; }
+}
+
+public class AllServiceViewModel
+{
+    public Dictionary<System_Statuses, List<ClsServiceViewTable>> GroupedTasks { get; set; }
+    public List<System_Statuses> AllStatuses { get; set; }
 }

@@ -37,13 +37,13 @@
         <div class="card shadow sticky-top" id="stickyBody">
             @if (ViewBag.IsAdmin)
             {
-                <div class="card-header">
-                    <div class="d-flex">
-                        <div class="ml-auto">
-                            <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
-                        </div>
+            <div class="card-header">
+                <div class="d-flex">
+                    <div class="ml-auto">
+                        <a href="@Url.Action("Manage","ChatBot")" class="btn btn-primary">Manage</a>
                     </div>
                 </div>
+            </div>
             }
             <div class="card-body" id="questionlistArea"></div>
         </div>

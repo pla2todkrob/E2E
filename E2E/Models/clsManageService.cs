@@ -3,11 +3,10 @@ using E2E.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -22,18 +21,18 @@ namespace E2E.Models
         private readonly ClsManageMaster master = new ClsManageMaster();
         private FileResponse fileResponse = new FileResponse();
 
-        private IQueryable<Services> Services_GetAllRequest_IQ()
+        public IQueryable<Services> Services_GetAllRequest_IQ()
         {
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                string departmentName = db.Users
-                    .Where(w => w.User_Id == id)
-                    .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
-                    .FirstOrDefault();
+                // รวมการค้นหาให้เป็นคำสั่งเดียว
                 IQueryable<Guid> userIds = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == departmentName)
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name ==
+                                db.Users.FirstOrDefault(u => u.User_Id == id).Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .Select(s => s.User_Id);
+
+                // ใช้ IQueryable เพื่อประสิทธิภาพที่ดีขึ้น
                 IQueryable<Services> query = db.Services
                     .Where(w => userIds.Contains(w.User_Id))
                     .OrderBy(o => o.Status_Id)
@@ -108,37 +107,27 @@ namespace E2E.Models
             catch (Exception ex)
             {
                 swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                swal.Text = ex.GetBaseException().Message;
+
             }
 
             return swal;
         }
 
-        public List<ClsServiceUserActionName> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
+        public List<ClsServiceViewTable> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
         {
             try
             {
                 var JobUnsat = db.Satisfactions.Where(w => w.Unsatisfied);
                 if (filter != null)
                 {
-                    if (filter.Date_From.HasValue)
-                    {
-                        JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
-                    }
-
+                    JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
                     filter.Date_To = filter.Date_To.AddDays(1);
                     JobUnsat = JobUnsat.Where(w => w.Create <= filter.Date_To);
 
                     var ServiceId = JobUnsat.Select(s => s.Service_Id).ToList();
                     var services = db.Services.Where(w => ServiceId.Contains(w.Service_Id))
-                   .Select(item => new ClsServiceUserActionName
+                   .Select(item => new ClsServiceViewTable
                    {
                        ActionBy = db.UserDetails
                        .Where(w => w.User_Id == item.Action_User_Id)
@@ -159,7 +148,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    return new List<ClsServiceUserActionName>();
+                    return new List<ClsServiceViewTable>();
                 }
             }
             catch (Exception)
@@ -170,177 +159,165 @@ namespace E2E.Models
 
         public ClsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
         {
-            try
-            {
-                ClsReportKPI res = new ClsReportKPI();
+            ClsReportKPI res = new ClsReportKPI();
+            Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            int[] finishIds = { 3, 4 };
 
-                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                IQueryable<Guid> userIds;
+            var user = db.Users
+                .Where(w => w.User_Id == userId)
+                .Select(s => new { s.Master_Processes.Master_Sections.Department_Id })
+                .FirstOrDefault();
 
-                IQueryable<Guid> serviceIds;
-                IQueryable<Services> query = db.Services.OrderBy(o => o.Create).ThenBy(t => t.Update);
-
-                res.Authorize_Id = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                    .FirstOrDefault();
-
-                int[] finishIds = { 3, 4 };
-
-                Guid DeptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
-
-                userIds = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId)
-                    .OrderBy(o => o.User_Code)
-                    .Select(s => s.User_Id);
-
-                query = query.Where(w => userIds.Contains(w.Action_User_Id.Value));
-
-                if (filter != null)
-                {
-                    if (filter.Date_From.HasValue)
-                    {
-                        query = query.Where(w => w.Create >= filter.Date_From);
-                    }
-
-                    filter.Date_To = filter.Date_To.AddDays(1);
-                    query = query.Where(w => w.Create <= filter.Date_To);
-                }
-
-                if (res.Authorize_Id /*!= 3*/ > 0)
-                {
-                    foreach (var item in userIds)
-                    {
-                        serviceIds = query
-                            .Where(w => w.Action_User_Id == item)
-                            .Select(s => s.Service_Id);
-
-                        ReportKPI_User reportKPI_User = new ReportKPI_User();
-
-                        if (serviceIds.Count() > 0)
-                        {
-                            int countSatisfaction = db.Satisfactions
-                        .Where(w => serviceIds.Contains(w.Service_Id))
-                        .Count();
-                            if (countSatisfaction > 0)
-                            {
-                                reportKPI_User.Average_Score = db.Satisfactions
-                        .Where(w => serviceIds.Contains(w.Service_Id))
-                        .Average(a => a.Satisfaction_Average);
-                            }
-
-                            if (query.Any(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id)))
-                            {
-                                reportKPI_User.SuccessPoint = query
-                                    .Where(w => serviceIds.Contains(w.Service_Id) && finishIds.Contains(w.Status_Id))
-                                    .Sum(s => s.System_Priorities.Priority_Point);
-                            }
-
-                            reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
-                            reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && serviceIds.Contains(w.Service_Id)).Count();
-                            reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && serviceIds.Contains(w.Service_Id)).Count();
-                            reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && serviceIds.Contains(w.Service_Id)).Count();
-                            reportKPI_User.Total = query.Where(w => serviceIds.Contains(w.Service_Id)).Count();
-                            reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && serviceIds.Contains(w.Service_Id)).Count();
-                        }
-
-                        serviceIds = query
-                        .Where(w => w.Action_User_Id != item)
-                        .Select(s => s.Service_Id);
-
-                        reportKPI_User.JoinTeam_Count = db.ServiceTeams
-                            .Where(w => serviceIds.Contains(w.Service_Id) && w.User_Id == item)
-                            .Count();
-
-                        reportKPI_User.User_Id = item;
-                        reportKPI_User.User_Name = master.Users_GetInfomation(item);
-                        res.ReportKPI_Users.Add(reportKPI_User);
-                    }
-                }
-                else
-                {
-                    serviceIds = query
-                        .Where(w => w.Action_User_Id == userId)
-                        .Select(s => s.Service_Id);
-
-                    ReportKPI_User reportKPI_User = new ReportKPI_User();
-
-                    if (serviceIds.Count() > 0)
-                    {
-                        int countSatisfaction = db.Satisfactions
-                        .Where(w => serviceIds.Contains(w.Service_Id))
-                        .Count();
-
-                        if (countSatisfaction > 0)
-                        {
-                            reportKPI_User.Average_Score = db.Satisfactions
-                                .Where(w => serviceIds.Contains(w.Service_Id))
-                                .Average(a => a.Satisfaction_Average);
-                        }
-
-                        int successCount = query
-                            .Where(w => finishIds.Contains(w.Status_Id) && serviceIds.Contains(w.Service_Id))
-                            .Count();
-                        if (successCount > 0)
-                        {
-                            reportKPI_User.SuccessPoint = query
-                            .Where(w => finishIds.Contains(w.Status_Id) && serviceIds.Contains(w.Service_Id))
-                        .Sum(s => s.System_Priorities.Priority_Point);
-                        }
-
-                        reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && serviceIds.Contains(w.Service_Id)).Count();
-                        reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && serviceIds.Contains(w.Service_Id)).Count();
-                        reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && serviceIds.Contains(w.Service_Id)).Count();
-                        reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && serviceIds.Contains(w.Service_Id)).Count();
-                        reportKPI_User.Total = query.Where(w => serviceIds.Contains(w.Service_Id)).Count();
-                        reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && serviceIds.Contains(w.Service_Id)).Count();
-                    }
-
-                    serviceIds = query
-                        .Where(w => w.Action_User_Id != userId)
-                        .Select(s => s.Service_Id);
-
-                    reportKPI_User.JoinTeam_Count = db.ServiceTeams
-                        .Where(w => serviceIds.Contains(w.Service_Id) && w.User_Id == userId)
-                        .Count();
-
-                    reportKPI_User.User_Id = userId;
-                    reportKPI_User.User_Name = master.Users_GetInfomation(userId);
-                    res.ReportKPI_Users.Add(reportKPI_User);
-                }
-
-                res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
-                res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
-                res.ReportKPI_Overview.Inprogress_Count = res.ReportKPI_Users.Select(s => s.Inprogress_Count).Sum();
-                res.ReportKPI_Overview.Pending_Count = res.ReportKPI_Users.Select(s => s.Pending_Count).Sum();
-                res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
-                res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
-                int ontimeCount = res.ReportKPI_Overview.Total - res.ReportKPI_Overview.OverDue_Count;
-                res.ReportKPI_Overview.OnTime_Count = ontimeCount;
-                double ontimePercent = Convert.ToDouble(ontimeCount) / Convert.ToDouble(res.ReportKPI_Overview.Total);
-                res.ReportKPI_Overview.OnTime_Percent = ontimePercent;
-
-                var UnsatCount = db.Satisfactions.Where(w => w.Unsatisfied);
-                if (filter != null)
-                {
-                    if (filter.Date_From.HasValue)
-                    {
-                        UnsatCount = UnsatCount.Where(w => w.Create >= filter.Date_From);
-                    }
-
-                    filter.Date_To = filter.Date_To.AddDays(1);
-                    UnsatCount = UnsatCount.Where(w => w.Create <= filter.Date_To);
-                    res.ReportKPI_Overview.Unsatisfied_Count = UnsatCount.Count();
-                }
-
-                res.ReportKPI_Overview.Satisfied_Percent = Math.Abs(1 - (res.ReportKPI_Overview.Unsatisfied_Count / (double)res.ReportKPI_Overview.Close_Count));
-
+            if (user == null)
                 return res;
-            }
-            catch (Exception)
+
+            Guid deptId = user.Department_Id;
+
+            List<Guid> userIds = db.Users
+                .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId && w.Active)
+                .OrderBy(o => o.User_Code)
+                .Select(s => s.User_Id)
+                .ToList();
+
+            IQueryable<Services> query = db.Services
+                .Where(w => finishIds.Contains(w.Status_Id) && userIds.Contains(w.Action_User_Id.Value));
+
+            if (filter != null)
             {
-                throw;
+                query = query.Where(w => w.Update >= filter.Date_From);
+                DateTime adjustedDateTo = filter.Date_To.AddDays(1);
+                query = query.Where(w => w.Update < adjustedDateTo);
             }
+
+            var allTasks = query
+                .Select(s => new
+                {
+                    s.Service_Id,
+                    s.Status_Id,
+                    s.Is_OverDue,
+                    s.Action_User_Id,
+                    s.System_Priorities.Priority_Point
+                }).ToList();
+
+            var serviceIds = allTasks.Select(s => s.Service_Id).ToList();
+
+            var joinTeam = db.ServiceTeams
+                .Where(w => serviceIds.Contains(w.Service_Id))
+                .Select(s => new { s.Service_Id, s.User_Id })
+                .ToList();
+
+            var closedServiceIds = allTasks
+                .Where(w => w.Status_Id == 4)
+                .Select(s => s.Service_Id)
+                .ToList();
+
+            var satList = db.Satisfactions
+                .Where(w => closedServiceIds.Contains(w.Service_Id))
+                .Select(s => new
+                {
+                    s.Satisfaction_Average,
+                    s.Service_Id,
+                    s.Unsatisfied
+                }).ToList();
+
+            foreach (Guid item in userIds)
+            {
+                var actionServices = allTasks
+                    .Where(w => w.Action_User_Id == item)
+                    .ToList();
+
+                List<Guid> notActionIds = allTasks
+                    .Where(w => w.Action_User_Id != item)
+                    .Select(s => s.Service_Id)
+                    .ToList();
+
+                ReportKPI_User reportKPI_User = new ReportKPI_User
+                {
+                    User_Id = item,
+                    User_Name = master.Users_GetInfomation(item),
+                    Total = actionServices.Count(),
+                    JoinTeam_Count = joinTeam.Count(w => w.User_Id == item)
+                };
+
+                if (reportKPI_User.Total > 0)
+                {
+                    reportKPI_User.Close_Count = actionServices.Count(w => w.Status_Id == 4);
+                    reportKPI_User.Complete_Count = actionServices.Count(w => w.Status_Id == 3);
+                    reportKPI_User.OverDue_Count = actionServices.Count(w => w.Is_OverDue);
+
+                    List<Guid> serviceCloseId = actionServices
+                        .Where(w => w.Status_Id == 4)
+                        .Select(s => s.Service_Id)
+                        .ToList();
+
+                    reportKPI_User.Average_Score = satList
+                        .Where(w => serviceCloseId.Contains(w.Service_Id))
+                        .Average(a => (double?)a.Satisfaction_Average) ?? 0;
+
+                    reportKPI_User.SuccessPoint = actionServices.Sum(s => (int?)s.Priority_Point) ?? 0;
+                }
+
+                res.ReportKPI_Users.Add(reportKPI_User);
+            }
+
+            int totalTasks = allTasks.Count;
+            int onTimeCount = allTasks.Count(w => !w.Is_OverDue);
+            int closedCount = allTasks.Count(w => w.Status_Id == 4);
+            int unsatisfiedCount = satList.Count(w => w.Unsatisfied);
+
+            res.ReportKPI_Overview = new ReportKPI_Overview()
+            {
+                Close_Count = closedCount,
+                Complete_Count = allTasks.Count(w => w.Status_Id == 3),
+                Total = totalTasks,
+                OnTime_Count = onTimeCount,
+                OnTime_Percent = (totalTasks == 0) ? 1 : (double)onTimeCount / totalTasks,
+                OverDue_Count = allTasks.Count(w => w.Is_OverDue),
+                Satisfied_Percent = (closedCount == 0) ? 1 : 1 - (double)unsatisfiedCount / closedCount,
+                Unsatisfied_Count = unsatisfiedCount
+            };
+
+            return res;
+        }
+
+        public List<ReportKPI_Overdue> ClsReportKPI_OverdueList(ReportKPI_Filter filter)
+        {
+            var query = db.Services.Where(w => w.Is_OverDue);
+            if (filter != null)
+            {
+                query = query.Where(w => w.Update >= filter.Date_From);
+                DateTime adjustedDateTo = filter.Date_To.AddDays(1);
+                query = query.Where(w => w.Update < adjustedDateTo);
+            }
+
+            // Execute the query and load the data into memory
+            var services = query
+                .Select(s => new
+                {
+                    s.Service_Id,
+                    s.Service_Key,
+                    s.Service_Subject,
+                    s.System_Statuses.Status_Class,
+                    s.System_Statuses.Status_Name,
+                    Action_User_Id = s.Action_User_Id.Value
+                })
+                .ToList();
+
+            // Now, process the data in memory and call the Users_GetInfomation method
+            var overdues = services
+                .Select(s => new ReportKPI_Overdue
+                {
+                    Service_Id = s.Service_Id,
+                    Service_Key = s.Service_Key,
+                    Service_Subject = s.Service_Subject,
+                    Status_Class = s.Status_Class,
+                    Status_Name = s.Status_Name,
+                    User_Id = s.Action_User_Id,
+                    User_Name = master.Users_GetInfomation(s.Action_User_Id)
+                })
+                .ToList();
+
+            return overdues;
         }
 
         public ClsSatisfaction ClsSatisfaction_View(Guid id)
@@ -381,8 +358,7 @@ namespace E2E.Models
 
                 if (clsServices.Services.Action_User_Id.HasValue)
                 {
-                    UserDetails userDetails = new UserDetails();
-                    userDetails = db.UserDetails
+                    UserDetails userDetails = db.UserDetails
                         .Where(w => w.User_Id == clsServices.Services.Action_User_Id)
                         .FirstOrDefault();
                     clsServices.Action_Email = userDetails.Users.User_Email;
@@ -520,36 +496,39 @@ namespace E2E.Models
         {
             try
             {
-                IQueryable<ReportKPI_User_Views> query = db.Services
-                    .Where(w => w.Action_User_Id == id)
-                    .GroupJoin(db.Satisfactions, ser => ser.Service_Id, sat => sat.Service_Id, (ser, g) => new
-                    {
-                        ser,
-                        g
-                    }).SelectMany(tmp => tmp.g.DefaultIfEmpty(), (tmp, sat) => new ReportKPI_User_Views()
-                    {
-                        Service_Id = tmp.ser.Service_Id,
-                        Create = tmp.ser.Create,
-                        Service_Subject = tmp.ser.Service_Subject,
-                        Service_Key = tmp.ser.Service_Key,
-                        Priority_Point = tmp.ser.System_Priorities.Priority_Point,
-                        Satisfaction_Average = sat.Satisfaction_Average,
-                        Status_Name = tmp.ser.System_Statuses.Status_Name,
-                        Status_Class = tmp.ser.System_Statuses.Status_Class
-                    }).OrderBy(o => o.Create);
+                int[] finishIds = { 3, 4 };
+                IQueryable<Services> services = db.Services
+                    .Where(w => w.Action_User_Id == id && finishIds.Contains(w.Status_Id));
 
                 if (filter != null)
                 {
-                    if (filter.Date_From.HasValue)
-                    {
-                        query = query.Where(w => w.Create >= filter.Date_From);
-                    }
+                    services = services.Where(w => w.Update >= filter.Date_From);
 
                     filter.Date_To = filter.Date_To.AddDays(1);
-                    query = query.Where(w => w.Create <= filter.Date_To);
+                    services = services.Where(w => w.Update <= filter.Date_To);
                 }
 
-                return query.ToList();
+                List<ReportKPI_User_Views> user_Views = services
+                    .GroupJoin(
+                    db.Satisfactions,
+                    ser => ser.Service_Id,
+                    sat => sat.Service_Id,
+                    (ser, satGroup) => new { ser, satGroup })
+                    .SelectMany(
+                    temp => temp.satGroup.DefaultIfEmpty(),
+                    (temp, sat) => new ReportKPI_User_Views
+                    {
+                        Service_Id = temp.ser.Service_Id,
+                        Update = temp.ser.Update,
+                        Service_Subject = temp.ser.Service_Subject,
+                        Service_Key = temp.ser.Service_Key,
+                        Priority_Point = temp.ser.System_Priorities.Priority_Point,
+                        Satisfaction_Average = sat != null ? sat.Satisfaction_Average : (double?)null,
+                        Status_Class = temp.ser.System_Statuses.Status_Class,
+                        Status_Name = temp.ser.System_Statuses.Status_Name
+                    }).ToList();
+
+                return user_Views;
             }
             catch (Exception)
             {
@@ -1106,12 +1085,9 @@ namespace E2E.Models
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                List<Guid> ids = Services_GetAllRequest_IQ()
-                    .Where(w => w.User_Id == id)
-                    .Select(s => s.Service_Id)
-                    .ToList();
+
                 return db.ServiceChangeDueDates
-                    .Where(w => ids.Contains(w.Service_Id))
+                    .Where(w => w.Services.User_Id == id)
                     .AsEnumerable()
                     .Select(s => new ClsChangeDueDates()
                     {
@@ -1262,36 +1238,31 @@ namespace E2E.Models
             {
                 if (!Guid.TryParse(HttpContext.Current.User.Identity.Name, out Guid id))
                 {
-                    // Handle the error if the user id cannot be parsed
                     throw new Exception("Invalid user id");
                 }
 
-                string deptName = master.GetDepartmentNameForUser(id);
-
-                IQueryable<Guid> deptIds = db.Master_Departments
-                    .Where(w => w.Department_Name == deptName)
-                    .Select(s => s.Department_Id);
-
-                IQueryable<Services> query = db.Services
-                    .Where(w => deptIds.Contains(w.Department_Id.Value))
-                    .OrderBy(o => o.Status_Id)
-                    .ThenByDescending(t => t.Priority_Id)
-                    .ThenBy(t => t.Service_DueDate)
-                    .ThenBy(t => t.Update);
+                var query = db.Services
+                    .AsNoTracking()
+                    .Join(db.Master_Sections,
+                          service => service.Department_Id,
+                          section => section.Department_Id,
+                          (service, section) => new { service, section })
+                    .Join(db.Master_Processes,
+                          combined => combined.section.Section_Id,
+                          process => process.Section_Id,
+                          (combined, process) => new { combined.service, process })
+                    .Join(db.Users,
+                          combined => combined.process.Process_Id,
+                          user => user.Process_Id,
+                          (combined, user) => new { combined.service, user })
+                    .Where(joined => joined.user.User_Id == id)
+                    .OrderBy(joined => joined.service.Status_Id)
+                    .ThenByDescending(joined => joined.service.Priority_Id)
+                    .ThenBy(joined => joined.service.Service_DueDate)
+                    .ThenBy(joined => joined.service.Update)
+                    .Select(joined => joined.service);
 
                 return query;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public List<Services> Services_GetDepartmentRequest()
-        {
-            try
-            {
-                return Services_GetAllRequest_IQ().ToList();
             }
             catch (Exception)
             {
@@ -1342,15 +1313,15 @@ namespace E2E.Models
             return Services_GetNoPending_IQ().ToList();
         }
 
-        public List<Services> Services_GetRequiredApprove(bool val)
+        public List<Services> Services_GetRequiredApprove(bool isApprove)
         {
             try
             {
                 Guid id = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 string deptName = db.Users.Find(id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-                IQueryable<Guid> userIdList = db.Users
-                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id);
-                return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == val && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
+                List<Guid> userIdList = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName).Select(s => s.User_Id).ToList();
+                return db.Services.Where(w => w.Is_MustBeApproved && w.Is_Approval == isApprove && userIdList.Contains(w.User_Id) && w.Status_Id == 1).ToList();
             }
             catch (Exception)
             {
@@ -1449,7 +1420,7 @@ namespace E2E.Models
                     db.SaveChanges();
                 }
 
-                InsertProcess:
+            InsertProcess:
 
                 bool res = new bool();
                 int todayCount = db.Services
@@ -1739,52 +1710,102 @@ namespace E2E.Models
                 throw;
             }
         }
+        
+        public async Task<bool> Services_SetClose(Guid id, bool isAuto = false)
+        {
+            try
+            {
+                bool res = new bool();
+                Services services = await db.Services.FindAsync(id);
+                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
+                services.Status_Id = system_Statuses.Status_Id;
+                services.Update = DateTime.Now.AddDays(-DateTime.Now.Day);
+                services.Is_AutoClose = isAuto;
+                db.Entry(services).State = EntityState.Modified;
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    ServiceComments serviceComments = new ServiceComments
+                    {
+                        Service_Id = id,
+                        Comment_Content = string.Format("Automatically update status to {0} by system", system_Statuses.Status_Name),
+                        User_Id = services.Action_User_Id
+                    };
+                    db.Entry(serviceComments).State = EntityState.Added;
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        if (services.Ref_Service_Id.HasValue)
+                        {
+                            res = await Services_SetClose(services.Ref_Service_Id.Value);
+                        }
+                        else
+                        {
+                            res = true;
+                        }
+
+                    }
+
+                    ClsMail clsMail = new ClsMail()
+                    {
+                        Body = serviceComments.Comment_Content,
+                        SendCC = services.User_Id,
+                        SendToId = services.Action_User_Id,
+                        SendFrom = services.Action_User_Id.Value,
+                        Subject = string.Format("[Closed job] {0} - {1}", services.Service_Key, services.Service_Subject)
+                    };
+                    await clsMail.SendMail(clsMail);
+                }
+
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<bool> Services_SetClose(Guid id, List<ClsEstimate> score)
         {
             try
             {
                 bool res = new bool();
-                Guid? nextId = id;
-                while (nextId.HasValue)
+                Services services = await db.Services.FindAsync(id);
+                if (services.Status_Id == 3)
                 {
-                    Services services = new Services();
-                    services = db.Services.Find(nextId.Value);
-                    if (services.Status_Id == 3)
+                    System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
+                    services.Status_Id = system_Statuses.Status_Id;
+                    services.Update = DateTime.Now;
+                    db.Entry(services).State = EntityState.Modified;
+                    if (await db.SaveChangesAsync() > 0)
                     {
-                        System_Statuses system_Statuses = new System_Statuses();
-                        system_Statuses = db.System_Statuses.Find(4);
-                        services.Status_Id = system_Statuses.Status_Id;
-                        services.Update = DateTime.Now;
-                        db.Entry(services).State = EntityState.Modified;
-                        if (db.SaveChanges() > 0)
+                        ServiceComments serviceComments = new ServiceComments
                         {
-                            ServiceComments serviceComments = new ServiceComments
+                            Service_Id = id,
+                            Comment_Content = string.Format("Status update to {0}", system_Statuses.Status_Name)
+                        };
+                        if (await Services_Comment(serviceComments))
+                        {
+                            if (services.Ref_Service_Id.HasValue)
                             {
-                                Service_Id = nextId.Value,
-                                Comment_Content = string.Format("Status update to {0}", system_Statuses.Status_Name)
-                            };
-                            if (await Services_Comment(serviceComments))
-                            {
-                                res = true;
-                                if (services.Ref_Service_Id.HasValue)
+                                id = services.Ref_Service_Id.Value;
+                                if (db.Services.Any(a => a.Service_Id == id && a.Status_Id == 3))
                                 {
-                                    nextId = services.Ref_Service_Id.Value;
-                                    if (db.Services.Any(a => a.Service_Id == nextId && a.Status_Id == 3))
-                                    {
-                                        res = await SaveEstimate(nextId.Value, score);
-                                    }
-                                    else
-                                    {
-                                        nextId = null;
-                                    }
-                                }
-                                else
-                                {
-                                    nextId = null;
-                                    res = true;
+                                    res = await SaveEstimate(id, score);
                                 }
                             }
+                            else
+                            {
+                                res = true;
+                            }
+
+                            ClsMail clsMail = new ClsMail()
+                            {
+                                Body = serviceComments.Comment_Content,
+                                SendCC = services.User_Id,
+                                SendToId = services.Action_User_Id,
+                                SendFrom = services.Action_User_Id.Value,
+                                Subject = string.Format("[Closed job] {0} - {1}", services.Service_Key, services.Service_Subject)
+                            };
+                            await clsMail.SendMail(clsMail);
                         }
                     }
                 }
@@ -1859,6 +1880,11 @@ namespace E2E.Models
                     };
                     if (await Services_Comment(serviceComments))
                     {
+
+                        var nextMonth = services.Update.Value.AddMonths(1);
+                        var eighthOfNextMonth = new DateTime(nextMonth.Year, nextMonth.Month, 8).ToShortDateString();
+                        var lastDayOfMonth = new DateTime(services.Update.Value.Year, services.Update.Value.Month, DateTime.DaysInMonth(services.Update.Value.Year, services.Update.Value.Month)).ToShortDateString();
+
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
                         linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
@@ -1866,18 +1892,19 @@ namespace E2E.Models
                         string subject = string.Format("[Require close job] {0} - {1}", services.Service_Key, services.Service_Subject);
                         string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
                         content += "</p>";
+                        content += $"<b>The system will automatically close the job on {eighthOfNextMonth}. The system will send you a total of 4 reminder emails. If you do not take action, the job will be closed automatically on the last day of this month ({lastDayOfMonth}).</b><br />";
+                        content += $"<b>ระบบจะปิดงานนี้โดยอัตโนมัติ โดยที่ระบบจะส่งอีเมลแจ้งเตือนให้ท่านรวมทั้งสิ้น 4 ครั้ง หากท่านไม่ดำเนินการ ระบบจะปิดงานโดยอัตโนมัติในวันที่ {eighthOfNextMonth} แต่ระบบจะระบุว่าปิดในวันสุดท้ายของเดือนนี้ ({lastDayOfMonth})</b><br />";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
                         clsMail.SendToId = services.User_Id;
+                        clsMail.SendCC = services.Action_User_Id;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         if (await clsMail.SendMail(clsMail))
                         {
                             Log_SendEmail log_SendEmail = new Log_SendEmail
                             {
-                                SendEmail_ClassName = nameof(Services_SetComplete),
                                 SendEmail_Content = content,
-                                SendEmail_MethodName = methodName,
                                 SendEmail_Ref_Id = model.Service_Id,
                                 SendEmail_Subject = subject,
                                 User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
@@ -2182,6 +2209,7 @@ namespace E2E.Models
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
                             clsMail.SendToId = services.Assign_User_Id;
+                            clsMail.SendCC = services.Action_User_Id;
                             clsMail.Subject = subject;
                             clsMail.Body = content;
                             res = await clsMail.SendMail(clsMail);
@@ -2462,19 +2490,17 @@ namespace E2E.Models
         {
             try
             {
+                int[] finishIds = { 3, 4 };
                 IQueryable<Services> query = db.ServiceTeams
-                    .Where(w => w.User_Id == id)
+                    .Where(w => w.User_Id == id && finishIds.Contains(w.Services.Status_Id))
                     .Select(s => s.Services);
 
                 if (filter != null)
                 {
-                    if (filter.Date_From.HasValue)
-                    {
-                        query = query.Where(w => w.Create >= filter.Date_From);
-                    }
+                    query = query.Where(w => w.Update >= filter.Date_From);
 
                     filter.Date_To = filter.Date_To.AddDays(1);
-                    query = query.Where(w => w.Create <= filter.Date_To);
+                    query = query.Where(w => w.Update <= filter.Date_To);
                 }
 
                 return query.ToList();
@@ -2572,6 +2598,41 @@ namespace E2E.Models
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task JobDaily()
+        {
+            var today = DateTime.Now;
+            var services = await db.Services
+                .Where(s => s.Status_Id == 3 && s.Update.HasValue)
+                .Select(s => new {
+                    s.Service_Id,
+                    UpdateDate = s.Update.Value
+                })
+                .ToListAsync();
+
+            foreach (var service in services)
+            {
+                var daysSinceChange = (today.Date - service.UpdateDate.Date).Days;
+
+                if (daysSinceChange == 2 || daysSinceChange == 4 || daysSinceChange == 6)
+                {
+                    await clsMail.ResendMail(service.Service_Id);
+                }
+            }
+        }
+
+
+        public async Task JobMonthly()
+        {
+            var servicesIds = await db.Services
+                .Where(s => s.Status_Id == 3 && s.Update.HasValue && s.Update.Value.Month < DateTime.Now.Month)
+                .Select(s => s.Service_Id)
+                .ToListAsync();
+            foreach (var serviceId in servicesIds)
+            {
+                await Services_SetClose(serviceId, true);
             }
         }
     }

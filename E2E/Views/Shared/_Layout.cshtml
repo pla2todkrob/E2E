@@ -27,7 +27,6 @@
             @{ Html.RenderAction("_Navbar", "Configurations"); }
         </div>
     </nav>
-    <div id="objSpin"></div>
 
     <div class="container-sm container-fluid bg-white py-3" id="sectionArea">
         @RenderSection("breadcrumb", required: false)
@@ -41,7 +40,7 @@
     </footer>
 
     <div class="modal fade" id="modalArea" tabindex="-1" role="dialog" aria-labelledby="modalTitle" data-backdrop="static" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document" id="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document" id="dialog">
             <div class="modal-content" id="modalContent">
             </div>
         </div>

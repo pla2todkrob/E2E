@@ -28,12 +28,17 @@ namespace E2E.Models.Views
             WorkRoots = new WorkRoots();
         }
 
-        public DateTime Create { get; set; }
         public Guid Service_Id { get; set; }
         public string Service_Key { get; set; }
+
+        [Display(Name = "Subject")]
         public string Service_Subject { get; set; }
+
         public DateTime Update { get; set; }
+
+        [Display(Name = "Username")]
         public string User_Name { get; set; }
+
         public WorkRoots WorkRoots { get; set; }
     }
 }

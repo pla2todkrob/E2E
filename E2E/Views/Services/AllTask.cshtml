@@ -7,8 +7,8 @@
     <script src="~/Asset/Service.js"></script>
 
     <script>
-        $(function () {
-            reloadTable();
+        $(async function () {
+           await reloadTable();
 
         });
 
@@ -18,8 +18,8 @@
             return false;
         });
 
-        function reloadTable() {
-            callTable_NoSort('@Url.Action("AllTask_Table", "Services")');
+       async function reloadTable() {
+           await callTable_NoSort('@Url.Action("AllTask_Table", "Services")');
         }
     </script>
 }
@@ -34,8 +34,4 @@
     </nav>
 }
 
-<div class="card shadow">
-    <div class="card-body">
-        <div class="row" id="datalist"></div>
-    </div>
-</div>
+<div class="card shadow" id="datalist"></div>

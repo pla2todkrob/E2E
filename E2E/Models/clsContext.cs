@@ -1,8 +1,8 @@
 ﻿using E2E.Models.Tables;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
 using System.Configuration;
+using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Web;
@@ -44,7 +44,6 @@ namespace E2E.Models
         public ClsContext() : base(ConfigurationManager.AppSettings["NameConn"])
         {
         }
-
 
         public DbSet<System_Program> System_Programs { get; set; }
         public DbSet<BusinessCardFiles> BusinessCardFiles { get; set; }

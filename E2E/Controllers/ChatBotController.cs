@@ -1,7 +1,6 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
@@ -17,11 +16,10 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class ChatBotController : Controller
+    public class ChatBotController : BaseController
     {
         private readonly ClsChatBot chatBot = new ClsChatBot();
         private readonly ClsApi clsApi = new ClsApi();
-        private readonly ClsContext db = new ClsContext();
         private readonly ClsManageMaster master = new ClsManageMaster();
         public string SessionQuestionName { get; set; } = "QuestionLv";
 
@@ -60,13 +58,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.TargetSite.Name;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Text = inner.Message;
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -241,13 +233,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.TargetSite.Name;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Text = inner.Message;
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -328,8 +314,7 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                    ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+                    ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == loginId && !w.IsEnd).FirstOrDefaultAsync();
                     chatGPT.IsEnd = true;
                     if (await db.SaveChangesAsync() > 0)
                     {
@@ -349,13 +334,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.TargetSite.Name;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Text = inner.Message;
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -363,9 +342,8 @@ namespace E2E.Controllers
 
         public async Task<ActionResult> OpenAI_History()
         {
-            Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
             List<ChatGPTHistory> chatGPTHistories = new List<ChatGPTHistory>();
-            ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+            ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == loginId && !w.IsEnd).FirstOrDefaultAsync();
             if (chatGPT != null)
             {
                 chatGPTHistories = await db.ChatGPTHistories.Where(w => w.GPTId == chatGPT.GPTId).OrderBy(o => o.Create).ToListAsync();
@@ -377,10 +355,9 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 DateTime fromDate = DateTime.Today.AddDays(-(DateTime.Today.Day - 1));
 
-                var chatGptQuery = db.ChatGPTs.Where(w => w.User_Id == userId);
+                var chatGptQuery = db.ChatGPTs.Where(w => w.User_Id == loginId);
                 var conversationTokenUsage = await chatGptQuery.Where(w => !w.IsEnd).Select(s => s.TokenUsage).FirstOrDefaultAsync();
                 var monthlyYourTokenUsage = await chatGptQuery
     .Where(w => w.Create >= fromDate)
@@ -418,7 +395,6 @@ namespace E2E.Controllers
                 {
                     return Json(null);
                 }
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 RestClientOptions options = new RestClientOptions("https://api.openai.com/")
                 {
                     MaxTimeout = -1,
@@ -428,12 +404,12 @@ namespace E2E.Controllers
 
                 request.AddHeader("Content-Type", "application/json");
                 request.AddHeader("Authorization", $"Bearer {ConfigurationManager.AppSettings["GPTkey"]}");
-                ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == userId && !w.IsEnd).FirstOrDefaultAsync();
+                ChatGPT chatGPT = await db.ChatGPTs.Where(w => w.User_Id == loginId && !w.IsEnd).FirstOrDefaultAsync();
                 if (chatGPT == null)
                 {
                     chatGPT = new ChatGPT()
                     {
-                        User_Id = userId
+                        User_Id = loginId
                     };
                     db.ChatGPTs.Add(chatGPT);
                 }

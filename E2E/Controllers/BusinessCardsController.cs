@@ -5,7 +5,6 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -17,28 +16,23 @@ using System.Web.Mvc;
 namespace E2E.Controllers
 {
     [Authorize]
-    public class BusinessCardsController : Controller
+    public class BusinessCardsController : BaseController
     {
         private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsManageService data = new ClsManageService();
         private readonly ClsManageBusinessCard dataCard = new ClsManageBusinessCard();
-        private readonly ClsContext db = new ClsContext();
         private readonly ReportKPI_Filter reportKPI_Filter = new ReportKPI_Filter();
         private readonly ClsManageMaster master = new ClsManageMaster();
-        
-
-        private static Guid? UserAuthorized { get; set; }
 
         public ActionResult BusinessCard_Create(Guid? id)
         {
             ClsBusinessCard businessCards;
             if (!id.HasValue)
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 businessCards = new ClsBusinessCard()
                 {
-                    User_id = userId,
-                    UserDetails = db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefault()
+                    User_id = loginId,
+                    UserDetails = db.UserDetails.Where(w => w.User_Id == loginId).FirstOrDefault()
                 };
             }
             else
@@ -87,14 +81,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -126,11 +113,10 @@ namespace E2E.Controllers
 
         public ActionResult BusinessCard_Detail(Guid id)
         {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.UserCardList = dataCard.SelectListItems_CardGroup();
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
+            ViewBag.GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
             ViewBag.OrderBusinessCard = db.BusinessCards.Where(w => w.BusinessCard_Id == id).Select(s => s.System_Statuses.OrderBusinessCard).FirstOrDefault();
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            ViewBag.authorized = authId;
             ViewBag.UserCHK = db.BusinessCardFiles.Any(a => a.BusinessCard_Id == id && a.Confirm == true);
             ViewBag.CountFileUpload = db.BusinessCardFiles.Where(w => w.BusinessCard_Id == id).Count();
             ViewBag.DeptCHK = dataCard.Same_department_check(id);
@@ -209,14 +195,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -258,14 +237,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -427,8 +399,8 @@ namespace E2E.Controllers
                 double xLeft_txt = 35.433070866142;
                 double xRight_txt = 297.63779527559;
 
-                PdfSharp.Drawing.XImage LogoTPs = PdfSharp.Drawing.XImage.FromStream(LogoTP());
-                PdfSharp.Drawing.XImage QrCodeTPs = PdfSharp.Drawing.XImage.FromStream(QrCodeTP());
+                PdfSharp.Drawing.XImage LogoTPs = XImage.FromStream(LogoTP());
+                PdfSharp.Drawing.XImage QrCodeTPs = XImage.FromStream(QrCodeTP());
                 //806.45669291339
                 graphics.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
                 //graphics2.DrawRectangle(XPens.Black, new XRect(xLeft, yLeft, 524.4094488189, 809.45669291339));
@@ -568,9 +540,8 @@ namespace E2E.Controllers
         // GET: BusinessCards
         public ActionResult Index()
         {
-            UserAuthorized = Guid.Parse(HttpContext.User.Identity.Name);
-            ViewBag.GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            ViewBag.authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            ViewBag.GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            ViewBag.authorized = authId;
             return View();
         }
 
@@ -605,7 +576,7 @@ namespace E2E.Controllers
             return View(clsLog_Businesses.OrderByDescending(O => O.Create));
         }
 
-        public async Task<ActionResult> ManagerGaApprove(Guid? id, Guid? SelectId , string remark)
+        public async Task<ActionResult> ManagerGaApprove(Guid? id, Guid? SelectId, string remark)
         {
             ClsSwal swal = new ClsSwal();
             TransactionOptions options = new TransactionOptions
@@ -626,7 +597,7 @@ namespace E2E.Controllers
                     if (db.SaveChanges() > 0)
                     {
                         dataCard.BusinessCard_SaveLog(businessCards);
-                        await dataCard.SendMail(businessCards, SelectId,null,"",remark);
+                        await dataCard.SendMail(businessCards, SelectId, null, "", remark);
                         scope.Complete();
                         swal.DangerMode = false;
                         swal.Icon = "success";
@@ -643,14 +614,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -694,14 +658,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -760,14 +717,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -811,14 +761,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -893,14 +836,7 @@ namespace E2E.Controllers
             catch (Exception ex)
             {
                 swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                swal.Text = ex.GetBaseException().Message;
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -955,14 +891,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1005,14 +934,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1056,14 +978,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1072,15 +987,15 @@ namespace E2E.Controllers
 
         public ActionResult Table_AllRequest()
         {
-            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            Guid MyDeptId = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
             //user
             if (authorized == 3 && GA == false)
             {
-                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized || w.UserRef_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == loginId || w.UserRef_id == loginId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
             //mg user
             else if (authorized == 2 && GA == false)
@@ -1095,7 +1010,7 @@ namespace E2E.Controllers
             // staff ga
             else if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = query.Where(w => w.User_id == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.User_id == loginId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
@@ -1103,8 +1018,8 @@ namespace E2E.Controllers
 
         public ActionResult Table_AllTask()
         {
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
 
@@ -1119,9 +1034,9 @@ namespace E2E.Controllers
 
         public ActionResult Table_Approval()
         {
-            Guid MyDeptId = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            Guid MyDeptId = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
 
@@ -1141,15 +1056,15 @@ namespace E2E.Controllers
 
         public ActionResult Table_MyTask()
         {
-            var GA = db.Users.Any(a => a.User_Id == UserAuthorized && a.BusinessCardGroup == true);
-            var authorized = db.Users.Where(w => w.User_Id == UserAuthorized).Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id).FirstOrDefault();
+            var GA = db.Users.Any(a => a.User_Id == loginId && a.BusinessCardGroup == true);
+            var authorized = authId;
             List<ClsBusinessCard> clsBusinessCard = new List<ClsBusinessCard>();
             var query = QueryClsBusinessCard();
 
             //staff ga
             if (authorized == 3 && GA == true)
             {
-                clsBusinessCard = query.Where(w => w.UserAction == UserAuthorized).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
+                clsBusinessCard = query.Where(w => w.UserAction == loginId).OrderBy(o => o.System_Statuses.OrderBusinessCard).ToList();
             }
 
             return View(clsBusinessCard);
@@ -1202,14 +1117,7 @@ namespace E2E.Controllers
             catch (Exception ex)
             {
                 swal.Title = ex.Source;
-                swal.Text = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    swal.Title = inner.Source;
-                    swal.Text += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                swal.Text = ex.GetBaseException().Message;
             }
 
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1227,7 +1135,7 @@ namespace E2E.Controllers
             ClsInquiryTopics clsInquiryTopics = new ClsInquiryTopics
             {
                 BusinessCards = db.BusinessCards.Find(id),
-                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w=>w.Program_Id == 2).OrderBy(o => o.InquiryTopic_Index).ToList()
+                List_Master_InquiryTopics = db.Master_InquiryTopics.Where(w => w.Program_Id == 2).OrderBy(o => o.InquiryTopic_Index).ToList()
             };
 
             return View(clsInquiryTopics);
@@ -1259,14 +1167,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1331,14 +1232,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1386,14 +1280,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1436,14 +1323,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -1461,8 +1341,6 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
-
 
         public ActionResult Report_KPI_View(Guid id, string filter)
         {
@@ -1498,14 +1376,6 @@ namespace E2E.Controllers
             {
                 ReportKPI_Filter _Filter = reportKPI_Filter.DeserializeFilter(filter);
 
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.AuthorizeId = db.Users
-                    .Where(w => w.User_Id == userId)
-                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                    .FirstOrDefault();
-
-                ViewBag.UserList = data.SelectListItems_UsersDepartment();
-
                 return View(_Filter);
             }
             catch (Exception)
@@ -1513,6 +1383,5 @@ namespace E2E.Controllers
                 throw;
             }
         }
-
     }
 }

@@ -275,6 +275,7 @@ namespace E2E.Models.Views
 
         public decimal MaxConversationValue { get; set; } = 4096;
         public decimal MaxMonthlyAllValue { get; set; } = 50000000;
+
         public decimal Conversation
         {
             get { return conversation; }

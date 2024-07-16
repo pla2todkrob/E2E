@@ -12,10 +12,9 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class ManualsController : Controller
+    public class ManualsController : BaseController
     {
         private readonly ClsManageService clsManageService = new ClsManageService();
-        private readonly ClsContext db = new ClsContext();
 
         // GET: Manuals
         public ActionResult Index()
@@ -95,14 +94,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }

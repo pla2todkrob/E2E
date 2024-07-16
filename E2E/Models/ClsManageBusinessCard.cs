@@ -18,7 +18,6 @@ namespace E2E.Models
         private readonly ClsMail mail = new ClsMail();
         private readonly ClsManageMaster master = new ClsManageMaster();
 
-
         public List<ClsBusinessCard> ClsReport_KPI_Unsatisfied(ReportKPI_Filter filter)
         {
             try
@@ -26,10 +25,7 @@ namespace E2E.Models
                 var JobUnsat = db.Satisfactions_BusinessCards.Where(w => w.Unsatisfied);
                 if (filter != null)
                 {
-                    if (filter.Date_From.HasValue)
-                    {
-                        JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
-                    }
+                    JobUnsat = JobUnsat.Where(w => w.Create >= filter.Date_From);
 
                     filter.Date_To = filter.Date_To.AddDays(1);
                     JobUnsat = JobUnsat.Where(w => w.Create <= filter.Date_To);
@@ -46,10 +42,7 @@ namespace E2E.Models
                        DueDate = item.DueDate,
                        Update = item.Update,
                        System_Statuses = item.System_Statuses
-
                    }).ToList();
-
-
 
                     return BusinessCards;
                 }
@@ -63,7 +56,6 @@ namespace E2E.Models
                 throw;
             }
         }
-
 
         public async Task<bool> SaveEstimate(Guid id, List<ClsEstimate> score)
         {
@@ -83,8 +75,6 @@ namespace E2E.Models
                     Satisfaction_Average = average,
                     Unsatisfied = unsatisfied
                 };
-
-
 
                 db.Satisfactions_BusinessCards.Add(Satisfactions_BusinessCard);
 
@@ -118,7 +108,6 @@ namespace E2E.Models
             bool res = new bool();
             try
             {
-
                 BusinessCards BusinessCard = new BusinessCards();
                 BusinessCard = db.BusinessCards.Find(id);
                 if (BusinessCard.Status_Id == 3)
@@ -135,8 +124,6 @@ namespace E2E.Models
                         }
                     }
                 }
-
-
             }
             catch (Exception)
             {
@@ -336,415 +323,406 @@ namespace E2E.Models
                 }
             }
 
-            return string.IsNullOrEmpty(strGrade)?0: Convert.ToInt32(strGrade);
+            return string.IsNullOrEmpty(strGrade) ? 0 : Convert.ToInt32(strGrade);
         }
 
-    public List<Guid> NoM3(List<Guid> IDs)
-    {
-        List<Guid> MGs = new List<Guid>();
-        foreach (var item in IDs)
+        public List<Guid> NoM3(List<Guid> IDs)
         {
-            if (GradeNumber(item) >= 4)
+            List<Guid> MGs = new List<Guid>();
+            foreach (var item in IDs)
             {
-                MGs.Add(item);
+                if (GradeNumber(item) >= 4)
+                {
+                    MGs.Add(item);
+                }
+            }
+
+            return MGs;
+        }
+
+        public bool Same_department_check(Guid? id)
+        {
+            bool res = new bool();
+            Guid MyUser = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            var businessCard = db.BusinessCards.Find(id);
+            Guid DeptJOB = db.Users.Where(w => w.User_Id == businessCard.User_id).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+            Guid DeptUser = db.Users.Where(w => w.User_Id == MyUser).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
+
+            if (DeptJOB == DeptUser)
+            {
+                res = true;
+            }
+
+            return res;
+        }
+
+        public List<SelectListItem> SelectListItems_CardGroup()
+        {
+            try
+            {
+                return db.UserDetails
+                .Where(w => w.Users.Active && w.Users.BusinessCardGroup == true && w.Users.Master_Grades.Master_LineWorks.Authorize_Id == 3)
+                .OrderBy(o => o.Users.User_Code)
+                .Select(s => new SelectListItem()
+                {
+                    Value = s.User_Id.ToString(),
+                    Text = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "][" + s.Users.User_Point + "]"
+                }).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
-        return MGs;
-    }
-
-    public bool Same_department_check(Guid? id)
-    {
-        bool res = new bool();
-        Guid MyUser = Guid.Parse(HttpContext.Current.User.Identity.Name);
-        var businessCard = db.BusinessCards.Find(id);
-        Guid DeptJOB = db.Users.Where(w => w.User_Id == businessCard.User_id).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-        Guid DeptUser = db.Users.Where(w => w.User_Id == MyUser).Select(s => s.Master_Processes.Master_Sections.Department_Id).FirstOrDefault();
-
-        if (DeptJOB == DeptUser)
+        public async Task<bool> SendMail(BusinessCards Model, Guid? SelectId = null, BusinessCardFiles ModelFile = null, string filepath = "", string remark = "", string pseudo = "")
         {
-            res = true;
-        }
+            bool res = new bool();
 
-        return res;
-    }
+            Guid DeptId = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Id).FirstOrDefault();
+            var GetMgApp = db.Users.Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
 
-    public List<SelectListItem> SelectListItems_CardGroup()
-    {
-        try
-        {
-            return db.UserDetails
-            .Where(w => w.Users.Active && w.Users.BusinessCardGroup == true && w.Users.Master_Grades.Master_LineWorks.Authorize_Id == 3)
-            .OrderBy(o => o.Users.User_Code)
-            .Select(s => new SelectListItem()
-            {
-                Value = s.User_Id.ToString(),
-                Text = s.Users.User_Code + " [" + s.Detail_EN_FirstName + " " + s.Detail_EN_LastName + "][" + s.Users.User_Point + "]"
-            }).ToList();
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
+            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+            bool found = linkUrl.Contains("Upload");
+            bool reSend = linkUrl.Contains("Resend_Email");
 
-    public async Task<bool> SendMail(BusinessCards Model, Guid? SelectId = null, BusinessCardFiles ModelFile = null, string filepath = "", string remark = "", string pseudo = "")
-    {
-        bool res = new bool();
+            linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
 
-        Guid DeptId = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Id).FirstOrDefault();
-        var GetMgApp = db.Users.Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
+            string subject = string.Format("[Business Card][Require approve] {0}", Model.Key);
 
-        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-        bool found = linkUrl.Contains("Upload");
-        bool reSend = linkUrl.Contains("Resend_Email");
-
-        linkUrl = linkUrl.Replace("BusinessCard_Create", "BusinessCard_Detail/" + Model.BusinessCard_Id);
-
-        string subject = string.Format("[Business Card][Require approve] {0}", Model.Key);
-
-        string content = "<p>Request Business Card";
-        content += "<br/>";
-        content += string.Format("<b>Requester:</b> {0}", master.Users_GetInfomation(Model.User_id));
-        content += "<br/>";
-        content += string.Format("<b>Amount:</b> {0} pcs.", Model.Amount);
-        if (Model.DueDate.HasValue)
-        {
+            string content = "<p>Request Business Card";
             content += "<br/>";
-            content += string.Format("<b>Due date:</b> {0}", Model.DueDate.Value.ToString("D"));
-        }
+            content += string.Format("<b>Requester:</b> {0}", master.Users_GetInfomation(Model.User_id));
+            content += "<br/>";
+            content += string.Format("<b>Amount:</b> {0} pcs.", Model.Amount);
+            if (Model.DueDate.HasValue)
+            {
+                content += "<br/>";
+                content += string.Format("<b>Due date:</b> {0}", Model.DueDate.Value.ToString("D"));
+            }
 
-        mail.SendToIds = GetMgApp;
-        mail.SendFrom = Model.User_id;
-        mail.Subject = subject;
-
-        if (Model.UserRef_id.HasValue)
-        {
-            mail.SendCC = Model.UserRef_id;
-        }
-
-        //Mg User Approved
-        if (Model.Status_Id == 7 && string.IsNullOrEmpty(pseudo))
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-            mail.SendToIds = NoM3(GetMgApp);
-            mail.SendCC = Model.User_id;
-        }
-        //Staff Undo
-        else if (Model.Status_Id == 7 && pseudo == "7")
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            subject = string.Format("[Business Card][Staff Undo] {0}", Model.Key);
-
-            content += string.Format("<p>Undo remark: {0}</p>", remark);
-
-            mail.Subject = subject;
-            GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
             mail.SendToIds = GetMgApp;
-        }
-
-        //User Undo
-        else if (Model.Status_Id == 9 && pseudo == "9")
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            subject = string.Format("[Business Card][Requester Undo] {0}", Model.Key);
-
-            content += string.Format("<p>Comment: {0}</p>", remark);
-            mail.SendToIds.Clear();
+            mail.SendFrom = Model.User_id;
             mail.Subject = subject;
-            mail.SendToId = Model.UserAction;
-        }
 
-        //Rejected
-        else if (Model.Status_Id == 5)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-            subject = string.Format("[Business Card][Rejected] {0}", Model.Key);
-            content = string.Format("<p>Comment: {0}", remark);
-            mail.SendToId = Model.User_id;
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
-            mail.SendToIds.Clear();
-
-            var ChkMgUserRejected = GetMgApp.Any(a => a == ActionId);
-
-            if (!ChkMgUserRejected)
+            if (Model.UserRef_id.HasValue)
             {
-                mail.SendBCC = GetMgApp;
+                mail.SendCC = Model.UserRef_id;
             }
-        }
-        //[M] GA Assign
-        else if (Model.Status_Id == 8)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
 
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-            List<Users> users = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).ToList();
-            if (SelectId.HasValue)
+            //Mg User Approved
+            if (Model.Status_Id == 7 && string.IsNullOrEmpty(pseudo))
             {
-                mail.SendToId = SelectId.Value;
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
+                mail.SendToIds = NoM3(GetMgApp);
+                mail.SendCC = Model.User_id;
+            }
+            //Staff Undo
+            else if (Model.Status_Id == 7 && pseudo == "7")
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                subject = string.Format("[Business Card][Staff Undo] {0}", Model.Key);
+
+                content += string.Format("<p>Undo remark: {0}</p>", remark);
+
+                mail.Subject = subject;
+                GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
+                mail.SendToIds = GetMgApp;
+            }
+
+            //User Undo
+            else if (Model.Status_Id == 9 && pseudo == "9")
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                subject = string.Format("[Business Card][Requester Undo] {0}", Model.Key);
+
+                content += string.Format("<p>Comment: {0}</p>", remark);
                 mail.SendToIds.Clear();
+                mail.Subject = subject;
+                mail.SendToId = Model.UserAction;
             }
-            else
+
+            //Rejected
+            else if (Model.Status_Id == 5)
             {
-                mail.SendToIds = users.Where(w => !w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
-            }
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
 
-            subject = string.Format("[Business Card][Assign] {0}", Model.Key);
-            if (Model.UserAction == null)
-            {
-                content = string.Format("<p>Comment: {0}</p>", remark);
-                content += "<p>Assign task to Department General Affair";
-            }
-            else
-            {
-                content = string.Format("<p>Comment: {0}</p>", remark);
-                content += "<p>Assign task to " + master.Users_GetInfomation(Model.UserAction.Value);
-            }
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
+                subject = string.Format("[Business Card][Rejected] {0}", Model.Key);
+                content = string.Format("<p>Comment: {0}", remark);
+                mail.SendToId = Model.User_id;
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+                mail.SendToIds.Clear();
 
-            //CC Email Grade 5 or 6
-            if (users.Any(w => w.Master_Grades.Grade_Name.Contains("6")) || users.Any(w => w.Master_Grades.Grade_Name.Contains("5")))
-            {
-                mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6") || w.Master_Grades.Grade_Name.Contains("5")).Select(s => s.User_Id).ToList();
-            }
-        }
+                var ChkMgUserRejected = GetMgApp.Any(a => a == ActionId);
 
-        //Staff Send Confirm
-        else if (Model.Status_Id == 2 && ModelFile == null || found)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-            subject = string.Format("[Business Card][Please Confirm] {0}", Model.Key);
-            content += string.Format("<p>Please confirm, check the correctness of the business card.</p>");
-            mail.SendToId = Model.User_id;
-            mail.SendToIds.Clear();
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
-            mail.SendCC = null;
-            mail.AttachPaths.Add(filepath);
-        }
-
-        //User Confirm
-        else if (Model.Status_Id == 9)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-            subject = string.Format("[Business Card][Requester Confirm] {0}", Model.Key);
-            content += string.Format("<p>Requester confirm business card is correct.</p>");
-            mail.SendToId = Model.UserAction;
-            mail.SendToIds.Clear();
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
-            mail.SendCC = null;
-        }
-
-        //User Cancel Confirm
-        else if (Model.Status_Id == 2 && found == false)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-            content = string.Empty;
-            subject = string.Format("[Business Card][Cancel Confirm {1}] {0}", Model.Key, ModelFile.FileName);
-            content = string.Format("<p>Requester Comment: {0}", remark);
-
-            mail.SendToId = Model.UserAction;
-            mail.SendToIds.Clear();
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
-            mail.SendCC = null;
-        }
-
-        //User Close
-        else if (Model.Status_Id == 4)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-            content = string.Empty;
-            subject = string.Format("[Business Card][Requester Closed] {0}", Model.Key);
-            content += string.Format("<p>Requester Closed job.</p>");
-            mail.SendToId = Model.UserAction;
-            mail.SendToIds.Clear();
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
-            mail.SendCC = null;
-        }
-
-        //Staff Completed
-        else if (Model.Status_Id == 3)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-
-            Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-            content = string.Empty;
-            subject = string.Format("[Business Card][Please Close job] {0}", Model.Key);
-
-            mail.SendToId = Model.User_id;
-            mail.SendToIds.Clear();
-            mail.SendFrom = ActionId;
-            mail.Subject = subject;
-            mail.SendCC = null;
-        }
-
-        //Resend
-        else if (reSend)
-        {
-            string keyword = "BusinessCards";
-            string pattern = $"{keyword}.*";
-            string result = Regex.Replace(linkUrl, pattern, keyword);
-            result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
-            linkUrl = result;
-        }
-
-        content += "</p>";
-        content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
-        content += "<p>Thank you for your consideration</p>";
-        mail.Body = content;
-        res = await mail.SendMail(mail);
-
-        return res;
-    }
-
-    public List<ReportKPI_User_Cards_Views> ReportKPI_User_Views(Guid id, ReportKPI_Filter filter)
-    {
-        try
-        {
-            IQueryable<ReportKPI_User_Cards_Views> query = db.BusinessCards
-                .Where(w => w.UserAction == id)
-                .GroupJoin(db.Satisfactions_BusinessCards, ser => ser.BusinessCard_Id, sat => sat.BusinessCard_Id, (ser, g) => new
+                if (!ChkMgUserRejected)
                 {
-                    ser,
-                    g
-                }).SelectMany(tmp => tmp.g.DefaultIfEmpty(), (tmp, sat) => new ReportKPI_User_Cards_Views()
-                {
-                    BusinessCard_Id = tmp.ser.BusinessCard_Id,
-                    Create = tmp.ser.Create,
-                    Key = tmp.ser.Key.ToString(),
-                    Priority_Point = tmp.ser.System_Priorities != null ? tmp.ser.System_Priorities.Priority_Point : 0,
-                    Satisfaction_Average = sat != null ? sat.Satisfaction_Average : (double?)null,
-                    Status_Name = tmp.ser.System_Statuses != null ? tmp.ser.System_Statuses.Status_Name : null,
-                    Status_Class = tmp.ser.System_Statuses != null ? tmp.ser.System_Statuses.Status_Class : null
-                }).OrderBy(o => o.Create);
-
-            if (filter != null)
+                    mail.SendBCC = GetMgApp;
+                }
+            }
+            //[M] GA Assign
+            else if (Model.Status_Id == 8)
             {
-                if (filter.Date_From.HasValue)
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                List<Users> users = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).ToList();
+                if (SelectId.HasValue)
                 {
-                    query = query.Where(w => w.Create >= filter.Date_From);
+                    mail.SendToId = SelectId.Value;
+                    mail.SendToIds.Clear();
+                }
+                else
+                {
+                    mail.SendToIds = users.Where(w => !w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
                 }
 
-                filter.Date_To = filter.Date_To.AddDays(1);
-                query = query.Where(w => w.Create <= filter.Date_To);
-            }
-
-            return query.ToList();
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
-
-
-    public ClsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
-    {
-        try
-        {
-            ClsReportKPI res = new ClsReportKPI();
-
-            Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-            IQueryable<Guid> userIds;
-
-            IQueryable<Guid> businessCardIds;
-            IQueryable<BusinessCards> query = db.BusinessCards.OrderBy(o => o.Create).ThenBy(t => t.Update);
-
-            res.Authorize_Id = db.Users
-                .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
-                .FirstOrDefault();
-
-            int[] finishIds = { 3, 4 };
-
-            Guid DeptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
-
-            userIds = db.Users
-                .Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId)
-                .OrderBy(o => o.User_Code)
-                .Select(s => s.User_Id);
-
-            query = query.Where(w => userIds.Contains(w.UserAction.Value));
-
-            if (filter != null)
-            {
-                if (filter.Date_From.HasValue)
+                subject = string.Format("[Business Card][Assign] {0}", Model.Key);
+                if (Model.UserAction == null)
                 {
-                    query = query.Where(w => w.Create >= filter.Date_From);
+                    content = string.Format("<p>Comment: {0}</p>", remark);
+                    content += "<p>Assign task to Department General Affair";
+                }
+                else
+                {
+                    content = string.Format("<p>Comment: {0}</p>", remark);
+                    content += "<p>Assign task to " + master.Users_GetInfomation(Model.UserAction.Value);
                 }
 
-                filter.Date_To = filter.Date_To.AddDays(1);
-                query = query.Where(w => w.Create <= filter.Date_To);
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+
+                //CC Email Grade 5 or 6
+                if (users.Any(w => w.Master_Grades.Grade_Name.Contains("6")) || users.Any(w => w.Master_Grades.Grade_Name.Contains("5")))
+                {
+                    mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6") || w.Master_Grades.Grade_Name.Contains("5")).Select(s => s.User_Id).ToList();
+                }
             }
 
-            if (res.Authorize_Id /*!= 3*/ > 0)
+            //Staff Send Confirm
+            else if (Model.Status_Id == 2 && ModelFile == null || found)
             {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                subject = string.Format("[Business Card][Please Confirm] {0}", Model.Key);
+                content += string.Format("<p>Please confirm, check the correctness of the business card.</p>");
+                mail.SendToId = Model.User_id;
+                mail.SendToIds.Clear();
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+                mail.SendCC = null;
+                mail.AttachPaths.Add(filepath);
+            }
+
+            //User Confirm
+            else if (Model.Status_Id == 9)
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                subject = string.Format("[Business Card][Requester Confirm] {0}", Model.Key);
+                content += string.Format("<p>Requester confirm business card is correct.</p>");
+                mail.SendToId = Model.UserAction;
+                mail.SendToIds.Clear();
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+                mail.SendCC = null;
+            }
+
+            //User Cancel Confirm
+            else if (Model.Status_Id == 2 && found == false)
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                content = string.Empty;
+                subject = string.Format("[Business Card][Cancel Confirm {1}] {0}", Model.Key, ModelFile.FileName);
+                content = string.Format("<p>Requester Comment: {0}", remark);
+
+                mail.SendToId = Model.UserAction;
+                mail.SendToIds.Clear();
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+                mail.SendCC = null;
+            }
+
+            //User Close
+            else if (Model.Status_Id == 4)
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                content = string.Empty;
+                subject = string.Format("[Business Card][Requester Closed] {0}", Model.Key);
+                content += string.Format("<p>Requester Closed job.</p>");
+                mail.SendToId = Model.UserAction;
+                mail.SendToIds.Clear();
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+                mail.SendCC = null;
+            }
+
+            //Staff Completed
+            else if (Model.Status_Id == 3)
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+
+                Guid ActionId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+
+                content = string.Empty;
+                subject = string.Format("[Business Card][Please Close job] {0}", Model.Key);
+
+                mail.SendToId = Model.User_id;
+                mail.SendToIds.Clear();
+                mail.SendFrom = ActionId;
+                mail.Subject = subject;
+                mail.SendCC = null;
+            }
+
+            //Resend
+            else if (reSend)
+            {
+                string keyword = "BusinessCards";
+                string pattern = $"{keyword}.*";
+                string result = Regex.Replace(linkUrl, pattern, keyword);
+                result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
+                linkUrl = result;
+            }
+
+            content += "</p>";
+            content += string.Format("<a href='{0}' target='_blank'>Please, click here to more detail.</a>", linkUrl);
+            content += "<p>Thank you for your consideration</p>";
+            mail.Body = content;
+            res = await mail.SendMail(mail);
+
+            return res;
+        }
+
+        public List<ReportKPI_User_Cards_Views> ReportKPI_User_Views(Guid id, ReportKPI_Filter filter)
+        {
+            try
+            {
+                IQueryable<ReportKPI_User_Cards_Views> query = db.BusinessCards
+                    .Where(w => w.UserAction == id)
+                    .GroupJoin(db.Satisfactions_BusinessCards, ser => ser.BusinessCard_Id, sat => sat.BusinessCard_Id, (ser, g) => new
+                    {
+                        ser,
+                        g
+                    }).SelectMany(tmp => tmp.g.DefaultIfEmpty(), (tmp, sat) => new ReportKPI_User_Cards_Views()
+                    {
+                        BusinessCard_Id = tmp.ser.BusinessCard_Id,
+                        Create = tmp.ser.Create,
+                        Key = tmp.ser.Key.ToString(),
+                        Priority_Point = tmp.ser.System_Priorities != null ? tmp.ser.System_Priorities.Priority_Point : 0,
+                        Satisfaction_Average = sat != null ? sat.Satisfaction_Average : (double?)null,
+                        Status_Name = tmp.ser.System_Statuses != null ? tmp.ser.System_Statuses.Status_Name : null,
+                        Status_Class = tmp.ser.System_Statuses != null ? tmp.ser.System_Statuses.Status_Class : null
+                    }).OrderBy(o => o.Create);
+
+                if (filter != null)
+                {
+                    query = query.Where(w => w.Create >= filter.Date_From);
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
+                }
+
+                return query.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public ClsReportKPI ClsReportKPI_ViewList(ReportKPI_Filter filter)
+        {
+            try
+            {
+                ClsReportKPI res = new ClsReportKPI();
+
+                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                IQueryable<Guid> userIds;
+
+                IQueryable<Guid> businessCardIds;
+                IQueryable<BusinessCards> query = db.BusinessCards.OrderBy(o => o.Create).ThenBy(t => t.Update);
+
+                res.Authorize_Id = db.Users
+                    .Where(w => w.User_Id == userId)
+                    .Select(s => s.Master_Grades.Master_LineWorks.Authorize_Id)
+                    .FirstOrDefault();
+
+                int[] finishIds = { 3, 4 };
+
+                Guid DeptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
+
+                userIds = db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId)
+                    .OrderBy(o => o.User_Code)
+                    .Select(s => s.User_Id);
+
+                query = query.Where(w => userIds.Contains(w.UserAction.Value));
+
+                if (filter != null)
+                {
+                    query = query.Where(w => w.Create >= filter.Date_From);
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    query = query.Where(w => w.Create <= filter.Date_To);
+                }
+
                 foreach (var item in userIds)
                 {
                     businessCardIds = query
@@ -771,7 +749,6 @@ namespace E2E.Models
                      .Where(w => businessCardIds.Contains(w.BusinessCard_Id) && finishIds.Contains(w.Status_Id))
                     .Sum(s => (int?)s.System_Priorities.Priority_Point);
 
-
                             if (SuccessPoint.HasValue)
                             {
                                 reportKPI_User.SuccessPoint = SuccessPoint.Value;
@@ -780,7 +757,6 @@ namespace E2E.Models
 
                         reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
                         reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                        reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
                         reportKPI_User.Total = query.Where(w => businessCardIds.Contains(w.BusinessCard_Id)).Count();
                         reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && businessCardIds.Contains(w.BusinessCard_Id)).Count();
                     }
@@ -793,101 +769,41 @@ namespace E2E.Models
                     reportKPI_User.User_Name = master.Users_GetInfomation(item);
                     res.ReportKPI_Users.Add(reportKPI_User);
                 }
-            }
-            else
-            {
-                businessCardIds = query
-                    .Where(w => w.UserAction == userId)
-                    .Select(s => s.BusinessCard_Id);
 
-                ReportKPI_User reportKPI_User = new ReportKPI_User();
+                res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
+                res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
+                res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
+                res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
+                int ontimeCount = res.ReportKPI_Overview.Total - res.ReportKPI_Overview.OverDue_Count;
+                res.ReportKPI_Overview.OnTime_Count = ontimeCount;
+                double ontimePercent = Convert.ToDouble(ontimeCount) / Convert.ToDouble(res.ReportKPI_Overview.Total);
+                res.ReportKPI_Overview.OnTime_Percent = ontimePercent;
 
-                if (businessCardIds.Count() > 0)
-                {
-                    int countSatisfaction = db.Satisfactions_BusinessCards
-                    .Where(w => businessCardIds.Contains(w.BusinessCard_Id))
-                    .Count();
-
-                    if (countSatisfaction > 0)
-                    {
-                        reportKPI_User.Average_Score = db.Satisfactions_BusinessCards
-                            .Where(w => businessCardIds.Contains(w.BusinessCard_Id))
-                            .Average(a => a.Satisfaction_Average);
-                    }
-
-                    int successCount = query
-                        .Where(w => finishIds.Contains(w.Status_Id) && businessCardIds.Contains(w.BusinessCard_Id))
-                        .Count();
-                    if (successCount > 0)
-                    {
-                        reportKPI_User.SuccessPoint = query
-                        .Where(w => finishIds.Contains(w.Status_Id) && businessCardIds.Contains(w.BusinessCard_Id))
-                    .Sum(s => s.System_Priorities.Priority_Point);
-                    }
-
-                    reportKPI_User.Close_Count = query.Where(w => w.Status_Id == 4 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                    reportKPI_User.Complete_Count = query.Where(w => w.Status_Id == 3 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                    reportKPI_User.Inprogress_Count = query.Where(w => w.Status_Id == 2 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                    reportKPI_User.Pending_Count = query.Where(w => w.Status_Id == 1 && businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                    reportKPI_User.Total = query.Where(w => businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                    reportKPI_User.OverDue_Count = query.Where(w => w.Is_OverDue && businessCardIds.Contains(w.BusinessCard_Id)).Count();
-                }
-
-                businessCardIds = query
-                    .Where(w => w.UserAction != userId)
-                    .Select(s => s.BusinessCard_Id);
-
-                reportKPI_User.JoinTeam_Count = db.ServiceTeams
-                    .Where(w => businessCardIds.Contains(w.Service_Id) && w.User_Id == userId)
-                    .Count();
-
-                reportKPI_User.User_Id = userId;
-                reportKPI_User.User_Name = master.Users_GetInfomation(userId);
-                res.ReportKPI_Users.Add(reportKPI_User);
-            }
-
-            res.ReportKPI_Overview.Close_Count = res.ReportKPI_Users.Select(s => s.Close_Count).Sum();
-            res.ReportKPI_Overview.Complete_Count = res.ReportKPI_Users.Select(s => s.Complete_Count).Sum();
-            res.ReportKPI_Overview.Inprogress_Count = res.ReportKPI_Users.Select(s => s.Inprogress_Count).Sum();
-            res.ReportKPI_Overview.Pending_Count = res.ReportKPI_Users.Select(s => s.Pending_Count).Sum();
-            res.ReportKPI_Overview.Total = res.ReportKPI_Users.Select(s => s.Total).Sum();
-            res.ReportKPI_Overview.OverDue_Count = res.ReportKPI_Users.Select(s => s.OverDue_Count).Sum();
-            int ontimeCount = res.ReportKPI_Overview.Total - res.ReportKPI_Overview.OverDue_Count;
-            res.ReportKPI_Overview.OnTime_Count = ontimeCount;
-            double ontimePercent = Convert.ToDouble(ontimeCount) / Convert.ToDouble(res.ReportKPI_Overview.Total);
-            res.ReportKPI_Overview.OnTime_Percent = ontimePercent;
-
-            var UnsatCount = db.Satisfactions_BusinessCards.Where(w => w.Unsatisfied);
-            if (filter != null)
-            {
-                if (filter.Date_From.HasValue)
+                var UnsatCount = db.Satisfactions_BusinessCards.Where(w => w.Unsatisfied);
+                if (filter != null)
                 {
                     UnsatCount = UnsatCount.Where(w => w.Create >= filter.Date_From);
+
+                    filter.Date_To = filter.Date_To.AddDays(1);
+                    UnsatCount = UnsatCount.Where(w => w.Create <= filter.Date_To);
+                    res.ReportKPI_Overview.Unsatisfied_Count = UnsatCount.Count();
                 }
 
-                filter.Date_To = filter.Date_To.AddDays(1);
-                UnsatCount = UnsatCount.Where(w => w.Create <= filter.Date_To);
-                res.ReportKPI_Overview.Unsatisfied_Count = UnsatCount.Count();
+                double? Avg = res.ReportKPI_Users.Select(s => s.Average_Score).Average();
 
+                int CountTopic = db.Master_InquiryTopics.Where(w => w.Program_Id == 2).Count();
+
+                if (Avg != null)
+                {
+                    res.ReportKPI_Overview.Satisfied_Percent = Math.Abs((Avg.Value / CountTopic) * 100) / 100;
+                }
+
+                return res;
             }
-
-            double? Avg = res.ReportKPI_Users.Select(s => s.Average_Score).Average();
-
-
-            int CountTopic = db.Master_InquiryTopics.Where(w => w.Program_Id == 2).Count();
-
-            if (Avg != null)
+            catch (Exception)
             {
-                res.ReportKPI_Overview.Satisfied_Percent = Math.Abs((Avg.Value / CountTopic) * 100) / 100;
+                throw;
             }
-
-
-            return res;
-        }
-        catch (Exception)
-        {
-            throw;
         }
     }
-}
 }

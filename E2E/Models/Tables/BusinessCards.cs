@@ -34,6 +34,7 @@ namespace E2E.Models.Tables
         public Guid User_id { get; set; }
         public Guid? UserAction { get; set; }
         public Guid? UserRef_id { get; set; }
+
         [Index]
         public bool Is_OverDue { get; set; }
     }

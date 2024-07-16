@@ -11,12 +11,10 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class EFormsController : Controller
+    public class EFormsController : BaseController
     {
         private readonly ClsMail clsMail = new ClsMail();
         private readonly ClsManageEForm data = new ClsManageEForm();
-        private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
 
         public ActionResult _FileCollections(Guid id)
         {
@@ -46,7 +44,7 @@ namespace E2E.Controllers
                 {
                     eForms = db.EForms.Find(id);
                     eForms.Status_Id = 3;
-                    eForms.ActionUserId = Guid.Parse(HttpContext.User.Identity.Name);
+                    eForms.ActionUserId = loginId;
 
                     swal.DangerMode = false;
                     swal.Icon = "success";
@@ -65,7 +63,7 @@ namespace E2E.Controllers
                 {
                     eForms = db.EForms.Find(id);
                     eForms.Status_Id = 6;
-                    eForms.ActionUserId = Guid.Parse(HttpContext.User.Identity.Name);
+                    eForms.ActionUserId = loginId;
 
                     swal.DangerMode = false;
                     swal.Icon = "success";
@@ -146,14 +144,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -179,14 +170,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -212,14 +196,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 
@@ -228,9 +205,8 @@ namespace E2E.Controllers
 
         public ActionResult EForms_Content(Guid? id)
         {
-            Guid id_emp = Guid.Parse(HttpContext.User.Identity.Name);
             ViewBag.Usercode = db.Users
-                .Where(w => w.User_Id == id_emp)
+                .Where(w => w.User_Id == loginId)
                 .Select(s => s.User_Code)
                 .FirstOrDefault();
 
@@ -305,14 +281,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -346,9 +315,8 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid id = Guid.Parse(HttpContext.User.Identity.Name);
                 ViewBag.Usercode = db.Users
-                    .Where(w => w.User_Id == id)
+                    .Where(w => w.User_Id == loginId)
                     .Select(s => s.User_Code)
                     .FirstOrDefault();
 
@@ -358,7 +326,7 @@ namespace E2E.Controllers
 
                 if (res == 2)
                 {
-                    query = db.EForms.Where(w => w.User_Id == id).OrderByDescending(o => o.Create);
+                    query = db.EForms.Where(w => w.User_Id == loginId).OrderByDescending(o => o.Create);
                     ViewBag.MyForm = true;
                 }
                 //if (res == 3)
@@ -378,8 +346,7 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
-                ViewBag.RoleId = db.Users.Where(w => w.User_Id == UserId).Select(s => s.Role_Id).FirstOrDefault();
+                ViewBag.RoleId = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Role_Id).FirstOrDefault();
 
                 IQueryable<EForms> query = db.EForms.Where(w => w.EForm_Start <= DateTime.Today && w.Status_Id == 3 && (!w.EForm_End.HasValue || w.EForm_End >= DateTime.Today)).OrderByDescending(o => new { o.Update, o.Create }).ThenBy(t => t.EForm_Start);
 
@@ -483,14 +450,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -522,7 +482,6 @@ namespace E2E.Controllers
 
         public List<SelectListItem> SelectListItems_Category_Name()
         {
-            Guid UserId = Guid.Parse(HttpContext.User.Identity.Name);
             var DeptDistinct = db.Master_Departments.Select(s => s.Department_Name).Distinct();
             List<SelectListItem> item = new List<SelectListItem>
             {

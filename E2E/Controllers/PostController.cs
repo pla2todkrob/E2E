@@ -75,13 +75,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     Exception inner = ex.InnerException;
-                    clsApi.Message = ex.Message;
-
-                    while (inner != null)
-                    {
-                        clsApi.Message += "\n" + inner.Message;
-                        inner = inner.InnerException;
-                    }
+                    clsApi.Message = ex.GetBaseException().Message;
                 }
             }
             else
@@ -173,20 +167,14 @@ namespace E2E.Controllers
                     {
                         throw new Exception("Username not found");
                     }
-                    LoginPass:
+                LoginPass:
                     clsApi.Value = users.User_Id;
                     clsApi.IsSuccess = true;
                 }
                 catch (Exception ex)
                 {
                     Exception inner = ex.InnerException;
-                    clsApi.Message = ex.Message;
-
-                    while (inner != null)
-                    {
-                        clsApi.Message += "\n" + inner.Message;
-                        inner = inner.InnerException;
-                    }
+                    clsApi.Message = ex.GetBaseException().Message;
                 }
             }
             else
@@ -235,13 +223,7 @@ namespace E2E.Controllers
             catch (Exception ex)
             {
                 Exception inner = ex.InnerException;
-                clsApi.Message = ex.Message;
-
-                while (inner != null)
-                {
-                    clsApi.Message += "\n" + inner.Message;
-                    inner = inner.InnerException;
-                }
+                clsApi.Message = ex.GetBaseException().Message;
             }
 
             return clsApi;

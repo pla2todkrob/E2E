@@ -25,6 +25,8 @@ namespace E2E.Models.Tables
 
         [Display(Name = "Department"), Index]
         public Guid? Department_Id { get; set; }
+        [Index]
+        public bool Is_AutoClose { get; set; }
 
         [Index]
         public bool Is_Action { get; set; }

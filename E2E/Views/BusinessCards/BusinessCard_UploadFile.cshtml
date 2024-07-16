@@ -4,7 +4,7 @@
 	Layout = null;
 }
 
-<form>
+
 
     <div class="modal-header">
         <h5 class="modal-title">Create</h5>
@@ -13,12 +13,13 @@
         </button>
     </div>
     <div class="modal-body">
-
-        <input type="file" name="file" id="file-input" />
+        <form>
+            <input type="file" name="file" id="file-input" />
+        </form>
     </div>
 
     <div class="modal-footer">
 
         <button type="button" onclick="uploadFile('@Model')" class="btn btn-success"><i class="fa fa-check"></i></button>
     </div>
-</form>
+

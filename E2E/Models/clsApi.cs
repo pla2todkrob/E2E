@@ -7,8 +7,6 @@ using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -48,18 +46,12 @@ namespace E2E.Models
 
         private byte[] GetByteFileBase(HttpPostedFileBase file)
         {
-            try
+            using (var binaryReader = new BinaryReader(file.InputStream))
             {
-                using (var binaryReader = new BinaryReader(file.InputStream))
-                {
-                    return binaryReader.ReadBytes(file.ContentLength);
-                }
-            }
-            catch (Exception)
-            {
-                throw;
+                return binaryReader.ReadBytes(file.ContentLength);
             }
         }
+
 
         private string GetToken()
         {
@@ -145,89 +137,74 @@ namespace E2E.Models
 
         public async Task<bool> SendMail(ClsServiceEmail clsServiceEmail, HttpFileCollectionBase files = null)
         {
-            try
+            MailResponse mailResponse = new MailResponse();
+            string resApi = string.Empty;
+            List<ClsFileAttach> clsFiles = new List<ClsFileAttach>();
+            string tokenKey = GetToken();
+
+            RestClient client = new RestClient(GetApiUrl());
+            RestRequest request = new RestRequest("api/Service_Email/Send", Method.Post);
+            request.AddHeader("Token", tokenKey);
+
+            request.AddParameter("SendFrom", clsServiceEmail.SendFrom);
+
+            foreach (var recipient in clsServiceEmail.SendTo)
             {
-                MailResponse mailResponse = new MailResponse();
-                string resApi = string.Empty;
-                List<ClsFileAttach> clsFiles = new List<ClsFileAttach>();
-                string tokenKey = GetToken();
-
-                RestClient client = new RestClient(GetApiUrl());
-                RestRequest request = new RestRequest("api/Service_Email/Send", Method.Post);
-                request.AddHeader("Token", tokenKey);
-
-                request.AddParameter("SendFrom", clsServiceEmail.SendFrom);
-
-                foreach (var recipient in clsServiceEmail.SendTo)
-                {
-                    request.AddParameter("SendTo", recipient);
-                }
-
-                if (clsServiceEmail.SendCC != null)
-                {
-                    foreach (var cc in clsServiceEmail.SendCC)
-                    {
-                        request.AddParameter("SendCC", cc);
-                    }
-                }
-
-                if (clsServiceEmail.SendBCC != null)
-                {
-                    foreach (var bcc in clsServiceEmail.SendBCC)
-                    {
-                        request.AddParameter("SendBCC", bcc);
-                    }
-                }
-
-                request.AddParameter("Subject", clsServiceEmail.Subject);
-                request.AddParameter("Body", clsServiceEmail.Body);
-
-                if (files != null)
-                {
-                    for (int i = 0; i < files.Count; i++)
-                    {
-                        HttpPostedFileBase file = files[i];
-                        if (file.ContentLength > 0)
-                        {
-                            request.AddFile("fileAttach", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName), file.ContentType);
-                        }
-                    }
-                }
-
-                if (clsServiceEmail.ClsFileAttaches.Count > 0)
-                {
-                    foreach (var item in clsServiceEmail.ClsFileAttaches)
-                    {
-                        if (!string.IsNullOrEmpty(item.FilePath))
-                        {
-                            request.AddFile("fileAttach", ConvertByte(item.FilePath), HttpUtility.UrlEncode(Path.GetFileName(item.FilePath)), MimeMapping.GetMimeMapping(item.FilePath));
-                        }
-                    }
-                }
-
-                // Execute the request
-                RestResponse response = await client.ExecuteAsync(request);
-
-                if (response.IsSuccessful)
-                {
-                    mailResponse = JsonConvert.DeserializeObject<MailResponse>(response.Content);
-                }
-                else
-                {
-                    throw new Exception(response.ErrorMessage);
-                }
-
-                if (!mailResponse.IsSuccess)
-                {
-                    throw new Exception(mailResponse.ErrorMessage);
-                }
-
-                return mailResponse.IsSuccess;
+                request.AddParameter("SendTo", recipient);
             }
-            catch (Exception)
+
+            if (clsServiceEmail.SendCC != null)
             {
-                throw;
+                foreach (var cc in clsServiceEmail.SendCC)
+                {
+                    request.AddParameter("SendCC", cc);
+                }
             }
+
+            if (clsServiceEmail.SendBCC != null)
+            {
+                foreach (var bcc in clsServiceEmail.SendBCC)
+                {
+                    request.AddParameter("SendBCC", bcc);
+                }
+            }
+
+            request.AddParameter("Subject", clsServiceEmail.Subject);
+            request.AddParameter("Body", clsServiceEmail.Body);
+
+            if (files != null)
+            {
+                for (int i = 0; i < files.Count; i++)
+                {
+                    HttpPostedFileBase file = files[i];
+                    if (file.ContentLength > 0)
+                    {
+                        request.AddFile("fileAttach", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName), file.ContentType);
+                    }
+                }
+            }
+
+            if (clsServiceEmail.ClsFileAttaches.Count > 0)
+            {
+                foreach (var item in clsServiceEmail.ClsFileAttaches)
+                {
+                    if (!string.IsNullOrEmpty(item.FilePath))
+                    {
+                        request.AddFile("fileAttach", ConvertByte(item.FilePath), HttpUtility.UrlEncode(Path.GetFileName(item.FilePath)), MimeMapping.GetMimeMapping(item.FilePath));
+                    }
+                }
+            }
+
+            // Execute the request
+            RestResponse response = await client.ExecuteAsync(request);
+            response.ThrowIfError();
+            mailResponse = JsonConvert.DeserializeObject<MailResponse>(response.Content);
+            if (!mailResponse.IsSuccess)
+            {
+                throw new Exception(mailResponse.ErrorMessage);
+            }
+
+            return mailResponse.IsSuccess;
         }
 
         public async Task<FileResponse> UploadFile(ClsServiceFile clsServiceFile, HttpPostedFileBase file)
@@ -238,6 +215,8 @@ namespace E2E.Models
                 string resApi = string.Empty;
                 string tokenKey = GetToken();
 
+                byte[] fileBytes = GetByteFileBase(file); // อ่านข้อมูลจากไฟล์เพียงครั้งเดียว
+
                 RestClientOptions options = new RestClientOptions(GetApiUrl())
                 {
                     MaxTimeout = -1,
@@ -246,68 +225,12 @@ namespace E2E.Models
                 RestRequest request = new RestRequest("api/Service_File/Upload", Method.Post);
                 request.AddHeader("Token", tokenKey);
                 request.AlwaysMultipartFormData = true;
-                request.AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(file.FileName), file.ContentType);
+                request.AddFile("fileUpload", fileBytes, HttpUtility.UrlEncode(file.FileName), file.ContentType); // ใช้ byte[] ที่อ่านมาแล้ว
                 request.AddParameter("FolderPath", clsServiceFile.FolderPath);
                 RestResponse response = await client.ExecuteAsync(request);
-
-                if (response.IsSuccessful)
-                {
-                    fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);
-                }
-                else
-                {
-                    throw new Exception(response.ErrorMessage);
-                }
-
-                if (!fileResponse.IsSuccess)
-                {
-                    throw new Exception(fileResponse.ErrorMessage);
-                }
-
-                return fileResponse;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<FileResponse> UploadFile(HttpPostedFileBase file, string folderPath, string fileName = "")
-        {
-            try
-            {
-                FileResponse fileResponse = new FileResponse();
-                string resApi = string.Empty;
-                string tokenKey = GetToken();
-
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    fileName = file.FileName;
-                }
-
-                RestClientOptions options = new RestClientOptions(GetApiUrl())
-                {
-                    MaxTimeout = -1,
-                };
-
-                RestClient client = new RestClient(options);
-                RestRequest request = new RestRequest("api/Service_File/Upload", Method.Post);
-                request.AddHeader("Token", tokenKey);
-                request.AlwaysMultipartFormData = true;
-                request.AddFile("fileUpload", GetByteFileBase(file), HttpUtility.UrlEncode(fileName), file.ContentType);
-                request.AddParameter("FolderPath", folderPath);
-
-                RestResponse response = await client.ExecuteAsync(request);
-
-                if (response.IsSuccessful)
-                {
-                    fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);
-                }
-                else
-                {
-                    throw new Exception(response.ErrorMessage);
-                }
-
+                response.ThrowIfError();
+                fileResponse = JsonConvert.DeserializeObject<FileResponse>(response.Content);
+                fileResponse.FileBytes = fileBytes;
                 if (!fileResponse.IsSuccess)
                 {
                     throw new Exception(fileResponse.ErrorMessage);

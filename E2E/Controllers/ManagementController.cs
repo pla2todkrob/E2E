@@ -4,19 +4,22 @@ using E2E.Models.Views;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class ManagementController : Controller
+    public class ManagementController : BaseController
     {
         private readonly ClsManageManagement data = new ClsManageManagement();
-        private readonly ClsContext db = new ClsContext();
-        private readonly ClsServiceFTP ftp = new ClsServiceFTP();
         private readonly ClsManageMaster master = new ClsManageMaster();
+        private readonly ClsApi api = new ClsApi();
 
         public ActionResult AuditReport()
         {
@@ -28,50 +31,126 @@ namespace E2E.Controllers
             try
             {
                 List<Guid> guids = JsonConvert.DeserializeObject<List<Guid>>(id);
-                List<string> arrEmail = new List<string>();
-                List<string> dirList = new List<string>();
-                if (!string.IsNullOrEmpty(emails))
-                {
-                    arrEmail = emails.Split(';').ToList();
-                }
+
+                List<ZipKey> zipKeys = new List<ZipKey>();
 
                 foreach (var item in guids)
                 {
-                    if (db.ServiceDocuments.Any(a => a.Service_Id == item && !string.IsNullOrEmpty(a.ServiceDocument_Path)))
+                    List<ServiceDocuments> serviceDocuments = await db.ServiceDocuments
+                        .Where(w => w.Service_Id == item)
+                        .ToListAsync();
+                    if (serviceDocuments.Count() > 0)
                     {
-                        string key = db.Services.Find(item).Service_Key;
-                        string dir = string.Format("Service/{0}/DocumentControls/", key);
-                        dirList.Add(dir);
+                        ZipKey zipKey = new ZipKey
+                        {
+                            ServiceKey = await db.Services
+                            .Where(w => w.Service_Id == item)
+                            .Select(s => s.Service_Key)
+                            .FirstOrDefaultAsync(),
+                            ZipKeyItems = serviceDocuments
+                            .Select(s => new ZipKeyItem()
+                            {
+                                DocumentFilePath = s.ServiceDocument_Path,
+                                DocumentFileName = s.ServiceDocument_Name,
+                                DocumentName = s.Master_Documents.Document_Name
+                            }).ToList()
+                        };
+                        zipKeys.Add(zipKey);
                     }
                 }
 
-                string zipName = DateTime.Now.ToString("d").Replace("/", "");
+                string zipName = DateTime.Now.ToString("yyyyMMdd") + ".zip"; // Use a date format that is safe for file names
+                string zipPath = Path.Combine(Path.GetTempPath(), zipName); // Temp path or any desired path
 
-                if (arrEmail.Count > 0)
+                using (var zipArchive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
                 {
-                    string subject = "[E2E][Document controls] นำส่งเอกสาร";
-                    string content = string.Format("<p><b>Attached file: </b> {0}.zip</p>", zipName);
-                    content += string.Format("<b>Include {0} job.</b><br />", dirList.Count());
-                    content += "<p>";
-                    for (int i = 1; i <= dirList.Count(); i++)
+                    foreach (var zipKey in zipKeys)
                     {
-                        content += string.Format("{0}. {1}<br />", i, dirList[i - 1].Split('/').ElementAt(1));
+                        foreach (var item in zipKey.ZipKeyItems)
+                        {
+                            string entryName = Path.Combine(zipKey.ServiceKey, Path.GetFileName(item.DocumentFilePath));
+                            zipArchive.CreateEntryFromFile(item.DocumentFilePath, entryName);
+                        }
                     }
-                    content += "</p>";
-                    content += "<b>Please do not reply to this mail. Thank you</b>";
+                }
 
-                    await ftp.Ftp_DownloadFolder(dirList, string.Format("AuditReport\\{0}", zipName), arrEmail, subject, content);
+                byte[] fileBytes = System.IO.File.ReadAllBytes(zipPath);
+
+                if (string.IsNullOrEmpty(emails))
+                {
+                    return File(fileBytes, "application/zip", zipName);
                 }
                 else
                 {
-                    ftp.Ftp_DownloadFolder(dirList, string.Format("AuditReport\\{0}", zipName));
-                }
+                    string[] arrEmail = emails.Split(';').ToArray();
 
-                return RedirectToAction("AuditReport");
+                    string subject = "[E2E][Document controls] นำส่งเอกสาร";
+                    string body = string.Format("<p><b>Attached file: </b> {0}.zip</p>", zipName);
+                    body += string.Format("<b>Include {0} job.</b><br />", zipKeys.Count());
+                    body += "<table>";
+
+                    body += "<thead>";
+                    body += "<tr>";
+                    body += "<th>Key</th>";
+                    body += "<th>Document type</th>";
+                    body += "<th>Document name</th>";
+                    body += "</tr>";
+                    body += "</thead>";
+
+                    body += "<tbody>";
+
+                    var groupedItems = zipKeys.GroupBy(item => item.ServiceKey);
+
+                    foreach (var group in groupedItems)
+                    {
+                        bool firstRow = true; // Flag to indicate the first row for each group
+                        foreach (var item2 in group.SelectMany(g => g.ZipKeyItems))
+                        {
+                            body += "<tr>";
+
+                            if (firstRow)
+                            {
+                                // Merge cell for ServiceKey column
+                                body += $"<td rowspan=\"{group.SelectMany(g => g.ZipKeyItems).Count()}\">{group.Key}</td>";
+                                firstRow = false; // Reset the flag after the first row
+                            }
+
+                            body += $"<td>{item2.DocumentName}</td>";
+                            body += $"<td>{item2.DocumentFileName}</td>";
+                            body += "</tr>";
+                        }
+                    }
+
+                    body += "</tbody>";
+
+                    body += "</table>";
+
+                    body += "<b>Please do not reply to this mail. Thank you</b>";
+
+                    ClsServiceEmail serviceEmail = new ClsServiceEmail()
+                    {
+                        Body = body,
+                        Subject = subject,
+                        SendTo = arrEmail
+                    };
+                    serviceEmail.ClsFileAttaches.Add(new ClsFileAttach()
+                    {
+                        Base64 = Convert.ToBase64String(fileBytes),
+                        FileName = zipName
+                    });
+
+                    bool isSuccess = await api.SendMail(serviceEmail);
+                    if (isSuccess)
+                    {
+                        return RedirectToAction("AuditReport");
+                    }
+
+                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, "Email sending failed. Please notify the administrator.");
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ex.GetBaseException().Message);
             }
         }
 
@@ -109,14 +188,12 @@ namespace E2E.Controllers
                 }
 
                 int[] finishIds = { 3, 4 };
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
-                string deptName = db.Users.Find(userId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
+                string deptName = db.Users.Find(loginId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                 List<Guid> deptIds = db.Master_Departments.Where(w => w.Department_Name == deptName).Select(s => s.Department_Id).ToList();
                 IQueryable<Services> query = db.Services
                     .Where(w => finishIds.Contains(w.Status_Id) && deptIds.Contains(w.Department_Id.Value));
                 _Filter.Date_To = _Filter.Date_To.AddDays(1);
-                query = query.Where(w => w.Create >= _Filter.Date_From);
-                query = query.Where(w => w.Create <= _Filter.Date_To);
+                query = query.Where(w => w.Update >= _Filter.Date_From && w.Update <= _Filter.Date_To);
 
                 List<Guid> hasDocIds = db.ServiceDocuments
                     .Where(w => query.Select(s => s.Service_Id).Contains(w.Service_Id))
@@ -124,19 +201,28 @@ namespace E2E.Controllers
                     .Distinct()
                     .ToList();
 
-                List<ClsAuditReport> clsAuditReports = query
+                var reportList = query
                     .Where(w => hasDocIds.Contains(w.Service_Id))
-                    .AsEnumerable()
+                    .Select(s => new
+                    {
+                        s.Service_Id,
+                        s.Service_Key,
+                        s.Service_Subject,
+                        s.WorkRoots,
+                        s.Action_User_Id,
+                        s.Update
+                    }).OrderBy(o => o.Update).ToList();
+
+                List<ClsAuditReport> clsAuditReports = reportList
                     .Select(s => new ClsAuditReport()
                     {
-                        Create = s.Create,
                         Service_Id = s.Service_Id,
                         Service_Key = s.Service_Key,
                         Service_Subject = s.Service_Subject,
                         WorkRoots = s.WorkRoots,
                         User_Name = master.Users_GetInfomation(s.Action_User_Id.Value),
                         Update = s.Update.Value
-                    }).OrderBy(o => o.Create).ToList();
+                    }).OrderBy(o => o.Update).ToList();
 
                 return View(clsAuditReports);
             }
@@ -201,14 +287,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -264,14 +343,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -280,9 +352,8 @@ namespace E2E.Controllers
 
         public ActionResult DocumentControl_Table()
         {
-            Guid Id = Guid.Parse(System.Web.HttpContext.Current.User.Identity.Name);
 
-            string DeptName = db.Users.Where(w => w.User_Id == Id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
+            string DeptName = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
             List<Guid> guids = new List<Guid>();
             guids = db.Master_Departments.Where(w => w.Department_Name == DeptName).Select(s => s.Department_Id).ToList();
 
@@ -291,23 +362,38 @@ namespace E2E.Controllers
             return View(sql);
         }
 
-        public void DownloadTemplate(Guid id)
+        public ActionResult DownloadTemplate(Guid id)
         {
-            try
+            // Fetch the document version based on the provided ID
+            Master_DocumentVersions master_DocumentVersions = db.Master_DocumentVersions
+                .Where(w => w.Document_Id == id)
+                .OrderByDescending(o => o.DocumentVersion_Number)
+                .FirstOrDefault();
+
+            if (master_DocumentVersions != null)
             {
-                Master_DocumentVersions master_DocumentVersions = new Master_DocumentVersions();
-                master_DocumentVersions = db.Master_DocumentVersions
-                    .Where(w => w.Document_Id == id)
-                    .OrderByDescending(o => o.DocumentVersion_Number)
-                    .FirstOrDefault();
-                if (master_DocumentVersions != null)
+                string filePath = master_DocumentVersions.DocumentVersion_Path;
+                string fileName = Path.GetFileName(filePath);
+
+                // Check if the file exists
+                if (System.IO.File.Exists(filePath))
                 {
-                    new ClsServiceFTP().Ftp_DownloadFile(master_DocumentVersions.DocumentVersion_Path);
+                    // Get the file content
+                    byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+                    // Return the file for download
+                    return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+                }
+                else
+                {
+                    // Handle file not found scenario
+                    return HttpNotFound("File not found.");
                 }
             }
-            catch (Exception)
+            else
             {
-                throw;
+                // Handle document version not found scenario
+                return HttpNotFound("Document version not found.");
             }
         }
 
@@ -347,14 +433,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -367,9 +446,8 @@ namespace E2E.Controllers
             {
                 ClsWorkRoots clsWorkRoots = new ClsWorkRoots();
                 bool isNew = true;
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 string deptName = db.Users
-                    .Where(w => w.User_Id == userId)
+                    .Where(w => w.User_Id == loginId)
                     .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
 
@@ -481,14 +559,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -522,9 +593,8 @@ namespace E2E.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(HttpContext.User.Identity.Name);
                 string deptName = db.Users
-                    .Where(w => w.User_Id == userId)
+                    .Where(w => w.User_Id == loginId)
                     .Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name)
                     .FirstOrDefault();
 
@@ -550,5 +620,18 @@ namespace E2E.Controllers
                 throw;
             }
         }
+    }
+
+    public class ZipKey
+    {
+        public string ServiceKey { get; set; }
+        public List<ZipKeyItem> ZipKeyItems { get; set; }
+    }
+
+    public class ZipKeyItem
+    {
+        public string DocumentName { get; set; }
+        public string DocumentFilePath { get; set; }
+        public string DocumentFileName { get; set; }
     }
 }

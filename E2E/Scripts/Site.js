@@ -2,7 +2,7 @@
 const pathName = window.location.pathname.toLowerCase();
 const baseUrl = pathName.search(siteName) < 0 ? '' : `/${siteName}`;
 
-let chat;
+let chat, spinnerContainer;
 
 $(function () {
     let classEmpty = true;
@@ -21,15 +21,7 @@ $(function () {
         });
     });
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        $($.fn.dataTable.tables(true)).DataTable()
-            .columns.adjust();
-    });
-    $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
-        $($.fn.dataTable.tables(true)).DataTable()
-            .columns.adjust();
-    });
-
+    
     reloadCount().then(function () {
         scrollFunction();
     });
@@ -96,36 +88,46 @@ async function reloadCount() {
     await Promise.all([navService, navDepartment, navNewTopic, reloadCountA, reloadCountN]);
 }
 async function callSpin(active) {
-    const opts = {
+    var opts = {
         lines: 13, // The number of lines to draw
         length: 38, // The length of each line
         width: 17, // The line thickness
         radius: 45, // The radius of the inner circle
         scale: 1, // Scales overall size of the spinner
         corners: 1, // Corner roundness (0..1)
+        color: '#ffffff', // CSS color or array of colors
+        fadeColor: 'transparent', // CSS color or array of colors
         speed: 1, // Rounds per second
         rotate: 0, // The rotation offset
         animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
         direction: 1, // 1: clockwise, -1: counterclockwise
-        color: '#ffffff', // CSS color or array of colors
-        fadeColor: 'transparent', // CSS color or array of colors
+        className: 'spinner', // The CSS class to assign to the spinner
         top: '50%', // Top position relative to parent
         left: '50%', // Left position relative to parent
         shadow: '0 0 1px transparent', // Box-shadow for the lines
-        className: 'spinner', // The CSS class to assign to the spinner
-        position: 'fixed', // Element positioning
+        position: 'absolute' // Element positioning
     };
 
-    const target = await document.getElementById('objSpin');
-    const spinner = await new Spinner(opts).spin(target);
-
     if (active) {
-        document.querySelector("body").classList.add("disabled");
-        target.appendChild(spinner.el);
-    }
-    else {
-        document.querySelector("body").classList.remove("disabled");
-        $(target).empty();
+        // Create spinner container and append it to the body
+        spinnerContainer = document.createElement('div');
+        spinnerContainer.id = 'spinner-container';
+
+        var spinner = document.createElement('div');
+        spinner.id = 'spinner';
+
+        spinnerContainer.appendChild(spinner);
+        document.body.appendChild(spinnerContainer);
+
+        // Initialize and start the spinner
+        var target = document.getElementById('spinner');
+        var spinnerInstance = new Spinner(opts).spin(target);
+
+    } else {
+        // Remove spinner container from the body
+        if (spinnerContainer) {
+            document.body.removeChild(spinnerContainer);
+        }
     }
 }
 
@@ -289,7 +291,21 @@ async function callDataWriteText(urlAjax, targetId, disableTarget = undefined) {
 
 // Helper function for creating a DataTable with the given options
 async function createDataTable(tableId, options) {
-    return await $(tableId).DataTable(options);
+    try {
+        await $(tableId).DataTable(options);
+    } catch (e) {
+        console.error(e);
+    }
+    finally {
+        $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+    }
+    
 }
 
 // Function for fetching and displaying data in a table
@@ -340,15 +356,18 @@ async function callTable(urlAjax, hasDate = false, hasButton = false, dateCol = 
                 await createDataTable(v, {
                     'columnDefs': targetArr,
                     'order': [[dateCol[0], 'desc']],
-                    'scrollX': true
+                    'scrollX': true,
+                    'pageLength': 50
                 });
             } else {
                 await createDataTable(v, {
-                    'scrollX': true
+                    'scrollX': true,
+                    'pageLength': 50
                 });
             }
         });
-        return preLineSetLink();
+
+        Promise.all(res, preLineSetLink());
     } catch (error) {
         // Handle the error
         console.error(error);
@@ -379,7 +398,8 @@ async function callTable_Normal(urlAjax, blockId = '#datalist') {
                 width: '100%'
             });
         });
-        return preLineSetLink();
+
+        Promise.all(res, preLineSetLink());
     } catch (error) {
         // Handle the error
         console.error(error);
@@ -411,23 +431,23 @@ async function callTable_NoSort(urlAjax, blockId = '#datalist') {
             });
         });
 
-        let table;
-        // create datatable with no sort
         $(blockId).find('table').each(async function (i, v) {
-            table = await createDataTable(v, {
+            await createDataTable(v, {
                 'ordering': false,
-                'scrollX': true
+                'scrollX': true,
+                'pageLength': 50
             });
         });
-        return preLineSetLink();
+
+        Promise.all(res, preLineSetLink());
     } catch (error) {
         // Handle the error
         console.error(error);
     }
 }
 
-function callFilter(urlAjax, blockId = '#filter') {
-    $.ajax({
+async function callFilter(urlAjax, blockId = '#filter') {
+    return $.ajax({
         url: `${urlAjax}?filter=${getQueryString()}`,
         method: 'GET',
         dataType: 'html',
@@ -461,7 +481,7 @@ async function callData(urlAjax, blockId = '#datalist', callback = undefined) {
         if (callback) {
             callback();
         }
-        return preLineSetLink();
+        Promise.all(res, preLineSetLink());
     } catch (e) {
         console.error(e);
     }
@@ -482,8 +502,13 @@ async function setDropdown_Form() {
     });
 }
 
-async function callModal(urlAjax, options = { bigSize: false, callback: null }) {
+async function callModal(urlAjax, options = { bigSize: false, callAfter: null, callBefore: null }) {
     try {
+
+        if (options.callBefore) {
+            options.callBefore();
+        }
+
         const res = await $.ajax({
             url: urlAjax,
             async: true
@@ -497,10 +522,6 @@ async function callModal(urlAjax, options = { bigSize: false, callback: null }) 
 
         $('#modalContent').html(res);
 
-        if (options.callback) {
-            options.callback();
-        }
-
         $('#modalArea').modal('show');
 
         // Reinitialize Select2 after the modal is shown
@@ -510,15 +531,22 @@ async function callModal(urlAjax, options = { bigSize: false, callback: null }) 
                 width: '100%'
             });
         });
+
+        if (options.callAfter) {
+            options.callAfter();
+        }
+
+        Promise.all(res);
+
     } catch (error) {
         console.error(error);
     }
 }
 
-function callSubmitModal(urlAjax, form) {
+function callSubmitModal(urlAjax, form, options = { title: '', text: '' }) {
     swal({
-        title: 'Are you sure?',
-        text: 'This information will be saved to the database.',
+        title: options.title ? options.title : 'Are you sure?',
+        text: options.text ? options.text : 'This information will be saved to the database.',
         buttons: true,
         icon: 'warning'
     }).then(function (confirmed) {
@@ -561,10 +589,10 @@ function callSubmitModal(urlAjax, form) {
     });
 }
 
-function callSubmitPage(urlAjax, form) {
+function callSubmitPage(urlAjax, form, options = { title: '', text: '' }) {
     swal({
-        title: 'Are you sure?',
-        text: 'This information will be saved to the database.',
+        title: options.title ? options.title : 'Are you sure?',
+        text: options.text ? options.text : 'This information will be saved to the database.',
         buttons: true,
         icon: 'warning'
     }).then((confirmed) => {
@@ -603,40 +631,50 @@ function callSubmitPage(urlAjax, form) {
     });
 }
 
-function callSubmitRedirect(urlAjax, form, urlRedirect) {
-    const formData = new FormData(form);
-    return $.ajax({
-        url: urlAjax,
-        type: 'POST',
-        data: formData,
-        async: true,
-        processData: false,
-        contentType: false,
-        success: function (json) {
-            swal({
-                title: json.Title,
-                text: json.Text,
-                icon: json.Icon,
-                button: json.Button,
-                dangerMode: json.DangerMode
-            }).then(function () {
-                if (json.Icon === 'success') {
-                    if (json.Option != null) {
-                        urlRedirect += '/' + json.Option;
-                    }
-                    window.location.href = urlRedirect;
+function callSubmitRedirect(urlAjax, form, urlRedirect, options = { title: '', text: '' }) {
+    return swal({
+        title: options.title ? options.title : 'Are you sure?',
+        text: options.text ? options.text : 'This information will be saved to the database.',
+        buttons: true,
+        icon: 'warning'
+    }).then(function (confirmed) {
+        if (confirmed) {
+            const formData = new FormData(form);
+            $.ajax({
+                url: urlAjax,
+                type: 'POST',
+                data: formData,
+                async: true,
+                processData: false,
+                contentType: false,
+                success: function (json) {
+                    swal({
+                        title: json.Title,
+                        text: json.Text,
+                        icon: json.Icon,
+                        button: json.Button,
+                        dangerMode: json.DangerMode
+                    }).then(function () {
+                        if (json.Icon === 'success') {
+                            if (json.Option != null) {
+                                urlRedirect += '/' + json.Option;
+                            }
+                            window.location.href = urlRedirect;
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    swal({
+                        title: 'Error',
+                        text: 'An error occurred while submitting the form.',
+                        icon: 'error'
+                    });
                 }
-            });
-        },
-        error: function (xhr, status, error) {
-            console.error(error);
-            swal({
-                title: 'Error',
-                text: 'An error occurred while submitting the form.',
-                icon: 'error'
             });
         }
     });
+
 }
 
 function callDeleteItem(urlAjax, reloadPage = false, option = { emptyTarget: undefined, hideTarget: undefined, showTarget: undefined }) {
@@ -771,6 +809,8 @@ async function confirmAndPerformAjaxRequest(urlAjax, action, option = { urlRedir
                     }
                 }
             });
+
+            Promise.all(res);
         } catch (error) {
             console.error(error);
         }

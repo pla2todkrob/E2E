@@ -4,12 +4,14 @@ using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Entity;
 using System.DirectoryServices.AccountManagement;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -127,135 +129,6 @@ namespace E2E.Models
                 master_Divisions.Active = model.Active;
                 master_Divisions.Update = DateTime.Now;
 
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        protected bool Grade_Insert(Master_Grades model)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Grades master_Grades = new Master_Grades
-                {
-                    LineWork_Id = model.LineWork_Id,
-                    Grade_Name = model.Grade_Name.Trim(),
-                    Grade_Position = model.Grade_Position.Trim(),
-                    Active = model.Active
-                };
-
-                db.Master_Grades.Add(master_Grades);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        protected bool Grade_Update(Master_Grades model)
-        {
-            try
-            {
-                bool res = new bool();
-                if (!model.Active)
-                {
-                    int GradesCount = db.Users.Where(w => w.Grade_Id == model.Grade_Id).Count();
-
-                    if (GradesCount > 0)
-                    {
-                        return res;
-                    }
-                }
-
-                Guid userid = Guid.Parse(HttpContext.Current.User.Identity.Name);
-
-                Master_Grades master_Grades = new Master_Grades();
-                master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
-
-                master_Grades.LineWork_Id = model.LineWork_Id;
-                master_Grades.Grade_Name = model.Grade_Name.Trim();
-                master_Grades.Grade_Position = model.Grade_Position.Trim();
-                master_Grades.Active = model.Active;
-                master_Grades.Update = DateTime.Now;
-
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        protected bool LineWork_Insert(Master_LineWorks model)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_LineWorks master_LineWorks = new Master_LineWorks
-                {
-                    LineWork_Name = model.LineWork_Name.Trim(),
-                    Authorize_Id = model.Authorize_Id
-                };
-
-                db.Master_LineWorks.Add(master_LineWorks);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        protected bool LineWork_Update(Master_LineWorks model)
-        {
-            try
-            {
-                bool res = new bool();
-
-                if (!model.Active)
-                {
-                    int LineWorksCount = db.Users.Where(w => w.Master_Grades.Master_LineWorks.LineWork_Id == model.LineWork_Id).Count();
-
-                    if (LineWorksCount > 0)
-                    {
-                        return res;
-                    }
-                }
-
-                Master_LineWorks master_LineWorks = new Master_LineWorks();
-                master_LineWorks = db.Master_LineWorks
-                    .Where(w => w.LineWork_Id == model.LineWork_Id)
-                    .FirstOrDefault();
-
-                master_LineWorks.Authorize_Id = model.Authorize_Id;
-                master_LineWorks.LineWork_Name = model.LineWork_Name;
-                master_LineWorks.Active = model.Active;
-                master_LineWorks.Update = DateTime.Now;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -486,162 +359,109 @@ namespace E2E.Models
 
         protected bool Users_Insert(UserDetails model)
         {
-            try
+            // Create new Users instance and populate its properties
+            Users users = new Users
             {
-                bool res = new bool();
-
-                Users users = new Users
-                {
-                    User_Code = model.Users.User_Code.Trim(),
-                    Grade_Id = model.Users.Grade_Id,
-                    Plant_Id = model.Users.Plant_Id,
-                    Process_Id = model.Users.Process_Id,
-                    Role_Id = model.Users.Role_Id != 0 ? model.Users.Role_Id : 2,
-                    User_CostCenter = model.Users.User_CostCenter.Trim(),
-                    YearSetPoint = DateTime.Now.Year,
-                    BusinessCardGroup = model.Users.BusinessCardGroup
-                };
-
-                System_Configurations system_ = new System_Configurations();
-                system_ = db.System_Configurations
+                User_Code = model.Users.User_Code.Trim(),
+                Grade_Id = model.Users.Grade_Id,
+                Plant_Id = model.Users.Plant_Id,
+                Process_Id = model.Users.Process_Id,
+                Role_Id = 2,
+                User_CostCenter = model.Users.User_CostCenter.Trim(),
+                YearSetPoint = DateTime.Now.Year,
+                BusinessCardGroup = model.Users.BusinessCardGroup,
+                User_Point = db.System_Configurations
                     .OrderByDescending(o => o.CreateDateTime)
-                    .FirstOrDefault();
-                if (system_ != null)
-                {
-                    users.User_Point = system_.Configuration_Point;
-                }
-                else
-                {
-                    users.User_Point = 50;
-                }
+                    .Select(s => s.Configuration_Point)
+                    .FirstOrDefault()
+            };
 
-                ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
-
-                users.Username = adInfo.SamAccountName;
-
-                string emailAd = adInfo.EmailAddress;
-                if (string.IsNullOrEmpty(model.Users.User_Email))
-                {
-                    users.User_Email = emailAd;
-                }
-                else
-                {
-                    users.User_Email = model.Users.User_Email;
-                }
-
-                if (!string.IsNullOrEmpty(users.User_Email))
-                {
-                    users.User_Email = users.User_Email.Trim();
-                }
-
-                db.Users.Add(users);
-
-                UserDetails userDetails = new UserDetails
-                {
-                    Detail_EN_FirstName = model.Detail_EN_FirstName.Trim(),
-                    Detail_EN_LastName = model.Detail_EN_LastName.Trim(),
-                    Prefix_EN_Id = model.Prefix_EN_Id
-                };
-
-                if (string.IsNullOrEmpty(emailAd))
-                {
-                    if (!string.IsNullOrEmpty(model.Detail_Password))
-                    {
-                        userDetails.Detail_Password = Users_Password(model.Detail_Password.Trim());
-                        userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
-                    }
-                    else
-                    {
-                        userDetails.Detail_Password = Users_Password(users.User_Code.Trim());
-                        userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
-                    }
-                }
-
-                userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
-                userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
-                userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
-                userDetails.User_Id = users.User_Id;
-                db.UserDetails.Add(userDetails);
-
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
-            }
-            catch (Exception)
+            // Fetch Active Directory info
+            ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
+            if (adInfo != null)
             {
-                throw;
+                users.Username = adInfo.SamAccountName;
+                users.User_Email = adInfo.EmailAddress;
             }
+            else
+            {
+                users.User_Email = model.Users.User_Email ?? "";
+            }
+
+            // Add user to the database
+            db.Users.Add(users);
+
+            // Create and populate UserDetails instance
+            UserDetails userDetails = new UserDetails
+            {
+                Detail_EN_FirstName = model.Detail_EN_FirstName.Trim(),
+                Detail_EN_LastName = model.Detail_EN_LastName.Trim(),
+                Prefix_EN_Id = model.Prefix_EN_Id,
+                Detail_TH_FirstName = model.Detail_TH_FirstName.Trim(),
+                Detail_TH_LastName = model.Detail_TH_LastName.Trim(),
+                Prefix_TH_Id = model.Prefix_TH_Id,
+                User_Id = users.User_Id
+            };
+
+            // Set password if email address is empty
+            if (adInfo == null)
+            {
+                string password = string.IsNullOrEmpty(model.Detail_Password)
+                    ? users.User_Code.Trim()
+                    : model.Detail_Password.Trim();
+                string hashPassword = Users_Password(password);
+                userDetails.Detail_Password = hashPassword;
+                userDetails.Detail_ConfirmPassword = hashPassword;
+            }
+
+            // Add user details to the database
+            db.UserDetails.Add(userDetails);
+
+            return db.SaveChanges() > 0;
         }
+
 
         protected bool Users_Update(UserDetails model)
         {
-            try
+            Users users = db.Users.Where(w => w.User_Code == model.Users.User_Code).FirstOrDefault();
+            if (model.Users.Role_Id != 0)
             {
-                bool res = new bool();
+                users.Role_Id = model.Users.Role_Id;
+            }
+            users.Grade_Id = model.Users.Grade_Id;
+            users.Plant_Id = model.Users.Plant_Id;
+            users.Process_Id = model.Users.Process_Id;
+            users.User_Code = model.Users.User_Code.Trim();
+            users.User_CostCenter = model.Users.User_CostCenter.Trim();
+            users.BusinessCardGroup = model.Users.BusinessCardGroup;
 
-                Users users = db.Users.Where(w => w.User_Code == model.Users.User_Code).FirstOrDefault();
-                if (model.Users.Role_Id != 0)
-                {
-                    users.Role_Id = model.Users.Role_Id;
-                }
-                users.Grade_Id = model.Users.Grade_Id;
-                users.Plant_Id = model.Users.Plant_Id;
-                users.Process_Id = model.Users.Process_Id;
-                users.User_Code = model.Users.User_Code.Trim();
-                users.User_CostCenter = model.Users.User_CostCenter.Trim();
-                users.BusinessCardGroup = model.Users.BusinessCardGroup;
+            if (!string.IsNullOrEmpty(model.Users.User_Email))
+            {
+                users.User_Email = model.Users.User_Email.Trim();
+            }
 
-                if (!string.IsNullOrEmpty(model.Users.User_Email))
-                {
-                    users.User_Email = model.Users.User_Email.Trim();
-                }
+            users.Update = DateTime.Now;
+            users.Active = model.Users.Active;
 
-                users.Update = DateTime.Now;
-                users.Active = model.Users.Active;
+            UserDetails userDetails = db.UserDetails.Where(w => w.User_Id == users.User_Id).FirstOrDefault();
+            userDetails.Detail_EN_FirstName = model.Detail_EN_FirstName.Trim();
+            userDetails.Detail_EN_LastName = model.Detail_EN_LastName.Trim();
+            userDetails.Prefix_EN_Id = model.Prefix_EN_Id;
 
-                UserDetails userDetails = db.UserDetails.Where(w => w.User_Id == users.User_Id).FirstOrDefault();
-                userDetails.Detail_EN_FirstName = model.Detail_EN_FirstName.Trim();
-                userDetails.Detail_EN_LastName = model.Detail_EN_LastName.Trim();
-                userDetails.Prefix_EN_Id = model.Prefix_EN_Id;
+            userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
+            userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
+            userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
 
-                userDetails.Detail_TH_FirstName = model.Detail_TH_FirstName.Trim();
-                userDetails.Detail_TH_LastName = model.Detail_TH_LastName.Trim();
-                userDetails.Prefix_TH_Id = model.Prefix_TH_Id;
-
-                ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
-
+            ClsActiveDirectoryInfo adInfo = GetAdInfo(model.Users.User_Code);
+            if (adInfo != null)
+            {
                 users.Username = adInfo.SamAccountName;
-
-                string emailAd = adInfo.EmailAddress;
-                if (!string.IsNullOrEmpty(emailAd))
-                {
-                    users.User_Email = emailAd;
-                    userDetails.Detail_Password = null;
-                    userDetails.Detail_ConfirmPassword = null;
-                }
-                else
-                {
-                    if (string.IsNullOrEmpty(userDetails.Detail_Password))
-                    {
-                        userDetails.Detail_Password = Users_Password(users.User_Code);
-                    }
-                    userDetails.Detail_ConfirmPassword = userDetails.Detail_Password;
-                }
-
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
+                users.User_Email = adInfo.EmailAddress;
+                userDetails.Detail_Password = null;
+                userDetails.Detail_ConfirmPassword = null;
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return db.SaveChanges() > 0;
         }
 
         public ClsSaveResult Categories_Delete(Guid id)
@@ -843,319 +663,69 @@ namespace E2E.Models
             }
         }
 
-        public ClsSaveResult Department_Delete(Guid id)
-        {
-            ClsSaveResult res = new ClsSaveResult();
-            try
-            {
-                Master_Departments master_Departments = new Master_Departments();
-                master_Departments = db.Master_Departments.Where(w => w.Department_Id == id).FirstOrDefault();
-
-                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Id == id).Count();
-                int deptCount = db.Master_Sections.Where(w => w.Department_Id == id).Count();
-
-                if (userCount > 0 || deptCount > 0)
-                {
-                    res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.IsSuccess = false;
-                }
-                else
-                {
-                    db.Master_Departments.Remove(master_Departments);
-                    if (db.SaveChanges() > 0)
-                    {
-                        res.IsSuccess = true;
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Master_Departments Department_Get(Guid id)
-        {
-            return db.Master_Departments.Find(id);
-        }
 
         public List<Master_Departments> Department_GetAll()
         {
-            return db.Master_Departments.ToList();
-        }
-
-        public List<ClsDepartments> Department_GetAllView()
-        {
             return db.Master_Departments
-                .Select(s => new ClsDepartments()
-                {
-                    Department_Id = s.Department_Id,
-                    Active = s.Active,
-                    Create = s.Create,
-                    Department_Name = s.Department_Name,
-                    Division_Name = s.Master_Divisions.Division_Name,
-                    Update = s.Update
-                }).ToList();
+                .OrderBy(o => o.Master_Divisions.Division_Name)
+                .ThenBy(t => t.Department_Name)
+                .ToList();
         }
 
-        public Guid? Department_GetId(Guid divisionId, string val, bool create = false)
+
+        public Guid Department_GetId(Guid divisionId, string val)
         {
-            try
-            {
-                Guid? res = null;
-            FindModel:
-                Master_Departments master_Departments = new Master_Departments();
-                master_Departments = db.Master_Departments
+            Master_Departments master_Departments = db.Master_Departments
                     .Where(w => w.Department_Name.ToLower() == val.ToLower().Trim() &&
                     w.Division_Id == divisionId)
                     .FirstOrDefault();
-                if (master_Departments != null)
-                {
-                    res = master_Departments.Department_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Department_Save_GetId(divisionId, val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
+            if (master_Departments == null)
             {
-                throw;
-            }
-        }
-
-        public bool Department_Save(Master_Departments model)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Departments master_Departments = new Master_Departments();
-                master_Departments = db.Master_Departments.Where(w => w.Department_Id == model.Department_Id).FirstOrDefault();
-
-                if (master_Departments != null)
+                master_Departments = new Master_Departments()
                 {
-                    master_Departments = db.Master_Departments.Where(w => w.Department_Id != model.Department_Id && w.Department_Name.ToLower() == model.Department_Name.ToLower().Trim() && w.Division_Id == model.Division_Id).FirstOrDefault();
-                    if (master_Departments != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = Department_Update(model);
-                    }
-                }
-                else
-                {
-                    master_Departments = db.Master_Departments.Where(w => w.Department_Name.ToLower() == model.Department_Name.ToLower().Trim() && w.Division_Id == model.Division_Id).FirstOrDefault();
-
-                    if (master_Departments != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = Department_Insert(model);
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Department_Save_GetId(Guid divisionId, string val)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Departments master_Departments = new Master_Departments
-                {
-                    Department_Name = val.Trim(),
+                    Department_Name = val,
                     Division_Id = divisionId
                 };
                 db.Master_Departments.Add(master_Departments);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
 
-                return res;
             }
-            catch (Exception)
+            else
             {
-                throw;
+                master_Departments.Active = true;
             }
-        }
+            db.SaveChanges();
 
-        public ClsSaveResult Division_Delete(Guid id)
-        {
-            ClsSaveResult res = new ClsSaveResult();
-            try
-            {
-                Master_Divisions master_Divisions = new Master_Divisions();
-                master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == id).FirstOrDefault();
-
-                int userCount = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Master_Divisions.Division_Id == id).Count();
-                int deptCount = db.Master_Departments.Where(w => w.Division_Id == id).Count();
-
-                if (userCount > 0 || deptCount > 0)
-                {
-                    res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.IsSuccess = false;
-                }
-                else
-                {
-                    db.Master_Divisions.Remove(master_Divisions);
-                    if (db.SaveChanges() > 0)
-                    {
-                        res.IsSuccess = true;
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Master_Divisions Division_Get(Guid id)
-        {
-            return db.Master_Divisions.Find(id);
+            return master_Departments.Department_Id;
         }
 
         public List<Master_Divisions> Division_GetAll()
         {
-            return db.Master_Divisions.ToList();
-        }
-
-        public List<ClsDivisions> Division_GetAllView()
-        {
             return db.Master_Divisions
-                .Select(s => new ClsDivisions()
-                {
-                    Division_Id = s.Division_Id,
-                    Active = s.Active,
-                    Create = s.Create,
-                    Division_Name = s.Division_Name,
-                    Update = s.Update
-                }).ToList();
+                .OrderBy(o=>o.Division_Name)
+                .ToList();
         }
 
-        public Guid? Division_GetId(string val, bool create = false)
+        public Guid Division_GetId(string val)
         {
-            try
-            {
-                Guid? res = null;
-            FindModel:
-                Master_Divisions master_Divisions = new Master_Divisions();
-                master_Divisions = db.Master_Divisions
+            Master_Divisions master_Divisions = db.Master_Divisions
                     .Where(w => w.Division_Name.ToLower() == val.ToLower().Trim())
                     .FirstOrDefault();
-                if (master_Divisions != null)
-                {
-                    res = master_Divisions.Division_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Division_Save_GetId(val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
+            if (master_Divisions == null)
             {
-                throw;
-            }
-        }
-
-        public bool Division_Save(Master_Divisions model)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Divisions master_Divisions = new Master_Divisions();
-                master_Divisions = db.Master_Divisions.Where(w => w.Division_Id == model.Division_Id).FirstOrDefault();
-
-                if (master_Divisions != null)
+                master_Divisions = new Master_Divisions()
                 {
-                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Id != model.Division_Id && w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim()).FirstOrDefault();
-                    if (master_Divisions != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = Division_Update(model);
-                    }
-                }
-                else
-                {
-                    master_Divisions = db.Master_Divisions.Where(w => w.Division_Name.ToLower() == model.Division_Name.ToLower().Trim()).FirstOrDefault();
-
-                    if (master_Divisions != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = Division_Insert(model);
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Division_Save_GetId(string val)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Divisions master_Divisions = new Master_Divisions
-                {
-                    Division_Name = val.Trim()
+                    Division_Name = val
                 };
                 db.Master_Divisions.Add(master_Divisions);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
+                
             }
-            catch (Exception)
+            else
             {
-                throw;
+                master_Divisions.Active = true;
             }
+            db.SaveChanges();
+
+            return master_Divisions.Division_Id;
         }
 
         public ClsActiveDirectoryInfo GetAdInfo(string code)
@@ -1283,148 +853,38 @@ namespace E2E.Models
             }
         }
 
-        public Guid? Grade_GetId(Guid lineWorkId, string grade, string position, bool create = false)
+        public Guid Grade_GetId(Guid lineWorkId, string grade, string position)
         {
-            try
-            {
-                Guid? res = null;
-
-            FindModel:
-                Master_Grades master_Grades = new Master_Grades();
-                master_Grades = db.Master_Grades
+            Master_Grades master_Grades = db.Master_Grades
                     .Where(w => w.Grade_Name.ToLower() == grade.ToLower().Trim() &&
                     w.Grade_Position.ToLower() == position.ToLower().Trim() &&
                     w.LineWork_Id == lineWorkId)
                     .FirstOrDefault();
-                if (master_Grades != null)
-                {
-                    res = master_Grades.Grade_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(grade) && !string.IsNullOrEmpty(position))
-                        {
-                            master_Grades = new Master_Grades
-                            {
-                                Grade_Name = grade,
-                                Grade_Position = position,
-                                LineWork_Id = lineWorkId
-                            };
-
-                            if (Grade_Save(master_Grades))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
+            if (master_Grades == null)
             {
-                throw;
-            }
-        }
-
-        public bool Grade_Save(Master_Grades model)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Grades master_Grades = new Master_Grades();
-                master_Grades = db.Master_Grades.Where(w => w.Grade_Id == model.Grade_Id).FirstOrDefault();
-
-                if (master_Grades != null)
+                master_Grades = new Master_Grades
                 {
-                    master_Grades = db.Master_Grades.Where(w => w.Grade_Id != model.Grade_Id && w.Grade_Name.ToLower() == model.Grade_Name.ToLower().Trim() && w.Grade_Position.ToLower() == model.Grade_Position.ToLower().Trim() && w.LineWork_Id == model.LineWork_Id).FirstOrDefault();
-                    if (master_Grades != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = Grade_Update(model);
-                    }
-                }
-                else
-                {
-                    master_Grades = db.Master_Grades.Where(w => w.Grade_Name.ToLower() == model.Grade_Name.ToLower().Trim() && w.Grade_Position.ToLower() == model.Grade_Position.Trim().ToLower() && w.LineWork_Id == model.LineWork_Id).FirstOrDefault();
-
-                    if (master_Grades != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = Grade_Insert(model);
-                    }
-                }
-
-                return res;
+                    Grade_Name = grade,
+                    Grade_Position = position,
+                    LineWork_Id = lineWorkId
+                };
+                db.Master_Grades.Add(master_Grades);
             }
-            catch (Exception)
+            else
             {
-                throw;
+                master_Grades.Active = true;
             }
-        }
+            db.SaveChanges();
 
-        public ClsSaveResult Grades_Delete(Guid id)
-        {
-            ClsSaveResult res = new ClsSaveResult();
-            try
-            {
-                Master_Grades master_Grades = new Master_Grades();
-                master_Grades = db.Master_Grades.Where(w => w.Grade_Id == id).FirstOrDefault();
-
-                int userCount = db.Users.Where(w => w.Grade_Id == id).Count();
-
-                if (userCount > 0)
-                {
-                    res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.IsSuccess = false;
-                }
-                else
-                {
-                    db.Master_Grades.Remove(master_Grades);
-                    if (db.SaveChanges() > 0)
-                    {
-                        res.IsSuccess = true;
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Master_Grades Grades_Get(Guid id)
-        {
-            return db.Master_Grades.Find(id);
+            return master_Grades.Grade_Id;
         }
 
         public List<Master_Grades> Grades_GetAll()
         {
-            return db.Master_Grades.ToList();
-        }
-
-        public List<ClsGrades> Grades_GetAllView()
-        {
             return db.Master_Grades
-                .Select(s => new ClsGrades()
-                {
-                    Active = s.Active,
-                    Create = s.Create,
-                    Grade_Name = s.Grade_Name,
-                    Grade_Position = s.Grade_Position,
-                    LineWork_Name = s.Master_LineWorks.LineWork_Name,
-                    Update = s.Update,
-                    Grade_Id = s.Grade_Id
-                }).ToList();
+                .OrderBy(o => o.Master_LineWorks.LineWork_Name)
+                .ThenBy(t => t.Grade_Name)
+                .ToList();
         }
 
         public bool HaveAD(string username)
@@ -1470,7 +930,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    db.Entry(master_InquiryTopics).State = System.Data.Entity.EntityState.Deleted;
+                    db.Entry(master_InquiryTopics).State = EntityState.Deleted;
                     if (db.SaveChanges() > 0)
                     {
                         res.IsSuccess = true;
@@ -1489,7 +949,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                db.Entry(model).State = System.Data.Entity.EntityState.Added;
+                db.Entry(model).State = EntityState.Added;
                 if (db.SaveChanges() > 0)
                 {
                     res = true;
@@ -1553,7 +1013,8 @@ namespace E2E.Models
         public List<Master_InquiryTopics> InquiryTopics_GetAll()
         {
             return db.Master_InquiryTopics
-                .OrderBy(o => o.InquiryTopic_Index)
+                .OrderBy(o => o.System_Program.Program_Name)
+                .ThenBy(o => o.InquiryTopic_Index)
                 .ToList();
         }
 
@@ -1577,140 +1038,39 @@ namespace E2E.Models
             }
         }
 
-        public Guid? LineWork_GetId(string val, bool create = false)
+        public Guid LineWork_GetId(string val)
         {
-            try
+            val = val.Trim();
+
+            // Check if the line work already exists
+            var master_LineWorks = db.Master_LineWorks
+                .FirstOrDefault(w => w.LineWork_Name.ToLower() == val.ToLower());
+
+            if (master_LineWorks == null)
             {
-                Guid? res = null;
-            FindModel:
-                Master_LineWorks master_LineWorks = new Master_LineWorks();
-                master_LineWorks = db.Master_LineWorks
-                    .Where(w => w.LineWork_Name.ToLower() == val.ToLower().Trim())
-                    .FirstOrDefault();
-                if (master_LineWorks != null)
+                master_LineWorks = new Master_LineWorks
                 {
-                    res = master_LineWorks.LineWork_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            master_LineWorks = new Master_LineWorks
-                            {
-                                LineWork_Name = val
-                            };
-                            if (val.StartsWith("J"))
-                            {
-                                master_LineWorks.Authorize_Id = 1;
-                            }
-                            else if (val.StartsWith("M"))
-                            {
-                                master_LineWorks.Authorize_Id = 2;
-                            }
-                            else
-                            {
-                                master_LineWorks.Authorize_Id = 3;
-                            }
-                            if (LineWork_Save(master_LineWorks))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
+                    LineWork_Name = val,
+                    Authorize_Id = val.StartsWith("J") ? 1 : (val.StartsWith("M") ? 2 : 3)
+                };
 
-                return res;
+                db.Master_LineWorks.Add(master_LineWorks);
             }
-            catch (Exception)
+            else
             {
-                throw;
+                master_LineWorks.Active = true;
             }
-        }
+            db.SaveChanges();
 
-        public bool LineWork_Save(Master_LineWorks model)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_LineWorks master_LineWorks = new Master_LineWorks();
-                master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Id == model.LineWork_Id).FirstOrDefault();
-
-                if (master_LineWorks != null)
-                {
-                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Id != model.LineWork_Id && w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim()).FirstOrDefault();
-                    if (master_LineWorks != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = LineWork_Update(model);
-                    }
-                }
-                else
-                {
-                    master_LineWorks = db.Master_LineWorks.Where(w => w.LineWork_Name.ToLower() == model.LineWork_Name.ToLower().Trim()).FirstOrDefault();
-
-                    if (master_LineWorks != null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        res = LineWork_Insert(model);
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public ClsSaveResult Lineworks_Delete(Guid id)
-        {
-            ClsSaveResult res = new ClsSaveResult();
-            try
-            {
-                int gradeCount = db.Master_Grades.Where(w => w.Grade_Id == id).Count();
-                int userCount = db.Users.Where(w => w.Grade_Id == id).Count();
-                if (gradeCount > 0 && userCount > 0)
-                {
-                    res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.IsSuccess = false;
-                }
-                else
-                {
-                    Master_LineWorks master_LineWorks = new Master_LineWorks();
-
-                    master_LineWorks = db.Master_LineWorks
-                            .Where(w => w.LineWork_Id == id).FirstOrDefault();
-                    db.Master_LineWorks.Remove(master_LineWorks);
-                    if (db.SaveChanges() > 0)
-                    {
-                        res.IsSuccess = true;
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Master_LineWorks LineWorks_Get(Guid id)
-        {
-            return db.Master_LineWorks.Find(id);
+            return master_LineWorks.LineWork_Id;
         }
 
         public List<Master_LineWorks> LineWorks_GetAll()
         {
-            return db.Master_LineWorks.ToList();
+            return db.Master_LineWorks
+                .OrderBy(o => o.Authorize_Id)
+                .ThenBy(t => t.LineWork_Name)
+                .ToList();
         }
 
         public bool LoginDomain(string username, string password)
@@ -1759,40 +1119,26 @@ namespace E2E.Models
             return db.Master_Plants.ToList();
         }
 
-        public Guid Plant_GetId(string val, bool create = false)
+        public Guid Plant_GetId(string val)
         {
-            try
-            {
-                Guid? res = null;
-            FindModel:
-                Master_Plants master_Plants = new Master_Plants();
-                master_Plants = db.Master_Plants
+            Master_Plants master_Plants = db.Master_Plants
                     .Where(w => w.Plant_Name.ToLower() == val.ToLower().Trim())
                     .FirstOrDefault();
-                if (master_Plants != null)
-                {
-                    res = master_Plants.Plant_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Plant_Save_GetID(val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-
-                return res.Value;
-            }
-            catch (Exception)
+            if (master_Plants == null)
             {
-                throw;
+                master_Plants = new Master_Plants()
+                {
+                    Plant_Name = val
+                };
+
+                db.Master_Plants.Add(master_Plants);
             }
+            else
+            {
+                master_Plants.Active = true;
+            }
+            db.SaveChanges();
+            return master_Plants.Plant_Id;
         }
 
         public bool Plant_Save(PlantDetail model)
@@ -1835,177 +1181,48 @@ namespace E2E.Models
             }
         }
 
-        public bool Plant_Save_GetID(string val)
+        public int Prefix_EN_GetId(string val)
         {
-            try
+            // Check if the value exists
+            var system_Prefix_ = db.System_Prefix_ENs
+                        .Where(w => w.Prefix_EN_Name == val)
+                        .FirstOrDefault();
+
+            // If the value doesn't exist and create is true
+            if (system_Prefix_ == null)
             {
-                bool res = new bool();
-                Master_Plants master_Plants = new Master_Plants
+                system_Prefix_ = new System_Prefix_EN
                 {
-                    Plant_Name = val.Trim()
+                    Prefix_EN_Name = val
                 };
-                db.Master_Plants.Add(master_Plants);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
 
-                return res;
+                db.System_Prefix_ENs.Add(system_Prefix_);
+                db.SaveChanges();
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return system_Prefix_.Prefix_EN_Id;
         }
 
-        public ClsSaveResult Plants_Delete(Guid id)
+        public int Prefix_TH_GetId(string val)
         {
-            ClsSaveResult res = new ClsSaveResult();
-            try
+            // Check if the value exists
+            var system_Prefix_ = db.System_Prefix_THs
+                        .Where(w => w.Prefix_TH_Name == val)
+                        .FirstOrDefault();
+
+            // If the value doesn't exist and create is true
+            if (system_Prefix_ == null)
             {
-                Master_Plants master_Plants = db.Master_Plants.Where(w => w.Plant_Id == id).FirstOrDefault();
-
-                int divisionCount = db.Master_Divisions.Where(w => w.Plant_Id == id).Count();
-                //int userCount = db.Users.Count();
-                int userCount = db.Users.Where(w => w.Master_Plants.Plant_Id == id).Count();
-
-                if (userCount > 0 || divisionCount > 0)
+                system_Prefix_ = new System_Prefix_TH
                 {
-                    res.Message = "ข้อมูลถูกใช้งานอยู่";
-                    res.IsSuccess = false;
-                }
-                else
-                {
-                    var PlantDetail = db.PlantDetails.Where(w => w.Plant_Id == id).FirstOrDefault();
-
-                    db.Master_Plants.Remove(master_Plants);
-                    db.PlantDetails.Remove(PlantDetail);
-
-                    if (db.SaveChanges() > 0)
-                    {
-                        res.IsSuccess = true;
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public int? Prefix_EN_GetId(string val, bool create = false)
-        {
-            try
-            {
-                int? res = null;
-            FindModel:
-                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN();
-                system_Prefix_EN = db.System_Prefix_ENs
-                    .Where(w => w.Prefix_EN_Name.ToLower() == val.ToLower().Trim())
-                    .FirstOrDefault();
-                if (system_Prefix_EN != null)
-                {
-                    res = system_Prefix_EN.Prefix_EN_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Prefix_EN_Save(val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Prefix_EN_Save(string val)
-        {
-            try
-            {
-                bool res = new bool();
-                System_Prefix_EN system_Prefix_EN = new System_Prefix_EN
-                {
-                    Prefix_EN_Name = val.Trim()
+                    Prefix_TH_Name = val
                 };
-                db.System_Prefix_ENs.Add(system_Prefix_EN);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
-        public int? Prefix_TH_GetId(string val, bool create = false)
-        {
-            try
-            {
-                int? res = null;
-            FindModel:
-                System_Prefix_TH system_Prefix_TH = new System_Prefix_TH();
-                system_Prefix_TH = db.System_Prefix_THs
-                    .Where(w => w.Prefix_TH_Name.ToLower() == val.ToLower().Trim())
-                    .FirstOrDefault();
-                if (system_Prefix_TH != null)
-                {
-                    res = system_Prefix_TH.Prefix_TH_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Prefix_TH_Save(val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-                return res;
+                db.System_Prefix_THs.Add(system_Prefix_);
+                db.SaveChanges();
             }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
-        public bool Prefix_TH_Save(string val)
-        {
-            try
-            {
-                bool res = new bool();
-                System_Prefix_TH system_Prefix_TH = new System_Prefix_TH
-                {
-                    Prefix_TH_Name = val.Trim()
-                };
-                db.System_Prefix_THs.Add(system_Prefix_TH);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return system_Prefix_.Prefix_TH_Id;
         }
 
         public ClsSaveResult Process_Delete(Guid id)
@@ -2046,60 +1263,35 @@ namespace E2E.Models
 
         public List<Master_Processes> Process_GetAll()
         {
-            return db.Master_Processes.ToList();
-        }
-
-        public List<ClsProcesses> Process_GetAllView()
-        {
             return db.Master_Processes
-                .Select(s => new ClsProcesses()
-                {
-                    Processes_Id = s.Process_Id,
-                    Active = s.Active,
-                    Create = s.Create,
-                    Department_Name = s.Master_Sections.Master_Departments.Department_Name,
-                    Division_Name = s.Master_Sections.Master_Departments.Master_Divisions.Division_Name,
-                    Process_Name = s.Process_Name,
-                    Section_Name = s.Master_Sections.Section_Name,
-                    Update = s.Update
-                }).ToList();
+                .OrderBy(o => o.Master_Sections.Master_Departments.Master_Divisions.Division_Name)
+                .ThenBy(t => t.Master_Sections.Master_Departments.Department_Name)
+                .ThenBy(t => t.Master_Sections.Section_Name)
+                .ThenBy(t => t.Process_Name)
+                .ToList();
         }
 
-        public Guid? Process_GetId(Guid sectionId, string val, bool create = false)
+        public Guid Process_GetId(Guid sectionId, string val)
         {
-            try
-            {
-                Guid? res = null;
-            FindModel:
-                Master_Processes master_Processes = new Master_Processes();
-                master_Processes = db.Master_Processes
+            Master_Processes master_Processes = db.Master_Processes
                     .Where(w => w.Process_Name.ToLower() == val.ToLower().Trim() &&
                     w.Section_Id == sectionId)
                     .FirstOrDefault();
-                if (master_Processes != null)
-                {
-                    res = master_Processes.Process_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Process_Save_GetId(sectionId, val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
-
-                return res;
-            }
-            catch (Exception)
+            if (master_Processes == null)
             {
-                throw;
+                master_Processes = new Master_Processes()
+                {
+                    Process_Name = val,
+                    Section_Id = sectionId
+                };
+                db.Master_Processes.Add(master_Processes);
             }
+            else
+            {
+                master_Processes.Active = true;
+            }
+            db.SaveChanges();
+            return master_Processes.Process_Id;
         }
 
         public bool Process_Save(Master_Processes model)
@@ -2136,29 +1328,6 @@ namespace E2E.Models
                     }
                 }
 
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Process_Save_GetId(Guid sectionId, string val)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Processes master_Processes = new Master_Processes
-                {
-                    Process_Name = val.Trim(),
-                    Section_Id = sectionId
-                };
-                db.Master_Processes.Add(master_Processes);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
-                }
                 return res;
             }
             catch (Exception)
@@ -2230,59 +1399,35 @@ namespace E2E.Models
 
         public List<Master_Sections> Section_GetAll()
         {
-            return db.Master_Sections.ToList();
-        }
-
-        public List<ClsSections> Section_GetAllView()
-        {
             return db.Master_Sections
-                .Select(s => new ClsSections()
-                {
-                    Section_Id = s.Section_Id,
-                    Active = s.Active,
-                    Create = s.Create,
-                    Department_Name = s.Master_Departments.Department_Name,
-                    Division_Name = s.Master_Departments.Master_Divisions.Division_Name,
-                    Section_Name = s.Section_Name,
-                    Update = s.Update
-                }).ToList();
+                .OrderBy(o => o.Master_Departments.Master_Divisions.Division_Name)
+                .ThenBy(t => t.Master_Departments.Department_Name)
+                .ThenBy(t => t.Section_Name)
+                .ToList();
         }
 
-        public Guid? Section_GetId(Guid departmentId, string val, bool create = false)
+        public Guid Section_GetId(Guid departmentId, string val)
         {
-            try
+            Master_Sections master_Sections = db.Master_Sections
+                     .Where(w => w.Section_Name.ToLower() == val.ToLower().Trim() &&
+                     w.Department_Id == departmentId)
+                     .FirstOrDefault();
+            if (master_Sections == null)
             {
-                Guid? res = null;
-            FindModel:
-                Master_Sections master_Sections = new Master_Sections();
-                master_Sections = db.Master_Sections
-                    .Where(w => w.Section_Name.ToLower() == val.ToLower().Trim() &&
-                    w.Department_Id == departmentId)
-                    .FirstOrDefault();
-                if (master_Sections != null)
+                master_Sections = new Master_Sections()
                 {
-                    res = master_Sections.Section_Id;
-                }
-                else
-                {
-                    if (create)
-                    {
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            if (Section_Save_GetId(departmentId, val))
-                            {
-                                goto FindModel;
-                            }
-                        }
-                    }
-                }
+                    Department_Id = departmentId,
+                    Section_Name = val
+                };
+                db.Master_Sections.Add(master_Sections);
+            }
+            else
+            {
+                master_Sections.Active = true;
+            }
+            db.SaveChanges();
 
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return master_Sections.Section_Id;
         }
 
         public bool Section_Save(Master_Sections model)
@@ -2317,30 +1462,6 @@ namespace E2E.Models
                     {
                         res = Section_Insert(model);
                     }
-                }
-
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public bool Section_Save_GetId(Guid departmentId, string val)
-        {
-            try
-            {
-                bool res = new bool();
-                Master_Sections master_Sections = new Master_Sections
-                {
-                    Department_Id = departmentId,
-                    Section_Name = val.Trim()
-                };
-                db.Master_Sections.Add(master_Sections);
-                if (db.SaveChanges() > 0)
-                {
-                    res = true;
                 }
 
                 return res;
@@ -2619,45 +1740,35 @@ namespace E2E.Models
             }
         }
 
-        public bool Users_AdjustMissing(List<string> userCodeList)
+        public async Task<bool> Users_AdjustMissing(List<string> userCodeList)
         {
-            try
+            List<Users> users = await db.Users
+                    .Where(w => !userCodeList.Contains(w.User_Code))
+                    .ToListAsync();
+            if (users.Count > 0)
             {
-                bool res = new bool();
-                List<Users> users = db.Users
-                    .Where(w => !userCodeList.Contains(w.User_Code)).ToList();
-                if (users.Count > 0)
+                foreach (var item in users)
                 {
-                    foreach (var item in users)
+                    if (User_CanDelete(item.User_Id))
                     {
-                        if (User_CanDelete(item.User_Id))
-                        {
-                            db.Entry(item).State = System.Data.Entity.EntityState.Deleted;
-                        }
-                        else
-                        {
-                            item.Active = false;
-                            item.Update = DateTime.Now;
-                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                        }
+                        db.Entry(item).State = EntityState.Deleted;
                     }
-
-                    if (db.SaveChanges() > 0)
+                    else
                     {
-                        res = true;
+                        item.Active = false;
+                        item.Update = DateTime.Now;
+                        db.Entry(item).State = EntityState.Modified;
                     }
                 }
-                else
-                {
-                    res = true;
-                }
 
-                return res;
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    return true;
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+
+            return true;
         }
 
         private bool User_CanDelete(Guid id)
@@ -2684,13 +1795,7 @@ namespace E2E.Models
             }
             catch (Exception ex)
             {
-                res.Message = ex.Message;
-                Exception inner = ex.InnerException;
-                while (inner != null)
-                {
-                    res.Message += string.Format("\n{0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                res.Message = ex.GetBaseException().Message;
             }
 
             return res;
@@ -2774,93 +1879,234 @@ namespace E2E.Models
             }
         }
 
-        public List<string> Users_ReadFile(string fileUrl)
+        public async Task<List<string>> Users_ReadFile(Stream stream)
         {
-            try
+            List<string> userCodeList = new List<string>();
+            List<Guid> lineWorkList = new List<Guid>();
+            List<Guid> gradeList = new List<Guid>();
+            List<Guid> plantList = new List<Guid>();
+            List<Guid> divisionList = new List<Guid>();
+            List<Guid> departmentList = new List<Guid>();
+            List<Guid> sectionList = new List<Guid>();
+            List<Guid> processList = new List<Guid>();
+
+            Dictionary<string, int> prefixEnCache = new Dictionary<string, int>();
+            Dictionary<string, int> prefixThCache = new Dictionary<string, int>();
+            Dictionary<string, Guid> lineWorkCache = new Dictionary<string, Guid>();
+            Dictionary<string, Guid> gradeCache = new Dictionary<string, Guid>();
+            Dictionary<string, Guid> plantCache = new Dictionary<string, Guid>();
+            Dictionary<string, Guid> divisionCache = new Dictionary<string, Guid>();
+            Dictionary<string, Guid> departmentCache = new Dictionary<string, Guid>();
+            Dictionary<string, Guid> sectionCache = new Dictionary<string, Guid>();
+            Dictionary<string, Guid> processCache = new Dictionary<string, Guid>();
+
+            List<UserDetails> userDetailsList = new List<UserDetails>();
+
+            using (ExcelPackage package = new ExcelPackage(stream))
             {
-                List<string> userCodeList = new List<string>();
-                using (HttpClient client = new HttpClient())
+                foreach (var sheet in package.Workbook.Worksheets)
                 {
-                    using (Stream stream = client.GetStreamAsync(fileUrl).Result)
+                    for (int row = 1; row <= sheet.Dimension.End.Row; row++)
                     {
-                        using (ExcelPackage package = new ExcelPackage(stream))
+                        var recNo = sheet.Cells[row, 1].Text;
+                        if (int.TryParse(recNo, out int startData))
                         {
-                            foreach (var sheet in package.Workbook.Worksheets)
+                            if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
                             {
-                                for (int row = 1; row <= sheet.Dimension.End.Row; row++)
-                                {
-                                    var recNo = sheet.Cells[row, 1].Text;
-                                    if (int.TryParse(recNo, out int startData))
-                                    {
-                                        if (string.IsNullOrEmpty(sheet.Cells[row, 1].Text))
-                                        {
-                                            throw new Exception("Data not found");
-                                        }
-                                        UserDetails userDetails = new UserDetails
-                                        {
-                                            Detail_EN_FirstName = sheet.Cells[row, 4].Text,
-                                            Detail_EN_LastName = sheet.Cells[row, 5].Text,
-                                            Prefix_EN_Id = Prefix_EN_GetId(sheet.Cells[row, 3].Text, true).Value,
-                                            Detail_TH_FirstName = sheet.Cells[row, 7].Text,
-                                            Detail_TH_LastName = sheet.Cells[row, 8].Text,
-                                            Prefix_TH_Id = Prefix_TH_GetId(sheet.Cells[row, 6].Text, true).Value,
-                                            Users = new Users()
-                                        };
-                                        Guid? lineworkId = LineWork_GetId(sheet.Cells[row, 10].Text, true);
-                                        if (sheet.Cells[row, 15].Text.Contains("General Affair"))
-                                        {
-                                            userDetails.Users.BusinessCardGroup = true;
-                                        }
-                                        userDetails.Users.Grade_Id = Grade_GetId(lineworkId.Value, sheet.Cells[row, 11].Text, sheet.Cells[row, 12].Text, true).Value;
-                                        userDetails.Users.Plant_Id = Plant_GetId(sheet.Cells[row, 13].Text, true);
-                                        Guid? divisionId = Division_GetId(sheet.Cells[row, 14].Text, true);
-                                        Guid? departmentId = Department_GetId(divisionId.Value, sheet.Cells[row, 15].Text, true);
-                                        Guid? sectionId = Section_GetId(departmentId.Value, sheet.Cells[row, 16].Text, true);
-                                        if (sheet.Cells[row, 16].Text.Contains("Application"))
-                                        {
-                                            userDetails.Users.Role_Id = 1;
-                                        }
-                                        userDetails.Users.Process_Id = Process_GetId(sectionId.Value, sheet.Cells[row, 17].Text, true).Value;
-                                        userDetails.Users.User_Code = sheet.Cells[row, 2].Text;
-                                        userDetails.Users.User_CostCenter = sheet.Cells[row, 18].Text;
-                                        if (Users_Save(userDetails))
-                                        {
-                                            userCodeList.Add(userDetails.Users.User_Code);
-                                        }
-                                    }
-                                }
+                                throw new Exception("Data not found");
                             }
+
+                            string prefixEnText = sheet.Cells[row, 3].Text;
+                            if (!prefixEnCache.ContainsKey(prefixEnText))
+                            {
+                                prefixEnCache[prefixEnText] = Prefix_EN_GetId(prefixEnText);
+                            }
+
+                            string prefixThText = sheet.Cells[row, 6].Text;
+                            if (!prefixThCache.ContainsKey(prefixThText))
+                            {
+                                prefixThCache[prefixThText] = Prefix_TH_GetId(prefixThText);
+                            }
+
+                            string lineWorkText = sheet.Cells[row, 10].Text;
+                            if (!lineWorkCache.ContainsKey(lineWorkText))
+                            {
+                                lineWorkCache[lineWorkText] = LineWork_GetId(lineWorkText);
+                            }
+                            Guid lineworkId = lineWorkCache[lineWorkText];
+                            lineWorkList.Add(lineworkId);
+
+                            string gradeName = sheet.Cells[row, 11].Text;
+                            string gradePosition = sheet.Cells[row, 12].Text;
+                            string gradeKey = $"{lineworkId}-{gradeName}-{gradePosition}";
+                            if (!gradeCache.ContainsKey(gradeKey))
+                            {
+                                gradeCache[gradeKey] = Grade_GetId(lineworkId, gradeName, gradePosition);
+                            }
+                            Guid gradeId = gradeCache[gradeKey];
+                            gradeList.Add(gradeId);
+
+                            string plantName = sheet.Cells[row, 13].Text;
+                            if (!plantCache.ContainsKey(plantName))
+                            {
+                                plantCache[plantName] = Plant_GetId(plantName);
+                            }
+                            Guid plantId = plantCache[plantName];
+                            plantList.Add(plantId);
+
+                            string divisionName = sheet.Cells[row, 14].Text;
+                            if (!divisionCache.ContainsKey(divisionName))
+                            {
+                                divisionCache[divisionName] = Division_GetId(divisionName);
+                            }
+                            Guid divisionId = divisionCache[divisionName];
+                            divisionList.Add(divisionId);
+
+                            string departmentName = sheet.Cells[row, 15].Text;
+                            string departmentKey = $"{divisionId}-{departmentName}";
+                            if (!departmentCache.ContainsKey(departmentKey))
+                            {
+                                departmentCache[departmentKey] = Department_GetId(divisionId, departmentName);
+                            }
+                            Guid departmentId = departmentCache[departmentKey];
+                            departmentList.Add(departmentId);
+
+                            string sectionName = sheet.Cells[row, 16].Text;
+                            string sectionKey = $"{departmentId}-{sectionName}";
+                            if (!sectionCache.ContainsKey(sectionKey))
+                            {
+                                sectionCache[sectionKey] = Section_GetId(departmentId, sectionName);
+                            }
+                            Guid sectionId = sectionCache[sectionKey];
+                            sectionList.Add(sectionId);
+
+                            string processName = sheet.Cells[row, 17].Text;
+                            string processKey = $"{sectionId}-{processName}";
+                            if (!processCache.ContainsKey(processKey))
+                            {
+                                processCache[processKey] = Process_GetId(sectionId, processName);
+                            }
+                            Guid processId = processCache[processKey];
+                            processList.Add(processId);
+
+                            UserDetails userDetails = new UserDetails
+                            {
+                                Detail_EN_FirstName = sheet.Cells[row, 4].Text,
+                                Detail_EN_LastName = sheet.Cells[row, 5].Text,
+                                Prefix_EN_Id = prefixEnCache[prefixEnText],
+                                Detail_TH_FirstName = sheet.Cells[row, 7].Text,
+                                Detail_TH_LastName = sheet.Cells[row, 8].Text,
+                                Prefix_TH_Id = prefixThCache[prefixThText],
+                                Users = new Users
+                                {
+                                    User_Code = sheet.Cells[row, 2].Text,
+                                    User_CostCenter = sheet.Cells[row, 18].Text,
+                                    Grade_Id = gradeId,
+                                    Plant_Id = plantId,
+                                    Process_Id = processId,
+                                    BusinessCardGroup = sheet.Cells[row, 15].Text.Contains("General Affair")
+                                }
+                            };
+
+                            userDetailsList.Add(userDetails);
                         }
                     }
                 }
+            }
 
-                return userCodeList;
-            }
-            catch (Exception)
+            foreach (var userDetails in userDetailsList)
             {
-                throw;
+                if (Users_Save(userDetails))
+                {
+                    userCodeList.Add(userDetails.Users.User_Code);
+                }
             }
+
+            await SetInactiveLinework(lineWorkList.Distinct().ToList());
+            await SetInactiveGrade(gradeList.Distinct().ToList());
+            await SetInactivePlant(plantList.Distinct().ToList());
+            await SetInactiveDivision(divisionList.Distinct().ToList());
+            await SetInactiveDepartment(departmentList.Distinct().ToList());
+            await SetInactiveSection(sectionList.Distinct().ToList());
+            await SetInactiveProcess(processList.Distinct().ToList());
+
+            await db.SaveChangesAsync();
+            return userCodeList;
+        }
+
+        private async Task SetInactiveLinework(List<Guid> guids)
+        {
+            var list = await db.Master_LineWorks
+                .Where(w => !guids.Contains(w.LineWork_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveGrade(List<Guid> guids)
+        {
+            var list = await db.Master_Grades
+                .Where(w => !guids.Contains(w.Grade_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactivePlant(List<Guid> guids)
+        {
+            var list = await db.Master_Plants
+                .Where(w => !guids.Contains(w.Plant_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false); ;
+        }
+
+        private async Task SetInactiveDivision(List<Guid> guids)
+        {
+            var list = await db.Master_Divisions
+                .Where(w => !guids.Contains(w.Division_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveDepartment(List<Guid> guids)
+        {
+            var list = await db.Master_Departments
+                .Where(w => !guids.Contains(w.Department_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveSection(List<Guid> guids)
+        {
+            var list = await db.Master_Sections
+                .Where(w => !guids.Contains(w.Section_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveProcess(List<Guid> guids)
+        {
+            var list = await db.Master_Processes
+                   .Where(w => !guids.Contains(w.Process_Id))
+                   .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
         }
 
         public bool Users_Save(UserDetails model)
         {
-            try
+            model.Users.User_Code = model.Users.User_Code.Trim();
+            if (db.Users.Any(a => a.User_Code == model.Users.User_Code))
             {
-                bool res = new bool();
-                if (db.Users.Where(w => w.User_Code == model.Users.User_Code.Trim()).FirstOrDefault() == null)
-                {
-                    res = Users_Insert(model);
-                }
-                else
-                {
-                    res = Users_Update(model);
-                }
-
-                return res;
+                return Users_Update(model);
             }
-            catch (Exception)
+            else
             {
-                throw;
+                return Users_Insert(model);
             }
         }
     }

@@ -24,9 +24,6 @@ namespace E2E.Models.Tables
         [Description("Division"), Display(Name = "Division"), StringLength(100), Index]
         public string Division_Name { get; set; }
 
-        [Display(Name = "Plant")]
-        public Guid? Plant_Id { get; set; }
-
         public DateTime? Update { get; set; }
     }
 }

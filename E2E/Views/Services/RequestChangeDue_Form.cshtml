@@ -4,8 +4,7 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "RequestForm" }))
-{
+
 <div class="modal-header">
     <h5 class="modal-title">Request change due date</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -13,30 +12,33 @@
     </button>
 </div>
 <div class="modal-body">
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Service_Id)
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(m => m.DueDate)
-                @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @readonly = "readonly", type = "date" })
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "RequestChangeDueForm", name = "RequestChangeDueForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Service_Id)
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.DueDate)
+                    @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @readonly = "readonly", type = "date" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.DueDate_New)
+                    @Html.TextBoxFor(m => m.DueDate_New, new { @class = "form-control", type = "date", required = "required", @min = DateTime.Today.ToString("yyyy-MM-dd") })
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Remark)
+                    @Html.TextAreaFor(m => m.Remark, new { @class = "form-control", required = "required" })
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(m => m.DueDate_New)
-                @Html.TextBoxFor(m => m.DueDate_New, new { @class = "form-control", type = "date", required = "required" })
-            </div>
-        </div>
-        <div class="col-12">
-            <div class="form-group">
-                @Html.LabelFor(m => m.Remark)
-                @Html.TextAreaFor(m => m.Remark, new { @class = "form-control", required = "required" })
-            </div>
-        </div>
-    </div>
+    }
 </div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-primary">Request</button>
+    <button type="submit" class="btn btn-primary" form="RequestChangeDueForm">Request</button>
 </div>
-}
+

@@ -5,7 +5,7 @@
 @section scripts{
 
     <script src="~/Asset/Master.js"></script>
-	<script>
+    <script>
         $(function () {
             reloadTable();
 
@@ -18,7 +18,7 @@
         });
 
         function reloadTable() {
-            callTable('@Url.Action("InquiryTopic_Table", "Masters")', true, true, [1,5]);
+            callTable_Normal('@Url.Action("InquiryTopic_Table", "Masters")');
         }
 
 		$(document.body).on('change', "#Program_Id", function (e) {
@@ -39,11 +39,8 @@
 				});
 			}
 
-
 		});
-
-
-	</script>
+    </script>
 }
 
 @section breadcrumb{
@@ -65,7 +62,7 @@
         </div>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist">
+        <div class="table-responsive" id="datalist">
         </div>
     </div>
 </div>

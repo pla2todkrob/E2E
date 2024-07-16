@@ -4,9 +4,7 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveForm", @class = "was-validated" }))
-{
-@Html.AntiForgeryToken()
+
 
 <div class="modal-header">
     <h5 class="modal-title" id="modalTitle">Form</h5>
@@ -15,64 +13,61 @@
     </button>
 </div>
 <div class="modal-body">
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-    @Html.HiddenFor(m => m.PlantDetail_Id)
-    @Html.HiddenFor(m => m.Plant_Id)
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.Master_Plants.Plant_Name)
-            @Html.TextBoxFor(m => m.Master_Plants.Plant_Name, new { @class = "form-control", required = "required" })
+    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveForm", name = "SaveForm", @class = "was-validated" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m => m.PlantDetail_Id)
+        @Html.HiddenFor(m => m.Plant_Id)
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.Master_Plants.Plant_Name)
+                @Html.TextBoxFor(m => m.Master_Plants.Plant_Name, new { @class = "form-control", @readonly = "readonly" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.OfficeAddress1)
-            @Html.TextBoxFor(m => m.OfficeAddress1, new { @class = "form-control", required = "required" })
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.OfficeAddress1)
+                @Html.TextBoxFor(m => m.OfficeAddress1, new { @class = "form-control" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.OfficeAddress2)
-            @Html.TextBoxFor(m => m.OfficeAddress2, new { @class = "form-control", required = "required" })
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.OfficeAddress2)
+                @Html.TextBoxFor(m => m.OfficeAddress2, new { @class = "form-control" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.OfficeFax)
-            @Html.TextBoxFor(m => m.OfficeFax, new { @class = "form-control", required = "required" })
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.OfficeFax)
+                @Html.TextBoxFor(m => m.OfficeFax, new { @class = "form-control" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.OfficeNumber)
-            @Html.TextBoxFor(m => m.OfficeNumber, new { @class = "form-control", required = "required" })
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.OfficeNumber)
+                @Html.TextBoxFor(m => m.OfficeNumber, new { @class = "form-control" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            @Html.LabelFor(m => m.OfficeName)
-            @Html.TextBoxFor(m => m.OfficeName, new { @class = "form-control", required = "required" })
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                @Html.LabelFor(m => m.OfficeName)
+                @Html.TextBoxFor(m => m.OfficeName, new { @class = "form-control" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group form-check">
-        @Html.CheckBoxFor(m => m.Master_Plants.Active, new { @class = "form-check-input" })
-        @Html.LabelFor(m => m.Master_Plants.Active, new { @class = "form-check-label" })
-    </div>
+        <div class="form-group form-check">
+            @Html.CheckBoxFor(m => m.Master_Plants.Active, new { @class = "form-check-input" })
+            @Html.LabelFor(m => m.Master_Plants.Active, new { @class = "form-check-label" })
+        </div>
+    }
 </div>
 <div class="modal-footer">
-    @{
-            if (!ViewBag.IsNew)
-            {
-        <button type="button" class="btn btn-outline-danger mr-auto" onclick="callDeleteItem('@Url.Action("Plants_Delete","Masters",new { id=Html.ValueFor(w=>w.Plant_Id)})')"><i class="fa fa-trash" aria-hidden="true"></i></button>
-            }
-    }
-
-    <button type="submit" class="btn btn-primary"><i class="fa fa-check" aria-hidden="true"></i></button>
+    <button type="submit" class="btn btn-primary" name="SaveForm"><i class="fa fa-check" aria-hidden="true"></i></button>
 </div>
-}
+

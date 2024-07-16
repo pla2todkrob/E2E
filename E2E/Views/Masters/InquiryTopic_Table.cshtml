@@ -7,28 +7,28 @@
 <table class="table table-bordered table-hover table-striped nowrap">
     <thead>
         <tr>
-            <th class="fit"></th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.InquiryTopic_Index)</th>
+            <th></th>
+            <th>@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.InquiryTopic_Index)</th>
             <th>@Html.DisplayNameFor(m => m.Description_TH)</th>
             <th>@Html.DisplayNameFor(m => m.Description_EN)</th>
             <th>@Html.DisplayNameFor(m => m.System_Program.Program_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+            <th>@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
         <tr>
-            <td>
+            <td class="fit">
                 <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("InquiryTopic_Form","Masters",new { id = Html.ValueFor(m => item.InquiryTopic_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
             </td>
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td>@Html.DisplayFor(i => item.InquiryTopic_Index)</td>
-            <td>@Html.DisplayFor(i => item.Description_TH)</td>
-            <td>@Html.DisplayFor(i => item.Description_EN)</td>
-            <td>@Html.DisplayFor(i => item.System_Program.Program_Name)</td>
-            <td>@Html.DisplayFor(i => item.Update)</td>
+            <td class="fit">@Html.DisplayFor(i => item.Create)</td>
+            <td class="fit">@Html.DisplayFor(i => item.InquiryTopic_Index)</td>
+            <td class="text-nowrap">@Html.DisplayFor(i => item.Description_TH)</td>
+            <td class="text-nowrap">@Html.DisplayFor(i => item.Description_EN)</td>
+            <td class="text-nowrap">@Html.DisplayFor(i => item.System_Program.Program_Name)</td>
+            <td class="fit">@Html.DisplayFor(i => item.Update)</td>
         </tr>
         }
     </tbody>

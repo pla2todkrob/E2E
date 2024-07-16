@@ -3,22 +3,10 @@
 }
 
 @section scripts{
-    <script src="~/Asset/Master.js"></script>
     <script>
         $(function () {
-            reloadTable();
-
+            callTable_Normal('@Url.Action("LineWorks_Table", "Masters")');
         });
-
-        $(document).on('submit', '#SaveForm', function (e) {
-            e.preventDefault();
-            callSubmitModal('@Url.Action("LineWorks_Form", "Masters")', this);
-            return false;
-        });
-
-        function reloadTable() {
-            callTable('@Url.Action("LineWorks_Table", "Masters")', true, true, [1,5]);
-        }
     </script>
 }
 
@@ -34,15 +22,9 @@
 
 <div class="card shadow">
     <div class="card-header">
-        <div class="d-flex">
-            <div class="mr-auto"></div>
-            <div class="ml-auto">
-                <button class="btn btn-primary" onclick="callModal('@Url.Action("LineWorks_Form","Masters")')"><i class="fa fa-plus"></i></button>
-            </div>
-        </div>
+        <h2 class="card-title">Line of works</h2>
     </div>
     <div class="card-body">
-        <div class="row" id="datalist">
-        </div>
+        <div class="table-responsive" id="datalist"></div>
     </div>
 </div>

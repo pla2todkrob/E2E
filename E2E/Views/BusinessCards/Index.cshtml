@@ -1,6 +1,5 @@
 ﻿@{
-	Layout = "~/Views/Shared/_Layout.cshtml";
-
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @section scripts{
@@ -11,12 +10,10 @@
 
 			let isGA = '@ViewBag.GA'.toLowerCase();
 			let authorized = '@ViewBag.authorized';
-			console.log(authorized);
-			console.log(isGA);
 
 			if (isGA == "false" && authorized == '3') {
                 $('#task-tab').removeClass('active');
-				$('#allReuqest-tab').addClass('active');
+				$('#allRequest-tab').addClass('active');
 
                 $('#task').removeClass('show active');
 				$('#request').addClass('show active');
@@ -36,13 +33,13 @@
 
 		$(document).on('submit', '#Create_submit', function (e) {
             e.preventDefault();
-            callSubmitModal('@Url.Action("BusinessCard_Create", "BusinessCards")',this);
+            callSubmitModal('@Url.Action("BusinessCard_Create", "BusinessCards")', this);
             return false;
         });
 
 		function selectUserDetail() {
 
-			$('input[type="text"]').each(function (i,e) {
+			$('input[type="text"]').each(function (i, e) {
 
 				if (e.value != '') {
 					$(this).prop('readonly', true);
@@ -74,7 +71,7 @@
 
 			callTable('@Url.Action("Table_AllTask", "BusinessCards")')
 				.then(function () {
-					callTable('@Url.Action("Table_MyTask", "BusinessCards")', false, false,[0,5],'#datalist2')
+					callTable('@Url.Action("Table_MyTask", "BusinessCards")', false, false, [0, 5], '#datalist2')
 						.then(function () {
 							callTable('@Url.Action("Table_Approval", "BusinessCards")', false, false, [2, 0], '#datalist3').then(function () {
 									callTable('@Url.Action("Table_AllRequest", "BusinessCards")', false, false, [0, 4], '#datalist4')
@@ -100,87 +97,63 @@
 <div class="d-flex mb-3">
     <div class="mr-auto"></div>
     <div class="ml-auto">
-        <button id="btn_create" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_Create","BusinessCards")', { bigSize: true, callback: selectUserDetail })"><i class="fa fa-plus"></i></button>
+        <button id="btn_create" class="btn btn-secondary" onclick="callModal('@Url.Action("BusinessCard_Create","BusinessCards")', { bigSize: true, callAfter: selectUserDetail })"><i class="fa fa-plus"></i></button>
     </div>
 </div>
 
-<ul class="nav nav-tabs" id="Cards" role="tablist">
-    @{
-		//staff ga
-		if (ViewBag.authorized == 3 && ViewBag.GA)
-		{
-        <li class="nav-item">
-            <a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
-                All task
-            </a>
-        </li>
-		}
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" id="Cards" role="tablist">
+            @{
+                //staff ga
+                if (ViewBag.authorized == 3 && ViewBag.GA)
+                {
+                <li class="nav-item">
+                    <a class="nav-link active" id="task-tab" data-toggle="tab" href="#task" role="tab" aria-controls="task" aria-selected="false">
+                        All task
+                    </a>
+                </li>
+                }
 
-        <li class="nav-item">
-            <a class="nav-link" id="allReuqest-tab" data-toggle="tab" href="#request" role="tab" aria-controls="request" aria-selected="false">
-                All request
-            </a>
-        </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="allRequest-tab" data-toggle="tab" href="#request" role="tab" aria-controls="request" aria-selected="false">
+                        All request
+                    </a>
+                </li>
 
-		//staff ga
-		if (ViewBag.authorized == 3 && ViewBag.GA)
-		{
-        <li class="nav-item">
-            <a class="nav-link" id="MyTask-tab" data-toggle="tab" href="#MyTask" role="tab" aria-controls="MyTask" aria-selected="false">
-                My task
-            </a>
-        </li>
-		}
+                //staff ga
+                if (ViewBag.authorized == 3 && ViewBag.GA)
+                {
+                <li class="nav-item">
+                    <a class="nav-link" id="MyTask-tab" data-toggle="tab" href="#MyTask" role="tab" aria-controls="MyTask" aria-selected="false">
+                        My task
+                    </a>
+                </li>
+                }
 
-		if (ViewBag.authorized == 2)
-		{
-        <li class="nav-item">
-            <a class="nav-link " id="approval-tab" data-toggle="tab" href="#approval" role="tab" aria-controls="approval" aria-selected="true">
-                Approval task
-            </a>
-        </li>
-		}
-
-    }
-</ul>
-
-<div class="tab-content" id="myTabContent">
-
-    <div class="tab-pane fade show active" id="task" role="tabpanel" aria-labelledby="task-tab">
-
-        <div class="card">
-
-            <div class="card-body">
+                if (ViewBag.authorized == 2)
+                {
+                <li class="nav-item">
+                    <a class="nav-link" id="approval-tab" data-toggle="tab" href="#approval" role="tab" aria-controls="approval" aria-selected="true">
+                        Approval task
+                    </a>
+                </li>
+                }
+            }
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="task" role="tabpanel" aria-labelledby="task-tab">
                 <div class="row" id="datalist"></div>
             </div>
-        </div>
-    </div>
-
-    <div class="tab-pane fade" id="request" role="tabpanel" aria-labelledby="allReuqest-tab">
-
-        <div class="card">
-
-            <div class="card-body">
+            <div class="tab-pane fade" id="request" role="tabpanel" aria-labelledby="allRequest-tab">
                 <div class="row" id="datalist4"></div>
             </div>
-        </div>
-    </div>
-
-    <div class="tab-pane fade" id="MyTask" role="tabpanel" aria-labelledby="MyTask-tab">
-
-        <div class="card">
-
-            <div class="card-body">
+            <div class="tab-pane fade" id="MyTask" role="tabpanel" aria-labelledby="MyTask-tab">
                 <div class="row" id="datalist2"></div>
             </div>
-        </div>
-    </div>
-
-    <div class="tab-pane fade " id="approval" role="tabpanel" aria-labelledby="approval-tab">
-
-        <div class="card mb-3">
-
-            <div class="card-body">
+            <div class="tab-pane fade" id="approval" role="tabpanel" aria-labelledby="approval-tab">
                 <div class="row" id="datalist3"></div>
             </div>
         </div>

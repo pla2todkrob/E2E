@@ -134,8 +134,8 @@ namespace E2E.Models
                 if (db.System_Statuses.Count() != System_Statuses.DefaultList().Count())
                 {
                     Status_Save();
-                }               
-                
+                }
+
                 if (db.System_Programs.Count() != System_Program.DefaultList().Count())
                 {
                     Program_Save();

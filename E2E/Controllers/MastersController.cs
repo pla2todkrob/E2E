@@ -12,12 +12,11 @@ using System.Web.Mvc;
 
 namespace E2E.Controllers
 {
-    public class MastersController : Controller
+    public class MastersController : BaseController
     {
         private readonly ClsApi api = new ClsApi();
         private readonly ClsManageService clsManageService = new ClsManageService();
         private readonly ClsManageMaster data = new ClsManageMaster();
-        private readonly ClsContext db = new ClsContext();
 
         public ActionResult Categories()
         {
@@ -67,14 +66,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -129,14 +121,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -193,132 +178,9 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpDelete]
-        public ActionResult Departments_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Department_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        public ActionResult Departments_Form(Guid? id)
-        {
-            ViewBag.PlantList = data.SelectListItems_Plant();
-            ViewBag.DivisionsList = data.SelectListItems_Division();
-
-            bool isNew = true;
-            Master_Departments master_Departments = new Master_Departments();
-            if (id.HasValue)
-            {
-                master_Departments = data.Department_Get(id.Value);
-                isNew = false;
-                ViewBag.DivisionsList = data.SelectListItems_Division();
-            }
-
-            ViewBag.IsNew = isNew;
-
-            return View(master_Departments);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Departments_Form(Master_Departments model)
-        {
-            ClsSwal swal = new ClsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Department_Save(model))
-                        {
-                            scope.Complete();
-                            swal.DangerMode = false;
-                            swal.Icon = "success";
-                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.Title = "Successful";
-                        }
-                        else
-                        {
-                            swal.Icon = "warning";
-                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.Title = "Warning";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.Icon = "warning";
-                swal.Title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.Text))
-                        {
-                            swal.Text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.Text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult Departments_Table()
         {
-            return View(data.Department_GetAllView());
+            return View(data.Department_GetAll());
         }
 
         public ActionResult Divisions()
@@ -326,128 +188,9 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpDelete]
-        public ActionResult Divisions_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Division_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        public ActionResult Divisions_Form(Guid? id)
-        {
-            bool isNew = true;
-            Master_Divisions master_Divisions = new Master_Divisions();
-            if (id.HasValue)
-            {
-                master_Divisions = data.Division_Get(id.Value);
-                isNew = false;
-            }
-
-            ViewBag.IsNew = isNew;
-
-            return View(master_Divisions);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Divisions_Form(Master_Divisions model)
-        {
-            ClsSwal swal = new ClsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Division_Save(model))
-                        {
-                            scope.Complete();
-                            swal.DangerMode = false;
-                            swal.Icon = "success";
-                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.Title = "Successful";
-                        }
-                        else
-                        {
-                            swal.Icon = "warning";
-                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.Title = "Warning";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.Icon = "warning";
-                swal.Title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.Text))
-                        {
-                            swal.Text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.Text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult Divisions_Table()
         {
-            return View(data.Division_GetAllView());
+            return View(data.Division_GetAll());
         }
 
         public ActionResult Grades()
@@ -455,130 +198,9 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpDelete]
-        public ActionResult Grades_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Grades_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        public ActionResult Grades_Form(Guid? id)
-        {
-            ViewBag.LineWorkList = data.SelectListItems_LineWork();
-
-            bool isNew = true;
-            Master_Grades master_Grades = new Master_Grades();
-            if (id.HasValue)
-            {
-                master_Grades = data.Grades_Get(id.Value);
-                isNew = false;
-            }
-
-            ViewBag.IsNew = isNew;
-
-            return View(master_Grades);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Grades_Form(Master_Grades model)
-        {
-            ClsSwal swal = new ClsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Grade_Save(model))
-                        {
-                            scope.Complete();
-                            swal.DangerMode = false;
-                            swal.Icon = "success";
-                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.Title = "Successful";
-                        }
-                        else
-                        {
-                            swal.Icon = "warning";
-                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.Title = "Warning";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.Icon = "warning";
-                swal.Title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.Text))
-                        {
-                            swal.Text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.Text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult Grades_Table()
         {
-            return View(data.Grades_GetAllView());
+            return View(data.Grades_GetAll());
         }
 
         public ActionResult Index()
@@ -623,14 +245,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -660,11 +275,10 @@ namespace E2E.Controllers
             }
 
             ViewBag.IsNew = isNew;
-            ViewBag.ProgramList = db.System_Programs.Select(s => new SelectListItem() {
-
+            ViewBag.ProgramList = db.System_Programs.Select(s => new SelectListItem()
+            {
                 Text = s.Program_Name,
                 Value = s.Program_Id.ToString()
-
             }).ToList();
 
             return View(master_InquiryTopics);
@@ -698,14 +312,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -745,127 +352,6 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpDelete]
-        public ActionResult LineWorks_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Lineworks_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        public ActionResult LineWorks_Form(Guid? id)
-        {
-            ViewBag.AuthorizeList = data.SelectListItems_Authorize();
-
-            bool isNew = true;
-            Master_LineWorks master_LineWorks = new Master_LineWorks();
-            if (id.HasValue)
-            {
-                master_LineWorks = data.LineWorks_Get(id.Value);
-                isNew = false;
-            }
-
-            ViewBag.IsNew = isNew;
-
-            return View(master_LineWorks);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult LineWorks_Form(Master_LineWorks model)
-        {
-            ClsSwal swal = new ClsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.LineWork_Save(model))
-                        {
-                            scope.Complete();
-                            swal.DangerMode = false;
-                            swal.Icon = "success";
-                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.Title = "Successful";
-                        }
-                        else
-                        {
-                            swal.Icon = "warning";
-                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.Title = "Warning";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.Icon = "warning";
-                swal.Title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.Text))
-                        {
-                            swal.Text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.Text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult LineWorks_Table()
         {
             return View(data.LineWorks_GetAll());
@@ -874,45 +360,6 @@ namespace E2E.Controllers
         public ActionResult Plants()
         {
             return View();
-        }
-
-        [HttpDelete]
-        public ActionResult Plants_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Plants_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
         }
 
         public ActionResult Plants_Form(Guid? id)
@@ -968,14 +415,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -1015,136 +455,9 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpDelete]
-        public ActionResult Processes_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Process_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        public ActionResult Processes_Form(Guid? id)
-        {
-            ViewBag.DivisionsList = new List<SelectListItem>();
-            ViewBag.DepartmentsList = new List<SelectListItem>();
-            ViewBag.SectionsList = new List<SelectListItem>();
-
-            bool isNew = true;
-            Master_Processes master_Processes = new Master_Processes();
-            if (id.HasValue)
-            {
-                master_Processes = data.Process_Get(id.Value);
-                isNew = false;
-
-                ViewBag.DivisionsList = data.SelectListItems_Division();
-                ViewBag.DepartmentsList = data.SelectListItems_Department(master_Processes.Master_Sections.Master_Departments.Division_Id);
-                ViewBag.SectionsList = data.SelectListItems_Section(master_Processes.Master_Sections.Department_Id);
-            }
-
-            ViewBag.IsNew = isNew;
-
-            return View(master_Processes);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Processes_Form(Master_Processes model)
-        {
-            ClsSwal swal = new ClsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Process_Save(model))
-                        {
-                            scope.Complete();
-                            swal.DangerMode = false;
-                            swal.Icon = "success";
-                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.Title = "Successful";
-                        }
-                        else
-                        {
-                            swal.Icon = "warning";
-                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.Title = "Warning";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.Icon = "warning";
-                swal.Title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.Text))
-                        {
-                            swal.Text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.Text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult Processes_Table()
         {
-            return View(data.Process_GetAllView());
+            return View(data.Process_GetAll());
         }
 
         public ActionResult Sections()
@@ -1152,133 +465,9 @@ namespace E2E.Controllers
             return View();
         }
 
-        [HttpDelete]
-        public ActionResult Sections_Delete(Guid id)
-        {
-            using (TransactionScope scope = new TransactionScope())
-            {
-                ClsSwal swal = new ClsSwal();
-                try
-                {
-                    ClsSaveResult clsSaveResult = data.Section_Delete(id);
-                    if (clsSaveResult.IsSuccess)
-                    {
-                        scope.Complete();
-                        swal.DangerMode = false;
-                        swal.Icon = "success";
-                        swal.Text = "ลบข้อมูลเรียบร้อยแล้ว";
-                        swal.Title = "Successful";
-                    }
-                    else
-                    {
-                        swal.Text = clsSaveResult.Message;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
-                }
-
-                return Json(swal, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        public ActionResult Sections_Form(Guid? id)
-        {
-            ViewBag.DepartmentsList = new List<SelectListItem>();
-            ViewBag.DivisionsList = new List<SelectListItem>();
-
-            bool isNew = true;
-            Master_Sections master_Sections = new Master_Sections();
-            if (id.HasValue)
-            {
-                master_Sections = data.Section_Get(id.Value);
-                isNew = false;
-                ViewBag.DepartmentsList = data.SelectListItems_Department(master_Sections.Master_Departments.Division_Id);
-                ViewBag.DivisionsList = data.SelectListItems_Division();
-            }
-
-            ViewBag.IsNew = isNew;
-
-            return View(master_Sections);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Sections_Form(Master_Sections model)
-        {
-            ClsSwal swal = new ClsSwal();
-            if (ModelState.IsValid)
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    try
-                    {
-                        if (data.Section_Save(model))
-                        {
-                            scope.Complete();
-                            swal.DangerMode = false;
-                            swal.Icon = "success";
-                            swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
-                            swal.Title = "Successful";
-                        }
-                        else
-                        {
-                            swal.Icon = "warning";
-                            swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
-                            swal.Title = "Warning";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var errors = ModelState.Select(x => x.Value.Errors)
-                                   .Where(y => y.Count > 0)
-                                   .ToList();
-                swal.Icon = "warning";
-                swal.Title = "Warning";
-                foreach (var item in errors)
-                {
-                    foreach (var item2 in item)
-                    {
-                        if (string.IsNullOrEmpty(swal.Text))
-                        {
-                            swal.Text = item2.ErrorMessage;
-                        }
-                        else
-                        {
-                            swal.Text += "\n" + item2.ErrorMessage;
-                        }
-                    }
-                }
-            }
-
-            return Json(swal, JsonRequestBehavior.AllowGet);
-        }
-
         public ActionResult Sections_Table()
         {
-            return View(data.Section_GetAllView());
+            return View(data.Section_GetAll());
         }
 
         public ActionResult Users()
@@ -1311,14 +500,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
@@ -1380,14 +562,7 @@ namespace E2E.Controllers
                     catch (Exception ex)
                     {
                         swal.Title = ex.Source;
-                        swal.Text = ex.Message;
-                        Exception inner = ex.InnerException;
-                        while (inner != null)
-                        {
-                            swal.Title = inner.Source;
-                            swal.Text += string.Format("\n{0}", inner.Message);
-                            inner = inner.InnerException;
-                        }
+                        swal.Text = ex.GetBaseException().Message;
                     }
                 }
             }
@@ -1472,26 +647,32 @@ namespace E2E.Controllers
                 try
                 {
                     var files = Request.Files;
-                    foreach (string item in files.AllKeys)
+                    for (int i = 0; i < files.Count; i++)
                     {
-                        HttpPostedFileBase file = files[item];
+                        HttpPostedFileBase file = files[i];
 
                         if (file.ContentLength > 0)
                         {
-                            string dir = "Users";
-                            ClsServiceFTP serviceFTP = new ClsServiceFTP();
-                            var fileRes = await api.UploadFile(file, dir);
-                            string filePath = fileRes.FileUrl;
+                            ClsServiceFile clsServiceFile = new ClsServiceFile()
+                            {
+                                Filename = file.FileName,
+                                FolderPath = "Users"
+                            };
+                            
+                            var fileRes = await api.UploadFile(clsServiceFile, file);
+                            string fileUrl = fileRes.FileUrl;
                             UserUploadHistory userUploadHistory = new UserUploadHistory
                             {
-                                UserUploadHistoryFile = filePath,
-                                UserUploadHistoryFileName = Path.GetFileName(filePath),
-                                User_Id = Guid.Parse(HttpContext.User.Identity.Name)
+                                UserUploadHistoryFile = fileUrl,
+                                UserUploadHistoryFileName = Path.GetFileName(fileUrl),
+                                User_Id = loginId
                             };
                             db.Entry(userUploadHistory).State = System.Data.Entity.EntityState.Added;
-                            if (db.SaveChanges() > 0)
+                            if (await db.SaveChangesAsync() > 0)
                             {
-                                if (data.Users_AdjustMissing(data.Users_ReadFile(userUploadHistory.UserUploadHistoryFile)))
+                                MemoryStream fileStream = new MemoryStream(fileRes.FileBytes);
+                                List<string> userCodeList = await data.Users_ReadFile(fileStream);
+                                if (await data.Users_AdjustMissing(userCodeList))
                                 {
                                     scope.Complete();
                                     swal.Icon = "success";
@@ -1512,14 +693,7 @@ namespace E2E.Controllers
                 catch (Exception ex)
                 {
                     swal.Title = ex.Source;
-                    swal.Text = ex.Message;
-                    Exception inner = ex.InnerException;
-                    while (inner != null)
-                    {
-                        swal.Title = inner.Source;
-                        swal.Text += string.Format("\n{0}", inner.Message);
-                        inner = inner.InnerException;
-                    }
+                    swal.Text = ex.GetBaseException().Message;
                 }
             }
 

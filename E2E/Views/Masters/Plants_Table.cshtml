@@ -7,24 +7,25 @@
 <table class="table table-bordered table-hover nowrap">
     <thead>
         <tr>
-            <th class="fit"></th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+            <th></th>
+            <th>@Html.DisplayNameFor(m => m.Create)</th>
+            <th>@Html.DisplayNameFor(m => m.Active)</th>
             <th>@Html.DisplayNameFor(m => m.Plant_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Active)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+            <th>@Html.DisplayNameFor(m => m.Update)</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
         <tr>
-            <td>
+            <td class="fit">
                 <button class="btn btn-outline-warning" onclick="callModal('@Url.Action("Plants_Form","Masters",new { id = Html.ValueFor(m => item.Plant_Id) })')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
             </td>
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td>@Html.DisplayFor(i => item.Plant_Name)</td>
-            <td class="text-center">@Html.DisplayFor(i => item.Active)</td>
-            <td>@Html.DisplayFor(i => item.Update)</td>
+            <td class="fit">@Html.DisplayFor(i => item.Create)</td>
+            <td class="fit text-center">@Html.DisplayFor(i => item.Active)</td>
+            <td class="text-nowrap">@Html.DisplayFor(i => item.Plant_Name)</td>
+
+            <td class="fit">@Html.DisplayFor(i => item.Update)</td>
         </tr>
         }
     </tbody>

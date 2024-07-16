@@ -1,6 +1,8 @@
 ﻿using E2E.Models;
 using System;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace E2E.Controllers
@@ -9,28 +11,49 @@ namespace E2E.Controllers
     {
         private readonly ClsContext db = new ClsContext();
 
-        public ClsApi GetAllUser()
+        [HttpGet]
+        public async Task<IHttpActionResult> GetAllUser()
         {
-            ClsApi clsApi = new ClsApi();
             try
             {
-                clsApi.IsSuccess = true;
-                clsApi.Value = db.UserDetails.ToList();
+                var userDetails = await db.UserDetails.ToListAsync();
+                if (userDetails.Any())
+                {
+                    return Ok(userDetails);
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             catch (Exception ex)
             {
-                clsApi.IsSuccess = false;
-                clsApi.Message = ex.Message;
-                Exception inner = ex.InnerException;
-
-                while (inner != null)
-                {
-                    clsApi.Message += string.Format("\n {0}", inner.Message);
-                    inner = inner.InnerException;
-                }
+                return InternalServerError(ex);
             }
-
-            return clsApi;
         }
+
+
+        [HttpGet]
+        public async Task<IHttpActionResult> NotifyAuto()
+        {
+            try
+            {
+                ClsManageService service = new ClsManageService();
+                await service.JobDaily();
+
+                int currentDay = DateTime.Today.Day;
+                if (currentDay == 8)
+                {
+                    await service.JobMonthly();
+                }
+
+                return Ok("Notification process completed successfully.");
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
     }
 }

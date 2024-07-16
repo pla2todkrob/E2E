@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Web;
 
 namespace E2E.Models.Tables
 {
     public class System_Program
     {
-
         [Key]
         public int Program_Id { get; set; }
 
@@ -26,6 +22,5 @@ namespace E2E.Models.Tables
             };
             return list;
         }
-
     }
 }

@@ -972,7 +972,7 @@ namespace E2E.Models
                     TopicGalleries topicGalleries = new TopicGalleries();
                     topicGalleries = db.TopicGalleries.Where(w => w.TopicGallery_Id == item.TopicGallery_Id).FirstOrDefault();
                     topicGalleries.TopicGallery_Seq = item.TopicGallery_Seq;
-                    db.Entry(topicGalleries).State = System.Data.Entity.EntityState.Modified;
+                    db.Entry(topicGalleries).State = EntityState.Modified;
                 }
                 if (db.SaveChanges() > 0)
                 {
