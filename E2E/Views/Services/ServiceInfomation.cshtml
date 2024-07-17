@@ -33,7 +33,6 @@
                 });
             });
         });
-
         $(document).on('submit', '#CommentForm', function (e) {
             e.preventDefault();
             var fd = new FormData(this);
@@ -66,13 +65,11 @@
             });
             return false;
         });
-
       async  function reloadComment() {
            await $('#commentHis').load('@Url.Action("_CommentHistory", "Services", new { id = Model.Services.Service_Id })');
            await $('#commentNew').load('@Url.Action("_Comment", "Services", new { id = Model.Services.Service_Id })');
            await adjustHeight();
         }
-
         function SaveCloseForm() {
             let arr = [];
 
@@ -131,31 +128,26 @@
             $('#modalArea').modal('show');
             return false;
         }
-
         $(document).on('submit', '#TeamForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("_AddTeam", "Services")',this);
             return false;
         });
-
         $(document).on('submit', '#ReturnForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetPending", "Services")',this,'@Url.Action("Index","Services")');
             return false;
         });
-
         $(document).on('submit', '#SaveForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("Form_Forward", "Services")',this,'@Url.Action("Index", "Services")');
             return false;
         });
-
         $(document).on('submit', '#SetInProgressForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("SetInProgress", "Services")', this);
             return false;
         });
-
         $(document).on('submit', '#CompleteForm', function (e) {
             e.preventDefault();
             let alertText = 'This information will be saved to the database.';
@@ -168,13 +160,11 @@
             callSubmitPage('@Url.Action("SetComplete", "Services")', this, {text:alertText});
             return false;
         });
-
         $(document).on('submit', '#SaveDocumentForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("ServiceInfomation_Document", "Services")',this);
             return false;
         });
-
         $(document).on('submit', '#RequestForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
@@ -233,10 +223,10 @@
             <div class="card-body overflow-auto" id="commentHis"></div>
             @if (Model.Services.Status_Id < 4)
             {
-            <div class="card-footer" id="commentNew"></div>
+                <div class="card-footer" id="commentNew"></div>
             }
         </div>
     </div>
-</div>0
+</div>
 
 @{ Html.RenderAction("_RefService", "Services", new { id = Model.Services.Service_Id }); }
