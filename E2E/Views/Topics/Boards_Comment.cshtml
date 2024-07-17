@@ -13,7 +13,7 @@
     </button>
 </div>
 <div class="modal-body">
-    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveComment", name = "SaveComment", @class = "was-validated" }))
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "SaveComment", @name = "SaveComment", @class = "was-validated" }))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(false, "", new { @class = "text-danger" })

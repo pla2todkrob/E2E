@@ -5,16 +5,16 @@
 }
 @if (Model.Services.Action_User_Id.HasValue && userId == Model.Services.Action_User_Id.Value)
 {
-<div class="d-flex justify-content-end mb-3">
-    @if (!Model.Services.Is_MustBeApproved && Model.Services.Status_Id == 1)
+    <div class="d-flex justify-content-end mb-3">
+        @if (!Model.Services.Is_MustBeApproved && Model.Services.Status_Id == 1)
         {
-    <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Must approved</button>
+            <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Must approved</button>
         }
-    @if (Model.Services.Ref_Service_Id.HasValue && !Model.Services.Is_FreePoint && Model.Services.Action_User_Id == userId)
+        @if (Model.Services.Ref_Service_Id.HasValue && !Model.Services.Is_FreePoint && Model.Services.Action_User_Id == userId)
         {
-    <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services", new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
+            <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services", new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
         }
-</div>
+    </div>
 }
 
 <dl class="row">
@@ -47,7 +47,11 @@
 
     @if (Model.Services.Update.HasValue)
     {
-    <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-    <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
+        <dt class="col-4 col-md-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+        <dd class="col-8 col-md-9">@Html.DisplayFor(m => m.Services.Update)</dd>
     }
 </dl>
+@if (Model.Services.WorkRoot_Id.HasValue)
+{
+    Html.RenderAction("_DocumentList", "Services", new { id = Model.Services.Service_Id });
+}

@@ -4,7 +4,7 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveConfig", @class = "was-validated", enctype = "multipath/form-data" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { @id = "SaveConfig", @name= "SaveConfig", @class = "was-validated", enctype = "multipath/form-data" }))
 {
 @Html.AntiForgeryToken()
 <div class="card mb-5">

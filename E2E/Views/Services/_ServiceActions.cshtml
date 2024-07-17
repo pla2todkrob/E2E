@@ -10,7 +10,7 @@
         {
             if (Model.Services.Status_Id < 3)
             {
-        <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
+                <button class="btn btn-outline-danger mr-1" type="button" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
             }
         }
         if (Model.Services.Action_User_Id == userId)
@@ -18,36 +18,40 @@
 
             if (Model.Services.Status_Id == 1)
             {
-        <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetReturnAssign","Services",new { id=Model.Services.Service_Id })')">Undo assign</button>
-        <div class="ml-auto">
+                <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetReturnAssign","Services",new { id=Model.Services.Service_Id })')">Undo assign</button>
+                <div class="ml-auto">
 
-            @if (Model.ServiceChangeDueDate == null)
+                    @if (Model.ServiceChangeDueDate == null)
                     {
-            <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services", new { id = Model.Services.Service_Id })')">Change due date</button>
-            <button class="btn btn-primary" onclick="callModal('@Url.Action("SetInProgress","Services", new { id = Model.Services.Service_Id })')">Start job</button>
+                        <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services", new { id = Model.Services.Service_Id })')">Change due date</button>
+                        <button class="btn btn-primary" onclick="callModal('@Url.Action("SetInProgress","Services", new { id = Model.Services.Service_Id })')">Start job</button>
                     }
                     else if (Model.ServiceChangeDueDate.User_Id.Equals(userId))
                     {
-            <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Cancel","Services", new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })', 'reloadPage', { isDangerous: true })">Cancel due date change</button>
+                        <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Cancel","Services", new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })', 'reloadPage', { isDangerous: true })">Cancel due date change</button>
                     }
-        </div>
+                </div>
             }
             else if (Model.Services.Status_Id == 2)
             {
-        <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
-        <div class="ml-auto">
-            <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
-            <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
-        </div>
+                <button type="button" class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id })')">Return job</button>
+                <div class="ml-auto">
+                    <button type="button" class="btn btn-outline-secondary" onclick="callModalService('@Url.Action("Form_Forward","Services",new { id=Model.Services.Service_Id })',true)">Forward</button>
+                    <button type="button" class="btn btn-success" onclick="callModal('@Url.Action("SetComplete","Services",new { id = Model.Services.Service_Id })')">Complete</button>
+                </div>
             }
             else if (Model.Services.Status_Id == 3)
             {
-        <button class="btn btn-outline-info" type="button" onclick="resendEmail('@Url.Action("ResendEmail","Services",new { id=Model.Services.Service_Id })')"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;Resend</button>
+                <button class="btn btn-outline-info" type="button" onclick="resendEmail('@Url.Action("ResendEmail","Services",new { id=Model.Services.Service_Id })')"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;Resend</button>
             }
         }
         if (Model.Services.User_Id == userId && Model.Services.Status_Id == 3)
         {
-        <button type="button" class="btn btn-outline-success ml-auto" onclick="callModalPoint('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
+            <button type="button" class="btn btn-outline-success ml-auto" onclick="callModalPoint('@Url.Action("SetClose","Services",new { id=Model.Services.Service_Id })')">Close</button>
         }
     }
 </div>
+@if (Model.Services.Status_Id == 4)
+{
+    Html.RenderAction("_SatisfactionResults", "Services", new { id = Model.Services.Service_Id });
+}

@@ -28,7 +28,7 @@
     </button>
 </div>
 <div class="modal-body">
-    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "Create_submit",name= "Create_submit", @class = "was-validated", enctype = "multipath/form-data" }))
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "Create_submit",@name= "Create_submit", @class = "was-validated", enctype = "multipath/form-data" }))
     {
         <div class="form-row">
             <div class="form-group col-12">

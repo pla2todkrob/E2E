@@ -4,53 +4,53 @@
     Layout = null;
 }
 
-@using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveConfig", @class = "was-validated", enctype = "multipath/form-data" }))
+@using (Html.BeginForm("", "", FormMethod.Post, new { @id = "SaveConfig", @name = "SaveConfig", @class = "was-validated", enctype = "multipath/form-data" }))
 {
-@Html.AntiForgeryToken()
-<div class="card mb-5">
+    @Html.AntiForgeryToken()
+    <div class="card mb-5">
 
-    <div class="card-body">
-        <div class="row">
+        <div class="card-body">
+            <div class="row">
 
-            <div class="col-md-4 col-lg-3 col-xl-2">
-                <div class="d-flex align-items-center justify-content-center flex-column h-100">
-                    @{
+                <div class="col-md-4 col-lg-3 col-xl-2">
+                    <div class="d-flex align-items-center justify-content-center flex-column h-100">
+                        @{
                             if (Model.Count() > 0)
                             {
                                 if (!string.IsNullOrEmpty(Model.FirstOrDefault().Configuration_Brand))
                                 {
 
-                        <img alt="@Model.FirstOrDefault().Configuration_Brand" src="@Model.FirstOrDefault().Configuration_Brand" class=" img-fluid" />
-                        <button type="button" class="btn btn-outline-danger mt-1" onclick="callDeleteItem('@Url.Action("Deletelogo","Configurations")', true)"><i class="fa fa-trash"></i>&nbsp;DELETE LOGO</button>
+                                    <img alt="@Model.FirstOrDefault().Configuration_Brand" src="@Model.FirstOrDefault().Configuration_Brand" class=" img-fluid" />
+                                    <button type="button" class="btn btn-outline-danger mt-1" onclick="callDeleteItem('@Url.Action("Deletelogo","Configurations")', true)"><i class="fa fa-trash"></i>&nbsp;DELETE LOGO</button>
                                 }
                             }
-                        @Html.HiddenFor(m => m.FirstOrDefault().Configuration_Brand)
-                    }
-                </div>
-            </div>
-            <div class="col-md-8 col-lg-9 col-xl-10">
-
-                <div class="row">
-                    <div class="col-12 text-right">
-                        <button class="btn btn-outline-info" type="button" onclick="@("window.location.href='" + @Url.Action("Index", "Manuals") + "'");">Manual System</button>
-                    </div>
-                    <div class="col-auto form-group">
-                        <label for="fileImage"></label>
-                        <input name="fileImage" id="fileImage" type="file" class="form-control-file" accept="image/*" />
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 form-group">
-                        @Html.DisplayNameFor(m => m.Configuration_Point)
-                        @Html.TextBoxFor(m => Model.FirstOrDefault().Configuration_Point, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.FirstOrDefault().Configuration_Brand)
+                        }
                     </div>
                 </div>
-            </div>
+                <div class="col-md-8 col-lg-9 col-xl-10">
 
-            <div class="col-12 text-right">
-                <button type="submit" class="btn btn-primary">SAVE</button>
+                    <div class="row">
+                        <div class="col-12 text-right">
+                            <button class="btn btn-outline-info" type="button" onclick="@("window.location.href='" + @Url.Action("Index", "Manuals") + "'");">Manual System</button>
+                        </div>
+                        <div class="col-auto form-group">
+                            <label for="fileImage"></label>
+                            <input name="fileImage" id="fileImage" type="file" class="form-control-file" accept="image/*" />
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 form-group">
+                            @Html.DisplayNameFor(m => m.Configuration_Point)
+                            @Html.TextBoxFor(m => Model.FirstOrDefault().Configuration_Point, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 text-right">
+                    <button type="submit" class="btn btn-primary">SAVE</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 }
 
 <div class="card">
@@ -78,20 +78,20 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                <tr>
-                    <td class="fit">
-                        @Html.DisplayFor(i => item.CreateDateTime)
-                    </td>
-                    <td>
-                        <img alt="  @Html.DisplayFor(i => item.Configuration_Brand)" src="  @Html.DisplayFor(i => item.Configuration_Brand)" class="logo" />
-                    </td>
-                    <td class="fit">
-                        @Html.DisplayFor(i => item.Configuration_Point)
-                    </td>
-                    <td class="fit">
-                        @Html.DisplayFor(i => item.Users.User_Code)
-                    </td>
-                </tr>
+                    <tr>
+                        <td class="fit">
+                            @Html.DisplayFor(i => item.CreateDateTime)
+                        </td>
+                        <td>
+                            <img alt="  @Html.DisplayFor(i => item.Configuration_Brand)" src="  @Html.DisplayFor(i => item.Configuration_Brand)" class="logo" />
+                        </td>
+                        <td class="fit">
+                            @Html.DisplayFor(i => item.Configuration_Point)
+                        </td>
+                        <td class="fit">
+                            @Html.DisplayFor(i => item.Users.User_Code)
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>

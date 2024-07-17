@@ -12,7 +12,7 @@
     </button>
 </div>
 <div class="modal-body">
-    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "AssignForm", name = "AssignForm" }))
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", @id = "AssignForm", @name = "AssignForm" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.Service_Id)

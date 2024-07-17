@@ -10,7 +10,7 @@
     </button>
 </div>
 <div class="modal-body">
-    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "UploadForm", name = "UploadForm", enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "UploadForm", @name = "UploadForm", @enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(false, "", new { @class = "text-danger" })

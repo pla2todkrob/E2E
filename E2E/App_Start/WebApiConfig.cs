@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using E2E.Models.Filter;
+using System.Web.Http;
 
 namespace E2E
 {
@@ -7,6 +8,9 @@ namespace E2E
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
+
+            // Add the custom token authorization filter globally
+            //config.Filters.Add(new TokenAuthorizationAttribute());
 
             // Web API routes
             config.MapHttpAttributeRoutes();

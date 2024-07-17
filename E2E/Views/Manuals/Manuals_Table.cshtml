@@ -6,7 +6,7 @@
 
 <div class="col-12">
 
-    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "SaveManual", @class = "was-validated", enctype = "multipath/form-data" }))
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "SaveManual", @name = "SaveManual", @class = "was-validated", @enctype = "multipath/form-data" }))
     {
     @Html.AntiForgeryToken()
     <div class="card mb-5">

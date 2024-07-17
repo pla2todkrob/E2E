@@ -103,7 +103,7 @@
                     </div>
                     <div class="col-12 col-md-5 order-md-0">
 
-                        @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "CommitForm" }))
+                        @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", @id = "CommitForm", @name = "CommitForm" }))
                         {
                         @Html.ValidationSummary(true)
                         @Html.AntiForgeryToken()

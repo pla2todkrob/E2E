@@ -337,6 +337,7 @@
     <Compile Include="Models\Filter\CompressionFilterAttribute.cs" />
     <Compile Include="Models\Filter\ExceptionFilterAttribute.cs" />
     <Compile Include="Models\Filter\TimingFilterAttribute.cs" />
+    <Compile Include="Models\Filter\TokenAuthorizationAttribute.cs" />
     <Compile Include="Models\Tables\ChatGPTHistory.cs" />
     <Compile Include="Models\Tables\System_Program.cs" />
     <Compile Include="Models\Tables\PlantDetail.cs" />

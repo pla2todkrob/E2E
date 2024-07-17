@@ -53,7 +53,7 @@ namespace E2E.Models
         }
 
 
-        private string GetToken()
+        public string GetToken()
         {
             try
             {

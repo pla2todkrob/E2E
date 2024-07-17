@@ -21,7 +21,7 @@
     </button>
 </div>
 <div class="modal-body">
-    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", id = "SetInProgressForm", name = "SetInProgressForm", enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "was-validated", @id = "SetInProgressForm", @name = "SetInProgressForm", @enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.Service_Id)
