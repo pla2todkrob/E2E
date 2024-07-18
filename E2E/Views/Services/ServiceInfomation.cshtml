@@ -165,11 +165,6 @@
             callSubmitPage('@Url.Action("ServiceInfomation_Document", "Services")',this);
             return false;
         });
-        $(document).on('submit', '#RequestForm', function (e) {
-            e.preventDefault();
-            callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
-            return false;
-        });
         $(document).on('submit', "#MustApproveForm", function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetMustApprove", "Services")', this,'@Url.Action("Index", "Services")');
