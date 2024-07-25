@@ -420,7 +420,6 @@ namespace E2E.Models
             return db.SaveChanges() > 0;
         }
 
-
         protected bool Users_Update(UserDetails model)
         {
             Users users = db.Users.Where(w => w.User_Code == model.Users.User_Code).FirstOrDefault();
@@ -663,7 +662,6 @@ namespace E2E.Models
             }
         }
 
-
         public List<Master_Departments> Department_GetAll()
         {
             return db.Master_Departments
@@ -671,7 +669,6 @@ namespace E2E.Models
                 .ThenBy(t => t.Department_Name)
                 .ToList();
         }
-
 
         public Guid Department_GetId(Guid divisionId, string val)
         {
@@ -2109,11 +2106,25 @@ namespace E2E.Models
                 return Users_Insert(model);
             }
         }
+
         public async Task<List<Guid>> GetManagementOfDepartment()
         {
             Guid loginId = Guid.Parse(HttpContext.Current.User.Identity.Name);
             Guid departmentId = await db.Users
                 .Where(w => w.User_Id == loginId)
+                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                .FirstOrDefaultAsync();
+
+            return await db.Users
+                .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
+                .Select(s => s.User_Id)
+                .ToListAsync();
+        }
+
+        public async Task<List<Guid>> GetManagementOfDepartment(Guid userId)
+        {
+            Guid departmentId = await db.Users
+                .Where(w => w.User_Id == userId)
                 .Select(s => s.Master_Processes.Master_Sections.Department_Id)
                 .FirstOrDefaultAsync();
 

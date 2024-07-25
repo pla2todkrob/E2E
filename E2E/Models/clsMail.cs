@@ -16,23 +16,18 @@ namespace E2E.Models
 
         public ClsMail()
         {
-            SendToIds = new List<Guid>();
-            SendToStrs = new List<string>();
+            SendTos = new List<Guid>();
             AttachPaths = new List<string>();
-            SendBCC = new List<Guid>();
+            SendBCCs = new List<Guid>();
             SendCCs = new List<Guid>();
         }
 
         public List<string> AttachPaths { get; set; }
         public string Body { get; set; }
-        public List<Guid> SendBCC { get; set; }
-        public Guid? SendCC { get; set; }
+        public List<Guid> SendBCCs { get; set; }
         public List<Guid> SendCCs { get; set; }
         public Guid SendFrom { get; set; }
-        public Guid? SendToId { get; set; }
-        public List<Guid> SendToIds { get; set; }
-        public string SendToStr { get; set; }
-        public List<string> SendToStrs { get; set; }
+        public List<Guid> SendTos { get; set; }
         public string Subject { get; set; }
 
         public async Task<bool> ResendMail(Guid refId)
@@ -55,7 +50,7 @@ namespace E2E.Models
                     switch (item.SendEmailTo_Type)
                     {
                         case "to":
-                            clsMail.SendToIds.Add(item.User_Id);
+                            clsMail.SendTos.Add(item.User_Id);
                             break;
 
                         case "cc":
@@ -63,7 +58,7 @@ namespace E2E.Models
                             break;
 
                         case "bcc":
-                            clsMail.SendBCC.Add(item.User_Id);
+                            clsMail.SendBCCs.Add(item.User_Id);
                             break;
 
                         default:
@@ -104,10 +99,8 @@ namespace E2E.Models
                 ClsServiceEmail clsServiceEmail = new ClsServiceEmail();
                 string dear = "Dear ";
 
-                if (model.SendToIds.Count > 0)
-                {
-                    List<ReceiveData> receiveDatas = db.UserDetails
-                    .Where(w => model.SendToIds.Contains(w.User_Id))
+                List<ReceiveData> receiveDatas = db.UserDetails
+                    .Where(w => model.SendTos.Contains(w.User_Id))
                     .Select(s => new ReceiveData()
                     {
                         Email = s.Users.User_Email,
@@ -117,97 +110,36 @@ namespace E2E.Models
                         FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
                     }).ToList();
 
-                    if (receiveDatas.Count == 0)
-                    {
-                        return true;
-                    }
-
-                    List<string> EmailTos = new List<string>();
-                    foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
-                    {
-                        attribute = new EmailAddressAttribute();
-                        if (attribute.IsValid(item.Email))
-                        {
-                            dear += string.Format("{0}, ", item.FullNameEN);
-                            EmailTos.Add(item.Email);
-                        }
-                    }
-                    dear = dear.Trim().TrimEnd(',');
-
-                    if (EmailTos.Count > 0)
-                    {
-                        clsServiceEmail.SendTo = EmailTos.ToArray();
-                    }
-                }
-                else if (model.SendToId.HasValue)
+                if (receiveDatas.Count == 0)
                 {
-                    ReceiveData receiveData = db.UserDetails
-                    .Where(w => w.User_Id == model.SendToId)
-                    .Select(s => new ReceiveData()
-                    {
-                        Email = s.Users.User_Email,
-                        NameEN = s.Detail_EN_FirstName,
-                        NameTH = s.Detail_TH_FirstName,
-                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                    }).FirstOrDefault();
-
-                    if (receiveData == null)
-                    {
-                        return true;
-                    }
-                    else if (string.IsNullOrEmpty(receiveData.Email))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        attribute = new EmailAddressAttribute();
-                        if (attribute.IsValid(receiveData.Email))
-                        {
-                            dear += receiveData.FullNameEN;
-                            clsServiceEmail.SendTo = new string[] { receiveData.Email };
-                        }
-                    }
+                    return true;
                 }
-                else if (!string.IsNullOrEmpty(model.SendToStr))
+
+                List<string> EmailTos = new List<string>();
+                foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
                 {
                     attribute = new EmailAddressAttribute();
-                    if (attribute.IsValid(model.SendToStr))
+                    if (attribute.IsValid(item.Email))
                     {
-                        clsServiceEmail.SendTo = new string[] { model.SendToStr };
+                        dear += string.Format("{0}, ", item.FullNameEN);
+                        EmailTos.Add(item.Email);
                     }
                 }
-                else if (model.SendToStrs.Count > 0)
-                {
-                    List<string> EmailTos = new List<string>();
-                    foreach (var item in model.SendToStrs)
-                    {
-                        attribute = new EmailAddressAttribute();
-                        if (attribute.IsValid(item))
-                        {
-                            EmailTos.Add(item);
-                        }
-                    }
+                dear = dear.Trim().TrimEnd(',');
 
-                    if (EmailTos.Count > 0)
-                    {
-                        clsServiceEmail.SendTo = EmailTos.ToArray();
-                    }
+                if (EmailTos.Count > 0)
+                {
+                    clsServiceEmail.SendTo = EmailTos.ToArray();
                 }
                 else
                 {
                     return true;
                 }
 
-                if (clsServiceEmail.SendTo.Length == 0)
-                {
-                    return true;
-                }
-
                 if (model.SendCCs.Count > 0)
                 {
-                    List<ReceiveData> receiveDatas = db.UserDetails
+                    receiveDatas = new List<ReceiveData>();
+                    receiveDatas = db.UserDetails
                     .Where(w => model.SendCCs.Contains(w.User_Id))
                     .Select(s => new ReceiveData()
                     {
@@ -232,33 +164,12 @@ namespace E2E.Models
                         clsServiceEmail.SendCC = EmailCCs.ToArray();
                     }
                 }
-                else if (model.SendCC.HasValue)
-                {
-                    ReceiveData receiveData = db.UserDetails
-                    .Where(w => model.SendCCs.Contains(w.User_Id))
-                    .Select(s => new ReceiveData()
-                    {
-                        Email = s.Users.User_Email,
-                        NameEN = s.Detail_EN_FirstName,
-                        NameTH = s.Detail_TH_FirstName,
-                        FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                        FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                    }).FirstOrDefault();
 
-                    if (receiveData != null && !string.IsNullOrEmpty(receiveData.Email))
-                    {
-                        attribute = new EmailAddressAttribute();
-                        if (attribute.IsValid(receiveData.Email))
-                        {
-                            clsServiceEmail.SendCC = new string[] { receiveData.Email };
-                        }
-                    }
-                }
-
-                if (model.SendBCC.Count > 0)
+                if (model.SendBCCs.Count > 0)
                 {
-                    List<ReceiveData> receiveDatas = db.UserDetails
-                    .Where(w => model.SendBCC.Contains(w.User_Id))
+                    receiveDatas = new List<ReceiveData>();
+                    receiveDatas = db.UserDetails
+                    .Where(w => model.SendBCCs.Contains(w.User_Id))
                     .Select(s => new ReceiveData()
                     {
                         Email = s.Users.User_Email,

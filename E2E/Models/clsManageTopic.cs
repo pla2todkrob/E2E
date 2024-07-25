@@ -312,7 +312,7 @@ namespace E2E.Models
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    clsMail.SendToId = query.User_Id;
+                    clsMail.SendTos.Add(query.User_Id);
                     clsMail.Subject = subject;
                     clsMail.Body = content;
                     res = await clsMail.SendMail(clsMail);
@@ -471,7 +471,7 @@ namespace E2E.Models
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    clsMail.SendToId = DBTopicComment.User_Id;
+                    clsMail.SendTos.Add(DBTopicComment.User_Id.Value);
                     clsMail.Subject = subject;
                     clsMail.Body = content;
                     res = await clsMail.SendMail(clsMail);

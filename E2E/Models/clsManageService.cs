@@ -649,7 +649,6 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                string Getteam = string.Empty;
                 foreach (var item in model.User_Ids)
                 {
                     ServiceTeams serviceTeams = new ServiceTeams
@@ -673,30 +672,25 @@ namespace E2E.Models
                 linkUrl += "/" + model.Service_Id;
                 linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
 
-                List<Guid> listTeam = new List<Guid>();
-                listTeam = db.ServiceTeams
+                var listTeam = await db.ServiceTeams
                     .Where(w => w.Service_Id == services.Service_Id)
-                    .Select(s => s.User_Id)
-                    .ToList();
+                    .Select(s => s.User_Id).ToListAsync();
 
-                foreach (var item in listTeam)
-                {
-                    Getteam += master.Users_GetInfomation(item) + "<br />";
-                }
+                var listTeamName = listTeam.Select(s => master.Users_GetInfomation(s)).ToList();
+
 
                 string subject = string.Format("[Notify add team] {0} - {1}", services.Service_Key, services.Service_Subject);
                 string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
                 content += "<br />";
                 content += "<br />";
                 content += "<b>Current member</b><br/>";
-                content += Getteam;
+                content += string.Join("<br />", listTeamName);
                 content += "</p>";
                 content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
-                clsMail.SendToIds = listTeam;
+                clsMail.SendTos = listTeam;
                 clsMail.Subject = subject;
                 clsMail.Body = content;
                 res = await clsMail.SendMail(clsMail);
@@ -735,9 +729,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                string getTeam = string.Empty;
-                ServiceTeams serviceTeams = new ServiceTeams();
-                serviceTeams = db.ServiceTeams.Find(id);
+                ServiceTeams serviceTeams = await db.ServiceTeams.FindAsync(id);
                 string userName = master.Users_GetInfomation(serviceTeams.User_Id);
                 Guid serviceId = serviceTeams.Service_Id;
                 db.Entry(serviceTeams).State = EntityState.Deleted;
@@ -757,8 +749,7 @@ namespace E2E.Models
                             linkUrl += string.Format("/{0}", serviceId);
                         }
 
-                        Services services = new Services();
-                        services = db.Services.Find(serviceId);
+                        Services services = await db.Services.FindAsync(serviceId);
 
                         List<Guid> listTeam = new List<Guid>();
                         listTeam = db.ServiceTeams
@@ -766,10 +757,7 @@ namespace E2E.Models
                             .Select(s => s.User_Id)
                             .ToList();
 
-                        foreach (var item in listTeam)
-                        {
-                            getTeam += master.Users_GetInfomation(item) + "<br />";
-                        }
+                        var listTeamName = listTeam.Select(s => master.Users_GetInfomation(s)).ToList();
 
                         listTeam.Add(serviceTeams.User_Id);
 
@@ -778,11 +766,11 @@ namespace E2E.Models
                         content += "<br />";
                         content += "<br />";
                         content += "<b>Current member</b><br/>";
-                        content += getTeam;
+                        content += string.Join("<br />", listTeamName);
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToIds = listTeam;
+                        clsMail.SendTos = listTeam;
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -802,7 +790,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
+                ServiceChangeDueDate serviceChangeDueDate = await db.ServiceChangeDueDates.FindAsync(id);
                 serviceChangeDueDate.DueDateStatus_Id = 2;
                 serviceChangeDueDate.Update = DateTime.Now;
                 db.Entry(serviceChangeDueDate).State = EntityState.Modified;
@@ -816,7 +804,7 @@ namespace E2E.Models
                     };
                     if (await Services_Comment(serviceComments))
                     {
-                        Services services = db.Services.Find(serviceChangeDueDate.Service_Id);
+                        Services services = await db.Services.FindAsync(serviceChangeDueDate.Service_Id);
                         services.Service_DueDate = serviceChangeDueDate.DueDate_New;
                         services.Update = DateTime.Now;
                         db.Entry(services).State = EntityState.Modified;
@@ -830,7 +818,7 @@ namespace E2E.Models
                             };
                             res = await Services_Comment(serviceComments);
 
-                            var Sendto = db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefault();
+                            var Sendto = await db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefaultAsync();
 
                             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
 
@@ -841,7 +829,7 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendToId = Sendto.User_Id;
+                            clsMail.SendTos.Add(Sendto.User_Id.Value);
                             clsMail.Subject = subject;
                             clsMail.Body = content;
                             res = await clsMail.SendMail(clsMail);
@@ -863,7 +851,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
+                ServiceChangeDueDate serviceChangeDueDate = await db.ServiceChangeDueDates.FindAsync(id);
                 serviceChangeDueDate.DueDateStatus_Id = 4;
                 serviceChangeDueDate.Update = DateTime.Now;
                 db.Entry(serviceChangeDueDate).State = EntityState.Modified;
@@ -909,7 +897,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                ServiceChangeDueDate serviceChangeDueDate = db.ServiceChangeDueDates.Find(id);
+                ServiceChangeDueDate serviceChangeDueDate = await db.ServiceChangeDueDates.FindAsync(id);
                 serviceChangeDueDate.DueDateStatus_Id = 3;
                 serviceChangeDueDate.Update = DateTime.Now;
                 db.Entry(serviceChangeDueDate).State = EntityState.Modified;
@@ -923,7 +911,7 @@ namespace E2E.Models
                     };
                     res = await Services_Comment(serviceComments);
 
-                    var Sendto = db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefault();
+                    var Sendto = await db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefaultAsync();
 
                     var linkUrl = HttpContext.Current.Request.Url.OriginalString;
 
@@ -934,7 +922,7 @@ namespace E2E.Models
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    clsMail.SendToId = Sendto.User_Id;
+                    clsMail.SendTos.Add(Sendto.User_Id.Value);
                     clsMail.Subject = subject;
                     clsMail.Body = content;
                     res = await clsMail.SendMail(clsMail);
@@ -969,8 +957,7 @@ namespace E2E.Models
                     };
                     if (await Services_Comment(serviceComments))
                     {
-                        Services services = new Services();
-                        services = db.Services.Find(model.Service_Id);
+                        Services services = await db.Services.FindAsync(model.Service_Id);
                         SaveUserActionChangeDue(model.Service_Id);
 
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
@@ -982,7 +969,7 @@ namespace E2E.Models
 
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToId = services.User_Id;
+                        clsMail.SendTos.Add(services.User_Id);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -1070,8 +1057,7 @@ namespace E2E.Models
                 ServiceFiles serviceFiles = new ServiceFiles();
                 serviceFiles = db.ServiceFiles.Find(id);
 
-                Services services = new Services();
-                services = db.Services.Find(serviceFiles.Service_Id);
+                Services services = await db.Services.FindAsync(serviceFiles.Service_Id);
                 services.Service_FileCount -= 1;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
@@ -1454,8 +1440,7 @@ namespace E2E.Models
             {
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 bool res = new bool();
-                ServiceDocuments serviceDocuments = new ServiceDocuments();
-                serviceDocuments = db.ServiceDocuments.Find(model.ServiceDocument_Id);
+                ServiceDocuments serviceDocuments = await db.ServiceDocuments.FindAsync(model.ServiceDocument_Id);
                 serviceDocuments.ServiceDocument_Remark = model.ServiceDocument_Remark;
                 serviceDocuments.User_Id = userId;
                 serviceDocuments.Update = DateTime.Now;
@@ -1487,8 +1472,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
 
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 
@@ -1497,10 +1481,9 @@ namespace E2E.Models
                     services.Action_User_Id = userId;
                 }
 
-                System_Statuses system_Statuses = new System_Statuses();
-                system_Statuses = db.System_Statuses
+                System_Statuses system_Statuses = await db.System_Statuses
                     .Where(w => w.Status_Id == 2)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 if (model.WorkRoot_Id.HasValue)
                 {
@@ -1543,8 +1526,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
                 services.Is_Approval = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
@@ -1566,7 +1548,7 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToId = services.User_Id;
+                        clsMail.SendTos.Add(services.User_Id);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -1586,13 +1568,9 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
 
-                System_Statuses system_Statuses = new System_Statuses();
-                system_Statuses = db.System_Statuses
-                    .Where(w => w.Status_Id == 6)
-                    .FirstOrDefault();
+                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(6);
 
                 services.Update = DateTime.Now;
                 services.Status_Id = system_Statuses.Status_Id;
@@ -1625,7 +1603,7 @@ namespace E2E.Models
                 throw;
             }
         }
-        
+
         public async Task<bool> Services_SetClose(Services services, bool isAuto = false)
         {
             try
@@ -1662,11 +1640,13 @@ namespace E2E.Models
                     ClsMail clsMail = new ClsMail()
                     {
                         Body = serviceComments.Comment_Content,
-                        SendCC = services.User_Id,
-                        SendToId = services.Action_User_Id,
                         SendFrom = services.Action_User_Id.Value,
                         Subject = string.Format("[Job is closed] {0} - {1}", services.Service_Key, services.Service_Subject)
                     };
+
+                    clsMail.SendCCs.Add(services.User_Id);
+                    clsMail.SendTos.Add(services.Action_User_Id.Value);
+
                     await clsMail.SendMail(clsMail);
                 }
 
@@ -1715,11 +1695,13 @@ namespace E2E.Models
                             ClsMail clsMail = new ClsMail()
                             {
                                 Body = serviceComments.Comment_Content,
-                                SendCC = services.User_Id,
-                                SendToId = services.Action_User_Id,
                                 SendFrom = services.Action_User_Id.Value,
                                 Subject = string.Format("[Job is closed] {0} - {1}", services.Service_Key, services.Service_Subject)
                             };
+
+                            clsMail.SendCCs.Add(services.User_Id);
+                            clsMail.SendTos.Add(services.Action_User_Id.Value);
+
                             await clsMail.SendMail(clsMail);
                         }
                     }
@@ -1760,13 +1742,9 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
 
-                System_Statuses system_Statuses = new System_Statuses();
-                system_Statuses = db.System_Statuses
-                    .Where(w => w.Status_Id == 3)
-                    .FirstOrDefault();
+                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(3);
 
                 services.Update = DateTime.Now;
                 if (services.Update.Value.Date > services.Service_DueDate)
@@ -1811,8 +1789,8 @@ namespace E2E.Models
                         content += $"<b>ระบบจะปิดงานนี้โดยอัตโนมัติ โดยที่ระบบจะส่งอีเมลแจ้งเตือนให้ท่านรวมทั้งสิ้น 4 ครั้ง หากท่านไม่ดำเนินการ ระบบจะปิดงานโดยอัตโนมัติในวันที่ {eighthOfNextMonth} แต่ระบบจะระบุว่าปิดในวันสุดท้ายของเดือนนี้ ({lastDayOfMonth})</b><br />";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToId = services.User_Id;
-                        clsMail.SendCC = services.Action_User_Id;
+                        clsMail.SendTos.Add(services.User_Id);
+                        clsMail.SendCCs.Add(services.Action_User_Id.Value);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         if (await clsMail.SendMail(clsMail))
@@ -1824,7 +1802,7 @@ namespace E2E.Models
                                 SendEmail_Subject = subject,
                                 User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
                             };
-                            db.Entry(log_SendEmail).State = EntityState.Added;
+                            db.Log_SendEmails.Add(log_SendEmail);
 
                             Log_SendEmailTo log_SendEmailTo = new Log_SendEmailTo
                             {
@@ -1832,7 +1810,8 @@ namespace E2E.Models
                                 SendEmail_Id = log_SendEmail.SendEmail_Id,
                                 User_Id = services.User_Id
                             };
-                            db.Entry(log_SendEmailTo).State = EntityState.Added;
+                            db.Log_SendEmailTos.Add(log_SendEmailTo);
+
                             if (await db.SaveChangesAsync() > 0)
                             {
                                 res = true;
@@ -1854,8 +1833,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(id);
+                Services services = await db.Services.FindAsync(id);
                 services.Is_FreePoint = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
@@ -1868,8 +1846,12 @@ namespace E2E.Models
                     };
                     if (await Services_Comment(serviceComments))
                     {
-                        int point = db.System_Priorities.Find(services.Priority_Id).Priority_Point;
-                        Users users = db.Users.Find(services.User_Id);
+                        int point = await db.System_Priorities
+                            .Where(w => w.Priority_Id == services.Priority_Id)
+                            .Select(s => s.Priority_Point)
+                            .FirstOrDefaultAsync();
+
+                        Users users = await db.Users.FindAsync(services.User_Id);
                         users.User_Point += point;
                         db.Entry(users).State = EntityState.Modified;
                         if (await db.SaveChangesAsync() > 0)
@@ -1995,8 +1977,8 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendToIds = await master.GetManagementOfDepartment();
-                            clsMail.SendCC = services.User_Id;
+                            clsMail.SendTos.AddRange(await master.GetManagementOfDepartment());
+                            clsMail.SendCCs.Add(services.User_Id);
                             clsMail.Subject = subject;
                             clsMail.Body = content;
                             res = await clsMail.SendMail(clsMail);
@@ -2017,17 +1999,13 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
                 if (!services.Department_Id.HasValue)
                 {
                     await Services_SetToDepartment(model.Service_Id);
                 }
 
-                System_Statuses system_Statuses = new System_Statuses();
-                system_Statuses = db.System_Statuses
-                    .Where(w => w.Status_Id == 5)
-                    .FirstOrDefault();
+                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(5);
 
                 services.Update = DateTime.Now;
                 services.Status_Id = system_Statuses.Status_Id;
@@ -2061,7 +2039,7 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToId = services.User_Id;
+                        clsMail.SendTos.Add(services.User_Id);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -2082,7 +2060,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
 
-                Services services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
                 services.Is_MustBeApproved = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
@@ -2095,13 +2073,6 @@ namespace E2E.Models
                     };
                     if (await Services_Comment(serviceComments))
                     {
-                        string deptName = db.Users.Find(services.User_Id).Master_Processes.Master_Sections.Master_Departments.Department_Name;
-                        List<Guid> sendTo = db.Users
-                            .Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == deptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
-                            .Select(s => s.User_Id)
-                            .ToList();
-                        sendTo.Add(services.User_Id);
-
                         var linkUrl = HttpContext.Current.Request.Url.OriginalString;
                         linkUrl += "/" + services.Service_Id;
                         linkUrl = linkUrl.Replace(methodName, "Approve_Form");
@@ -2114,7 +2085,8 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToIds = sendTo;
+                        clsMail.SendTos.AddRange(await master.GetManagementOfDepartment(services.User_Id));
+                        clsMail.SendTos.Add(services.User_Id);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -2134,8 +2106,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
 
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
@@ -2171,8 +2142,8 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendToId = services.Assign_User_Id;
-                            clsMail.SendCC = services.Action_User_Id;
+                            clsMail.SendTos.Add(services.Assign_User_Id.Value);
+                            clsMail.SendCCs.Add(services.Action_User_Id.Value);
                             clsMail.Subject = subject;
                             clsMail.Body = content;
                             res = await clsMail.SendMail(clsMail);
@@ -2193,8 +2164,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                Services services = new Services();
-                services = db.Services.Find(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
 
                 services.Update = DateTime.Now;
                 services.Is_Commit = false;
@@ -2202,13 +2172,12 @@ namespace E2E.Models
                 services.WorkRoot_Id = null;
                 db.Entry(services).State = EntityState.Modified;
 
-                List<ServiceDocuments> serviceDocuments = new List<ServiceDocuments>();
-                serviceDocuments = db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToList();
+                List<ServiceDocuments> serviceDocuments = await db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToListAsync();
                 foreach (var item in serviceDocuments)
                 {
                     if (await Api_DeleteFile(item.ServiceDocument_Path))
                     {
-                        db.Entry(item).State = EntityState.Deleted;
+                        db.ServiceDocuments.Remove(item);
                     }
                 }
                 if (await db.SaveChangesAsync() > 0)
@@ -2242,7 +2211,7 @@ namespace E2E.Models
                             content += "</p>";
                             content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                             content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendToId = services.Assign_User_Id;
+                            clsMail.SendTos.Add(services.Assign_User_Id.Value);
                             clsMail.Subject = subject;
                             clsMail.Body = content;
                             res = await clsMail.SendMail(clsMail);
@@ -2269,9 +2238,12 @@ namespace E2E.Models
                     deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
                 }
 
-                string deptName = db.Master_Departments.Find(deptId).Department_Name;
+                string deptName = await db.Master_Departments
+                    .Where(w => w.Department_Id == deptId)
+                    .Select(s => s.Department_Name)
+                    .FirstOrDefaultAsync();
 
-                Services services = db.Services.Find(id);
+                Services services = await db.Services.FindAsync(id);
                 services.Department_Id = deptId;
                 services.Is_Commit = true;
                 services.Update = DateTime.Now;
@@ -2301,9 +2273,12 @@ namespace E2E.Models
             {
                 bool res = new bool();
 
-                string deptName = db.Master_Departments.Find(deptId).Department_Name;
+                string deptName = await db.Master_Departments
+                    .Where(w => w.Department_Id == deptId)
+                    .Select(s => s.Department_Name)
+                    .FirstOrDefaultAsync();
 
-                Services services = db.Services.Find(id);
+                Services services = await db.Services.FindAsync(id);
                 services.Department_Id = deptId;
                 services.Action_User_Id = userId;
                 services.Is_Commit = true;
@@ -2333,7 +2308,7 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToId = userId;
+                        clsMail.SendTos.Add(userId);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -2354,8 +2329,7 @@ namespace E2E.Models
             {
                 bool res = new bool();
 
-                Services services = new Services();
-                services = db.Services.Find(id);
+                Services services = await db.Services.FindAsync(id);
                 services.Action_User_Id = userId;
                 services.Update = DateTime.Now;
                 services.Assign_User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
@@ -2384,7 +2358,7 @@ namespace E2E.Models
                         content += "</p>";
                         content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                         content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendToId = userId;
+                        clsMail.SendTos.Add(userId);
                         clsMail.Subject = subject;
                         clsMail.Body = content;
                         res = await clsMail.SendMail(clsMail);
@@ -2404,7 +2378,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                
+
 
                 if (files[0].ContentLength > 0)
                 {
@@ -2570,7 +2544,8 @@ namespace E2E.Models
             var today = DateTime.Now;
             var services = await db.Services
                 .Where(s => s.Status_Id == 3 && s.Update.HasValue)
-                .Select(s => new {
+                .Select(s => new
+                {
                     s.Service_Id,
                     UpdateDate = s.Update.Value
                 })

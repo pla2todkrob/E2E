@@ -59,49 +59,46 @@ namespace E2E.Models
 
         public async Task<bool> SaveEstimate(Guid id, List<ClsEstimate> score)
         {
+            if (score == null || !score.Any())
+                throw new ArgumentException("Score list cannot be null or empty.", nameof(score));
+
             try
             {
-                bool res = new bool();
+                var average = score.Average(x => x.Score);
+                var sum = score.Sum(x => x.Score) * 100 / 25;
+                var unsatisfied = sum < (0.8 * 100);
 
-                var average = score.Select(x => x.Score).Average();
-                var Sum = score.Select(x => x.Score).Sum();
-                Sum = Sum * 100 / 25;
-
-                bool unsatisfied = Sum < (0.8 * 100);
-
-                Satisfactions_BusinessCards Satisfactions_BusinessCard = new Satisfactions_BusinessCards
+                var satisfactionsBusinessCard = new Satisfactions_BusinessCards
                 {
                     BusinessCard_Id = id,
                     Satisfaction_Average = average,
                     Unsatisfied = unsatisfied
                 };
 
-                db.Satisfactions_BusinessCards.Add(Satisfactions_BusinessCard);
+                db.Satisfactions_BusinessCards.Add(satisfactionsBusinessCard);
 
-                foreach (var item in score)
+                var satisfactionDetails = score.Select(item => new SatisfactionDetails_BusinessCards
                 {
-                    SatisfactionDetails_BusinessCards SatisfactionDetails_BusinessCard = new SatisfactionDetails_BusinessCards
-                    {
-                        Satisfactions_BusinessCard_id = Satisfactions_BusinessCard.Satisfactions_BusinessCard_id,
-                        InquiryTopic_Id = item.Id,
-                        Point = item.Score
-                    };
+                    Satisfactions_BusinessCard_id = satisfactionsBusinessCard.Satisfactions_BusinessCard_id,
+                    InquiryTopic_Id = item.Id,
+                    Point = item.Score
+                }).ToList();
 
-                    db.SatisfactionDetails_BusinessCards.Add(SatisfactionDetails_BusinessCard);
-                }
+                db.SatisfactionDetails_BusinessCards.AddRange(satisfactionDetails);
 
-                if (db.SaveChanges() > 0)
+                if (await db.SaveChangesAsync() > 0)
                 {
-                    res = await BusinessCards_SetClose(id);
+                    return await BusinessCards_SetClose(id);
                 }
-
-                return res;
+                return false;
             }
             catch (Exception ex)
             {
-                throw ex;
+                // Log the exception
+                throw new ApplicationException("An error occurred while saving the estimate.", ex);
             }
         }
+
 
         public async Task<bool> BusinessCards_SetClose(Guid id)
         {
@@ -379,9 +376,6 @@ namespace E2E.Models
         {
             bool res = new bool();
 
-            Guid DeptId = db.Users.Where(w => w.User_Id == Model.User_id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Id).FirstOrDefault();
-            var GetMgApp = db.Users.Where(w => w.Master_Processes.Master_Sections.Department_Id == DeptId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-
             var linkUrl = HttpContext.Current.Request.Url.OriginalString;
             bool found = linkUrl.Contains("Upload");
             bool reSend = linkUrl.Contains("Resend_Email");
@@ -401,14 +395,16 @@ namespace E2E.Models
                 content += string.Format("<b>Due date:</b> {0}", Model.DueDate.Value.ToString("D"));
             }
 
-            mail.SendToIds = GetMgApp;
+            mail.SendTos.AddRange(await master.GetManagementOfDepartment(Model.User_id));
             mail.SendFrom = Model.User_id;
             mail.Subject = subject;
 
             if (Model.UserRef_id.HasValue)
             {
-                mail.SendCC = Model.UserRef_id;
+                mail.SendCCs.Add(Model.UserRef_id.Value);
             }
+
+            List<Guid> businessApprovers = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
 
             //Mg User Approved
             if (Model.Status_Id == 7 && string.IsNullOrEmpty(pseudo))
@@ -419,9 +415,9 @@ namespace E2E.Models
                 result = result + "/BusinessCard_Detail/" + Model.BusinessCard_Id;
                 linkUrl = result;
 
-                GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-                mail.SendToIds = NoM3(GetMgApp);
-                mail.SendCC = Model.User_id;
+                mail.SendTos.Clear();
+                mail.SendTos.AddRange(NoM3(businessApprovers));
+                mail.SendCCs.Add(Model.User_id);
             }
             //Staff Undo
             else if (Model.Status_Id == 7 && pseudo == "7")
@@ -437,8 +433,8 @@ namespace E2E.Models
                 content += string.Format("<p>Undo remark: {0}</p>", remark);
 
                 mail.Subject = subject;
-                GetMgApp = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-                mail.SendToIds = GetMgApp;
+                mail.SendTos.Clear();
+                mail.SendTos.AddRange(businessApprovers);
             }
 
             //User Undo
@@ -453,9 +449,10 @@ namespace E2E.Models
                 subject = string.Format("[Business Card][Requester Undo] {0}", Model.Key);
 
                 content += string.Format("<p>Comment: {0}</p>", remark);
-                mail.SendToIds.Clear();
+                
                 mail.Subject = subject;
-                mail.SendToId = Model.UserAction;
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.UserAction.Value);
             }
 
             //Rejected
@@ -471,16 +468,16 @@ namespace E2E.Models
 
                 subject = string.Format("[Business Card][Rejected] {0}", Model.Key);
                 content = string.Format("<p>Comment: {0}", remark);
-                mail.SendToId = Model.User_id;
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.User_id);
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendToIds.Clear();
 
-                var ChkMgUserRejected = GetMgApp.Any(a => a == ActionId);
+                var ChkMgUserRejected = businessApprovers.Any(a => a == ActionId);
 
                 if (!ChkMgUserRejected)
                 {
-                    mail.SendBCC = GetMgApp;
+                    mail.SendBCCs.AddRange(businessApprovers);
                 }
             }
             //[M] GA Assign
@@ -496,12 +493,14 @@ namespace E2E.Models
                 List<Users> users = db.Users.Where(w => w.BusinessCardGroup == true && w.Master_Grades.Master_LineWorks.Authorize_Id == 3).ToList();
                 if (SelectId.HasValue)
                 {
-                    mail.SendToId = SelectId.Value;
-                    mail.SendToIds.Clear();
+                    mail.SendTos.Clear();
+                    mail.SendTos.Add(SelectId.Value);
+                    
                 }
                 else
                 {
-                    mail.SendToIds = users.Where(w => !w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList();
+                    mail.SendTos.Clear();
+                    mail.SendTos.AddRange(users.Where(w => !w.Master_Grades.Grade_Name.Contains("6")).Select(s => s.User_Id).ToList());
                 }
 
                 subject = string.Format("[Business Card][Assign] {0}", Model.Key);
@@ -522,7 +521,8 @@ namespace E2E.Models
                 //CC Email Grade 5 or 6
                 if (users.Any(w => w.Master_Grades.Grade_Name.Contains("6")) || users.Any(w => w.Master_Grades.Grade_Name.Contains("5")))
                 {
-                    mail.SendCCs = users.Where(w => w.Master_Grades.Grade_Name.Contains("6") || w.Master_Grades.Grade_Name.Contains("5")).Select(s => s.User_Id).ToList();
+                    mail.SendCCs.Clear();
+                    mail.SendCCs.AddRange(users.Where(w => w.Master_Grades.Grade_Name.Contains("6") || w.Master_Grades.Grade_Name.Contains("5")).Select(s => s.User_Id).ToList());
                 }
             }
 
@@ -539,11 +539,11 @@ namespace E2E.Models
 
                 subject = string.Format("[Business Card][Please Confirm] {0}", Model.Key);
                 content += string.Format("<p>Please confirm, check the correctness of the business card.</p>");
-                mail.SendToId = Model.User_id;
-                mail.SendToIds.Clear();
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.User_id);
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendCC = null;
+                mail.SendCCs.Clear();
                 mail.AttachPaths.Add(filepath);
             }
 
@@ -560,11 +560,11 @@ namespace E2E.Models
 
                 subject = string.Format("[Business Card][Requester Confirm] {0}", Model.Key);
                 content += string.Format("<p>Requester confirm business card is correct.</p>");
-                mail.SendToId = Model.UserAction;
-                mail.SendToIds.Clear();
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.UserAction.Value);
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendCC = null;
+                mail.SendCCs.Clear();
             }
 
             //User Cancel Confirm
@@ -582,11 +582,11 @@ namespace E2E.Models
                 subject = string.Format("[Business Card][Cancel Confirm {1}] {0}", Model.Key, ModelFile.FileName);
                 content = string.Format("<p>Requester Comment: {0}", remark);
 
-                mail.SendToId = Model.UserAction;
-                mail.SendToIds.Clear();
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.UserAction.Value);
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendCC = null;
+                mail.SendCCs.Clear();
             }
 
             //User Close
@@ -603,11 +603,11 @@ namespace E2E.Models
                 content = string.Empty;
                 subject = string.Format("[Business Card][Requester Closed] {0}", Model.Key);
                 content += string.Format("<p>Requester Closed job.</p>");
-                mail.SendToId = Model.UserAction;
-                mail.SendToIds.Clear();
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.UserAction.Value);
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendCC = null;
+                mail.SendCCs.Clear();
             }
 
             //Staff Completed
@@ -623,12 +623,11 @@ namespace E2E.Models
 
                 content = string.Empty;
                 subject = string.Format("[Business Card][Please Close job] {0}", Model.Key);
-
-                mail.SendToId = Model.User_id;
-                mail.SendToIds.Clear();
+                mail.SendTos.Clear();
+                mail.SendTos.Add(Model.UserAction.Value);
                 mail.SendFrom = ActionId;
                 mail.Subject = subject;
-                mail.SendCC = null;
+                mail.SendCCs.Clear();
             }
 
             //Resend

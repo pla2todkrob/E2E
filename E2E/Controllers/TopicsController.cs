@@ -346,22 +346,19 @@ namespace E2E.Controllers
             {
                 try
                 {
-                    var sql = db.TopicComments.Find(model.TopicComment_Id);
-                    string DeptName = db.Users.Where(w => w.User_Id == sql.User_Id).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
-                    var Approver = db.Users.Where(w => w.Master_Processes.Master_Sections.Master_Departments.Department_Name == DeptName && w.Master_Grades.Master_LineWorks.Authorize_Id == 2).Select(s => s.User_Id).ToList();
-
+                    var topicComments = await db.TopicComments.FindAsync(model.TopicComment_Id);
                     var linkUrl = System.Web.HttpContext.Current.Request.Url.OriginalString;
                     linkUrl = linkUrl.Replace("Boards_ReportComment", "Boards_Form");
-                    linkUrl += "/" + sql.Topics.Topic_Id + "/#" + model.TopicComment_Id;
+                    linkUrl += "/" + topicComments.Topics.Topic_Id + "/#" + model.TopicComment_Id;
 
-                    string subject = string.Format("[Notify inappropriate comment] {0}", sql.Topics.Topic_Title);
+                    string subject = string.Format("[Notify inappropriate comment] {0}", topicComments.Topics.Topic_Title);
                     string content = string.Format("<p><b>Reporter:</b> {0} <b>Comment:</b> {1}", master.Users_GetInfomation(loginId), CommentReportUser);
                     content += "<br />";
-                    content += string.Format("<b>Commentator:</b> {1} <b>Comment:</b> {0}", sql.Comment_Content, master.Users_GetInfomation(sql.User_Id.Value));
+                    content += string.Format("<b>Commentator:</b> {1} <b>Comment:</b> {0}", topicComments.Comment_Content, master.Users_GetInfomation(topicComments.User_Id.Value));
                     content += "</p>";
                     content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                     content += "<p>Thank you for your consideration</p>";
-                    clsMail.SendToIds = Approver;
+                    clsMail.SendTos.AddRange(await master.GetManagementOfDepartment(topicComments.User_Id.Value));
                     clsMail.Subject = subject;
                     clsMail.Body = content;
                     if (await clsMail.SendMail(clsMail))

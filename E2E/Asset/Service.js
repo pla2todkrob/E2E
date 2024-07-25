@@ -208,6 +208,7 @@ async function resendEmail(urlAjax) {
                             button: res.Button,
                             dangerMode: res.DangerMode
                         }).then(function () {
+                            console.log('Notification closed');
                             location.reload(true);
                         });
                     }

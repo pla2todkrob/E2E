@@ -389,7 +389,7 @@ namespace E2E.Controllers
                 content += "<br />";
                 content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
                 content += "<p>Thank you for your consideration</p>";
-                clsMail.SendToId = sendTo;
+                clsMail.SendTos.Add(sendTo);
                 clsMail.Subject = subject;
                 clsMail.Body = content;
                 await clsMail.SendMail(clsMail);

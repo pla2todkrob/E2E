@@ -140,7 +140,7 @@
         });
         $(document).on('submit', "#RejectForm", function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
+            callSubmitPage('@Url.Action("SetReject","Services")', this);
             return false;
         });
         $(document).on('submit', '#ForwardForm', function (e) {
@@ -197,7 +197,6 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
-            <li class="breadcrumb-item active">Profile</li>
             <li class="breadcrumb-item active">Task</li>
             <li class="breadcrumb-item active" aria-current="page">Service information</li>
         </ol>

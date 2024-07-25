@@ -133,11 +133,13 @@
                 async: true,
                 method: 'Get',
                 success: function (years) {
+                    let selectedYear;
                     years.forEach(function (v, i) {
+                        if (i == 0) {
+                            selectedYear = v;
+                        }
                         selectOption.append(new Option(v, v));
                     });
-
-                    let selectedYear;
 
                     selectOption.addEventListener('change', function () {
                         selectedYear = this.value;
@@ -225,5 +227,7 @@
 <div class="mb-3 d-flex">
     <div id="filter"></div>
 </div>
+
 <div id="dataOverview" class="table-responsive mb-3"></div>
+
 <div id="dataIndividual" class="table-responsive"></div>
