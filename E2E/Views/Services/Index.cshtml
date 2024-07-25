@@ -49,10 +49,10 @@
         <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
             @if (ViewBag.AuthorizeIndex != 3)
             {
-            <li class="nav-item">
-                <a class="nav-link @(isAuthorizeIndex3 ? "" : "active")" id="waiting-commit-tab" data-toggle="tab" href="#waitingCommit" role="tab" aria-controls="waitingCommit" aria-selected="@(isAuthorizeIndex3 ? "false" : "true")">Waiting Commit</a>
-            </li>
-                }
+                <li class="nav-item">
+                    <a class="nav-link @(isAuthorizeIndex3 ? "" : "active")" id="waiting-commit-tab" data-toggle="tab" href="#waitingCommit" role="tab" aria-controls="waitingCommit" aria-selected="@(isAuthorizeIndex3 ? "false" : "true")">Waiting Commit</a>
+                </li>
+            }
             <li class="nav-item">
                 <a class="nav-link @(isAuthorizeIndex3 ? "active" : "")" id="waiting-action-tab" data-toggle="tab" href="#waitingAction" role="tab" aria-controls="waitingAction" aria-selected="@(isAuthorizeIndex3 ? "true" : "false")">Waiting Action</a>
             </li>
@@ -62,9 +62,10 @@
         <div class="tab-content" id="myTabContent">
             @if (ViewBag.AuthorizeIndex != 3)
             {
-            <div class="tab-pane fade @(isAuthorizeIndex3 ? "" : "show active")" id="waitingCommit" role="tabpanel" aria-labelledby="waiting-commit-tab">
-                <div class="row"></div>
-            </div>      }
+                <div class="tab-pane fade @(isAuthorizeIndex3 ? "" : "show active")" id="waitingCommit" role="tabpanel" aria-labelledby="waiting-commit-tab">
+                    <div class="row"></div>
+                </div>
+            }
             <div class="tab-pane fade @(isAuthorizeIndex3 ? "show active" : "")" id="waitingAction" role="tabpanel" aria-labelledby="waiting-action-tab">
                 <div class="row"></div>
             </div>

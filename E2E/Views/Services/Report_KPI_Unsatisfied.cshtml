@@ -1,4 +1,4 @@
-﻿@model List<E2E.Models.Views.ClsServiceViewTable>
+﻿@model IEnumerable<E2E.Models.Views.ReportKPI_Unsatisfied>
 
 @{
     Layout = null;
@@ -15,31 +15,23 @@
         <table class="display table table-bordered table-hover nowrap w-100">
             <thead>
                 <tr>
-                    <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Create)</th>
-                    <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Subject)</th>
-                    <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Requester)</th>
-                    <th>@Html.DisplayNameFor(m => m.FirstOrDefault().ActionBy)</th>
-                    <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Update)</th>
+                    <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
+                    <th>@Html.DisplayNameFor(m => m.UserRequest)</th>
+                    <th>@Html.DisplayNameFor(m => m.UserAction)</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
-                    string txtColor = "";
-                    if (item.Is_OverDue)
-                    {
-                        txtColor = "text-danger";
-                    }
-                <tr class="@txtColor">
-                    <td class="fit">@Html.DisplayFor(i => item.Create)</td>
-                    <td class="text-wrap">
-                        <small class="font-weight-bold">[@Html.DisplayFor(i => item.Key)]</small><br />
-                        <a target="_blank" href="@Url.Action("ServiceInfomation","Services",new { id = item.ServiceId })">@Html.DisplayFor(i => item.Subject)</a>
-                    </td>
-                    <td>@Html.DisplayFor(i => item.Requester)</td>
-                    <td>@Html.DisplayFor(i => item.ActionBy)</td>
-                    <td class="fit">@Html.DisplayFor(i => item.Update)</td>
-                </tr>
+
+                    <tr>
+                        <td class="text-wrap">
+                            <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+                            <a target="_blank" href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+                        </td>
+                        <td>@Html.DisplayFor(i => item.UserRequest)</td>
+                        <td>@Html.DisplayFor(i => item.UserAction)</td>
+                    </tr>
                 }
             </tbody>
         </table>

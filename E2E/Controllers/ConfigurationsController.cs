@@ -77,7 +77,6 @@ namespace E2E.Controllers
                     {
                         Guid deptId = db.Users.Find(loginId).Master_Processes.Master_Sections.Department_Id;
 
-
                         if (authId != 3)
                         {
                             res = db.Services
@@ -111,8 +110,6 @@ namespace E2E.Controllers
                 {
                     if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        
-
                         ViewBag.Author = authId;
                         string deptName = db.Users.Find(loginId).Master_Processes.Master_Sections.Master_Departments.Department_Name;
                         List<Guid> userIdList = db.Users
@@ -143,7 +140,6 @@ namespace E2E.Controllers
                 {
                     if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        
                         if (authId == 2)
                         {
                             res = true;
@@ -184,11 +180,8 @@ namespace E2E.Controllers
 
                 if (HttpContext.User.Identity.IsAuthenticated)
                 {
-
                     if (db.Users.Any(a => a.User_Id == loginId))
                     {
-                        
-
                         if (authId == 3)
                         {
                             res = clsManageService.Services_GetWaitActionCount(loginId);

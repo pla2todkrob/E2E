@@ -658,7 +658,7 @@ namespace E2E.Controllers
                                 Filename = file.FileName,
                                 FolderPath = "Users"
                             };
-                            
+
                             var fileRes = await api.UploadFile(clsServiceFile, file);
                             string fileUrl = fileRes.FileUrl;
                             UserUploadHistory userUploadHistory = new UserUploadHistory

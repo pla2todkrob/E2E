@@ -33,39 +33,7 @@
                 });
             });
         });
-        $(document).on('submit', '#CommentForm', function (e) {
-            e.preventDefault();
-            var fd = new FormData(this);
-
-            $.ajax({
-                url: baseUrl + '/Services/_Comment',
-                method: "POST",
-                async: true,
-                data: fd,
-                processData: false,
-                contentType: false,
-                traditional: true,
-                success: function (res) {
-                    if (res.Icon != 'success') {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        });
-                    }
-                    else {
-
-                        $.connection.hub.start().done(function () {
-                            chat.server.sendMessageToGroup(res.Option.Service_Id, res.Option.Comment_Content);
-                        });
-                    }
-                }
-            });
-            return false;
-        });
-      async  function reloadComment() {
+        async  function reloadComment() {
            await $('#commentHis').load('@Url.Action("_CommentHistory", "Services", new { id = Model.Services.Service_Id })');
            await $('#commentNew').load('@Url.Action("_Comment", "Services", new { id = Model.Services.Service_Id })');
            await adjustHeight();
@@ -128,6 +96,38 @@
             $('#modalArea').modal('show');
             return false;
         }
+        $(document).on('submit', '#CommentForm', function (e) {
+            e.preventDefault();
+            var fd = new FormData(this);
+
+            $.ajax({
+                url: baseUrl + '/Services/_Comment',
+                method: "POST",
+                async: true,
+                data: fd,
+                processData: false,
+                contentType: false,
+                traditional: true,
+                success: function (res) {
+                    if (res.Icon != 'success') {
+                        swal({
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
+                        });
+                    }
+                    else {
+
+                        $.connection.hub.start().done(function () {
+                            chat.server.sendMessageToGroup(res.Option.Service_Id, res.Option.Comment_Content);
+                        });
+                    }
+                }
+            });
+            return false;
+        });
         $(document).on('submit', '#TeamForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("_AddTeam", "Services")',this);
@@ -138,7 +138,12 @@
             callSubmitRedirect('@Url.Action("SetPending", "Services")',this,'@Url.Action("Index","Services")');
             return false;
         });
-        $(document).on('submit', '#SaveForm', function (e) {
+        $(document).on('submit', "#RejectForm", function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
+            return false;
+        });
+        $(document).on('submit', '#ForwardForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("Form_Forward", "Services")',this,'@Url.Action("Index", "Services")');
             return false;
@@ -178,6 +183,11 @@
         $(document).on('submit', '#RequestChangeDueForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
+            return false;
+        });
+        $(document).on('submit', "#RequestRejectForm", function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetRequestReject", "Services")', this,'@Url.Action("Index", "Services")');
             return false;
         });
     </script>

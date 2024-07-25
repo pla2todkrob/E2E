@@ -145,8 +145,6 @@ namespace E2E.Models.Views
 
     public class ReportKPI_Overdue
     {
-        public Guid User_Id { get; set; }
-
         [Display(Name = "User")]
         public string User_Name { get; set; }
 
@@ -160,5 +158,22 @@ namespace E2E.Models.Views
 
         [Display(Name = "Status")]
         public string Status_Name { get; set; }
+    }
+
+    public class ReportKPI_Unsatisfied
+    {
+        
+        [Display(Name = "Operator")]
+        public string UserAction { get; set; }
+
+        [Display(Name = "Requester")]
+        public string UserRequest { get; set; }
+
+        public Guid Service_Id { get; set; }
+        public string Service_Key { get; set; }
+
+        [Display(Name = "Subject")]
+        public string Service_Subject { get; set; }
+
     }
 }

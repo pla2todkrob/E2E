@@ -352,7 +352,6 @@ namespace E2E.Controllers
 
         public ActionResult DocumentControl_Table()
         {
-
             string DeptName = db.Users.Where(w => w.User_Id == loginId).Select(s => s.Master_Processes.Master_Sections.Master_Departments.Department_Name).FirstOrDefault();
             List<Guid> guids = new List<Guid>();
             guids = db.Master_Departments.Where(w => w.Department_Name == DeptName).Select(s => s.Department_Id).ToList();

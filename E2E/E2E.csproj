@@ -429,6 +429,7 @@
     <Compile Include="Models\Views\ClsSaveResult.cs" />
     <Compile Include="Models\Views\ClsSections.cs" />
     <Compile Include="Models\Views\ClsServiceComments.cs" />
+    <Compile Include="Models\Views\ClsServiceKPI.cs" />
     <Compile Include="Models\Views\ClsServices.cs" />
     <Compile Include="Models\Views\ClsServiceTeams.cs" />
     <Compile Include="Models\Views\ClsServiceViewTable.cs" />
@@ -1053,11 +1054,8 @@
     <Content Include="Views\Services\SetReturnAssign.cshtml" />
     <Content Include="Views\Services\_SatisfactionResults.cshtml" />
     <Content Include="Views\Services\Report_KPI.cshtml" />
-    <Content Include="Views\Services\Report_KPI_Filter.cshtml" />
-    <Content Include="Views\Services\Report_KPI_Table.cshtml" />
     <Content Include="Views\Services\Report_KPI_View.cshtml" />
     <Content Include="Views\Shared\_LayoutFluid.cshtml" />
-    <Content Include="Views\Services\Report_KPI_JoinTeam.cshtml" />
     <Content Include="Views\Topics\Boards_ReportComment.cshtml" />
     <Content Include="Views\Management\AuditReport.cshtml" />
     <Content Include="Views\Management\AuditReport_Email.cshtml" />
@@ -1113,6 +1111,9 @@
     <Content Include="Views\Services\Report_KPI_Overdue.cshtml" />
     <Content Include="Views\Services\_ServiceDetails.cshtml" />
     <Content Include="Views\Services\_ServiceActions.cshtml" />
+    <Content Include="Views\Services\YearlyReportOverview.cshtml" />
+    <Content Include="Views\Services\SetRequestReject.cshtml" />
+    <Content Include="Views\Services\YearlyReportIndividual.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

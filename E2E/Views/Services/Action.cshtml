@@ -12,40 +12,39 @@
             callSubmitRedirect('@Url.Action("SetInProgress", "Services")', this,'@Url.Action("ServiceInfomation", "Services")');
             return false;
         });
-
         $(document).on('submit', '#ReturnForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetReturnJob", "Services")', this,'@Url.Action("Index", "Services")');
             return false;
         });
-
         $(document).on('submit', '#RequestChangeDueForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("RequestChangeDue_Form", "Services")', this);
             return false;
         });
-
         $(document).on('submit', "#RejectForm", function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetReject","Services")', this,'@Url.Action("ServiceInfomation", "Services")');
             return false;
         });
-
         $(document).on('submit', "#MustApproveForm", function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetMustApprove", "Services")', this,'@Url.Action("Index", "Services")');
             return false;
         });
-
         $(document).on('submit', '#AssignForm', function (e) {
             e.preventDefault();
             callSubmitPage('@Url.Action("SetAssign", "Services")', this);
             return false;
         });
-
         $(document).on('submit', '#ReturnAssignForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetReturnAssign", "Services")', this,'@Url.Action("Index", "Services")');
+            return false;
+        });
+        $(document).on('submit', "#RequestRejectForm", function (e) {
+            e.preventDefault();
+            callSubmitRedirect('@Url.Action("SetRequestReject", "Services")', this,'@Url.Action("Index", "Services")');
             return false;
         });
     </script>
@@ -61,7 +60,7 @@
 }
 
 <blockquote class="blockquote text-right">
-    <p class="mb-0">[@Model.Services.Service_Key]&nbsp;@Html.DisplayFor(m => m.Services.Service_Subject)</p>
+    <p class="mb-0">[<span class="copyText">@Model.Services.Service_Key</span>]&nbsp;<span class="copyText">@Html.DisplayFor(m => m.Services.Service_Subject)</span></p>
     <small class="blockquote-footer"><cite title="@Html.DisplayFor(m => m.Services.Create)">@Html.DisplayNameFor(m => m.Create_Name): @Html.DisplayFor(m => m.Create_Name)</cite></small>
 </blockquote>
 <div class="row">
@@ -72,29 +71,29 @@
                     <div class="mr-auto">
                         @if (ViewBag.AuthorizeIndex < 3)
                         {
-                        <button class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id})')">Return job</button>
+                            <button class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReturnJob","Services",new { id = Model.Services.Service_Id})')">Return job</button>
                         }
                     </div>
                     <div class="ml-auto">
-                        @{
-                            if (!Model.Services.Is_MustBeApproved)
-                            {
+                        <button type="button" class="btn btn-danger" onclick="callModal('@Url.Action("SetRequestReject","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Request reject</button>
+                        @if (!Model.Services.Is_MustBeApproved)
+                        {
                             <button type="button" class="btn btn-warning" onclick="callModal('@Url.Action("SetMustApprove","Services",new { id = Html.ValueFor(m => m.Services.Service_Id)})')">Must approved</button>
-                            }
-                            if (Model.Services.Ref_Service_Id.HasValue)
+                        }
+                        @if (Model.Services.Ref_Service_Id.HasValue)
+                        {
+                            if (!Model.Services.Is_FreePoint)
                             {
-                                if (!Model.Services.Is_FreePoint)
+                                if (Model.Services.Action_User_Id.HasValue)
                                 {
-                                    if (Model.Services.Action_User_Id.HasValue)
+                                    if (Model.Services.Action_User_Id.Equals(userId))
                                     {
-                                        if (Model.Services.Action_User_Id.Equals(userId))
-                                        {
-                            <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
-                                        }
+                                        <button class="btn btn-outline-primary" type="button" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetFreePoint","Services",new { id = Model.Services.Service_Id })','reloadPage')">Free point</button>
                                     }
                                 }
                             }
                         }
+
                     </div>
                 </div>
                 <dl class="row">
@@ -121,8 +120,8 @@
                     <dd class="col-8 col-lg-9">@Html.DisplayFor(m => m.Services.Service_Contact)</dd>
                     @if (Model.Services.Update.HasValue)
                     {
-                    <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
-                    <dd class="col-8 col-lg-9">@Html.DisplayFor(m => m.Services.Update)</dd>
+                        <dt class="col-4 col-lg-3">@Html.DisplayNameFor(m => m.Services.Update)</dt>
+                        <dd class="col-8 col-lg-9">@Html.DisplayFor(m => m.Services.Update)</dd>
                     }
 
                     <dt class="col-4 col-lg-3">Files</dt>
@@ -131,9 +130,9 @@
                         <ul class="list-unstyled">
                             @foreach (var item in Model.ServiceFiles.OrderBy(o => o.ServiceFile_Extension))
                             {
-                            <li>
-                                <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
-                            </li>
+                                <li>
+                                    <a href="@item.ServiceFile_Path" target="_blank" title="@item.ServiceFile_Name"><i class="fa fa-download"></i>&nbsp;@item.ServiceFile_Name</a>
+                                </li>
 
                             }
                         </ul>
@@ -144,18 +143,18 @@
                 <div class="float-left">
                     @if (!Model.Services.Action_User_Id.HasValue && (ViewBag.AuthorizeIndex < 3 || ViewBag.CanAssign))
                     {
-                    <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetAssign","Services",new { id=Model.Services.Service_Id })')">Set assign</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetAssign","Services",new { id=Model.Services.Service_Id })')">Set assign</button>
                     }
                     else if (Model.Services.Action_User_Id.HasValue)
                     {
                         if (Guid.Equals(Model.Services.Action_User_Id.Value, userId))
                         {
-                    <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetReturnAssign","Services",new { id=Model.Services.Service_Id })')">Undo assign</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="callModal('@Url.Action("SetReturnAssign","Services",new { id=Model.Services.Service_Id })')">Undo assign</button>
                         }
                     }
                     @if (ViewBag.AuthorizeIndex < 3)
                     {
-                    <button class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
+                        <button class="btn btn-outline-danger" onclick="callModal('@Url.Action("SetReject","Services",new { id = Model.Services.Service_Id})')">Reject</button>
                     }
                 </div>
                 <div class="float-right">
@@ -164,12 +163,12 @@
                         // Display buttons only if there is no pending change due date or the user is the one who requested the change
                         if (Model.ServiceChangeDueDate == null)
                         {
-                    <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services", new { id = Model.Services.Service_Id })')">Change due date</button>
-                    <button class="btn btn-primary" onclick="callModal('@Url.Action("SetInProgress","Services", new { id = Model.Services.Service_Id })')">Start job</button>
+                            <button class="btn btn-warning" onclick="callModal('@Url.Action("RequestChangeDue_Form","Services", new { id = Model.Services.Service_Id })')">Change due date</button>
+                            <button class="btn btn-primary" onclick="callModal('@Url.Action("SetInProgress","Services", new { id = Model.Services.Service_Id })')">Start job</button>
                         }
                         else if (Model.ServiceChangeDueDate.User_Id.Equals(userId))
                         {
-                    <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Cancel","Services", new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })', 'reloadPage', { isDangerous: true })">Cancel due date change</button>
+                            <button class="btn btn-outline-danger" onclick="confirmAndPerformAjaxRequest('@Url.Action("RequestChangeDue_Cancel","Services", new { id = Model.ServiceChangeDueDate.ChangeDueDate_Id })', 'reloadPage', { isDangerous: true })">Cancel due date change</button>
                         }
                     }
                 </div>

@@ -1,6 +1,6 @@
 ﻿@{
-	ViewBag.Title = "Report KPI";
-	Layout = "~/Views/Shared/_LayoutFluid.cshtml";
+    ViewBag.Title = "Report KPI";
+    Layout = "~/Views/Shared/_LayoutFluid.cshtml";
 }
 
 @section breadcrumb{
@@ -15,41 +15,40 @@
 
 @section scripts{
     <script>
-        $(function () {
-            reloadTable();
+        window.onload = function () {
+            YearFilterList();
+        }
 
-        });
-
-        function callOverdueModal() {
+        function callOverdueModal(year, month, userId) {
             $.ajax({
                 url: '@Url.Action("Report_KPI_Overdue", "Services")',
                 data: {
-                    filter:getQueryString()
+                    year,
+                    month,
+                    userId
                 },
                 async: true,
                 success: function (res) {
-                    $('#modalContent').parent().addClass('modal-xl');
-
                     $('#modalContent').html(res);
-
+                    $('#modalContent').parent().addClass('modal-xl');
                     $('#modalArea').modal('show');
                 }
             });
             return false;
         }
 
-        function callUnsatisfiedModal() {
+        function callUnsatisfiedModal(year, month, userId) {
             $.ajax({
                 url: '@Url.Action("Report_KPI_Unsatisfied", "Services")',
                 data: {
-                    filter:getQueryString()
+                    year,
+                    month,
+                    userId
                 },
                 async: true,
                 success: function (res) {
-                    $('#modalContent').parent().addClass('modal-xl');
-
                     $('#modalContent').html(res);
-
+                    $('#modalContent').parent().addClass('modal-xl');
                     $('#modalArea').modal('show');
                 }
             });
@@ -65,10 +64,8 @@
                 },
                 async: true,
                 success: function (res) {
-                    $('#modalContent').parent().addClass('modal-xl');
-
                     $('#modalContent').html(res);
-
+                    $('#modalContent').parent().addClass('modal-xl');
                     $('#modalArea').modal('show');
                 }
             });
@@ -94,22 +91,139 @@
             return false;
         }
 
-       function reloadTable() {
-           callFilter('@Url.Action("Report_KPI_Filter", "Services")').then(function () {
-               callTable_Normal('@Url.Action("Report_KPI_Table", "Services")');
-           });
+        function YearFilterList() {
+            // Create the input-group container
+            let inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group');
 
+            // Create the input-group-prepend container
+            let inputGroupPrepend = document.createElement('div');
+            inputGroupPrepend.classList.add('input-group-prepend');
+
+            // Create the input-group-text element
+            let inputGroupText = document.createElement('div');
+            inputGroupText.classList.add('input-group-text');
+            inputGroupText.innerText = 'Annual report year';
+
+            // Append the input-group-text to the input-group-prepend container
+            inputGroupPrepend.appendChild(inputGroupText);
+
+            // Create the select element
+            let selectOption = document.createElement('select');
+            selectOption.classList.add('form-control');
+
+            // Create the input-group-append container
+            let inputGroupAppend = document.createElement('div');
+            inputGroupAppend.classList.add('input-group-append');
+
+            let inputGroupButton = document.createElement('button');
+            inputGroupButton.classList.add('btn', 'btn-outline-secondary');
+            inputGroupButton.innerText = 'Export';
+            inputGroupButton.setAttribute('type', 'button');
+
+            inputGroupAppend.appendChild(inputGroupButton);
+
+            // Append the input-group-prepend and select element to the input group
+            inputGroup.appendChild(inputGroupPrepend);
+            inputGroup.appendChild(selectOption);
+            inputGroup.appendChild(inputGroupAppend);
+
+            $.ajax({
+                url: '@Url.Action("YearList", "Services")',
+                async: true,
+                method: 'Get',
+                success: function (years) {
+                    years.forEach(function (v, i) {
+                        selectOption.append(new Option(v, v));
+                    });
+
+                    let selectedYear;
+
+                    selectOption.addEventListener('change', function () {
+                        selectedYear = this.value;
+                        LoadSelectedYear(selectedYear);
+                    });
+
+                    document.getElementById('filter').appendChild(inputGroup);
+
+                    if (years.length > 0) {
+                        LoadSelectedYear(years[0]);
+                    }
+
+                    inputGroupAppend.addEventListener('click', function () {
+                        if (selectedYear) {
+                            swal({
+                                title: "Are you sure?",
+                                text: "Confirm to download excel file or not",
+                                icon: "warning",
+                                buttons: true,
+                            }).then((conf) => {
+                                if (conf) {
+                                    window.location.href = '@Url.Action("YearlyReportExport", "Services")' + '?year=' + selectedYear;
+                                }
+                            });
+
+                        } else {
+                            swal({
+                                title: 'Warning',
+                                text: 'Please select a year to export.',
+                                icon: 'warning'
+                            });
+                        }
+                    });
+                }
+            });
         }
+
+        function LoadSelectedYear(year) {
+            $.ajax({
+                url: '@Url.Action("YearlyReportOverview","Services")',
+                async: true,
+                data: {
+                    Year: year
+                },
+                method: 'Get',
+                success: function (viewDataOverview) {
+                    document.getElementById('dataOverview').innerHTML = viewDataOverview;
+                    $('[data-toggle="tooltip"]').tooltip();
+
+                    $.ajax({
+                        url: '@Url.Action("YearlyReportIndividual", "Services")',
+                        async: true,
+                        data: {
+                            Year: year
+                        },
+                        method: 'Get',
+                        success: function (viewDataIndividual) {
+                            document.getElementById('dataIndividual').innerHTML = viewDataIndividual;
+                            $('[data-toggle="tooltip"]').tooltip();
+
+                            document.querySelectorAll('.viewOverdue').forEach(function (v, i) {
+                                v.addEventListener('click', function () {
+                                    var dataMonth = $(this).data('month');
+                                    var dataUserId = $(this).data('userid');
+                                    callOverdueModal(year, dataMonth, dataUserId);
+                                });
+                            });
+
+                            document.querySelectorAll('.viewUnsatisfied').forEach(function (v, i) {
+                                v.addEventListener('click', function () {
+                                    var dataMonth = $(this).data('month');
+                                    var dataUserId = $(this).data('userid');
+                                    callUnsatisfiedModal(year, dataMonth, dataUserId);
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
     </script>
 }
 
 <div class="mb-3 d-flex">
-    <div>
-        <button type="button" class="btn btn-light" onclick="confirmAndPerformAjaxRequest('@Url.Action("SetClosePrevious","Services")','reloadTable')">
-            <i class="fa fa-th-list mr-2" aria-hidden="true"></i>
-            Closing of previous months'
-        </button>
-    </div>
-    <div class="ml-auto" id="filter"></div>
+    <div id="filter"></div>
 </div>
-<div id="datalist"></div>
+<div id="dataOverview" class="table-responsive mb-3"></div>
+<div id="dataIndividual" class="table-responsive"></div>

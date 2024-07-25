@@ -5,6 +5,7 @@ const baseUrl = pathName.search(siteName) < 0 ? '' : `/${siteName}`;
 let chat, spinnerContainer;
 
 $(function () {
+    $('[data-toggle="tooltip"]').tooltip();
     let classEmpty = true;
     const urlPathName = window.location.pathname,
         urlRegExp = new RegExp(urlPathName.replace(/\/$/, '') + '$');

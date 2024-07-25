@@ -2109,5 +2109,18 @@ namespace E2E.Models
                 return Users_Insert(model);
             }
         }
+        public async Task<List<Guid>> GetManagementOfDepartment()
+        {
+            Guid loginId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            Guid departmentId = await db.Users
+                .Where(w => w.User_Id == loginId)
+                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                .FirstOrDefaultAsync();
+
+            return await db.Users
+                .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
+                .Select(s => s.User_Id)
+                .ToListAsync();
+        }
     }
 }

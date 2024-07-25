@@ -1,13 +1,18 @@
 ﻿using E2E.Models;
 using E2E.Models.Tables;
 using E2E.Models.Views;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -381,8 +386,7 @@ namespace E2E.Controllers
             }
             catch (Exception ex)
             {
-                // Log exception
-                // throw;
+                // Log exception throw;
                 return View("Error", new HandleErrorInfo(ex, "Services", "AllRequest_Table"));
             }
         }
@@ -1142,52 +1146,41 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Report_KPI_Filter(string filter)
+        public ActionResult Report_KPI_Unsatisfied(int year, int? month, Guid? userId)
         {
-            try
+            IQueryable<Satisfactions> jobUnsat = db.Satisfactions
+                .Where(w => w.Unsatisfied && w.Create.Year == year)
+                .OrderBy(o => o.Services.Create);
+            if (month.HasValue)
             {
-                return View(reportKPI_Filter.DeserializeFilter(filter));
+                jobUnsat = jobUnsat.Where(w => w.Create.Month <= month.Value);
             }
-            catch (Exception)
+            else if (userId.HasValue)
             {
-                throw;
+                jobUnsat = jobUnsat.Where(w => w.Services.Action_User_Id.Value == userId);
             }
-        }
 
-        public ActionResult Report_KPI_JoinTeam(Guid id, string filter)
-        {
-            try
-            {
-                return View(data.Services_ViewJoinTeamList(id, reportKPI_Filter.DeserializeFilter(filter)));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+            var interimResults = jobUnsat
+                .Select(s => new
+                {
+                    s.Service_Id,
+                    s.Services.Service_Key,
+                    s.Services.Service_Subject,
+                    ActionUserId = s.Services.Action_User_Id.Value,
+                    RequestUserId = s.Services.User_Id
+                }).ToList();
 
-        public ActionResult Report_KPI_Table(string filter)
-        {
-            try
-            {
-                return View(data.ClsReportKPI_ViewList(reportKPI_Filter.DeserializeFilter(filter)));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+            List<ReportKPI_Unsatisfied> unsatisfieds = interimResults
+                .Select(s => new ReportKPI_Unsatisfied()
+                {
+                    Service_Id = s.Service_Id,
+                    Service_Key = s.Service_Key,
+                    Service_Subject = s.Service_Subject,
+                    UserAction = master.Users_GetInfomation(s.ActionUserId),
+                    UserRequest = master.Users_GetInfomation(s.RequestUserId)
+                }).ToList();
 
-        public ActionResult Report_KPI_Unsatisfied(string filter)
-        {
-            try
-            {
-                return View(data.ClsReport_KPI_Unsatisfied(reportKPI_Filter.DeserializeFilter(filter)));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return View(unsatisfieds);
         }
 
         public ActionResult Report_KPI_View(Guid id, string filter)
@@ -1202,9 +1195,45 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Report_KPI_Overdue(string filter)
+        public ActionResult Report_KPI_Overdue(int year, int? month, Guid? userId)
         {
-            return View(data.ClsReportKPI_OverdueList(reportKPI_Filter.DeserializeFilter(filter)));
+            IQueryable<Services> services = db.Services
+                .Where(w => w.Update.Value.Year == year && w.Is_OverDue)
+                .OrderBy(o => o.Create);
+            if (month.HasValue)
+            {
+                services = services.Where(w => w.Update.Value.Month <= month.Value);
+            }
+            else if (userId.HasValue)
+            {
+                services = services.Where(w => w.Action_User_Id == userId);
+            }
+
+            // First, get the data from the database
+            var interimResults = services
+                .Select(s => new
+                {
+                    s.Service_Id,
+                    s.Service_Key,
+                    s.Service_Subject,
+                    s.System_Statuses.Status_Class,
+                    s.System_Statuses.Status_Name,
+                    ActionUserId = s.Action_User_Id.Value,
+                }).ToList(); // Execute query and get results into memory
+
+            // Then, apply the custom method in-memory
+            List<ReportKPI_Overdue> overdues = interimResults
+                .Select(s => new ReportKPI_Overdue()
+                {
+                    Service_Id = s.Service_Id,
+                    Service_Key = s.Service_Key,
+                    Service_Subject = s.Service_Subject,
+                    Status_Class = s.Status_Class,
+                    Status_Name = s.Status_Name,
+                    User_Name = master.Users_GetInfomation(s.ActionUserId) // Now calling the method in-memory
+                }).ToList();
+
+            return View(overdues);
         }
 
         public ActionResult RequestChangeDue()
@@ -1743,6 +1772,7 @@ namespace E2E.Controllers
             }
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
+
         public async Task<JsonResult> SetClosePrevious()
         {
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -1754,7 +1784,7 @@ namespace E2E.Controllers
 
                     foreach (var service in services)
                     {
-                        await data.Services_SetClose(service.Service_Id, true);
+                        await data.Services_SetClose(service, true);
                     }
 
                     if (await db.SaveChangesAsync() > 0)
@@ -1773,8 +1803,8 @@ namespace E2E.Controllers
 
                 return Json(swal, JsonRequestBehavior.AllowGet);
             }
-
         }
+
         public ActionResult SetComplete(Guid id)
         {
             ServiceComments serviceComments = new ServiceComments
@@ -2057,6 +2087,49 @@ namespace E2E.Controllers
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult SetRequestReject(Guid id)
+        {
+            ServiceComments serviceComments = new ServiceComments
+            {
+                Service_Id = id
+            };
+
+            return View(serviceComments);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<ActionResult> SetRequestReject(ServiceComments model)
+        {
+            ClsSwal swal = new ClsSwal();
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    if (await data.Services_SetRequestReject(model, nameof(SetRequestReject)))
+                    {
+                        scope.Complete();
+                        swal.DangerMode = false;
+                        swal.Icon = "success";
+                        swal.Text = "บันทึกข้อมูลเรียบร้อยแล้ว";
+                        swal.Title = "Successful";
+                        swal.Option = model.Service_Id;
+                    }
+                    else
+                    {
+                        swal.Icon = "warning";
+                        swal.Text = "บันทึกข้อมูลไม่สำเร็จ";
+                        swal.Title = "Warning";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    swal.Title = ex.Source;
+                    swal.Text = ex.GetBaseException().Message;
+                }
+            }
+            return Json(swal, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult SetReject(Guid id)
         {
             try
@@ -2209,6 +2282,370 @@ namespace E2E.Controllers
             {
                 throw;
             }
+        }
+
+        public async Task<JsonResult> YearList()
+        {
+            List<int> years = await db.Services
+                .Select(s => s.Create.Year) // Select the year first
+                .Distinct() // Remove duplicates
+                .OrderByDescending(year => year) // Then order by the year
+                .ToListAsync();
+
+            return Json(years, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<ActionResult> YearlyReportOverview(int year)
+        {
+            int[] finishedStatus = { 3, 4 };
+            int[] unfinishedStatus = { 1, 2 };
+            int rejectedStatus = 5;
+
+            Guid departmentId = await GetDepartmentIdAsync(loginId);
+
+            var createdServicesByMonth = await GetServicesByMonthAsync(year, departmentId, true);
+            var updatedServicesByMonth = await GetServicesByMonthAsync(year, departmentId, false);
+
+            int remainingServicesCount = await CalculateRemainingServicesAsync(departmentId, year, unfinishedStatus);
+
+            var monthlyOverviews = CalculateMonthlyOverviews(year, createdServicesByMonth, updatedServicesByMonth, finishedStatus, rejectedStatus, remainingServicesCount);
+
+            ClsServiceKPI clsServiceKPI = new ClsServiceKPI
+            {
+                Remaining = remainingServicesCount,
+                Overviews = monthlyOverviews
+            };
+
+            return View(clsServiceKPI);
+        }
+
+        private async Task<List<MonthlyServices>> GetServicesByMonthAsync(int year, Guid departmentId, bool isCreated)
+        {
+            return await db.Services.AsNoTracking()
+                .Where(s => (isCreated ? s.Create.Year == year : s.Update.Value.Year == year) && s.Department_Id == departmentId)
+                .GroupBy(s => s.Create.Month)
+                .Select(g => new MonthlyServices
+                {
+                    Month = g.Key,
+                    Services = g.ToList()
+                })
+                .OrderBy(ms => ms.Month)
+                .ToListAsync();
+        }
+
+        private Expression<Func<Services, bool>> CreateYearPredicate(int year, bool isCreated)
+        {
+            return s => isCreated ? s.Create.Year == year : s.Update.Value.Year == year;
+        }
+
+        private async Task<int> CalculateRemainingServicesAsync(Guid departmentId, int year, int[] unfinishedStatus)
+        {
+            return await db.Services.AsNoTracking()
+                .Where(s => ((s.Create.Year < year && unfinishedStatus.Contains(s.Status_Id)) ||
+                            (s.Create.Year < year && s.Update.Value.Year >= year)) &&
+                            s.Department_Id == departmentId)
+                .CountAsync();
+        }
+
+        private async Task<Guid> GetDepartmentIdAsync(Guid userId)
+        {
+            return await db.Users
+                .Where(u => u.User_Id == userId)
+                .Select(u => u.Master_Processes.Master_Sections.Department_Id)
+                .FirstOrDefaultAsync();
+        }
+
+        private List<ClsServiceKPI.Overview> CalculateMonthlyOverviews(int year, List<MonthlyServices> createdServicesByMonth, List<MonthlyServices> updatedServicesByMonth, int[] finishedStatus, int rejectedStatus, int initialRemainingCount)
+        {
+            int cumulativeTotal = initialRemainingCount;
+            int cumulativeCompleted = 0, cumulativeManualClose = 0, cumulativeClosed = 0, cumulativeOverdue = 0, cumulativeUnsatisfied = 0, cumulativeRejected = 0;
+
+            var monthlyOverviews = new List<ClsServiceKPI.Overview>();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                var createdData = createdServicesByMonth.FirstOrDefault(c => c.Month == month);
+                var updatedData = updatedServicesByMonth.FirstOrDefault(u => u.Month == month);
+
+                int incoming = createdData?.Services.Count ?? 0;
+                int completed = updatedData?.Services.Count(c => finishedStatus.Contains(c.Status_Id)) ?? 0;
+                int closeAuto = updatedData?.Services.Count(s => s.Is_AutoClose && s.Status_Id == 4) ?? 0;
+                int closeManual = updatedData?.Services.Count(s => !s.Is_AutoClose && s.Status_Id == 4) ?? 0;
+                int closed = closeAuto + closeManual;
+                int rejected = updatedData?.Services.Count(c => c.Status_Id == rejectedStatus) ?? 0;
+                int overdue = updatedData?.Services.Count(s => s.Is_OverDue) ?? 0;
+                int unsatisfied = CalculateUnsatisfiedServices(updatedData?.Services);
+
+                cumulativeTotal += incoming;
+                cumulativeCompleted += completed;
+                cumulativeManualClose += closeManual;
+                cumulativeClosed += closed;
+                cumulativeRejected += rejected;
+                cumulativeOverdue += overdue;
+                cumulativeUnsatisfied += unsatisfied;
+
+                double ontime = (cumulativeCompleted == 0) ? 0 : (double)(cumulativeCompleted - cumulativeOverdue) / cumulativeCompleted;
+                double satisfied = (cumulativeManualClose == 0) ? 0 : (double)(cumulativeManualClose - cumulativeUnsatisfied) / cumulativeManualClose;
+
+                monthlyOverviews.Add(new ClsServiceKPI.Overview
+                {
+                    NumberYear = year,
+                    NumberMonth = month,
+                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(month),
+                    Incoming = incoming,
+                    Completed = completed,
+                    CloseAuto = closeAuto,
+                    CloseManual = closeManual,
+                    Closed = closed,
+                    Rejected = rejected,
+                    Total = cumulativeTotal,
+                    CompletedTotal = cumulativeCompleted,
+                    ClosedTotal = cumulativeClosed,
+                    RejectedTotal = cumulativeRejected,
+                    Overdue = cumulativeOverdue,
+                    Ontime = ontime,
+                    Unsatisfied = cumulativeUnsatisfied,
+                    Satisfied = satisfied
+                });
+            }
+
+            return monthlyOverviews;
+        }
+
+        private int CalculateUnsatisfiedServices(List<Services> services)
+        {
+            if (services == null) return 0;
+
+            return services
+                .Where(s => s.Status_Id == 4)
+                .Join(db.Satisfactions.AsNoTracking(),
+                    ser => ser.Service_Id,
+                    sat => sat.Service_Id,
+                    (ser, sat) => sat.Unsatisfied)
+                .Count(unsatisfied => unsatisfied);
+        }
+
+        private class MonthlyServices
+        {
+            public int Month { get; set; }
+            public List<Services> Services { get; set; }
+        }
+
+        public async Task<ActionResult> YearlyReportIndividual(int year)
+        {
+            try
+            {
+                int[] finishedStatus = { 3, 4 };
+                int rejectedStatus = 5;
+
+                Guid departmentId = await GetDepartmentIdAsync(loginId);
+                var userIds = await GetUserIdsForYearAsync(year, departmentId);
+                var nonNullUserIds = userIds.Where(id => id.HasValue).Select(id => id.Value).ToList();
+
+                var userList = await GetUserDetailsAsync(nonNullUserIds);
+
+                var services = await GetServicesForYearAsync(nonNullUserIds, year, departmentId);
+                var createdYear = GroupServicesByUserAndYear(services, year, s => s.Create.Year);
+                var updatedYear = GroupServicesByUserAndYear(services, year, s => s.Update.Value.Year);
+
+                ClsServiceKPI clsServiceKPI = new ClsServiceKPI
+                {
+                    Individuals = userList.Select(user =>
+                    {
+                        var createdData = createdYear.FirstOrDefault(c => c.User_Id == user.User_Id);
+                        var updatedData = updatedYear.FirstOrDefault(u => u.User_Id == user.User_Id);
+
+                        int incoming = createdData?.Services.Count ?? 0;
+                        int completed = updatedData?.Services.Count(c => finishedStatus.Contains(c.Status_Id)) ?? 0;
+                        int closeAuto = updatedData?.Services.Count(s => s.Is_AutoClose && s.Status_Id == 4) ?? 0;
+                        int closeManual = updatedData?.Services.Count(s => !s.Is_AutoClose && s.Status_Id == 4) ?? 0;
+                        int closed = closeAuto + closeManual;
+                        int rejected = updatedData?.Services.Count(c => c.Status_Id == rejectedStatus) ?? 0;
+                        int overdue = updatedData?.Services.Count(s => s.Is_OverDue) ?? 0;
+                        int unsat = updatedData?.Services
+                        .Where(w => w.Status_Id == 4)
+                        .Join(db.Satisfactions,
+                        ser => ser.Service_Id,
+                        sat => sat.Service_Id,
+                        (ser, sat) => sat.Unsatisfied)
+                        .Where(w => w)
+                        .Count() ?? 0;
+
+                        double ontime = completed == 0 ? 0 : (double)(completed - overdue) / completed;
+                        double satisfied = closeManual == 0 ? 0 : (double)(closeManual - unsat) / closeManual;
+
+                        return new ClsServiceKPI.Individual
+                        {
+                            NumberYear = year,
+                            UserId = user.User_Id,
+                            User = $"{user.User_Code} [{user.Username}]",
+                            Incoming = incoming,
+                            Completed = completed,
+                            CloseAuto = closeAuto,
+                            CloseManual = closeManual,
+                            Closed = closed,
+                            Rejected = rejected,
+                            Overdue = overdue,
+                            Ontime = ontime,
+                            Unsatisfied = unsat,
+                            Satisfied = satisfied
+                        };
+                    }).ToList()
+                };
+
+                return View(clsServiceKPI.Individuals);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception (log it, display an error message, etc.) For now, we rethrow
+                // the exception
+                throw ex;
+            }
+        }
+
+        private async Task<List<Guid?>> GetUserIdsForYearAsync(int year, Guid departmentId)
+        {
+            return await db.Services
+                          .Where(s => (s.Create.Year == year || s.Update.Value.Year == year) && s.Department_Id == departmentId)
+                          .Select(s => s.Action_User_Id)
+                          .Distinct()
+                          .ToListAsync();
+        }
+
+        private async Task<List<UserDetail>> GetUserDetailsAsync(List<Guid> userIds)
+        {
+            return await db.Users
+                          .Where(u => userIds.Contains(u.User_Id))
+                          .Select(s => new UserDetail
+                          {
+                              User_Id = s.User_Id,
+                              User_Code = s.User_Code,
+                              Username = s.Username
+                          })
+                          .OrderBy(o => o.User_Code)
+                          .ToListAsync();
+        }
+
+        private async Task<List<Services>> GetServicesForYearAsync(List<Guid> userIds, int year, Guid departmentId)
+        {
+            return await db.Services
+                          .Where(s => userIds.Contains(s.Action_User_Id.Value) &&
+                                      (s.Create.Year == year || s.Update.Value.Year == year) &&
+                                      s.Department_Id == departmentId)
+                          .ToListAsync();
+        }
+
+        private List<UserServices> GroupServicesByUserAndYear(List<Services> services, int year, Expression<Func<Services, int>> yearSelector)
+        {
+            return services
+                .Where(s => yearSelector.Compile()(s) == year)
+                .GroupBy(s => s.Action_User_Id.Value)
+                .Select(group => new UserServices
+                {
+                    User_Id = group.Key,
+                    Services = group.ToList()
+                })
+                .ToList();
+        }
+
+        private class UserDetail
+        {
+            public Guid User_Id { get; set; }
+            public string User_Code { get; set; }
+            public string Username { get; set; }
+        }
+
+        private class UserServices
+        {
+            public Guid User_Id { get; set; }
+            public List<Services> Services { get; set; }
+        }
+
+        public async Task<ActionResult> YearlyReportExport(int year)
+        {
+            Guid departmentId = await db.Users
+                .Where(w => w.User_Id == loginId)
+                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                .FirstOrDefaultAsync();
+
+            var services = await db.Services
+                .Where(w => w.Create.Year == year && w.Department_Id == departmentId)
+                .OrderBy(o => o.Create)
+                .ToListAsync();
+
+            var includedProperties = new List<string> { "Create", "Service_Key", "Service_DueDate", "System_Statuses.Status_Name", "Update" };
+
+            var stream = new MemoryStream();
+            using (var package = new ExcelPackage(stream))
+            {
+                var sheet = package.Workbook.Worksheets.Add("Yearly Report");
+
+                // Adding headers and handling nested properties
+                var headers = new List<string>();
+                int columnIndex = 1;
+                foreach (var propertyName in includedProperties)
+                {
+                    var header = GetPropertyDisplayName(typeof(Services), propertyName);
+                    headers.Add(header);
+                    sheet.Cells[1, columnIndex++].Value = header;
+                }
+
+                // Apply AutoFilter to the header row
+                sheet.Cells[1, 1, 1, columnIndex - 1].AutoFilter = true;
+
+                // Populate the worksheet with data
+                int rowIndex = 2;
+                foreach (var service in services)
+                {
+                    columnIndex = 1;
+                    foreach (var propertyName in includedProperties)
+                    {
+                        object value = GetNestedPropertyValue(service, propertyName);
+                        sheet.Cells[rowIndex, columnIndex].Value = value;
+                        if (value is DateTime)
+                        {
+                            sheet.Cells[rowIndex, columnIndex].Style.Numberformat.Format = "dd-MM-yyyy";
+                        }
+                        columnIndex++;
+                    }
+                    rowIndex++;
+                }
+
+                sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
+
+                package.Save();
+            }
+
+            stream.Position = 0;
+            var fileName = $"YearlyReport_{year}.xlsx";
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        private string GetPropertyDisplayName(Type type, string propertyName)
+        {
+            var parts = propertyName.Split('.');
+            PropertyInfo property = null;
+            foreach (var part in parts)
+            {
+                property = type.GetProperty(part);
+                if (property == null) return part; // Return the part name if not found
+                type = property.PropertyType;
+            }
+            var displayName = property.GetCustomAttributes(typeof(DisplayAttribute), true)
+                                      .FirstOrDefault() as DisplayAttribute;
+            return displayName?.Name ?? property.Name;
+        }
+
+        private object GetNestedPropertyValue(object obj, string propertyName)
+        {
+            foreach (var part in propertyName.Split('.'))
+            {
+                if (obj == null) return null;
+                var property = obj.GetType().GetProperty(part);
+                if (property == null) return null;
+                obj = property.GetValue(obj);
+            }
+            return obj;
         }
     }
 }

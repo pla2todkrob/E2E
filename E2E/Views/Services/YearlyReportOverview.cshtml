@@ -1,0 +1,174 @@
+﻿@model E2E.Models.Views.ClsServiceKPI
+
+@{
+    Layout = null;
+    var formulaOntime = string.Format("(({0} - {1}) / {0}) * 100", Html.DisplayNameFor(m => m.Overviews.First().CompletedTotal), Html.DisplayNameFor(m => m.Overviews.First().Overdue));
+    var formulaSat = string.Format("(({0} - {1}) / {0}) * 100", Html.DisplayNameFor(m => m.Overviews.First().ClosedTotal), Html.DisplayNameFor(m => m.Overviews.First().Unsatisfied));
+    var formulaRemaining = string.Format("({0} - {1} - {2}) of last year", Html.DisplayNameFor(m => m.Overviews.First().Total), Html.DisplayNameFor(m => m.Overviews.First().CompletedTotal), Html.DisplayNameFor(m => m.Overviews.First().RejectedTotal));
+}
+
+<p>
+    <strong data-toggle="tooltip" data-placement="right" title="@formulaRemaining">@Html.DisplayNameFor(m => m.Remaining):</strong><span class="ml-2">@Html.DisplayFor(m => m.Remaining)</span>
+</p>
+
+<table class="table table-bordered table-hover text-nowrap">
+    <caption>
+        Overviews
+    </caption>
+    <thead>
+        <tr>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().Month)
+            </th>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().Incoming)
+            </th>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().Completed)
+            </th>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().CloseAuto)
+            </th>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().CloseManual)
+            </th>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().Closed)
+            </th>
+            <th rowspan="2">
+                @Html.DisplayNameFor(m => m.Overviews.First().Rejected)
+            </th>
+            <th colspan="8" class="text-center table-primary">
+                Accumulate
+            </th>
+        </tr>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Total)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().CompletedTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().ClosedTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().RejectedTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Overdue)
+            </th>
+            <th data-toggle="tooltip" data-placement="top" title="@formulaOntime">
+                @Html.DisplayNameFor(m => m.Overviews.First().Ontime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Unsatisfied)
+            </th>
+            <th data-toggle="tooltip" data-placement="top" title="@formulaSat">
+                @Html.DisplayNameFor(m => m.Overviews.First().Satisfied)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Overviews)
+        {
+        <tr>
+            <th>
+                @Html.DisplayFor(m => item.Month)
+            </th>
+            <td>
+                @Html.DisplayFor(m => item.Incoming)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.Completed)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.CloseAuto)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.CloseManual)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.Closed)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.Rejected)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.Total)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.CompletedTotal)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.ClosedTotal)
+            </td>
+            <td>
+                @Html.DisplayFor(m => item.RejectedTotal)
+            </td>
+            <td>
+                <a href="#" data-month="@item.NumberMonth" data-year="@item.NumberYear" class="viewOverdue">@Html.DisplayFor(m => item.Overdue)</a>
+            </td>
+            <td class="@(item.Ontime >= 0.90 ? "text-success" : "text-danger")">
+                <i class="@(item.Ontime >= 0.90 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Ontime.ToString("P")
+            </td>
+            <td>
+                <a href="#" data-month="@item.NumberMonth" data-year="@item.NumberYear" class="viewUnsatisfied">@Html.DisplayFor(m => item.Unsatisfied)</a>
+            </td>
+            <td class="@(item.Satisfied >= 0.96 ? "text-success" : "text-danger")">
+                <i class="@(item.Satisfied >= 0.96 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Satisfied.ToString("P")
+            </td>
+
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Month)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Incoming)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Completed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().CloseAuto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().CloseManual)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Closed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Rejected)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Total)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().CompletedTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().ClosedTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().RejectedTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Overdue)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Ontime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Unsatisfied)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overviews.First().Satisfied)
+            </th>
+        </tr>
+    </tfoot>
+</table>

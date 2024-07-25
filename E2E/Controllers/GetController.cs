@@ -32,6 +32,26 @@ namespace E2E.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IHttpActionResult> GetUser(string userCode)
+        {
+            try
+            {
+                var userDetail = await db.UserDetails.FirstOrDefaultAsync(f => f.Users.User_Code == userCode);
+                if (userDetail != null)
+                {
+                    return Ok(userDetail);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
 
         [HttpGet]
         public async Task<IHttpActionResult> NotifyAuto()
@@ -54,6 +74,5 @@ namespace E2E.Controllers
                 return InternalServerError(ex);
             }
         }
-
     }
 }

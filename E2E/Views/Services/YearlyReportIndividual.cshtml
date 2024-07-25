@@ -1,0 +1,128 @@
+﻿@model IEnumerable<E2E.Models.Views.ClsServiceKPI.Individual>
+
+@{
+    Layout = null;
+    var formulaOntime = string.Format("(({0} - {1}) / {0}) * 100", Html.DisplayNameFor(m => m.Completed), Html.DisplayNameFor(m => m.Overdue));
+    var formulaSat = string.Format("(({0} - {1}) / {0}) * 100", Html.DisplayNameFor(m => m.Closed), Html.DisplayNameFor(m => m.Unsatisfied));
+}
+
+<table class="table table-bordered table-hover text-nowrap">
+    <caption>
+        Individual
+    </caption>
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(m => m.User)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Incoming)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Completed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.CloseAuto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.CloseManual)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Closed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Rejected)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overdue)
+            </th>
+            <th data-toggle="tooltip" data-placement="top" title="@formulaOntime">
+                @Html.DisplayNameFor(m => m.Ontime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Unsatisfied)
+            </th>
+            <th data-toggle="tooltip" data-placement="top" title="@formulaSat">
+                @Html.DisplayNameFor(m => m.Satisfied)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th>
+                    @Html.DisplayFor(m => item.User)
+                </th>
+                <td>
+                    @Html.DisplayFor(m => item.Incoming)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Completed)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.CloseAuto)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.CloseManual)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Closed)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Rejected)
+                </td>
+                <td>
+                    <a href="#" data-year="@item.NumberYear" data-userId="@item.UserId" class="viewOverdue">@Html.DisplayFor(m => item.Overdue)</a>
+                </td>
+                <td class="@(item.Ontime >= 0.90 ? "text-success" : "text-danger")">
+                    <i class="@(item.Ontime >= 0.90 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Ontime.ToString("P")
+                </td>
+                <td>
+                    <a href="#" data-year="@item.NumberYear" data-userId="@item.UserId" class="viewUnsatisfied">@Html.DisplayFor(m => item.Unsatisfied)</a>
+                </td>
+                <td class="@(item.Satisfied >= 0.96 ? "text-success" : "text-danger")">
+                    <i class="@(item.Satisfied >= 0.96 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Satisfied.ToString("P")
+                </td>
+
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(m => m.User)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Incoming)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Completed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.CloseAuto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.CloseManual)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Closed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Rejected)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Overdue)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Ontime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Unsatisfied)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Satisfied)
+            </th>
+        </tr>
+    </tfoot>
+</table>
