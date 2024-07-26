@@ -15,6 +15,8 @@ namespace E2E.Models.Views
     {
         private readonly ClsContext db = new ClsContext();
 
+        public ChatBot ChatBot { get; set; }
+
         private async Task<List<ChatBotQuestion>> GetChildQuestionsAsync(Guid parentQuestionId)
         {
             return await db.ChatBotQuestions
@@ -22,8 +24,6 @@ namespace E2E.Models.Views
                 .OrderBy(o => o.Question)
                 .ToListAsync();
         }
-
-        public ChatBot ChatBot { get; set; }
 
         public string EscapeHtml(string html)
         {
@@ -273,14 +273,14 @@ namespace E2E.Models.Views
         private decimal monthlyAll;
         private decimal monthlyYour;
 
-        public decimal MaxConversationValue { get; set; } = 4096;
-        public decimal MaxMonthlyAllValue { get; set; } = 50000000;
-
         public decimal Conversation
         {
             get { return conversation; }
             set { conversation = Math.Min(value, MaxConversationValue); } // Limit the maximum value to 4096
         }
+
+        public decimal MaxConversationValue { get; set; } = 4096;
+        public decimal MaxMonthlyAllValue { get; set; } = 50000000;
 
         public decimal MonthlyAll
         {

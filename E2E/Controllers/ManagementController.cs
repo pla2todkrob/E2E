@@ -17,9 +17,9 @@ namespace E2E.Controllers
 {
     public class ManagementController : BaseController
     {
+        private readonly ClsApi api = new ClsApi();
         private readonly ClsManageManagement data = new ClsManageManagement();
         private readonly ClsManageMaster master = new ClsManageMaster();
-        private readonly ClsApi api = new ClsApi();
 
         public ActionResult AuditReport()
         {
@@ -629,8 +629,8 @@ namespace E2E.Controllers
 
     public class ZipKeyItem
     {
-        public string DocumentName { get; set; }
-        public string DocumentFilePath { get; set; }
         public string DocumentFileName { get; set; }
+        public string DocumentFilePath { get; set; }
+        public string DocumentName { get; set; }
     }
 }

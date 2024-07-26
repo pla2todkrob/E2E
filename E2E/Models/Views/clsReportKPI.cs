@@ -40,13 +40,31 @@ namespace E2E.Models.Views
         }
     }
 
+    public class ReportKPI_Overdue
+    {
+        public Guid Service_Id { get; set; }
+
+        public string Service_Key { get; set; }
+
+        [Display(Name = "Subject")]
+        public string Service_Subject { get; set; }
+
+        public string Status_Class { get; set; }
+
+        [Display(Name = "Status")]
+        public string Status_Name { get; set; }
+
+        [Display(Name = "User")]
+        public string User_Name { get; set; }
+    }
+
     public class ReportKPI_Overview
     {
-        [Display(Name = "Complete")]
-        public int Complete_Count { get; set; }
-
         [Display(Name = "Close")]
         public int Close_Count { get; set; }
+
+        [Display(Name = "Complete")]
+        public int Complete_Count { get; set; }
 
         [Display(Name = "Ontime")]
         public int OnTime_Count { get; set; }
@@ -67,6 +85,22 @@ namespace E2E.Models.Views
 
         [Display(Name = "Unsatisfied")]
         public int Unsatisfied_Count { get; set; }
+    }
+
+    public class ReportKPI_Unsatisfied
+    {
+        public Guid Service_Id { get; set; }
+
+        public string Service_Key { get; set; }
+
+        [Display(Name = "Subject")]
+        public string Service_Subject { get; set; }
+
+        [Display(Name = "Operator")]
+        public string UserAction { get; set; }
+
+        [Display(Name = "Requester")]
+        public string UserRequest { get; set; }
     }
 
     public class ReportKPI_User
@@ -99,32 +133,12 @@ namespace E2E.Models.Views
         public string User_Name { get; set; }
     }
 
-    public class ReportKPI_User_Views
-    {
-        public DateTime? Update { get; set; }
-
-        [Display(Name = "Point")]
-        public int Priority_Point { get; set; }
-
-        [Display(Name = "Average")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
-        public double? Satisfaction_Average { get; set; }
-
-        public Guid Service_Id { get; set; }
-        public string Service_Key { get; set; }
-
-        [Display(Name = "Subject")]
-        public string Service_Subject { get; set; }
-
-        public string Status_Class { get; set; }
-
-        [Display(Name = "Status")]
-        public string Status_Name { get; set; }
-    }
-
     public class ReportKPI_User_Cards_Views
     {
+        public Guid BusinessCard_Id { get; set; }
         public DateTime Create { get; set; }
+
+        public string Key { get; set; }
 
         [Display(Name = "Point")]
         public int Priority_Point { get; set; }
@@ -133,9 +147,6 @@ namespace E2E.Models.Views
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
         public double? Satisfaction_Average { get; set; }
 
-        public Guid BusinessCard_Id { get; set; }
-        public string Key { get; set; }
-
         [Display(Name = "Subject")]
         public string Status_Class { get; set; }
 
@@ -143,10 +154,14 @@ namespace E2E.Models.Views
         public string Status_Name { get; set; }
     }
 
-    public class ReportKPI_Overdue
+    public class ReportKPI_User_Views
     {
-        [Display(Name = "User")]
-        public string User_Name { get; set; }
+        [Display(Name = "Point")]
+        public int Priority_Point { get; set; }
+
+        [Display(Name = "Average")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:F}")]
+        public double? Satisfaction_Average { get; set; }
 
         public Guid Service_Id { get; set; }
         public string Service_Key { get; set; }
@@ -158,22 +173,7 @@ namespace E2E.Models.Views
 
         [Display(Name = "Status")]
         public string Status_Name { get; set; }
-    }
 
-    public class ReportKPI_Unsatisfied
-    {
-        
-        [Display(Name = "Operator")]
-        public string UserAction { get; set; }
-
-        [Display(Name = "Requester")]
-        public string UserRequest { get; set; }
-
-        public Guid Service_Id { get; set; }
-        public string Service_Key { get; set; }
-
-        [Display(Name = "Subject")]
-        public string Service_Subject { get; set; }
-
+        public DateTime? Update { get; set; }
     }
 }

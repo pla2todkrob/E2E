@@ -23,18 +23,6 @@ namespace E2E.Models
             }
         }
 
-        private void Program_Save()
-        {
-            foreach (var item in System_Program.DefaultList())
-            {
-                if (db.System_Programs.Where(w => w.Program_Name == item.Program_Name).Count() == 0)
-                {
-                    db.System_Programs.Add(item);
-                    db.SaveChanges();
-                }
-            }
-        }
-
         private void DueDateStatus_Save()
         {
             foreach (var item in System_DueDateStatuses.DefaultList())
@@ -78,6 +66,18 @@ namespace E2E.Models
                 if (db.System_Priorities.Where(w => w.Priority_Name == item.Priority_Name).Count() == 0)
                 {
                     db.System_Priorities.Add(item);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private void Program_Save()
+        {
+            foreach (var item in System_Program.DefaultList())
+            {
+                if (db.System_Programs.Where(w => w.Program_Name == item.Program_Name).Count() == 0)
+                {
+                    db.System_Programs.Add(item);
                     db.SaveChanges();
                 }
             }

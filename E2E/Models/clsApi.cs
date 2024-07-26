@@ -14,6 +14,17 @@ namespace E2E.Models
 {
     public class ClsApi
     {
+        public ClsApi()
+        {
+            IsSuccess = new bool();
+        }
+
+        public bool IsSuccess { get; set; }
+
+        public string Message { get; set; }
+
+        public dynamic Value { get; set; }
+
         private string GetApiUrl()
         {
             try
@@ -52,33 +63,6 @@ namespace E2E.Models
             }
         }
 
-
-        public string GetToken()
-        {
-            try
-            {
-                string target = ConfigurationManager.AppSettings["TargetHost"];
-
-                switch (target)
-                {
-                    case "Pro":
-
-                        return ConfigurationManager.AppSettings["TokenPro"];
-
-                    case "Dev":
-
-                        return ConfigurationManager.AppSettings["TokenDev"];
-
-                    default:
-                        return ConfigurationManager.AppSettings["TokenLocal"];
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         private bool IsLocalPath(string path)
         {
             bool isLocalPath = Uri.TryCreate(path, UriKind.Absolute, out Uri uriResult)
@@ -86,15 +70,6 @@ namespace E2E.Models
 
             return !isLocalPath;
         }
-
-        public ClsApi()
-        {
-            IsSuccess = new bool();
-        }
-
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; }
-        public dynamic Value { get; set; }
 
         public byte[] ConvertByte(string filePath)
         {
@@ -133,6 +108,32 @@ namespace E2E.Models
             }
 
             return res;
+        }
+
+        public string GetToken()
+        {
+            try
+            {
+                string target = ConfigurationManager.AppSettings["TargetHost"];
+
+                switch (target)
+                {
+                    case "Pro":
+
+                        return ConfigurationManager.AppSettings["TokenPro"];
+
+                    case "Dev":
+
+                        return ConfigurationManager.AppSettings["TokenDev"];
+
+                    default:
+                        return ConfigurationManager.AppSettings["TokenLocal"];
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<bool> SendMail(ClsServiceEmail clsServiceEmail, HttpFileCollectionBase files = null)

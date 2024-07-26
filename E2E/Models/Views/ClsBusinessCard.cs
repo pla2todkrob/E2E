@@ -9,12 +9,13 @@ namespace E2E.Models.Views
     {
         public int Amount { get; set; }
         public bool BothSided { get; set; }
-        public bool Is_OverDue { get; set; }
         public Guid BusinessCard_Id { get; set; }
         public DateTime Create { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? DueDate { get; set; }
+
+        public bool Is_OverDue { get; set; }
 
         [DisplayName("Job no")]
         public long Key { get; set; }

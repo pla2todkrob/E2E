@@ -646,7 +646,7 @@ namespace E2E.Controllers
                 ClsSwal swal = new ClsSwal();
                 try
                 {
-                    if (await data.Services_SetToDepartment(id))
+                    if (await data.Services_SetToDepartment(id,nameof(Commit_ToDepartment)))
                     {
                         scope.Complete();
                         swal.DangerMode = false;
@@ -934,7 +934,7 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Form_Forward(Guid id)
+        public ActionResult SetForwarded(Guid id)
         {
             try
             {
@@ -954,7 +954,7 @@ namespace E2E.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<ActionResult> Form_Forward(Services model)
+        public async Task<ActionResult> SetForwarded(Services model)
         {
             ClsSwal swal = new ClsSwal();
             if (ModelState.IsValid)
@@ -2384,8 +2384,8 @@ namespace E2E.Controllers
                 cumulativeOverdue += overdue;
                 cumulativeUnsatisfied += unsatisfied;
 
-                double ontime = (cumulativeCompleted == 0) ? 0 : (double)(cumulativeCompleted - cumulativeOverdue) / cumulativeCompleted;
-                double satisfied = (cumulativeManualClose == 0) ? 0 : (double)(cumulativeManualClose - cumulativeUnsatisfied) / cumulativeManualClose;
+                double ontime = (cumulativeCompleted == 0) ? 1 : (double)(cumulativeCompleted - cumulativeOverdue) / cumulativeCompleted;
+                double satisfied = (cumulativeManualClose == 0) ? 1 : (double)(cumulativeManualClose - cumulativeUnsatisfied) / cumulativeManualClose;
 
                 monthlyOverviews.Add(new ClsServiceKPI.Overview
                 {
@@ -2471,8 +2471,8 @@ namespace E2E.Controllers
                         .Where(w => w)
                         .Count() ?? 0;
 
-                        double ontime = completed == 0 ? 0 : (double)(completed - overdue) / completed;
-                        double satisfied = closeManual == 0 ? 0 : (double)(closeManual - unsat) / closeManual;
+                        double ontime = completed == 0 ? 1 : (double)(completed - overdue) / completed;
+                        double satisfied = closeManual == 0 ? 1 : (double)(closeManual - unsat) / closeManual;
 
                         return new ClsServiceKPI.Individual
                         {
@@ -2573,7 +2573,7 @@ namespace E2E.Controllers
                 .OrderBy(o => o.Create)
                 .ToListAsync();
 
-            var includedProperties = new List<string> { "Create", "Service_Key", "Service_DueDate", "System_Statuses.Status_Name", "Update" };
+            var includedProperties = new List<string> { "Service_Key", "Service_Subject", "Create", "System_Statuses.Status_Name", "Service_Description", "System_Priorities.Priority_Name", "Service_DueDate", "Users.User_Code", "Update" };
 
             var stream = new MemoryStream();
             using (var package = new ExcelPackage(stream))

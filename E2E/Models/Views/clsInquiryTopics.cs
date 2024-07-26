@@ -11,13 +11,12 @@ namespace E2E.Models.Views
             List_Master_InquiryTopics = new List<Master_InquiryTopics>();
         }
 
+        public BusinessCards BusinessCards { get; set; }
         public List<Master_InquiryTopics> List_Master_InquiryTopics { get; set; }
         public List<SatisfactionDetails> List_SatisfactionDetails { get; set; }
         public SatisfactionDetails SatisfactionDetails { get; set; }
         public Satisfactions Satisfactions { get; set; }
-        public Services Services { get; set; }
-
-        public BusinessCards BusinessCards { get; set; }
         public Satisfactions_BusinessCards Satisfactions_BusinessCards { get; set; }
+        public Services Services { get; set; }
     }
 }

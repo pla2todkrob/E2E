@@ -134,6 +134,13 @@ namespace E2E.Controllers
             return View(query);
         }
 
+        public ActionResult CHK_INDEX(int id)
+        {
+            int Count = db.Master_InquiryTopics.Where(w => w.Program_Id == id).Count() + 1;
+
+            return Json(Count, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult DeleteWrongData()
         {
             return View(new DateTime());
@@ -211,13 +218,6 @@ namespace E2E.Controllers
         public ActionResult InquiryTopic()
         {
             return View();
-        }
-
-        public ActionResult CHK_INDEX(int id)
-        {
-            int Count = db.Master_InquiryTopics.Where(w => w.Program_Id == id).Count() + 1;
-
-            return Json(Count, JsonRequestBehavior.AllowGet);
         }
 
         [HttpDelete]

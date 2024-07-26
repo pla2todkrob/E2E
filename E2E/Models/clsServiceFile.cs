@@ -13,20 +13,20 @@ namespace E2E.Models
     public class FileResponse
     {
         public string ErrorMessage { get; set; }
-        public string FileThumbnailUrl { get; set; }
-        public string FileUrl { get; set; }
+        public byte[] FileBytes { get; set; }
         public string FilePath { get; set; }
         public string FileThumbnailPath { get; set; }
+        public string FileThumbnailUrl { get; set; }
+        public string FileUrl { get; set; }
         public bool IsSuccess { get; set; }
-        public byte[] FileBytes { get; set; }
     }
 
     public class FileStreamPostedFile : HttpPostedFileBase
     {
-        private readonly Stream _stream;
+        private readonly int _contentLength;
         private readonly string _contentType;
         private readonly string _fileName;
-        private readonly int _contentLength;
+        private readonly Stream _stream;
 
         public FileStreamPostedFile(Stream stream, string fileName, string contentType)
         {
@@ -49,5 +49,4 @@ namespace E2E.Models
             }
         }
     }
-
 }

@@ -1015,7 +1015,7 @@
     <Content Include="Views\Topics\_SortTopicNew.cshtml" />
     <Content Include="Views\Services\SetReturnJob.cshtml" />
     <Content Include="Views\Services\_AddTeam.cshtml" />
-    <Content Include="Views\Services\Form_Forward.cshtml" />
+    <Content Include="Views\Services\SetForwarded.cshtml" />
     <Content Include="Views\Masters\InquiryTopic.cshtml" />
     <Content Include="Views\Masters\InquiryTopic_Form.cshtml" />
     <Content Include="Views\Masters\InquiryTopic_Table.cshtml" />

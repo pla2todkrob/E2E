@@ -18,6 +18,7 @@ namespace E2E.Models.Tables
 
         [Key]
         public Guid SendEmail_Id { get; set; }
+
         public Guid SendEmail_Ref_Id { get; set; }
         public string SendEmail_Subject { get; set; }
 

@@ -135,7 +135,7 @@
         });
         $(document).on('submit', '#ReturnForm', function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("SetPending", "Services")',this,'@Url.Action("Index","Services")');
+            callSubmitPage('@Url.Action("SetPending", "Services")',this);
             return false;
         });
         $(document).on('submit', "#RejectForm", function (e) {
@@ -145,7 +145,7 @@
         });
         $(document).on('submit', '#ForwardForm', function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("Form_Forward", "Services")',this,'@Url.Action("Index", "Services")');
+            callSubmitPage('@Url.Action("SetForwarded", "Services")',this);
             return false;
         });
         $(document).on('submit', '#SetInProgressForm', function (e) {
@@ -172,12 +172,12 @@
         });
         $(document).on('submit', "#MustApproveForm", function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("SetMustApprove", "Services")', this,'@Url.Action("Index", "Services")');
+            callSubmitPage('@Url.Action("SetMustApprove", "Services")', this);
             return false;
         });
         $(document).on('submit', '#ReturnAssignForm', function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("SetReturnAssign", "Services")', this,'@Url.Action("Index", "Services")');
+            callSubmitPage('@Url.Action("SetReturnAssign", "Services")', this);
             return false;
         });
         $(document).on('submit', '#RequestChangeDueForm', function (e) {
@@ -187,7 +187,7 @@
         });
         $(document).on('submit', "#RequestRejectForm", function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("SetRequestReject", "Services")', this,'@Url.Action("Index", "Services")');
+            callSubmitPage('@Url.Action("SetRequestReject", "Services")', this);
             return false;
         });
     </script>

@@ -11,77 +11,77 @@ namespace E2E.Models
 {
     public class ClsContext : DbContext
     {
-        protected Guid GetUserId(DbPropertyValues propertyValues)
-        {
-            try
-            {
-                Guid res = Guid.Empty;
-                if (HttpContext.Current.User.Identity.IsAuthenticated)
-                {
-                    res = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                }
-                else
-                {
-                    string propUserId = propertyValues.PropertyNames.Where(w => w.Contains("User_Id")).FirstOrDefault();
-                    if (!string.IsNullOrEmpty(propUserId))
-                    {
-                        res = Guid.Parse(propertyValues[propUserId].ToString());
-                    }
-                }
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-        }
-
         public ClsContext() : base(ConfigurationManager.AppSettings["NameConn"])
         {
         }
 
-        public DbSet<System_Program> System_Programs { get; set; }
         public DbSet<BusinessCardFiles> BusinessCardFiles { get; set; }
+
         public DbSet<BusinessCards> BusinessCards { get; set; }
+
         public DbSet<ChatBotAnswer> ChatBotAnswers { get; set; }
+
         public DbSet<ChatBotQuestion> ChatBotQuestions { get; set; }
+
         public DbSet<ChatBot> ChatBots { get; set; }
+
         public DbSet<ChatBotUploadHistory> ChatBotUploadHistories { get; set; }
+
         public DbSet<ChatGPTHistory> ChatGPTHistories { get; set; }
+
         public DbSet<ChatGPT> ChatGPTs { get; set; }
+
         public DbSet<EForm_Files> EForm_Files { get; set; }
+
         public DbSet<EForm_Galleries> EForm_Galleries { get; set; }
+
         public DbSet<EForms> EForms { get; set; }
+
         public DbSet<Log_BusinessCards> Log_BusinessCards { get; set; }
+
         public DbSet<Log_DbChange> Log_DbChanges { get; set; }
+
         public DbSet<Log_DbDelete> Log_DbDeletes { get; set; }
+
         public DbSet<Log_Exception> Log_Exceptions { get; set; }
+
         public DbSet<Log_Login> Log_Logins { get; set; }
+
         public DbSet<Log_SendEmail> Log_SendEmails { get; set; }
+
         public DbSet<Log_SendEmailTo> Log_SendEmailTos { get; set; }
+
         public DbSet<Manuals> Manuals { get; set; }
+
         public DbSet<Master_Categories> Master_Categories { get; set; }
+
         public DbSet<Master_Departments> Master_Departments { get; set; }
+
         public DbSet<Master_Divisions> Master_Divisions { get; set; }
+
         public DbSet<Master_Documents> Master_Documents { get; set; }
+
         public DbSet<Master_DocumentVersions> Master_DocumentVersions { get; set; }
+
         public DbSet<Master_Grades> Master_Grades { get; set; }
+
         public DbSet<Master_InquiryTopics> Master_InquiryTopics { get; set; }
+
         public DbSet<Master_LineWorks> Master_LineWorks { get; set; }
+
         public DbSet<Master_Plants> Master_Plants { get; set; }
+
         public DbSet<Master_Processes> Master_Processes { get; set; }
+
         public DbSet<Master_Sections> Master_Sections { get; set; }
+
         public DbSet<PlantDetail> PlantDetails { get; set; }
+
         public DbSet<SatisfactionDetails> SatisfactionDetails { get; set; }
 
-        public DbSet<Satisfactions> Satisfactions { get; set; }
-
         public DbSet<SatisfactionDetails_BusinessCards> SatisfactionDetails_BusinessCards { get; set; }
+
+        public DbSet<Satisfactions> Satisfactions { get; set; }
 
         public DbSet<Satisfactions_BusinessCards> Satisfactions_BusinessCards { get; set; }
 
@@ -115,6 +115,8 @@ namespace E2E.Models
 
         public DbSet<System_Priorities> System_Priorities { get; set; }
 
+        public DbSet<System_Program> System_Programs { get; set; }
+
         public DbSet<System_Roles> System_Roles { get; set; }
 
         public DbSet<System_Statuses> System_Statuses { get; set; }
@@ -140,6 +142,36 @@ namespace E2E.Models
         public DbSet<WorkRootDocuments> WorkRootDocuments { get; set; }
 
         public DbSet<WorkRoots> WorkRoots { get; set; }
+
+        protected Guid GetUserId(DbPropertyValues propertyValues)
+        {
+            try
+            {
+                Guid res = Guid.Empty;
+                if (HttpContext.Current.User.Identity.IsAuthenticated)
+                {
+                    res = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                }
+                else
+                {
+                    string propUserId = propertyValues.PropertyNames.Where(w => w.Contains("User_Id")).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(propUserId))
+                    {
+                        res = Guid.Parse(propertyValues[propUserId].ToString());
+                    }
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
 
         public override int SaveChanges()
         {

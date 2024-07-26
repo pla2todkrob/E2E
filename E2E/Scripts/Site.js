@@ -679,52 +679,64 @@ function callSubmitRedirect(urlAjax, form, urlRedirect, options = { title: '', t
 }
 
 function callDeleteItem(urlAjax, reloadPage = false, option = { emptyTarget: undefined, hideTarget: undefined, showTarget: undefined }) {
-    $.ajax({
-        url: urlAjax,
-        type: 'DELETE',
-        async: true,
-        success: function (json) {
-            swal({
-                title: json.Title,
-                text: json.Text,
-                icon: json.Icon,
-                button: json.Button,
-                dangerMode: json.DangerMode
-            }).then(function () {
-                if (json.Icon === 'success') {
-                    if (reloadPage) {
-                        location.reload();
-                    } else {
-                        if (option.emptyTarget) {
-                            $(option.emptyTarget).empty();
-                            if (json.Option) {
-                                $('#' + json.Option).empty();
-                            }
-                            if (option.hideTarget) {
-                                $(option.hideTarget).hide();
-                            }
-                            if (option.showTarget) {
-                                $(option.showTarget).show();
+    // Show the confirmation dialog first
+    swal({
+        title: "Are you sure?",
+        text: "Do you really want to delete this item?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((willDelete) => {
+        // If the user confirms, proceed with the deletion
+        if (willDelete) {
+            $.ajax({
+                url: urlAjax,
+                type: 'DELETE',
+                async: true,
+                success: function (json) {
+                    swal({
+                        title: json.Title,
+                        text: json.Text,
+                        icon: json.Icon,
+                        button: json.Button,
+                        dangerMode: json.DangerMode
+                    }).then(function () {
+                        if (json.Icon === 'success') {
+                            if (reloadPage) {
+                                location.reload();
+                            } else {
+                                if (option.emptyTarget) {
+                                    $(option.emptyTarget).empty();
+                                    if (json.Option) {
+                                        $('#' + json.Option).empty();
+                                    }
+                                    if (option.hideTarget) {
+                                        $(option.hideTarget).hide();
+                                    }
+                                    if (option.showTarget) {
+                                        $(option.showTarget).show();
+                                    }
+                                } else {
+                                    $('#modalArea').modal('hide');
+                                    reloadTable();
+                                }
                             }
                         }
-                        else {
-                            $('#modalArea').modal('hide');
-                            reloadTable();
-                        }
-                    }
+                    });
+                },
+                error: function (error) {
+                    console.error(error);
+                    swal({
+                        title: 'Error',
+                        text: 'An error occurred while deleting the item.',
+                        icon: 'error'
+                    });
                 }
-            });
-        },
-        error: function (error) {
-            console.error(error);
-            swal({
-                title: 'Error',
-                text: 'An error occured while deleting the item.',
-                icon: 'error'
             });
         }
     });
 }
+
 
 async function notifySignout(url) {
     return swal({

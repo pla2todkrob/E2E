@@ -18,11 +18,10 @@ namespace E2E.Models.Tables
 
         public int Point { get; set; }
 
-        public Guid Satisfactions_BusinessCard_id { get; set; }
-
         [Key]
         public Guid SatisfactionDetails_BusinessCards_id { get; set; }
 
+        public Guid Satisfactions_BusinessCard_id { get; set; }
         public virtual Satisfactions_BusinessCards Satisfactions_BusinessCards { get; set; }
     }
 }

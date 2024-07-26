@@ -8,7 +8,6 @@ using System.Data.Entity;
 using System.DirectoryServices.AccountManagement;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +19,79 @@ namespace E2E.Models
     public class ClsManageMaster
     {
         private readonly ClsContext db = new ClsContext();
+
+        private async Task SetInactiveDepartment(List<Guid> guids)
+        {
+            var list = await db.Master_Departments
+                .Where(w => !guids.Contains(w.Department_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveDivision(List<Guid> guids)
+        {
+            var list = await db.Master_Divisions
+                .Where(w => !guids.Contains(w.Division_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveGrade(List<Guid> guids)
+        {
+            var list = await db.Master_Grades
+                .Where(w => !guids.Contains(w.Grade_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveLinework(List<Guid> guids)
+        {
+            var list = await db.Master_LineWorks
+                .Where(w => !guids.Contains(w.LineWork_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactivePlant(List<Guid> guids)
+        {
+            var list = await db.Master_Plants
+                .Where(w => !guids.Contains(w.Plant_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false); ;
+        }
+
+        private async Task SetInactiveProcess(List<Guid> guids)
+        {
+            var list = await db.Master_Processes
+                   .Where(w => !guids.Contains(w.Process_Id))
+                   .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private async Task SetInactiveSection(List<Guid> guids)
+        {
+            var list = await db.Master_Sections
+                .Where(w => !guids.Contains(w.Section_Id))
+                .ToListAsync();
+
+            list.ForEach(f => f.Active = false);
+        }
+
+        private bool User_CanDelete(Guid id)
+        {
+            if (db.Log_Logins.Any(a => a.User_Id == id) || db.Log_DbChanges.Any(a => a.User_Id == id) || db.Log_DbDeletes.Any(a => a.User_Id == id))
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         protected bool Department_Insert(Master_Departments model)
         {
@@ -684,7 +756,6 @@ namespace E2E.Models
                     Division_Id = divisionId
                 };
                 db.Master_Departments.Add(master_Departments);
-
             }
             else
             {
@@ -698,7 +769,7 @@ namespace E2E.Models
         public List<Master_Divisions> Division_GetAll()
         {
             return db.Master_Divisions
-                .OrderBy(o=>o.Division_Name)
+                .OrderBy(o => o.Division_Name)
                 .ToList();
         }
 
@@ -714,7 +785,6 @@ namespace E2E.Models
                     Division_Name = val
                 };
                 db.Master_Divisions.Add(master_Divisions);
-                
             }
             else
             {
@@ -809,6 +879,39 @@ namespace E2E.Models
             {
                 throw;
             }
+        }
+
+        public async Task<List<Guid>> GetManagementOfDepartment()
+        {
+            Guid loginId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+            Guid departmentId = await db.Users
+                .Where(w => w.User_Id == loginId)
+                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                .FirstOrDefaultAsync();
+
+            return await LeaderListId(departmentId);
+
+        }
+
+        public async Task<List<Guid>> GetManagementOfDepartment(Guid userId)
+        {
+            Guid departmentId = await db.Users
+                .Where(w => w.User_Id == userId)
+                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                .FirstOrDefaultAsync();
+
+            return await LeaderListId(departmentId);
+        }
+
+        private async Task<List<Guid>> LeaderListId(Guid departmentId)
+        {
+            int gradeNumber;
+            return await db.Users
+                .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId &&
+                (w.Master_Grades.Master_LineWorks.Authorize_Id == 2 ||
+                (!w.Master_Grades.Grade_Name.StartsWith("M") && int.TryParse(w.Master_Grades.Grade_Name.Substring(1), out gradeNumber) && gradeNumber <= 6)))
+                .Select(s => s.User_Id)
+                .ToListAsync();
         }
 
         public string GetUsernameAD(string code)
@@ -1764,17 +1867,6 @@ namespace E2E.Models
                 }
             }
 
-
-            return true;
-        }
-
-        private bool User_CanDelete(Guid id)
-        {
-            if (db.Log_Logins.Any(a => a.User_Id == id) || db.Log_DbChanges.Any(a => a.User_Id == id) || db.Log_DbDeletes.Any(a => a.User_Id == id))
-            {
-                return false;
-            }
-
             return true;
         }
 
@@ -2031,69 +2123,6 @@ namespace E2E.Models
             return userCodeList;
         }
 
-        private async Task SetInactiveLinework(List<Guid> guids)
-        {
-            var list = await db.Master_LineWorks
-                .Where(w => !guids.Contains(w.LineWork_Id))
-                .ToListAsync();
-
-            list.ForEach(f => f.Active = false);
-        }
-
-        private async Task SetInactiveGrade(List<Guid> guids)
-        {
-            var list = await db.Master_Grades
-                .Where(w => !guids.Contains(w.Grade_Id))
-                .ToListAsync();
-
-            list.ForEach(f => f.Active = false);
-        }
-
-        private async Task SetInactivePlant(List<Guid> guids)
-        {
-            var list = await db.Master_Plants
-                .Where(w => !guids.Contains(w.Plant_Id))
-                .ToListAsync();
-
-            list.ForEach(f => f.Active = false); ;
-        }
-
-        private async Task SetInactiveDivision(List<Guid> guids)
-        {
-            var list = await db.Master_Divisions
-                .Where(w => !guids.Contains(w.Division_Id))
-                .ToListAsync();
-
-            list.ForEach(f => f.Active = false);
-        }
-
-        private async Task SetInactiveDepartment(List<Guid> guids)
-        {
-            var list = await db.Master_Departments
-                .Where(w => !guids.Contains(w.Department_Id))
-                .ToListAsync();
-
-            list.ForEach(f => f.Active = false);
-        }
-
-        private async Task SetInactiveSection(List<Guid> guids)
-        {
-            var list = await db.Master_Sections
-                .Where(w => !guids.Contains(w.Section_Id))
-                .ToListAsync();
-
-            list.ForEach(f => f.Active = false);
-        }
-
-        private async Task SetInactiveProcess(List<Guid> guids)
-        {
-            var list = await db.Master_Processes
-                   .Where(w => !guids.Contains(w.Process_Id))
-                   .ToListAsync();
-
-            list.ForEach(f => f.Active = false);
-        }
-
         public bool Users_Save(UserDetails model)
         {
             model.Users.User_Code = model.Users.User_Code.Trim();
@@ -2105,33 +2134,6 @@ namespace E2E.Models
             {
                 return Users_Insert(model);
             }
-        }
-
-        public async Task<List<Guid>> GetManagementOfDepartment()
-        {
-            Guid loginId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-            Guid departmentId = await db.Users
-                .Where(w => w.User_Id == loginId)
-                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
-                .FirstOrDefaultAsync();
-
-            return await db.Users
-                .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
-                .Select(s => s.User_Id)
-                .ToListAsync();
-        }
-
-        public async Task<List<Guid>> GetManagementOfDepartment(Guid userId)
-        {
-            Guid departmentId = await db.Users
-                .Where(w => w.User_Id == userId)
-                .Select(s => s.Master_Processes.Master_Sections.Department_Id)
-                .FirstOrDefaultAsync();
-
-            return await db.Users
-                .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId && w.Master_Grades.Master_LineWorks.Authorize_Id == 2)
-                .Select(s => s.User_Id)
-                .ToListAsync();
         }
     }
 }

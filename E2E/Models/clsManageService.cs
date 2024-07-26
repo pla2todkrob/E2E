@@ -61,6 +61,34 @@ namespace E2E.Models
             return db.ServiceTeams
                     .Where(w => w.Service_Id == id);
         }
+        private async Task AddServiceComment(Guid serviceId, string commentContent, Guid? userId = null)
+        {
+
+            if (!userId.HasValue)
+            {
+                if (HttpContext.Current.User.Identity.IsAuthenticated)
+                {
+                    userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                }
+                else
+                {
+                    userId = await db.Services
+                        .Where(w => w.Service_Id == serviceId)
+                        .Select(s => s.Action_User_Id.Value)
+                        .FirstOrDefaultAsync();
+                }
+            }
+            
+
+            ServiceComments serviceComments = new ServiceComments
+            {
+                Service_Id = serviceId,
+                Comment_Content = commentContent,
+                User_Id = userId
+            };
+
+            await Services_Comment(serviceComments);
+        }
 
         public async Task<bool> Api_DeleteFile(string path)
         {
@@ -648,7 +676,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 foreach (var item in model.User_Ids)
                 {
                     ServiceTeams serviceTeams = new ServiceTeams
@@ -659,12 +686,7 @@ namespace E2E.Models
                     db.Entry(serviceTeams).State = EntityState.Added;
                     if (await db.SaveChangesAsync() > 0)
                     {
-                        ServiceComments serviceComments = new ServiceComments
-                        {
-                            Service_Id = model.Service_Id,
-                            Comment_Content = string.Format("Add {0} to join team", master.Users_GetInfomation(item))
-                        };
-                        res = await Services_Comment(serviceComments);
+                        await AddServiceComment(model.Service_Id, string.Format("Add {0} to join team", master.Users_GetInfomation(item)));
                     }
                 }
 
@@ -693,9 +715,8 @@ namespace E2E.Models
                 clsMail.SendTos = listTeam;
                 clsMail.Subject = subject;
                 clsMail.Body = content;
-                res = await clsMail.SendMail(clsMail);
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -728,55 +749,47 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 ServiceTeams serviceTeams = await db.ServiceTeams.FindAsync(id);
                 string userName = master.Users_GetInfomation(serviceTeams.User_Id);
                 Guid serviceId = serviceTeams.Service_Id;
                 db.Entry(serviceTeams).State = EntityState.Deleted;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
+                    await AddServiceComment(serviceId, string.Format("Delete {0} from this team", userName));
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
+                    if (!linkUrl.EndsWith(serviceId.ToString()))
                     {
-                        Service_Id = serviceId,
-                        Comment_Content = string.Format("Delete {0} from this team", userName)
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
-                        if (!linkUrl.EndsWith(serviceId.ToString()))
-                        {
-                            linkUrl += string.Format("/{0}", serviceId);
-                        }
-
-                        Services services = await db.Services.FindAsync(serviceId);
-
-                        List<Guid> listTeam = new List<Guid>();
-                        listTeam = db.ServiceTeams
-                            .Where(w => w.Service_Id == serviceId)
-                            .Select(s => s.User_Id)
-                            .ToList();
-
-                        var listTeamName = listTeam.Select(s => master.Users_GetInfomation(s)).ToList();
-
-                        listTeam.Add(serviceTeams.User_Id);
-
-                        string subject = string.Format("[Notify delete member] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = "<p><b>Delete: </b>" + userName;
-                        content += "<br />";
-                        content += "<br />";
-                        content += "<b>Current member</b><br/>";
-                        content += string.Join("<br />", listTeamName);
-                        content += "</p>";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos = listTeam;
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
+                        linkUrl += string.Format("/{0}", serviceId);
                     }
+
+                    Services services = await db.Services.FindAsync(serviceId);
+
+                    List<Guid> listTeam = new List<Guid>();
+                    listTeam = db.ServiceTeams
+                        .Where(w => w.Service_Id == serviceId)
+                        .Select(s => s.User_Id)
+                        .ToList();
+
+                    var listTeamName = listTeam.Select(s => master.Users_GetInfomation(s)).ToList();
+
+                    listTeam.Add(serviceTeams.User_Id);
+
+                    string subject = string.Format("[Notify delete member] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = "<p><b>Delete: </b>" + userName;
+                    content += "<br />";
+                    content += "<br />";
+                    content += "<b>Current member</b><br/>";
+                    content += string.Join("<br />", listTeamName);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos = listTeam;
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
-                return res;
+
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -788,7 +801,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 ServiceChangeDueDate serviceChangeDueDate = await db.ServiceChangeDueDates.FindAsync(id);
                 serviceChangeDueDate.DueDateStatus_Id = 2;
@@ -796,48 +808,34 @@ namespace E2E.Models
                 db.Entry(serviceChangeDueDate).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
+                    await AddServiceComment(serviceChangeDueDate.Service_Id, "Accept due date change request");
+                    Services services = await db.Services.FindAsync(serviceChangeDueDate.Service_Id);
+                    services.Service_DueDate = serviceChangeDueDate.DueDate_New;
+                    services.Update = DateTime.Now;
+                    db.Entry(services).State = EntityState.Modified;
+                    if (await db.SaveChangesAsync() > 0)
                     {
-                        Comment_Content = "Accept due date change request",
-                        Service_Id = serviceChangeDueDate.Service_Id,
-                        User_Id = userId
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        Services services = await db.Services.FindAsync(serviceChangeDueDate.Service_Id);
-                        services.Service_DueDate = serviceChangeDueDate.DueDate_New;
-                        services.Update = DateTime.Now;
-                        db.Entry(services).State = EntityState.Modified;
-                        if (await db.SaveChangesAsync() > 0)
-                        {
-                            serviceComments = new ServiceComments
-                            {
-                                Comment_Content = string.Format("Change due date from {0} to {1}", serviceChangeDueDate.DueDate.ToString("d"), serviceChangeDueDate.DueDate_New.Value.ToString("d")),
-                                Service_Id = serviceChangeDueDate.Service_Id,
-                                User_Id = userId
-                            };
-                            res = await Services_Comment(serviceComments);
+                        string commentContent = string.Format("Change due date from {0} to {1}", serviceChangeDueDate.DueDate.ToString("d"), serviceChangeDueDate.DueDate_New.Value.ToString("d"));
+                        await AddServiceComment(serviceChangeDueDate.Service_Id, commentContent);
 
-                            var Sendto = await db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefaultAsync();
+                        var Sendto = await db.ServiceComments.Where(w => w.Service_Id == services.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefaultAsync();
 
-                            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
 
-                            linkUrl = linkUrl.Replace(methodName + "/" + serviceChangeDueDate.ChangeDueDate_Id, "Action/" + serviceComments.Service_Id);
+                        linkUrl = linkUrl.Replace(methodName + "/" + serviceChangeDueDate.ChangeDueDate_Id, "Action/" + services.Service_Id);
 
-                            string subject = string.Format("[Accept requests to change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
-                            string content = string.Format("<p><b>Comment: </b> {0}<br />", serviceComments.Comment_Content);
-                            content += "</p>";
-                            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                            content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendTos.Add(Sendto.User_Id.Value);
-                            clsMail.Subject = subject;
-                            clsMail.Body = content;
-                            res = await clsMail.SendMail(clsMail);
-                        }
+                        string subject = string.Format("[Accept requests to change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Comment: </b> {0}<br />", commentContent);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        clsMail.SendTos.Add(Sendto.User_Id.Value);
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
                     }
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -849,24 +847,16 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 ServiceChangeDueDate serviceChangeDueDate = await db.ServiceChangeDueDates.FindAsync(id);
                 serviceChangeDueDate.DueDateStatus_Id = 4;
                 serviceChangeDueDate.Update = DateTime.Now;
                 db.Entry(serviceChangeDueDate).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Comment_Content = "Cancel due date change request",
-                        Service_Id = serviceChangeDueDate.Service_Id,
-                        User_Id = userId
-                    };
-                    res = await Services_Comment(serviceComments);
+                    await AddServiceComment(serviceChangeDueDate.Service_Id, "Cancel due date change request");
                 }
 
-                return res;
+                return true;
             }
             catch (Exception)
             {
@@ -895,27 +885,19 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-                Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 ServiceChangeDueDate serviceChangeDueDate = await db.ServiceChangeDueDates.FindAsync(id);
                 serviceChangeDueDate.DueDateStatus_Id = 3;
                 serviceChangeDueDate.Update = DateTime.Now;
                 db.Entry(serviceChangeDueDate).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Comment_Content = "Reject due date change request",
-                        Service_Id = serviceChangeDueDate.Service_Id,
-                        User_Id = userId
-                    };
-                    res = await Services_Comment(serviceComments);
+                    await AddServiceComment(serviceChangeDueDate.Service_Id, "Reject due date change request");
 
-                    var Sendto = await db.ServiceComments.Where(w => w.Service_Id == serviceComments.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefaultAsync();
+                    var Sendto = await db.ServiceComments.Where(w => w.Service_Id == serviceChangeDueDate.Service_Id && w.Comment_Content.StartsWith("Request change due date from")).OrderByDescending(o => o.Create).FirstOrDefaultAsync();
 
                     var linkUrl = HttpContext.Current.Request.Url.OriginalString;
 
-                    linkUrl = linkUrl.Replace(methodName + "/" + serviceChangeDueDate.ChangeDueDate_Id, "Action/" + serviceComments.Service_Id);
+                    linkUrl = linkUrl.Replace(methodName + "/" + serviceChangeDueDate.ChangeDueDate_Id, "Action/" + serviceChangeDueDate.Service_Id);
 
                     string subject = string.Format("[Reject request to change due date] {0} - {1}", Sendto.Services.Service_Key, Sendto.Services.Service_Subject);
                     string content = string.Format("<p><b>Comment: </b> {0}<br />", "Reject due date change request");
@@ -925,10 +907,9 @@ namespace E2E.Models
                     clsMail.SendTos.Add(Sendto.User_Id.Value);
                     clsMail.Subject = subject;
                     clsMail.Body = content;
-                    res = await clsMail.SendMail(clsMail);
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -940,43 +921,34 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 DateTime dateTime = DateTime.Now;
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 model.User_Id = userId;
                 db.Entry(model).State = EntityState.Added;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    string Comment = string.Format("Request change due date from {0} to {1}", model.DueDate.ToString("d"), model.DueDate_New.Value.ToString("d"));
+                    string mailDes = string.Format("Request change due date from {0} to {1}", model.DueDate.ToString("d"), model.DueDate_New.Value.ToString("d"));
+                    string commentContent = string.Format("{0}{1}{2}Remark: {3}", mailDes, Environment.NewLine, Environment.NewLine, model.Remark);
+                    await AddServiceComment(model.Service_Id, commentContent);
 
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = model.Service_Id,
-                        Comment_Content = string.Format("{0}{1}{2}Remark: {3}", Comment, Environment.NewLine, Environment.NewLine, model.Remark),
-                        User_Id = userId
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        Services services = await db.Services.FindAsync(model.Service_Id);
-                        SaveUserActionChangeDue(model.Service_Id);
+                    Services services = await db.Services.FindAsync(model.Service_Id);
+                    SaveUserActionChangeDue(model.Service_Id);
 
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace(methodName, "RequestChangeDue");
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace(methodName, "RequestChangeDue");
 
-                        string subject = string.Format("[Request to change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Description:</b> {0}</p>", Comment);
-                        content += string.Format("<p><b>Remark:</b> {0}</p>", model.Remark);
+                    string subject = string.Format("[Request to change due date] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Description:</b> {0}</p>", mailDes);
+                    content += string.Format("<p><b>Remark:</b> {0}</p>", model.Remark);
 
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.Add(services.User_Id);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
-                    }
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(services.User_Id);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1098,9 +1070,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                model.Create = DateTime.Now;
-                db.Entry(model).State = EntityState.Added;
+                db.ServiceComments.Add(model);
                 if (files != null)
                 {
                     for (int i = 0; i < files.Count; i++)
@@ -1118,7 +1088,7 @@ namespace E2E.Models
                         serviceCommentFiles.ServiceComment_Id = model.ServiceComment_Id;
                         serviceCommentFiles.ServiceComment_Seq = i;
                         serviceCommentFiles.ServiceCommentFile_Extension = Path.GetExtension(files[i].FileName);
-                        db.Entry(serviceCommentFiles).State = EntityState.Added;
+                        db.ServiceCommentFiles.Add(serviceCommentFiles);
                     }
                 }
 
@@ -1327,7 +1297,6 @@ namespace E2E.Models
 
             InsertProcess:
 
-                bool res = new bool();
                 int todayCount = await db.Services
                     .Where(w => w.Create >= DateTime.Today)
                     .CountAsync();
@@ -1361,8 +1330,6 @@ namespace E2E.Models
                             .Where(w => w.Status_Id == 3)
                             .FirstOrDefaultAsync();
 
-                        ServiceComments serviceComments = new ServiceComments();
-
                         Services services = await db.Services.FindAsync(model.Ref_Service_Id);
                         if (services.Status_Id == 2)
                         {
@@ -1370,28 +1337,14 @@ namespace E2E.Models
                             services.Update = DateTime.Now;
                             await db.SaveChangesAsync();
 
-                            serviceComments = new ServiceComments
-                            {
-                                Service_Id = model.Ref_Service_Id.Value,
-                                Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name)
-                            };
-                            await Services_Comment(serviceComments);
+                            await AddServiceComment(model.Ref_Service_Id.Value, string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name));
                         }
 
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = model.Ref_Service_Id.Value,
-                            Comment_Content = string.Format("Forward this job to new service key {0}", model.Service_Key)
-                        };
-                        res = await Services_Comment(serviceComments);
-                    }
-                    else
-                    {
-                        res = true;
+                        await AddServiceComment(model.Ref_Service_Id.Value, string.Format("Forward this job to new service key {0}", model.Service_Key));
                     }
                 }
 
-                return res;
+                return true;
             }
             catch (Exception)
             {
@@ -1471,7 +1424,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
 
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
@@ -1505,15 +1457,10 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime, system_Statuses.Status_Name)
-                    };
-                    res = await Services_Comment(serviceComments);
+                    await AddServiceComment(services.Service_Id, string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime, system_Statuses.Status_Name));
                 }
 
-                return res;
+                return true;
             }
             catch (Exception)
             {
@@ -1525,37 +1472,29 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
                 services.Is_Approval = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = model.Service_Id,
-                        Comment_Content = string.Format("Approved,\n{0}", model.Comment_Content)
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace(methodName, "Approve_Form");
+                    string mailComment = string.Format("Approved,\n{0}", model.Comment_Content);
+                    await AddServiceComment(model.Service_Id, mailComment);
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "Approve_Form");
 
-                        string subject = string.Format("[Approved] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
-                        content += "</p>";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.Add(services.User_Id);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
-                    }
+                    string subject = string.Format("[Approved] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, mailComment);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(services.User_Id);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1567,7 +1506,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
 
                 System_Statuses system_Statuses = await db.System_Statuses.FindAsync(6);
@@ -1577,26 +1515,15 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
                     if (!string.IsNullOrEmpty(model.Comment_Content))
                     {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
-                        await Services_Comment(serviceComments);
+                        await AddServiceComment(services.Service_Id, model.Comment_Content);
                     }
 
-                    serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Cancel task, Status update to {0}", system_Statuses.Status_Name)
-                    };
-                    res = await Services_Comment(serviceComments);
+                    await AddServiceComment(services.Service_Id, string.Format("Cancel task, Status update to {0}", system_Statuses.Status_Name));
                 }
 
-                return res;
+                return true;
             }
             catch (Exception)
             {
@@ -1608,7 +1535,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
                 services.Status_Id = system_Statuses.Status_Id;
                 services.Update = DateTime.Now.AddDays(-DateTime.Now.Day);
@@ -1616,30 +1542,18 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Automatically update status to {0} by system", system_Statuses.Status_Name),
-                        User_Id = services.Action_User_Id
-                    };
-                    db.Entry(serviceComments).State = EntityState.Added;
-                    if (await db.SaveChangesAsync() > 0)
-                    {
-                        if (services.Ref_Service_Id.HasValue)
-                        {
-                            services = await db.Services.FindAsync(services.Ref_Service_Id.Value);
-                            res = await Services_SetClose(services);
-                        }
-                        else
-                        {
-                            res = true;
-                        }
+                    string commentContent = string.Format("Automatically update status to {0} by system", system_Statuses.Status_Name);
+                    await AddServiceComment(services.Service_Id, commentContent, services.Action_User_Id);
 
+                    if (services.Ref_Service_Id.HasValue)
+                    {
+                        services = await db.Services.FindAsync(services.Ref_Service_Id.Value);
+                        await Services_SetClose(services);
                     }
 
                     ClsMail clsMail = new ClsMail()
                     {
-                        Body = serviceComments.Comment_Content,
+                        Body = commentContent,
                         SendFrom = services.Action_User_Id.Value,
                         Subject = string.Format("[Job is closed] {0} - {1}", services.Service_Key, services.Service_Subject)
                     };
@@ -1647,10 +1561,10 @@ namespace E2E.Models
                     clsMail.SendCCs.Add(services.User_Id);
                     clsMail.SendTos.Add(services.Action_User_Id.Value);
 
-                    await clsMail.SendMail(clsMail);
+                    
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1662,7 +1576,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(id);
                 if (services.Status_Id == 3)
                 {
@@ -1672,42 +1585,32 @@ namespace E2E.Models
                     db.Entry(services).State = EntityState.Modified;
                     if (await db.SaveChangesAsync() > 0)
                     {
-                        ServiceComments serviceComments = new ServiceComments
+                        string commentContent = string.Format("Status update to {0}", system_Statuses.Status_Name);
+                        await AddServiceComment(id, commentContent);
+                        if (services.Ref_Service_Id.HasValue)
                         {
-                            Service_Id = id,
-                            Comment_Content = string.Format("Status update to {0}", system_Statuses.Status_Name)
-                        };
-                        if (await Services_Comment(serviceComments))
-                        {
-                            if (services.Ref_Service_Id.HasValue)
+                            id = services.Ref_Service_Id.Value;
+                            if (db.Services.Any(a => a.Service_Id == id && a.Status_Id == 3))
                             {
-                                id = services.Ref_Service_Id.Value;
-                                if (db.Services.Any(a => a.Service_Id == id && a.Status_Id == 3))
-                                {
-                                    res = await SaveEstimate(id, score);
-                                }
+                                await SaveEstimate(id, score);
                             }
-                            else
-                            {
-                                res = true;
-                            }
-
-                            ClsMail clsMail = new ClsMail()
-                            {
-                                Body = serviceComments.Comment_Content,
-                                SendFrom = services.Action_User_Id.Value,
-                                Subject = string.Format("[Job is closed] {0} - {1}", services.Service_Key, services.Service_Subject)
-                            };
-
-                            clsMail.SendCCs.Add(services.User_Id);
-                            clsMail.SendTos.Add(services.Action_User_Id.Value);
-
-                            await clsMail.SendMail(clsMail);
                         }
+
+                        ClsMail clsMail = new ClsMail()
+                        {
+                            Body = commentContent,
+                            SendFrom = services.Action_User_Id.Value,
+                            Subject = string.Format("[Job is closed] {0} - {1}", services.Service_Key, services.Service_Subject)
+                        };
+
+                        clsMail.SendCCs.Add(services.User_Id);
+                        clsMail.SendTos.Add(services.Action_User_Id.Value);
+
+                        
                     }
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1726,7 +1629,7 @@ namespace E2E.Models
                 }
                 else
                 {
-                    res = await Services_SetToDepartment(model.Service_Id, model.Department_Id);
+                    res = await Services_SetToDepartment(model.Service_Id, methodName, model.Department_Id);
                 }
 
                 return res;
@@ -1741,7 +1644,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
 
                 System_Statuses system_Statuses = await db.System_Statuses.FindAsync(3);
@@ -1755,72 +1657,54 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
-                    if (!string.IsNullOrEmpty(model.Comment_Content))
-                    {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
-                        await Services_Comment(serviceComments);
-                    }
+                    
+                    await AddServiceComment(services.Service_Id, model.Comment_Content);
+                    string commentContent = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
+                    await AddServiceComment(services.Service_Id, commentContent);
+                    commentContent = $"{model.Comment_Content}<br />{commentContent}";
 
-                    serviceComments = new ServiceComments
+
+                    var nextMonth = services.Update.Value.AddMonths(1);
+                    var eighthOfNextMonth = new DateTime(nextMonth.Year, nextMonth.Month, 8).ToShortDateString();
+                    var lastDayOfMonth = new DateTime(services.Update.Value.Year, services.Update.Value.Month, DateTime.DaysInMonth(services.Update.Value.Year, services.Update.Value.Month)).ToShortDateString();
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
+
+                    string subject = string.Format("[Request close the job] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, commentContent);
+                    content += "</p>";
+                    content += $"<b>The system will automatically close the job on {eighthOfNextMonth}. The system will send you a total of 4 reminder emails. If you do not take action, the job will be closed automatically on the last day of this month ({lastDayOfMonth}).</b><br />";
+                    content += $"<b>ระบบจะปิดงานนี้โดยอัตโนมัติ โดยที่ระบบจะส่งอีเมลแจ้งเตือนให้ท่านรวมทั้งสิ้น 4 ครั้ง หากท่านไม่ดำเนินการ ระบบจะปิดงานโดยอัตโนมัติในวันที่ {eighthOfNextMonth} แต่ระบบจะระบุว่าปิดในวันสุดท้ายของเดือนนี้ ({lastDayOfMonth})</b><br />";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(services.User_Id);
+                    clsMail.SendCCs.Add(services.Action_User_Id.Value);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+
+                    Log_SendEmail log_SendEmail = new Log_SendEmail
                     {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name)
+                        SendEmail_Content = content,
+                        SendEmail_Ref_Id = model.Service_Id,
+                        SendEmail_Subject = subject,
+                        User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
                     };
-                    if (await Services_Comment(serviceComments))
+                    db.Log_SendEmails.Add(log_SendEmail);
+
+                    Log_SendEmailTo log_SendEmailTo = new Log_SendEmailTo
                     {
+                        SendEmailTo_Type = "to",
+                        SendEmail_Id = log_SendEmail.SendEmail_Id,
+                        User_Id = services.User_Id
+                    };
+                    db.Log_SendEmailTos.Add(log_SendEmailTo);
 
-                        var nextMonth = services.Update.Value.AddMonths(1);
-                        var eighthOfNextMonth = new DateTime(nextMonth.Year, nextMonth.Month, 8).ToShortDateString();
-                        var lastDayOfMonth = new DateTime(services.Update.Value.Year, services.Update.Value.Month, DateTime.DaysInMonth(services.Update.Value.Year, services.Update.Value.Month)).ToShortDateString();
-
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
-
-                        string subject = string.Format("[Request close the job] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
-                        content += "</p>";
-                        content += $"<b>The system will automatically close the job on {eighthOfNextMonth}. The system will send you a total of 4 reminder emails. If you do not take action, the job will be closed automatically on the last day of this month ({lastDayOfMonth}).</b><br />";
-                        content += $"<b>ระบบจะปิดงานนี้โดยอัตโนมัติ โดยที่ระบบจะส่งอีเมลแจ้งเตือนให้ท่านรวมทั้งสิ้น 4 ครั้ง หากท่านไม่ดำเนินการ ระบบจะปิดงานโดยอัตโนมัติในวันที่ {eighthOfNextMonth} แต่ระบบจะระบุว่าปิดในวันสุดท้ายของเดือนนี้ ({lastDayOfMonth})</b><br />";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.Add(services.User_Id);
-                        clsMail.SendCCs.Add(services.Action_User_Id.Value);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        if (await clsMail.SendMail(clsMail))
-                        {
-                            Log_SendEmail log_SendEmail = new Log_SendEmail
-                            {
-                                SendEmail_Content = content,
-                                SendEmail_Ref_Id = model.Service_Id,
-                                SendEmail_Subject = subject,
-                                User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
-                            };
-                            db.Log_SendEmails.Add(log_SendEmail);
-
-                            Log_SendEmailTo log_SendEmailTo = new Log_SendEmailTo
-                            {
-                                SendEmailTo_Type = "to",
-                                SendEmail_Id = log_SendEmail.SendEmail_Id,
-                                User_Id = services.User_Id
-                            };
-                            db.Log_SendEmailTos.Add(log_SendEmailTo);
-
-                            if (await db.SaveChangesAsync() > 0)
-                            {
-                                res = true;
-                            }
-                        }
-                    }
+                    await db.SaveChangesAsync();
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1832,41 +1716,25 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(id);
                 services.Is_FreePoint = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = id,
-                        Comment_Content = "This request is not deducted points."
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        int point = await db.System_Priorities
+                    await AddServiceComment(id, "This request is not deducted points.");
+                    int point = await db.System_Priorities
                             .Where(w => w.Priority_Id == services.Priority_Id)
                             .Select(s => s.Priority_Point)
                             .FirstOrDefaultAsync();
-
-                        Users users = await db.Users.FindAsync(services.User_Id);
-                        users.User_Point += point;
-                        db.Entry(users).State = EntityState.Modified;
-                        if (await db.SaveChangesAsync() > 0)
-                        {
-                            serviceComments = new ServiceComments
-                            {
-                                Service_Id = id,
-                                Comment_Content = string.Format("Give back {0} points to {1}", point, master.Users_GetInfomation(services.User_Id))
-                            };
-                            res = await Services_Comment(serviceComments);
-                        }
-                    }
+                    await AddServiceComment(id, string.Format("Give back {0} points to {1}", point, master.Users_GetInfomation(services.User_Id)));
+                    Users users = await db.Users.FindAsync(services.User_Id);
+                    users.User_Point += point;
+                    db.Entry(users).State = EntityState.Modified;
+                    await db.SaveChangesAsync();
                 }
 
-                return res;
+                return true;
             }
             catch (Exception)
             {
@@ -1878,9 +1746,8 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-                Services services = new Services();
-                services = await db.Services.FindAsync(model.Service_Id);
+                Services services = await db.Services.FindAsync(model.Service_Id);
+                Guid? actionUserId = services.Action_User_Id ?? null;
 
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
@@ -1909,36 +1776,35 @@ namespace E2E.Models
                     db.ServiceDocuments.RemoveRange(serviceDocuments);
                     await db.SaveChangesAsync();
 
-                    ServiceComments serviceComments = new ServiceComments();
-                    if (!string.IsNullOrEmpty(model.Comment_Content))
-                    {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
+                    await AddServiceComment(services.Service_Id, model.Comment_Content);
 
-                        if (await Services_Comment(serviceComments))
-                        {
-                            List<ServiceTeams> serviceTeams = await db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToListAsync();
-                            foreach (var item in serviceTeams)
-                            {
-                                await Service_DeleteTeam(item.Team_Id, methodName);
-                            }
-                        }
+                    List<ServiceTeams> serviceTeams = await db.ServiceTeams.Where(w => w.Service_Id == model.Service_Id).ToListAsync();
+                    foreach (var item in serviceTeams)
+                    {
+                        await Service_DeleteTeam(item.Team_Id, methodName);
                     }
-
                     string deptName = db.Master_Departments.Find(services.Department_Id).Department_Name;
+                    await AddServiceComment(services.Service_Id, string.Format("Return job to department {0}", deptName));
 
-                    serviceComments = new ServiceComments
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
+
+                    string subject = string.Format("[Return the job to department] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Comment:</b> {0}", model.Comment_Content);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.AddRange(await master.GetManagementOfDepartment());
+                    if (actionUserId.HasValue)
                     {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Return job to department {0}", deptName)
-                    };
-                    res = await Services_Comment(serviceComments);
+                        clsMail.SendCCs.Add(actionUserId.Value);
+                    }
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1950,43 +1816,36 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
+
+                Guid? actionUserId = services.Action_User_Id ?? null;
+
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
                 services.Status_Id = 1;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
-                    if (!string.IsNullOrEmpty(model.Comment_Content))
-                    {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
-                        if (await Services_Comment(serviceComments))
-                        {
-                            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                            linkUrl += "/" + services.Service_Id;
-                            linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
+                    await AddServiceComment(services.Service_Id, model.Comment_Content);
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
 
-                            string subject = string.Format("[Request reject job] {0} - {1}", services.Service_Key, services.Service_Subject);
-                            string content = string.Format("<p><b>Comment:</b> {0}", model.Comment_Content);
-                            content += "</p>";
-                            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                            content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendTos.AddRange(await master.GetManagementOfDepartment());
-                            clsMail.SendCCs.Add(services.User_Id);
-                            clsMail.Subject = subject;
-                            clsMail.Body = content;
-                            res = await clsMail.SendMail(clsMail);
-                        }
+                    string subject = string.Format("[Request reject job] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Comment:</b> {0}", model.Comment_Content);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.AddRange(await master.GetManagementOfDepartment());
+                    if (actionUserId.HasValue)
+                    {
+                        clsMail.SendCCs.Add(actionUserId.Value);
                     }
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -1998,13 +1857,7 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
-                if (!services.Department_Id.HasValue)
-                {
-                    await Services_SetToDepartment(model.Service_Id);
-                }
-
                 System_Statuses system_Statuses = await db.System_Statuses.FindAsync(5);
 
                 services.Update = DateTime.Now;
@@ -2012,41 +1865,31 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
-                    if (!string.IsNullOrEmpty(model.Comment_Content))
+                    await AddServiceComment(services.Service_Id, model.Comment_Content);
+                    string commentContent = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name);
+                    await AddServiceComment(services.Service_Id, commentContent);
+                    commentContent = $"{model.Comment_Content}<br />{commentContent}";
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
+
+                    string subject = string.Format("[Job rejected] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, commentContent);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(services.User_Id);
+                    if (services.User_Id != services.Create_User_Id)
                     {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
-                        await Services_Comment(serviceComments);
+                        clsMail.SendCCs.Add(services.Create_User_Id);
                     }
 
-                    serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name)
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace(methodName, "ServiceInfomation");
-
-                        string subject = string.Format("[Job rejected] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
-                        content += "</p>";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.Add(services.User_Id);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
-                    }
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -2058,42 +1901,33 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-
                 Services services = await db.Services.FindAsync(model.Service_Id);
                 services.Is_MustBeApproved = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = model.Service_Id,
-                        Comment_Content = string.Format("Approval required, \n {0}", model.Comment_Content)
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl += "/" + services.Service_Id;
-                        linkUrl = linkUrl.Replace(methodName, "Approve_Form");
+                    string commentContent = string.Format("Approval required, \n {0}", model.Comment_Content);
+                    await AddServiceComment(model.Service_Id, commentContent);
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "Approve_Form");
 
-                        string subject = string.Format("[Require approval] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
-                        content += "<br />";
-                        content += "<br />";
-                        content += string.Format("<b>Comment:</b> {0}", serviceComments.Comment_Content);
-                        content += "</p>";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.AddRange(await master.GetManagementOfDepartment(services.User_Id));
-                        clsMail.SendTos.Add(services.User_Id);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
-                    }
+                    string subject = string.Format("[Require approval] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Description:</b> {0}", services.Service_Description);
+                    content += "<br />";
+                    content += "<br />";
+                    content += string.Format("<b>Comment:</b> {0}", commentContent);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.AddRange(await master.GetManagementOfDepartment(services.User_Id));
+                    clsMail.SendTos.Add(services.User_Id);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -2105,53 +1939,37 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-                Services services = await db.Services.FindAsync(model.Service_Id);
 
+                Services services = await db.Services.FindAsync(model.Service_Id);
+                Guid actionUserId = services.Action_User_Id.Value;
                 services.Update = DateTime.Now;
                 services.Action_User_Id = null;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
-                    if (!string.IsNullOrEmpty(model.Comment_Content))
-                    {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
-                        await Services_Comment(serviceComments);
-                    }
+                    await AddServiceComment(services.Service_Id, model.Comment_Content);
+                    string commentContent = string.Format("Return assignments to {0} department", db.Master_Departments.Find(services.Department_Id).Department_Name);
+                    await AddServiceComment(services.Service_Id, commentContent);
+                    commentContent = $"{model.Comment_Content}<br />{commentContent}";
 
-                    serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Return assignments to {0} department", db.Master_Departments.Find(services.Department_Id).Department_Name)
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        if (services.Assign_User_Id.HasValue)
-                        {
-                            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                            linkUrl += "/" + services.Service_Id;
-                            linkUrl = linkUrl.Replace(methodName, "Action");
 
-                            string subject = string.Format("[Return assignments] {0} - {1}", services.Service_Key, services.Service_Subject);
-                            string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
-                            content += "</p>";
-                            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                            content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendTos.Add(services.Assign_User_Id.Value);
-                            clsMail.SendCCs.Add(services.Action_User_Id.Value);
-                            clsMail.Subject = subject;
-                            clsMail.Body = content;
-                            res = await clsMail.SendMail(clsMail);
-                        }
-                    }
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl += "/" + services.Service_Id;
+                    linkUrl = linkUrl.Replace(methodName, "Action");
+
+                    string subject = string.Format("[Return assignments] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, commentContent);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.AddRange(await master.GetManagementOfDepartment(actionUserId));
+                    clsMail.SendCCs.Add(actionUserId);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
+
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -2163,7 +1981,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 Services services = await db.Services.FindAsync(model.Service_Id);
 
                 services.Update = DateTime.Now;
@@ -2172,54 +1989,36 @@ namespace E2E.Models
                 services.WorkRoot_Id = null;
                 db.Entry(services).State = EntityState.Modified;
 
-                List<ServiceDocuments> serviceDocuments = await db.ServiceDocuments.Where(w => w.Service_Id == services.Service_Id).ToListAsync();
-                foreach (var item in serviceDocuments)
-                {
-                    if (await Api_DeleteFile(item.ServiceDocument_Path))
-                    {
-                        db.ServiceDocuments.Remove(item);
-                    }
-                }
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments();
-                    if (!string.IsNullOrEmpty(model.Comment_Content))
-                    {
-                        serviceComments = new ServiceComments
-                        {
-                            Service_Id = services.Service_Id,
-                            Comment_Content = model.Comment_Content
-                        };
-                        await Services_Comment(serviceComments);
-                    }
+                    await AddServiceComment(services.Service_Id, model.Comment_Content);
+                    string commentContent = "Return job to center room";
+                    await AddServiceComment(services.Service_Id, commentContent);
+                    commentContent = $"{model.Comment_Content}<br />{commentContent}";
 
-                    serviceComments = new ServiceComments
+                    if (services.Assign_User_Id.HasValue)
                     {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = "Return job to center room"
-                    };
-                    if (await Services_Comment(serviceComments))
-                    {
-                        if (services.Assign_User_Id.HasValue)
-                        {
-                            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                            linkUrl += "/" + services.Service_Id;
-                            linkUrl = linkUrl.Replace(methodName, "Commit");
+                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                        linkUrl += "/" + services.Service_Id;
+                        linkUrl = linkUrl.Replace(methodName, "Commit");
 
-                            string subject = string.Format("[Returned] {0} - {1}", services.Service_Key, services.Service_Subject);
-                            string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, serviceComments.Comment_Content);
-                            content += "</p>";
-                            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                            content += "<p>Thank you for your consideration</p>";
-                            clsMail.SendTos.Add(services.Assign_User_Id.Value);
-                            clsMail.Subject = subject;
-                            clsMail.Body = content;
-                            res = await clsMail.SendMail(clsMail);
+                        string subject = string.Format("[Returned] {0} - {1}", services.Service_Key, services.Service_Subject);
+                        string content = string.Format("<p><b>Comment:</b> {0}<br />{1}", model.Comment_Content, commentContent);
+                        content += "</p>";
+                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                        content += "<p>Thank you for your consideration</p>";
+                        clsMail.SendTos.Add(services.Assign_User_Id.Value);
+                        clsMail.SendCCs.Add(services.User_Id);
+                        if (services.Create_User_Id != services.User_Id)
+                        {
+                            clsMail.SendCCs.Add(services.Create_User_Id);
                         }
+                        clsMail.Subject = subject;
+                        clsMail.Body = content;
                     }
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -2227,16 +2026,25 @@ namespace E2E.Models
             }
         }
 
-        public async Task<bool> Services_SetToDepartment(Guid id, Guid? deptId = null)
+        public async Task<bool> Services_SetToDepartment(Guid id, string methodName, Guid? deptId = null)
         {
             try
             {
-                bool res = new bool();
                 Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
                 if (!deptId.HasValue)
                 {
-                    deptId = db.Users.Find(userId).Master_Processes.Master_Sections.Department_Id;
+                    deptId = await db.Users
+                        .Where(w => w.User_Id == userId)
+                        .Select(s => s.Master_Processes.Master_Sections.Department_Id)
+                        .FirstOrDefaultAsync();
                 }
+
+                List<Guid> listTeam = await db.Users
+                    .Where(w => w.Master_Processes.Master_Sections.Department_Id == deptId)
+                    .Select(s => s.User_Id)
+                    .ToListAsync();
+
+                var listTeamName = listTeam.Select(s => master.Users_GetInfomation(s)).ToList();
 
                 string deptName = await db.Master_Departments
                     .Where(w => w.Department_Id == deptId)
@@ -2251,15 +2059,28 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Commit Task, Assign task to the {0} department", deptName)
-                    };
-                    res = await Services_Comment(serviceComments);
+                    string commentContent = string.Format("Commit Task, Assign task to the {0} department", deptName);
+                    await AddServiceComment(services.Service_Id,commentContent);
+
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace(methodName, "Action");
+
+                    string subject = string.Format("[Commit to department] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>To:</b> {0}", string.Join("<br />", listTeamName));
+                    content += "<br />";
+                    content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                    content += "<br />";
+                    content += "<br />";
+                    content += string.Format("<b>Comment:</b> {0}", commentContent);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(userId);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -2271,8 +2092,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-
                 string deptName = await db.Master_Departments
                     .Where(w => w.Department_Id == deptId)
                     .Select(s => s.Department_Name)
@@ -2287,35 +2106,29 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Commit Task, Assign task to the {0} department, Assign task to {1}", deptName, master.Users_GetInfomation(userId))
-                    };
+                    string commentContent = string.Format("Commit Task, Assign task to the {0} department, Assign task to {1}", deptName, master.Users_GetInfomation(userId));
+                    await AddServiceComment(services.Service_Id, commentContent);
+                    
 
-                    if (await Services_Comment(serviceComments))
-                    {
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace(methodName, "Action");
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace(methodName, "Action");
 
-                        string subject = string.Format("[Assigned] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
-                        content += "<br />";
-                        content += string.Format("<b>Description:</b> {0}", services.Service_Description);
-                        content += "<br />";
-                        content += "<br />";
-                        content += string.Format("<b>Comment:</b> {0}", serviceComments.Comment_Content);
-                        content += "</p>";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.Add(userId);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
-                    }
+                    string subject = string.Format("[Assigned] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
+                    content += "<br />";
+                    content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                    content += "<br />";
+                    content += "<br />";
+                    content += string.Format("<b>Comment:</b> {0}", commentContent);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(userId);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {
@@ -2327,8 +2140,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
-
                 Services services = await db.Services.FindAsync(id);
                 services.Action_User_Id = userId;
                 services.Update = DateTime.Now;
@@ -2336,36 +2147,29 @@ namespace E2E.Models
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
-                    ServiceComments serviceComments = new ServiceComments
-                    {
-                        Service_Id = services.Service_Id,
-                        Comment_Content = string.Format("Assign task to {0}", master.Users_GetInfomation(userId))
-                    };
+                    string commentContent = string.Format("Assign task to {0}", master.Users_GetInfomation(userId));
+                    await AddServiceComment(services.Service_Id, commentContent);
 
-                    if (await Services_Comment(serviceComments))
-                    {
-                        var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                        linkUrl = linkUrl.Replace(methodName, "Action");
-                        linkUrl = string.Concat(linkUrl, "/", id);
+                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                    linkUrl = linkUrl.Replace(methodName, "Action");
+                    linkUrl = string.Concat(linkUrl, "/", id);
 
-                        string subject = string.Format("[Assigned] {0} - {1}", services.Service_Key, services.Service_Subject);
-                        string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
-                        content += "<br />";
-                        content += string.Format("<b>Description:</b> {0}", services.Service_Description);
-                        content += "<br />";
-                        content += "<br />";
-                        content += string.Format("<b>Comment:</b> {0}", serviceComments.Comment_Content);
-                        content += "</p>";
-                        content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                        content += "<p>Thank you for your consideration</p>";
-                        clsMail.SendTos.Add(userId);
-                        clsMail.Subject = subject;
-                        clsMail.Body = content;
-                        res = await clsMail.SendMail(clsMail);
-                    }
+                    string subject = string.Format("[Assigned] {0} - {1}", services.Service_Key, services.Service_Subject);
+                    string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(userId));
+                    content += "<br />";
+                    content += string.Format("<b>Description:</b> {0}", services.Service_Description);
+                    content += "<br />";
+                    content += "<br />";
+                    content += string.Format("<b>Comment:</b> {0}", commentContent);
+                    content += "</p>";
+                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                    content += "<p>Thank you for your consideration</p>";
+                    clsMail.SendTos.Add(userId);
+                    clsMail.Subject = subject;
+                    clsMail.Body = content;
                 }
 
-                return res;
+                return await clsMail.SendMail(clsMail);
             }
             catch (Exception)
             {

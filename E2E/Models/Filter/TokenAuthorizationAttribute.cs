@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -11,6 +8,14 @@ namespace E2E.Models.Filter
 {
     public class TokenAuthorizationAttribute : AuthorizationFilterAttribute
     {
+        private bool IsValidToken(string token)
+        {
+            ClsApi clsApi = new ClsApi();
+
+            // Implement your token validation logic here
+            return !string.IsNullOrEmpty(token) && token == clsApi.GetToken();
+        }
+
         public override void OnAuthorization(HttpActionContext actionContext)
         {
             if (actionContext.Request.Headers.Contains("Token"))
@@ -26,14 +31,6 @@ namespace E2E.Models.Filter
 
             // If token is not valid or missing, return unauthorized response
             actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized, "Unauthorized request.");
-        }
-
-        private bool IsValidToken(string token)
-        {
-            ClsApi clsApi = new ClsApi();
-
-            // Implement your token validation logic here
-            return !string.IsNullOrEmpty(token) && token == clsApi.GetToken();
         }
     }
 }
