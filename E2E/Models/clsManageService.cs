@@ -63,23 +63,6 @@ namespace E2E.Models
         }
         private async Task AddServiceComment(Guid serviceId, string commentContent, Guid? userId = null)
         {
-
-            if (!userId.HasValue)
-            {
-                if (HttpContext.Current.User.Identity.IsAuthenticated)
-                {
-                    userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
-                }
-                else
-                {
-                    userId = await db.Services
-                        .Where(w => w.Service_Id == serviceId)
-                        .Select(s => s.Action_User_Id.Value)
-                        .FirstOrDefaultAsync();
-                }
-            }
-            
-
             ServiceComments serviceComments = new ServiceComments
             {
                 Service_Id = serviceId,
@@ -1069,7 +1052,10 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
+                if (!model.User_Id.HasValue)
+                {
+                    model.User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name);
+                }
                 db.ServiceComments.Add(model);
                 if (files != null)
                 {
@@ -1092,12 +1078,7 @@ namespace E2E.Models
                     }
                 }
 
-                if (await db.SaveChangesAsync() > 0)
-                {
-                    res = true;
-                }
-
-                return res;
+                return await db.SaveChangesAsync() > 0;
             }
             catch (Exception)
             {
@@ -2357,9 +2338,14 @@ namespace E2E.Models
 
             foreach (var service in services)
             {
+                //daysSinceChange default is 2 4 6
+                //int[] difRange = { 2, 4, 6 };
+                //daysSinceChange test is 1 2 3
+                int[] difRange = { 1, 2, 3 };
+
                 var daysSinceChange = (today.Date - service.UpdateDate.Date).Days;
 
-                if (daysSinceChange == 2 || daysSinceChange == 4 || daysSinceChange == 6)
+                if (difRange.Contains(daysSinceChange))
                 {
                     await clsMail.ResendMail(service.Service_Id);
                 }

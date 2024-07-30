@@ -61,8 +61,11 @@ namespace E2E.Controllers
                 ClsManageService service = new ClsManageService();
                 await service.JobDaily();
 
+                //currentDay default is 8
+                //currentDay test is 4
                 int currentDay = DateTime.Today.Day;
-                if (currentDay == 8)
+
+                if (currentDay == 4)
                 {
                     await service.JobMonthly();
                 }

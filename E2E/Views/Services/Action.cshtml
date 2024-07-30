@@ -44,7 +44,7 @@
         });
         $(document).on('submit', "#RequestRejectForm", function (e) {
             e.preventDefault();
-            callSubmitRedirect('@Url.Action("SetRequestReject", "Services")', this,'@Url.Action("Index", "Services")');
+            callSubmitRedirect('@Url.Action("SetRequestReject", "Services")', this,'@Url.Action("Action", "Services")');
             return false;
         });
     </script>

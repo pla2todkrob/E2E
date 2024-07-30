@@ -101,7 +101,7 @@
             var fd = new FormData(this);
 
             $.ajax({
-                url: baseUrl + '/Services/_Comment',
+                url: '@Url.Action("_Comment", "Services")',
                 method: "POST",
                 async: true,
                 data: fd,
@@ -187,7 +187,7 @@
         });
         $(document).on('submit', "#RequestRejectForm", function (e) {
             e.preventDefault();
-            callSubmitPage('@Url.Action("SetRequestReject", "Services")', this);
+            callSubmitRedirect('@Url.Action("SetRequestReject", "Services")', this,'@Url.Action("Action", "Services")');
             return false;
         });
     </script>

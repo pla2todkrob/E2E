@@ -905,14 +905,23 @@ namespace E2E.Models
 
         private async Task<List<Guid>> LeaderListId(Guid departmentId)
         {
-            int gradeNumber;
-            return await db.Users
+            var users = await db.Users
                 .Where(w => w.Master_Processes.Master_Sections.Department_Id == departmentId &&
                 (w.Master_Grades.Master_LineWorks.Authorize_Id == 2 ||
-                (!w.Master_Grades.Grade_Name.StartsWith("M") && int.TryParse(w.Master_Grades.Grade_Name.Substring(1), out gradeNumber) && gradeNumber <= 6)))
-                .Select(s => s.User_Id)
+                !w.Master_Grades.Grade_Name.StartsWith("M")))
+                .Select(s => new { s.User_Id, s.Master_Grades.Grade_Name })
                 .ToListAsync();
+
+            var result = users
+                .Where(u => u.Grade_Name.StartsWith("M") ||
+                            (!u.Grade_Name.StartsWith("M") &&
+                             int.TryParse(u.Grade_Name.Substring(1), out int gradeNumber) && gradeNumber <= 6))
+                .Select(u => u.User_Id)
+                .ToList();
+
+            return result;
         }
+
 
         public string GetUsernameAD(string code)
         {
