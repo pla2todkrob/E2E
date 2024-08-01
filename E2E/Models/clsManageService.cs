@@ -1626,10 +1626,12 @@ namespace E2E.Models
             try
             {
                 Services services = await db.Services.FindAsync(model.Service_Id);
-
+                DateTime inprogrssDate = services.Update.Value;
                 System_Statuses system_Statuses = await db.System_Statuses.FindAsync(3);
 
                 services.Update = DateTime.Now;
+                TimeSpan timeDifference = services.Update.Value - inprogrssDate;
+                services.Service_ActualTime = (int)timeDifference.TotalDays;
                 if (services.Update.Value.Date > services.Service_DueDate)
                 {
                     services.Is_OverDue = true;
