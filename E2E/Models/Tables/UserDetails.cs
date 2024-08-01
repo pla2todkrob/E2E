@@ -6,10 +6,8 @@ namespace E2E.Models.Tables
 {
     public class UserDetails
     {
-        public UserDetails()
-        {
-            Detail_Id = Guid.NewGuid();
-        }
+        [Key, ForeignKey("Users")]
+        public Guid User_Id { get; set; }
 
         [DataType(DataType.Password)]
         [Compare("Detail_Password")]
@@ -21,9 +19,6 @@ namespace E2E.Models.Tables
 
         [Display(Name = "EN Last name")]
         public string Detail_EN_LastName { get; set; }
-
-        [Key]
-        public Guid Detail_Id { get; set; }
 
         [DataType(DataType.Password)]
         public string Detail_Password { get; set; }
@@ -42,9 +37,6 @@ namespace E2E.Models.Tables
 
         public virtual System_Prefix_EN System_Prefix_EN { get; set; }
         public virtual System_Prefix_TH System_Prefix_TH { get; set; }
-
-        [Index(IsUnique = true)]
-        public Guid User_Id { get; set; }
 
         public virtual Users Users { get; set; }
     }

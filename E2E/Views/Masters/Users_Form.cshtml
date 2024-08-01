@@ -16,8 +16,7 @@
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-        @Html.HiddenFor(m => m.Users.User_Id)
-        @Html.HiddenFor(m => m.Detail_Id)
+        @Html.HiddenFor(m => m.User_Id)
         <div class="form-row">
             <div class="form-group col-md-4">
                 @Html.LabelFor(m => m.Users.Role_Id)

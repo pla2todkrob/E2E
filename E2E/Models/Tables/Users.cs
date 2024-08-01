@@ -14,35 +14,30 @@ namespace E2E.Models.Tables
         }
 
         public bool Active { get; set; }
-
-        [Display(Name = "Business card group")]
         public bool BusinessCardGroup { get; set; }
-
         public DateTime Create { get; set; }
 
         [Required]
-        [Display(Name = "Grade"), Index]
+        [Display(Name = "Grade")]
         public Guid Grade_Id { get; set; }
 
         public virtual Master_Grades Master_Grades { get; set; }
-
         public virtual Master_Plants Master_Plants { get; set; }
         public virtual Master_Processes Master_Processes { get; set; }
 
         [Required]
-        [Display(Name = "Plant"), Index]
+        [Display(Name = "Plant")]
         public Guid Plant_Id { get; set; }
 
         [Required]
-        [Display(Name = "Process"), Index]
+        [Display(Name = "Process")]
         public Guid Process_Id { get; set; }
 
         [Required]
-        [Display(Name = "Role"), Index]
+        [Display(Name = "Role")]
         public int Role_Id { get; set; }
 
         public virtual System_Roles System_Roles { get; set; }
-
         public DateTime? Update { get; set; }
 
         [Display(Name = "Code"), Required, StringLength(100), Index(IsUnique = true)]
@@ -64,5 +59,7 @@ namespace E2E.Models.Tables
         public string Username { get; set; }
 
         public int YearSetPoint { get; set; }
+
+        public virtual UserDetails UserDetails { get; set; }
     }
 }

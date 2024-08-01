@@ -171,10 +171,10 @@ namespace E2E.Models
                         // year as their YearSetPoint
                         if (users.Count > 0)
                         {
-                            int setPoint = db.System_Configurations
+                            int setPoint = db.System_Configurations?
                                 .OrderByDescending(o => o.CreateDateTime)
                                 .Select(s => s.Configuration_Point)
-                                .FirstOrDefault();
+                                .FirstOrDefault() ?? 50;
 
                             foreach (var user in users)
                             {
@@ -197,8 +197,8 @@ namespace E2E.Models
                         Master_Grades master_Grades = new Master_Grades
                         {
                             Active = true,
-                            Grade_Name = "E8",
-                            Grade_Position = "Engineer",
+                            Grade_Name = "E6",
+                            Grade_Position = "Chief Engineer",
                             LineWork_Id = master_LineWorks.LineWork_Id
                         };
                         db.Entry(master_Grades).State = System.Data.Entity.EntityState.Added;
