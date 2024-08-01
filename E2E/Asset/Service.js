@@ -188,31 +188,38 @@ async function setCommitToDepartment(urlAjax, urlRedirect) {
         });
 }
 
-async function resendEmail(urlAjax) {
+function resendEmail(urlAjax) {
     swal({
         title: 'Are you sure?',
         text: 'An email will be sent to the creator of the request again.',
-        buttons: true,
-        icon: 'warning'
-    })
-        .then((cf) => {
-            if (cf) {
-                $.ajax({
-                    url: urlAjax,
-                    async: true,
-                    success: function (res) {
-                        swal({
-                            title: res.Title,
-                            text: res.Text,
-                            icon: res.Icon,
-                            button: res.Button,
-                            dangerMode: res.DangerMode
-                        }).then(function () {
-                            console.log('Notification closed');
-                            location.reload(true);
-                        });
-                    }
-                });
-            }
-        });
+        icon: 'warning',
+        buttons: true
+    }).then((willSend) => {
+        if (willSend) {
+            $.ajax({
+                url: urlAjax,
+                type: 'POST', // Ensure the type is set correctly, usually POST for actions like this
+                success: function (res) {
+                    console.log(res);
+                    swal({
+                        title: res.Title,
+                        text: res.Text,
+                        icon: res.Icon,
+                        button: res.Button,
+                        dangerMode: res.DangerMode
+                    }).then(() => {
+                        console.log('Notification closed');
+                        location.reload(true);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    swal("Error", "There was an error sending the email.", "error");
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+    }).catch((err) => {
+        console.error('SweetAlert Error:', err);
+    });
 }
+

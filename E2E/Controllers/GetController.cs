@@ -62,10 +62,10 @@ namespace E2E.Controllers
                 await service.JobDaily();
 
                 //currentDay default is 8
-                //currentDay test is 4
+                //currentDay test is 5
                 int currentDay = DateTime.Today.Day;
 
-                if (currentDay == 4)
+                if (currentDay == 5)
                 {
                     await service.JobMonthly();
                 }
