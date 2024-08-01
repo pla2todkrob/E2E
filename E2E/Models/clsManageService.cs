@@ -1684,6 +1684,13 @@ namespace E2E.Models
                     };
                     db.Log_SendEmailTos.Add(log_SendEmailTo);
 
+                    log_SendEmailTo = new Log_SendEmailTo
+                    {
+                        SendEmailTo_Type = "cc",
+                        SendEmail_Id = log_SendEmail.SendEmail_Id,
+                        User_Id = services.Action_User_Id.Value
+                    };
+
                     await db.SaveChangesAsync();
                 }
 
