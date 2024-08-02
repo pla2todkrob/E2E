@@ -296,6 +296,7 @@ namespace E2E.Controllers
                            Service_Id = s.Service_Id,
                            Service_Key = s.Service_Key,
                            Service_Subject = s.Service_Subject,
+                           Status_Id = s.Status_Id,
                            Status_Class = s.System_Statuses.Status_Class,
                            Status_Name = s.System_Statuses.Status_Name,
                            Update = s.Update,

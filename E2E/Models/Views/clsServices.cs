@@ -65,7 +65,7 @@ namespace E2E.Models.Views
 
         [Display(Name = "Subject")]
         public string Service_Subject { get; set; }
-
+        public int Status_Id { get; set; }
         public string Status_Class { get; set; }
 
         [Display(Name = "Status")]

@@ -2,43 +2,68 @@
 
 @{
     Layout = null;
+    var groupedServices = Model.GroupBy(s => s.Status_Id)
+        .OrderBy(o => o.Key)
+        .ToList();
 }
 
-<table class="display table table-bordered table-hover nowrap w-100">
-    <thead>
-        <tr>
-            <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.System_Statuses.Status_Name)</th>
-            <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
-
-            <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
-            <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+        @foreach (var group in groupedServices)
         {
-            string txtColor = "";
-            if (item.Is_OverDue)
-            {
-                txtColor = "text-danger";
-            }
-        <tr class="@txtColor">
-            <td>@Html.DisplayFor(i => item.Create)</td>
-            <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
-            <td>
-                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
-                <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                @if (item.Status_Id == 1)
-                    {
-                <button type="button" class="btn" onclick="callModalService('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")','@Url.Action("GetOwnerUser","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
-                    }
-            </td>
-            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
-            <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
-            <td>@Html.DisplayFor(i => item.Update)</td>
-        </tr>
+            var status = group.Key; // Status Id
+            var statusName = group.First().System_Statuses.Status_Name; // Get Status Name
+            <li class="nav-item">
+                <a class="nav-link @(status == groupedServices.First().Key ? "active" : "")" id="tab-@status" data-toggle="tab" href="#content-@status" role="tab" aria-controls="content-@status" aria-selected="@(status == groupedServices.First().Key ? "true" : "false")">
+                    @statusName
+                </a>
+            </li>
         }
-    </tbody>
-</table>
+    </ul>
+</div>
+
+<div class="card-body tab-content">
+    @foreach (var group in groupedServices)
+    {
+        var statusId = group.Key;
+        <div class="tab-pane fade @(statusId == groupedServices.First().Key ? "show active" : "")" id="content-@statusId" role="tabpanel" aria-labelledby="tab-@statusId">
+            <table class="display table table-bordered table-hover nowrap w-100">
+                <thead>
+                    <tr>
+                        <th class="fit">@Html.DisplayNameFor(m => m.Create)</th>
+                        <th class="fit">@Html.DisplayNameFor(m => m.System_Statuses.Status_Name)</th>
+                        <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
+                        <th class="fit">@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
+                        <th class="fit">@Html.DisplayNameFor(m => m.Service_DueDate)</th>
+                        <th class="fit">@Html.DisplayNameFor(m => m.Update)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in group)
+                    {
+                        string txtColor = "";
+                        if (item.Is_OverDue)
+                        {
+                            txtColor = "text-danger";
+                        }
+                        <tr class="@txtColor">
+                            <td>@Html.DisplayFor(i => item.Create)</td>
+                            <td class="text-center"><span class="@item.System_Statuses.Status_Class">@Html.DisplayFor(i => item.System_Statuses.Status_Name)</span></td>
+                            <td>
+                                <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+                                <a href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+                                @if (item.Status_Id == 1)
+                                {
+                                    <button type="button" class="btn" onclick="callModalService('@Url.Action("Form","Services",new { id = item.Service_Id })','@Url.Action("GetPriorityDateRange","Services")','@Url.Action("GetOwnerUser","Services")',true)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                                }
+                            </td>
+                            <td class="text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+                            <td>@Html.DisplayFor(i => item.Service_DueDate)</td>
+                            <td>@Html.DisplayFor(i => item.Update)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
