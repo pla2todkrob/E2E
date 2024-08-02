@@ -110,7 +110,7 @@ namespace E2E.Controllers
                     {
                         scope.Complete();
                         swal.Icon = "success";
-
+                        model.Services = null;
                         swal.Option = model;
                     }
                     else
@@ -127,6 +127,8 @@ namespace E2E.Controllers
                 }
             }
 
+
+            Response.ContentType = "application/json";
             return Json(swal, JsonRequestBehavior.AllowGet);
         }
 

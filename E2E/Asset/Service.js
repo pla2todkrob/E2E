@@ -1,17 +1,9 @@
-﻿$(function () {
-    adjustHeight().then(function () {
-        $(window).resize(function () {
-            adjustHeight();
-        });
-    });
-});
-
-async function adjustHeight() {
+﻿function adjustHeight() {
     if ($(document).find('#serviceInfo').length) {
         $('#serviceComment').innerHeight(0);
         var infoHeight = $('#serviceInfo').innerHeight();
         $('#serviceComment').innerHeight(infoHeight);
-        await bottomFunction('#commentHis');
+        bottomFunction('#commentHis');
     }
 
     if ($(document).find('#refSection').length) {

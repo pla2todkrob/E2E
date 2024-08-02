@@ -5,8 +5,90 @@
     Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
 }
 @section scripts{
+    <script src="~/signalr/hubs" type="text/javascript"></script>
     <script src="~/Asset/Service.js"></script>
     <script>
+        $(function () {
+            reloadComment();
+            chat = $.connection.clsChatHub;
+
+            // Declare a function on the chat hub so the server can invoke it
+            chat.client.addChatMessage = function (message) {
+                reloadComment();
+            };
+
+            $.connection.hub.start(function (start) {
+                chat.server.joinGroup('@Model.Services.Service_Id');
+            });
+        });
+
+        function reloadComment() {
+
+            fetch('@Url.Action("_CommentHistory", "Services", new { id = Model.Services.Service_Id })')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                }).then(html => {
+                    document.getElementById('commentHis').innerHTML = html;
+                    fetch('@Url.Action("_Comment", "Services", new { id = Model.Services.Service_Id })')
+                        .then(response2 => {
+                            if (!response2.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response2.text();
+                        }).then(html2 => {
+                            document.getElementById('commentNew').innerHTML = html2;
+                            adjustHeight();
+                        }).catch(error2 => {
+                            console.error('Error loading the new comment:', error2);
+                        });
+                }).catch(error => {
+                    console.error('Error loading the comment history:', error);
+                });
+        }
+
+        $(document).on('submit', '#CommentForm', function (e) {
+            e.preventDefault();
+            var fd = new FormData(this);
+
+            $.ajax({
+                url: '@Url.Action("_Comment", "Services")',
+                method: "POST",
+                async: true,
+                data: fd,
+                processData: false,
+                contentType: false,
+                traditional: true,
+                success: function (res) {
+                    if (res.Icon != 'success') {
+                        swal({
+                            title: res.Title,
+                            text: res.Text,
+                            icon: res.Icon,
+                            button: res.Button,
+                            dangerMode: res.DangerMode
+                        });
+                    }
+                    else {
+                        chat.server.sendMessageToGroup(res.Option.Service_Id, res.Option.Comment_Content);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX error:", status, error, "Response:", xhr.responseText);
+                    swal({
+                        title: "AJAX Error",
+                        text: "Status: " + xhr.status + " - " + error,
+                        icon: "error",
+                        button: "OK"
+                    });
+                }
+
+            });
+            return false;
+        });
+
         $(document).on('submit', '#SetInProgressForm', function (e) {
             e.preventDefault();
             callSubmitRedirect('@Url.Action("SetInProgress", "Services")', this,'@Url.Action("ServiceInfomation", "Services")');
@@ -180,9 +262,8 @@
             <div class="card-header">
                 <h5 class="card-title">Comments</h5>
             </div>
-            <div class="card-body overflow-auto card-body-scrollable" id="commentHis">
-                @{ Html.RenderAction("_CommentHistory", "Services", new { id = Model.Services.Service_Id }); }
-            </div>
+            <div class="card-body overflow-auto card-body-scrollable" id="commentHis"></div>
+            <div class="card-footer" id="commentNew"></div>
         </div>
     </div>
 </div>

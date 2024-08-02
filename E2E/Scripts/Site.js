@@ -909,10 +909,8 @@ function formatDate(date) {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
     return date.toLocaleDateString('en-US', options);
 }
-async function bottomFunction(target, duration = 500) {
-    if ($(target).length > 0) {
-        await $(target).animate({ scrollTop: $(target)[0].scrollHeight }, duration);
-    }
+function bottomFunction(target, duration = 500) {
+    $(target).animate({ scrollTop: $(target)[0].scrollHeight }, duration);
 }
 // Function to set session value
 function setSessionValue(key, value) {
