@@ -171,11 +171,6 @@ namespace E2E.Models
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<UserDetails>()
-                .HasRequired(ud => ud.Users)
-                .WithOptional(u => u.UserDetails)
-                .WillCascadeOnDelete(true);
         }
 
         public override int SaveChanges()

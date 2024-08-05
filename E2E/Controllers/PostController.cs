@@ -124,7 +124,7 @@ namespace E2E.Controllers
                         if (string.IsNullOrEmpty(users.Username))
                         {
                             ClsActiveDirectoryInfo adInfo = master.GetAdInfo(users.User_Code);
-                            if (!string.IsNullOrEmpty(adInfo.SamAccountName))
+                            if (adInfo != null)
                             {
                                 users.Username = adInfo.SamAccountName;
                                 users.User_Email = adInfo.EmailAddress;

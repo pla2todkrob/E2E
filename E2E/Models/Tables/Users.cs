@@ -59,7 +59,5 @@ namespace E2E.Models.Tables
         public string Username { get; set; }
 
         public int YearSetPoint { get; set; }
-
-        public virtual UserDetails UserDetails { get; set; }
     }
 }

@@ -892,7 +892,6 @@ namespace E2E.Models
 
         public async Task<bool> ServiceChangeDueDate_Request(ServiceChangeDueDate model, string methodName)
         {
-            DateTime dateTime = DateTime.Now;
             Guid userId = Guid.Parse(HttpContext.Current.User.Identity.Name);
             model.User_Id = userId;
             db.Entry(model).State = EntityState.Added;
@@ -1517,8 +1516,8 @@ namespace E2E.Models
             clsMail.SendCCs.Clear();
             clsMail.SendTos.Clear();
 
-            clsMail.SendCCs.Add(services.User_Id);
             clsMail.SendTos.Add(services.Action_User_Id.Value);
+            clsMail.SendCCs.Add(services.User_Id);
             return await clsMail.SendMail(clsMail);
         }
 
@@ -1564,17 +1563,14 @@ namespace E2E.Models
 
         public async Task<bool> Services_SetCommit(Services model, string methodName)
         {
-            bool res = new bool();
             if (model.Action_User_Id.HasValue)
             {
-                res = await Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value, methodName);
+                return await Services_SetToUser(model.Service_Id, model.Department_Id.Value, model.Action_User_Id.Value, methodName);
             }
             else
             {
-                res = await Services_SetToDepartment(model.Service_Id, methodName, model.Department_Id);
+                return await Services_SetToDepartment(model.Service_Id, methodName, model.Department_Id);
             }
-
-            return res;
         }
 
         public async Task<bool> Services_SetComplete(ServiceComments model, string methodName)
@@ -1647,6 +1643,7 @@ namespace E2E.Models
                 SendEmail_Id = log_SendEmail.SendEmail_Id,
                 User_Id = services.Action_User_Id.Value
             };
+            db.Log_SendEmailTos.Add(log_SendEmailTo);
 
             await db.SaveChangesAsync();
 
