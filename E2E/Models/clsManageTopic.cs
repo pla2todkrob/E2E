@@ -286,46 +286,41 @@ namespace E2E.Models
 
         public async Task<bool> Board_Comment_Insert(TopicComments model)
         {
-            try
+            TopicComments topicComments = new TopicComments
             {
-                bool res = new bool();
-                TopicComments topicComments = new TopicComments
-                {
-                    Topic_Id = model.Topic_Id,
-                    Comment_Content = model.Comment_Content,
-                    User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
-                };
+                Topic_Id = model.Topic_Id,
+                Comment_Content = model.Comment_Content,
+                User_Id = Guid.Parse(HttpContext.Current.User.Identity.Name)
+            };
 
-                db.TopicComments.Add(topicComments);
-                if (db.SaveChanges() > 0)
-                {
-                    var query = db.Topics.Find(model.Topic_Id);
+            db.TopicComments.Add(topicComments);
+            await db.SaveChangesAsync();
 
-                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                    linkUrl = linkUrl.Replace("Boards_Comment", "Boards_Form");
-                    linkUrl += "/" + query.Topic_Id;
+            var query = db.Topics.Find(model.Topic_Id);
 
-                    string subject = string.Format("[Notify new comment] {0}", query.Topic_Title);
-                    string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(topicComments.User_Id.Value));
-                    content += "<br />";
-                    content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
-                    content += "</p>";
-                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                    content += "<p>Thank you for your consideration</p>";
-                    clsMail.SendTos.Add(query.User_Id);
-                    clsMail.Subject = subject;
-                    clsMail.Body = content;
-                    res = await clsMail.SendMail(clsMail);
+            var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+            linkUrl = linkUrl.Replace("Boards_Comment", "Boards_Form");
+            linkUrl += "/" + query.Topic_Id;
 
-                    Board_CountComment_Update(model);
-                }
+            string subject = string.Format("[Notify new comment] {0}", query.Topic_Title);
+            string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(topicComments.User_Id.Value));
+            content += "<br />";
+            content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
+            content += "</p>";
+            content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+            content += "<p>Thank you for your consideration</p>";
 
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            clsMail.AttachPaths.Clear();
+            clsMail.SendBCCs.Clear();
+            clsMail.SendCCs.Clear();
+            clsMail.SendTos.Clear();
+
+            clsMail.SendTos.Add(query.User_Id);
+            clsMail.Subject = subject;
+            clsMail.Body = content;
+            await clsMail.SendMail(clsMail);
+
+            return Board_CountComment_Update(model);
         }
 
         public async Task<bool> Board_Comment_Save(TopicComments model)
@@ -445,7 +440,6 @@ namespace E2E.Models
         {
             try
             {
-                bool res = new bool();
                 var DBTopicComment = db.TopicComments.Where(w => w.TopicComment_Id == model.TopicComment_Id).FirstOrDefault();
                 TopicComments topicComments = new TopicComments
                 {
@@ -456,30 +450,31 @@ namespace E2E.Models
                 };
 
                 db.TopicComments.Add(topicComments);
-                if (db.SaveChanges() > 0)
-                {
-                    //var query = db.TopicComments.Where(w => w.Topic_Id == model.Topic_Id).Select(s=>s.).FirstOrDefault();
+                await db.SaveChangesAsync();
 
-                    var linkUrl = HttpContext.Current.Request.Url.OriginalString;
-                    linkUrl = linkUrl.Replace("Boards_Reply", "Boards_Form");
-                    linkUrl += "/" + DBTopicComment.Topics.Topic_Id;
+                var linkUrl = HttpContext.Current.Request.Url.OriginalString;
+                linkUrl = linkUrl.Replace("Boards_Reply", "Boards_Form");
+                linkUrl += "/" + DBTopicComment.Topics.Topic_Id;
 
-                    string subject = string.Format("[Notify new comment] {0}", DBTopicComment.Topics.Topic_Title);
-                    string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(DBTopicComment.User_Id.Value));
-                    content += "<br />";
-                    content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
-                    content += "</p>";
-                    content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
-                    content += "<p>Thank you for your consideration</p>";
-                    clsMail.SendTos.Add(DBTopicComment.User_Id.Value);
-                    clsMail.Subject = subject;
-                    clsMail.Body = content;
-                    res = await clsMail.SendMail(clsMail);
+                string subject = string.Format("[Notify new comment] {0}", DBTopicComment.Topics.Topic_Title);
+                string content = string.Format("<p><b>To:</b> {0}", master.Users_GetInfomation(DBTopicComment.User_Id.Value));
+                content += "<br />";
+                content += string.Format("<b>Comment:</b> {0}", model.Comment_Content);
+                content += "</p>";
+                content += string.Format("<a href='{0}'>Please, click here to more detail.</a>", linkUrl);
+                content += "<p>Thank you for your consideration</p>";
 
-                    Board_CountComment_Update(DBTopicComment);
-                }
+                clsMail.AttachPaths.Clear();
+                clsMail.SendBCCs.Clear();
+                clsMail.SendCCs.Clear();
+                clsMail.SendTos.Clear();
 
-                return res;
+                clsMail.SendTos.Add(DBTopicComment.User_Id.Value);
+                clsMail.Subject = subject;
+                clsMail.Body = content;
+                await clsMail.SendMail(clsMail);
+
+                return Board_CountComment_Update(DBTopicComment);
             }
             catch (Exception)
             {

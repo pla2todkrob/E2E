@@ -4,32 +4,36 @@
     Layout = null;
 }
 
-<h5>Satisfaction results</h5>
-<table class="table table-bordered table-hover table-striped table-light">
-    <thead>
-        <tr>
-            <th class="text-center">#</th>
-            <th>Topic</th>
-            <th class="text-center">Point</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.SatisfactionDetails)
-        {
-        <tr>
-            <td class="text-center">@Html.DisplayFor(m => item.Master_InquiryTopics.InquiryTopic_Index)</td>
-            <td>
-                @Html.DisplayFor(m => item.Master_InquiryTopics.Description_TH)<br />
-                <small>@Html.DisplayFor(m => item.Master_InquiryTopics.Description_EN)</small>
-            </td>
-            <td class="text-center">@Html.DisplayFor(m => item.Point)</td>
-        </tr>
-        }
-    </tbody>
-    <tfoot>
-        <tr>
-            <th colspan="2" class="text-right">@Html.DisplayNameFor(m => m.Satisfactions.Satisfaction_Average)</th>
-            <th class="text-center">@Html.DisplayFor(m => m.Satisfactions.Satisfaction_Average)</th>
-        </tr>
-    </tfoot>
-</table>
+@if (Model != null)
+{
+    <h5>Satisfaction results</h5>
+    <table class="table table-bordered table-hover table-striped table-light">
+        <thead>
+            <tr>
+                <th class="text-center">#</th>
+                <th>Topic</th>
+                <th class="text-center">Point</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SatisfactionDetails)
+            {
+                <tr>
+                    <td class="text-center">@Html.DisplayFor(m => item.Master_InquiryTopics.InquiryTopic_Index)</td>
+                    <td>
+                        @Html.DisplayFor(m => item.Master_InquiryTopics.Description_TH)<br />
+                        <small>@Html.DisplayFor(m => item.Master_InquiryTopics.Description_EN)</small>
+                    </td>
+                    <td class="text-center">@Html.DisplayFor(m => item.Point)</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="2" class="text-right">@Html.DisplayNameFor(m => m.Satisfactions.Satisfaction_Average)</th>
+                <th class="text-center">@Html.DisplayFor(m => m.Satisfactions.Satisfaction_Average)</th>
+            </tr>
+        </tfoot>
+    </table>
+}
+

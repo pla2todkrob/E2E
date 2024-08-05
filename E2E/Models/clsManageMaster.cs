@@ -531,6 +531,15 @@ namespace E2E.Models
                 userDetails.Detail_Password = null;
                 userDetails.Detail_ConfirmPassword = null;
             }
+            else
+            {
+                string password = string.IsNullOrEmpty(model.Detail_Password)
+                    ? users.User_Code.Trim()
+                    : model.Detail_Password.Trim();
+                string hashPassword = Users_Password(password);
+                userDetails.Detail_Password = hashPassword;
+                userDetails.Detail_ConfirmPassword = hashPassword;
+            }
 
             return db.SaveChanges() > 0;
         }
@@ -797,48 +806,41 @@ namespace E2E.Models
 
         public ClsActiveDirectoryInfo GetAdInfo(string code)
         {
-            try
+            ClsActiveDirectoryInfo res = null;
+            string domainName = ConfigurationManager.AppSettings["DomainName"];
+            using (var context = new PrincipalContext(ContextType.Domain, domainName))
             {
-                ClsActiveDirectoryInfo res = new ClsActiveDirectoryInfo();
-                string domainName = ConfigurationManager.AppSettings["DomainName"];
-                using (var context = new PrincipalContext(ContextType.Domain, domainName))
+                UserPrincipal user = new UserPrincipal(context)
                 {
-                    UserPrincipal user = new UserPrincipal(context)
-                    {
-                        Description = code.Trim()
-                    };
+                    Description = code.Trim()
+                };
 
-                    PrincipalSearcher searcher = new PrincipalSearcher
+                PrincipalSearcher searcher = new PrincipalSearcher
+                {
+                    QueryFilter = user
+                };
+                Principal principal = searcher.FindOne();
+                if (principal != null)
+                {
+                    if (principal is UserPrincipal userPrincipal)
                     {
-                        QueryFilter = user
-                    };
-                    Principal principal = searcher.FindOne();
-                    if (principal != null)
-                    {
-                        if (principal is UserPrincipal userPrincipal)
+                        res = new ClsActiveDirectoryInfo()
                         {
-                            res = new ClsActiveDirectoryInfo()
-                            {
-                                Description = userPrincipal.Description,
-                                DisplayName = userPrincipal.DisplayName,
-                                DistinguishedName = userPrincipal.DistinguishedName,
-                                Guid = userPrincipal.Guid,
-                                Name = userPrincipal.Name,
-                                SamAccountName = userPrincipal.SamAccountName,
-                                Sid = userPrincipal.Sid,
-                                StructuralObjectClass = userPrincipal.StructuralObjectClass,
-                                EmailAddress = userPrincipal.EmailAddress,
-                            };
-                        }
+                            Description = userPrincipal.Description,
+                            DisplayName = userPrincipal.DisplayName,
+                            DistinguishedName = userPrincipal.DistinguishedName,
+                            Guid = userPrincipal.Guid,
+                            Name = userPrincipal.Name,
+                            SamAccountName = userPrincipal.SamAccountName,
+                            Sid = userPrincipal.Sid,
+                            StructuralObjectClass = userPrincipal.StructuralObjectClass,
+                            EmailAddress = userPrincipal.EmailAddress,
+                        };
                     }
                 }
+            }
 
-                return res;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return res;
         }
 
         public string GetDepartmentNameForUser(Guid userId)
