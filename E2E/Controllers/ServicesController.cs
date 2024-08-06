@@ -1149,10 +1149,11 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Report_KPI_Unsatisfied(int year, int? month, Guid? userId)
+        public async Task<ActionResult> Report_KPI_Unsatisfied(int year, int? month, Guid? userId)
         {
+            Guid departmentId = await GetDepartmentIdAsync(loginId);
             IQueryable<Satisfactions> jobUnsat = db.Satisfactions
-                .Where(w => w.Unsatisfied && w.Create.Year == year)
+                .Where(w => w.Unsatisfied && w.Create.Year == year && w.Services.Department_Id == departmentId)
                 .OrderBy(o => o.Services.Create);
             if (month.HasValue)
             {
@@ -1198,10 +1199,11 @@ namespace E2E.Controllers
             }
         }
 
-        public ActionResult Report_KPI_Overdue(int year, int? month, Guid? userId)
+        public async Task<ActionResult> Report_KPI_Overdue(int year, int? month, Guid? userId)
         {
+            Guid departmentId = await GetDepartmentIdAsync(loginId);
             IQueryable<Services> services = db.Services
-                .Where(w => w.Update.Value.Year == year && w.Is_OverDue)
+                .Where(w => w.Update.Value.Year == year && w.Is_OverDue && w.Department_Id == departmentId)
                 .OrderBy(o => o.Create);
             if (month.HasValue)
             {
@@ -2319,22 +2321,66 @@ namespace E2E.Controllers
                 Overviews = monthlyOverviews
             };
 
+            // Determine the end month for green lines
+            DateTime currentDate = DateTime.Now;
+
+            int greenEndMonth;
+            if (currentDate.Year > year)
+            {
+                if (currentDate.Month == 1) // January case
+                {
+                    greenEndMonth = currentDate.Day < 8 ? 11 : 12; // January 1-7: Jan-Nov, January 8 onwards: Jan-Dec
+                }
+                else
+                {
+                    greenEndMonth = 12; // Whole year should be green
+                }
+            }
+            else if (currentDate.Year == year)
+            {
+                greenEndMonth = currentDate.Day < 8 ? currentDate.Month - 2 : currentDate.Month - 1;
+                greenEndMonth = greenEndMonth < 1 ? 12 : greenEndMonth; // Handle wrap-around to previous year
+            }
+            else
+            {
+                greenEndMonth = 0; // No month should be green
+            }
+
+            ViewBag.GreenEndMonth = greenEndMonth;
+
             return View(clsServiceKPI);
         }
 
         private async Task<List<MonthlyServices>> GetServicesByMonthAsync(int year, Guid departmentId, bool isCreated)
         {
-            return await db.Services.AsNoTracking()
-                .Where(s => (isCreated ? s.Create.Year == year : s.Update.Value.Year == year) && s.Department_Id == departmentId)
-                .GroupBy(s => s.Create.Month)
-                .Select(g => new MonthlyServices
-                {
-                    Month = g.Key,
-                    Services = g.ToList()
-                })
-                .OrderBy(ms => ms.Month)
-                .ToListAsync();
+            if (isCreated)
+            {
+                return await db.Services.AsNoTracking()
+                    .Where(s => s.Create.Year == year && s.Department_Id == departmentId)
+                    .GroupBy(s => s.Create.Month)
+                    .Select(g => new MonthlyServices
+                    {
+                        Month = g.Key,
+                        Services = g.ToList()
+                    })
+                    .OrderBy(ms => ms.Month)
+                    .ToListAsync();
+            }
+            else
+            {
+                return await db.Services.AsNoTracking()
+                    .Where(s => s.Update.HasValue && s.Update.Value.Year == year && s.Department_Id == departmentId)
+                    .GroupBy(s => s.Update.Value.Month)
+                    .Select(g => new MonthlyServices
+                    {
+                        Month = g.Key,
+                        Services = g.ToList()
+                    })
+                    .OrderBy(ms => ms.Month)
+                    .ToListAsync();
+            }
         }
+
 
         private Expression<Func<Services, bool>> CreateYearPredicate(int year, bool isCreated)
         {
@@ -2437,6 +2483,42 @@ namespace E2E.Controllers
             public int Month { get; set; }
             public List<Services> Services { get; set; }
         }
+
+        public async Task SetUpdateFromCommentComplete()
+        {
+            var commentComplete = await db.ServiceComments
+                .AsNoTracking()
+                .Where(w => w.Comment_Content.StartsWith("Complete task"))
+                .Select(s => new
+                {
+                    s.Service_Id,
+                    s.Create
+                }).ToListAsync();
+
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                foreach (var item in commentComplete)
+                {
+                    var service = await db.Services.FindAsync(item.Service_Id);
+                    if (service != null)
+                    {
+                        service.Update = item.Create;
+                    }
+                }
+
+                try
+                {
+                    await db.SaveChangesAsync();
+                    scope.Complete();
+                }
+                catch (Exception)
+                {
+                    // Handle the exception (e.g., log it)
+                    throw;  // or handle accordingly
+                }
+            }
+        }
+
 
         public async Task<ActionResult> YearlyReportIndividual(int year)
         {

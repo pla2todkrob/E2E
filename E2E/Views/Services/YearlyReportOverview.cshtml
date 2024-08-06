@@ -5,6 +5,7 @@
     var formulaOntime = string.Format("(({0} - {1}) / {0}) * 100", Html.DisplayNameFor(m => m.Overviews.First().CompletedTotal), Html.DisplayNameFor(m => m.Overviews.First().Overdue));
     var formulaSat = string.Format("(({0} - {1}) / {0}) * 100", Html.DisplayNameFor(m => m.Overviews.First().ClosedTotal), Html.DisplayNameFor(m => m.Overviews.First().Unsatisfied));
     var formulaRemaining = string.Format("({0} - {1} - {2}) of last year", Html.DisplayNameFor(m => m.Overviews.First().Total), Html.DisplayNameFor(m => m.Overviews.First().CompletedTotal), Html.DisplayNameFor(m => m.Overviews.First().RejectedTotal));
+    int greenEndMonth = ViewBag.GreenEndMonth;
 }
 
 <p>
@@ -35,7 +36,7 @@
             <th rowspan="2">
                 @Html.DisplayNameFor(m => m.Overviews.First().Rejected)
             </th>
-            <th colspan="8" class="text-center table-primary">
+            <th colspan="8" class="text-center table-info">
                 Accumulate
             </th>
         </tr>
@@ -69,54 +70,55 @@
     <tbody>
         @foreach (var item in Model.Overviews)
         {
-        <tr>
-            <th>
-                @Html.DisplayFor(m => item.Month)
-            </th>
-            <td>
-                @Html.DisplayFor(m => item.Incoming)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.Completed)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.CloseAuto)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.CloseManual)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.Closed)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.Rejected)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.Total)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.CompletedTotal)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.ClosedTotal)
-            </td>
-            <td>
-                @Html.DisplayFor(m => item.RejectedTotal)
-            </td>
-            <td>
-                <a href="javascript:callOverdueModal(@item.NumberYear, @item.NumberMonth, null);" data-month="@item.NumberMonth" data-year="@item.NumberYear" >@Html.DisplayFor(m => item.Overdue)</a>
-            </td>
-            <td class="@(item.Ontime >= 0.90 ? "text-success" : "text-danger")">
-                <i class="@(item.Ontime >= 0.90 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Ontime.ToString("P")
-            </td>
-            <td>
-                <a href="javascript:callUnsatisfiedModal(@item.NumberYear, @item.NumberMonth, null);" data-month="@item.NumberMonth" data-year="@item.NumberYear" >@Html.DisplayFor(m => item.Unsatisfied)</a>
-            </td>
-            <td class="@(item.Satisfied >= 0.96 ? "text-success" : "text-danger")">
-                <i class="@(item.Satisfied >= 0.96 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Satisfied.ToString("P")
-            </td>
+            string rowClass = item.NumberMonth <= greenEndMonth ? "table-success" : "";
+            <tr class="@rowClass">
+                <th>
+                    @Html.DisplayFor(m => item.Month)
+                </th>
+                <td>
+                    @Html.DisplayFor(m => item.Incoming)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Completed)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.CloseAuto)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.CloseManual)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Closed)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Rejected)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.Total)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.CompletedTotal)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.ClosedTotal)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => item.RejectedTotal)
+                </td>
+                <td>
+                    <a href="javascript:callOverdueModal(@item.NumberYear, @item.NumberMonth, null);" data-month="@item.NumberMonth" data-year="@item.NumberYear">@Html.DisplayFor(m => item.Overdue)</a>
+                </td>
+                <td class="@(item.Ontime >= 0.90 ? "text-success" : "text-danger")">
+                    <i class="@(item.Ontime >= 0.90 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Ontime.ToString("P")
+                </td>
+                <td>
+                    <a href="javascript:callUnsatisfiedModal(@item.NumberYear, @item.NumberMonth, null);" data-month="@item.NumberMonth" data-year="@item.NumberYear">@Html.DisplayFor(m => item.Unsatisfied)</a>
+                </td>
+                <td class="@(item.Satisfied >= 0.96 ? "text-success" : "text-danger")">
+                    <i class="@(item.Satisfied >= 0.96 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Satisfied.ToString("P")
+                </td>
 
-        </tr>
+            </tr>
         }
     </tbody>
     <tfoot>

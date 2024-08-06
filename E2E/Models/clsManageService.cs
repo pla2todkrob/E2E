@@ -1494,7 +1494,6 @@ namespace E2E.Models
         {
             System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
             services.Status_Id = system_Statuses.Status_Id;
-            services.Update = DateTime.Now.AddDays(-DateTime.Now.Day);
             services.Is_AutoClose = isAuto;
             db.Entry(services).State = EntityState.Modified;
             await db.SaveChangesAsync();
@@ -1528,7 +1527,6 @@ namespace E2E.Models
             {
                 System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
                 services.Status_Id = system_Statuses.Status_Id;
-                services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 await db.SaveChangesAsync();
 
