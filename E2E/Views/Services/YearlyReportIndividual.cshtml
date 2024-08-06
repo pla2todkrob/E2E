@@ -71,13 +71,13 @@
                     @Html.DisplayFor(m => item.Rejected)
                 </td>
                 <td>
-                    <a href="#" data-year="@item.NumberYear" data-userId="@item.UserId" class="viewOverdue">@Html.DisplayFor(m => item.Overdue)</a>
+                    <a href="javascript:callOverdueModal(@item.NumberYear, null, '@item.UserId');" data-year="@item.NumberYear" data-userId="@item.UserId" >@Html.DisplayFor(m => item.Overdue)</a>
                 </td>
                 <td class="@(item.Ontime >= 0.90 ? "text-success" : "text-danger")">
                     <i class="@(item.Ontime >= 0.90 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Ontime.ToString("P")
                 </td>
                 <td>
-                    <a href="#" data-year="@item.NumberYear" data-userId="@item.UserId" class="viewUnsatisfied">@Html.DisplayFor(m => item.Unsatisfied)</a>
+                    <a href="javascript:callUnsatisfiedModal(@item.NumberYear, null, '@item.UserId');" data-year="@item.NumberYear" data-userId="@item.UserId">@Html.DisplayFor(m => item.Unsatisfied)</a>
                 </td>
                 <td class="@(item.Satisfied >= 0.96 ? "text-success" : "text-danger")">
                     <i class="@(item.Satisfied >= 0.96 ? "fa fa-caret-up" : "fa fa-caret-down")"></i> @item.Satisfied.ToString("P")

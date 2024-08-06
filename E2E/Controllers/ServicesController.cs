@@ -2364,8 +2364,11 @@ namespace E2E.Controllers
             int cumulativeCompleted = 0, cumulativeManualClose = 0, cumulativeClosed = 0, cumulativeOverdue = 0, cumulativeUnsatisfied = 0, cumulativeRejected = 0;
 
             var monthlyOverviews = new List<ClsServiceKPI.Overview>();
+            // ตรวจสอบว่าปีที่เลือกเป็นปีปัจจุบันหรือไม่
+            int currentYear = DateTime.Now.Year;
+            int monthLimit = (year == currentYear) ? DateTime.Now.Month : 12;
 
-            for (int month = 1; month <= 12; month++)
+            for (int month = 1; month <= monthLimit; month++) // เปลี่ยนจาก month <= 12 เป็น month <= currentMonth
             {
                 var createdData = createdServicesByMonth.FirstOrDefault(c => c.Month == month);
                 var updatedData = updatedServicesByMonth.FirstOrDefault(u => u.Month == month);
@@ -2414,6 +2417,7 @@ namespace E2E.Controllers
 
             return monthlyOverviews;
         }
+
 
         private int CalculateUnsatisfiedServices(List<Services> services)
         {

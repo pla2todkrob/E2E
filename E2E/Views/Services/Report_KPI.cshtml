@@ -199,22 +199,6 @@
                         success: function (viewDataIndividual) {
                             document.getElementById('dataIndividual').innerHTML = viewDataIndividual;
                             $('[data-toggle="tooltip"]').tooltip();
-
-                            document.querySelectorAll('.viewOverdue').forEach(function (v, i) {
-                                v.addEventListener('click', function () {
-                                    var dataMonth = $(this).data('month');
-                                    var dataUserId = $(this).data('userid');
-                                    callOverdueModal(year, dataMonth, dataUserId);
-                                });
-                            });
-
-                            document.querySelectorAll('.viewUnsatisfied').forEach(function (v, i) {
-                                v.addEventListener('click', function () {
-                                    var dataMonth = $(this).data('month');
-                                    var dataUserId = $(this).data('userid');
-                                    callUnsatisfiedModal(year, dataMonth, dataUserId);
-                                });
-                            });
                         }
                     });
                 }
