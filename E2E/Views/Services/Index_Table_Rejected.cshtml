@@ -1,0 +1,44 @@
+﻿@model IEnumerable<E2E.Models.Views.ClsServiceViewTable>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-hover nowrap w-100">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Update)</th>
+            <th>@Html.DisplayNameFor(m => m.Subject)</th>
+            <th>@Html.DisplayNameFor(m => m.Requester)</th>
+            <th>@Html.DisplayNameFor(m => m.System_Priorities.Priority_Name)</th>
+            <th>@Html.DisplayNameFor(m => m.Duedate)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="fit">@Html.DisplayFor(i => item.Update)</td>
+
+                <td class="text-wrap">
+                    <small class="font-weight-bold">[@Html.DisplayFor(i => item.Key)]</small><br />
+                    <a href="@Url.Action("ServiceInfomation", "Services", new { id = item.ServiceId })">@Html.DisplayFor(i => item.Subject)</a>
+                    @{
+
+                        if (Guid.Equals(item.ActionBy, ViewBag.UserNames))
+                        {
+                            <span class="badge badge-danger">MY TASK</span>
+                        }
+
+                    }
+                </td>
+
+                <td class="fit text-center">@Html.DisplayFor(i => item.Requester)</td>
+
+                <td class="fit text-center"><span class="@Html.ValueFor(i => item.System_Priorities.Priority_Class)">@Html.DisplayFor(i => item.System_Priorities.Priority_Name)</span></td>
+
+                <td class="fit">@Html.DisplayFor(i => item.Duedate)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1114,6 +1114,7 @@
     <Content Include="Views\Services\YearlyReportOverview.cshtml" />
     <Content Include="Views\Services\SetRequestReject.cshtml" />
     <Content Include="Views\Services\YearlyReportIndividual.cshtml" />
+    <Content Include="Views\Services\Index_Table_Rejected.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

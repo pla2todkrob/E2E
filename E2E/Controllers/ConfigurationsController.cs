@@ -184,12 +184,12 @@ namespace E2E.Controllers
                     {
                         if (authId == 3)
                         {
-                            res = clsManageService.Services_GetWaitActionCount(loginId);
+                            res = clsManageService.Services_GetWaitAction_IQ(loginId).Count();
                         }
                         else
                         {
                             res = clsManageService.Services_GetWaitCommitCount();
-                            res += clsManageService.Services_GetWaitActionCount(loginId);
+                            res += clsManageService.Services_GetWaitAction_IQ(loginId).Count();
                         }
                     }
                     else

@@ -1067,12 +1067,12 @@ namespace E2E.Controllers
             return View();
         }
 
-        public ActionResult Index_Table_WaitAction()
+        public async Task<ActionResult> Index_Table_WaitAction()
         {
             try
             {
-                List<ClsServiceViewTable> clsServiceViewTables = data.Services_GetWaitAction_IQ(loginId)
-                    .AsEnumerable()
+                List<Services> services = await WaitActionList();
+                List<ClsServiceViewTable> clsServiceViewTables = services
                      .Select(s => new ClsServiceViewTable()
                      {
                          ActionBy = s.Action_User_Id.HasValue ? Users_GetName(s.Action_User_Id.Value) : "",
@@ -1098,6 +1098,53 @@ namespace E2E.Controllers
             }
         }
 
+        private async Task<List<Services>> WaitActionList()
+        {
+            Guid departmentId = await GetDepartmentIdAsync(loginId);
+            List<Services> services = await db.Services
+                .AsNoTracking()
+                .Where(w => w.Is_Commit && w.Status_Id == 1 && (w.Is_Approval || !w.Is_MustBeApproved) && w.Department_Id == departmentId && (w.Action_User_Id.HasValue == false || w.Action_User_Id.Value == loginId))
+                .OrderByDescending(service => service.Priority_Id)
+                .ThenBy(service => new { service.Create, service.Service_DueDate })
+                .ToListAsync();
+
+            return services;
+        }
+
+        public async Task<ActionResult> Index_Table_Rejected()
+        {
+            try
+            {
+                Guid departmentId = await GetDepartmentIdAsync(loginId);
+                List<Services> services = await db.Services
+                    .AsNoTracking()
+                    .Where(w => w.Department_Id == departmentId && w.Action_User_Id.HasValue == false && w.Status_Id == 5)
+                    .ToListAsync();
+
+                List<ClsServiceViewTable> clsServiceViewTables = services
+                    .Select(s => new ClsServiceViewTable()
+                    {
+                        Create = s.Create,
+                        Subject = s.Service_Subject,
+                        Duedate = s.Service_DueDate,
+                        Estimate_time = s.Service_EstimateTime,
+                        Key = s.Service_Key,
+                        Requester = Users_GetName(s.User_Id),
+                        Update = s.Update,
+                        ServiceId = s.Service_Id,
+                        System_Priorities = s.System_Priorities,
+                        System_Statuses = s.System_Statuses
+                    }).ToList();
+
+                ViewBag.UserNames = Users_GetName(loginId);
+
+                return View(clsServiceViewTables);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public ActionResult Index_Table_WaitCommit()
         {
             try

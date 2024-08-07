@@ -23,7 +23,10 @@
                 callTable_NoSort( '@Url.Action("Index_Table_WaitCommit", "Services")', '#waitingCommit');
             }
 
-            callTable_NoSort( '@Url.Action("Index_Table_WaitAction", "Services")', '#waitingAction');
+            callTable_NoSort('@Url.Action("Index_Table_WaitAction", "Services")', '#waitingAction').then(function () {
+                callTable_NoSort('@Url.Action("Index_Table_Rejected", "Services")', '#rejected');
+            });
+
         }
     </script>
 }
@@ -56,6 +59,9 @@
             <li class="nav-item">
                 <a class="nav-link @(isAuthorizeIndex3 ? "active" : "")" id="waiting-action-tab" data-toggle="tab" href="#waitingAction" role="tab" aria-controls="waitingAction" aria-selected="@(isAuthorizeIndex3 ? "true" : "false")">Waiting Action</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="rejected-tab" data-toggle="tab" href="#rejected" role="tab" aria-controls="rejected">Rejected</a>
+            </li>
         </ul>
     </div>
     <div class="card-body">
@@ -67,6 +73,9 @@
                 </div>
             }
             <div class="tab-pane fade @(isAuthorizeIndex3 ? "show active" : "")" id="waitingAction" role="tabpanel" aria-labelledby="waiting-action-tab">
+                <div class="row"></div>
+            </div>
+            <div class="tab-pane fade" id="rejected" role="tabpanel" aria-labelledby="rejected-tab">
                 <div class="row"></div>
             </div>
         </div>

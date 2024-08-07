@@ -1191,18 +1191,6 @@ namespace E2E.Models
             }
         }
 
-        public int Services_GetWaitActionCount(Guid? id = null)
-        {
-            try
-            {
-                return Services_GetWaitAction_IQ(id).Count();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public IQueryable<Services> Services_GetWaitCommit_IQ()
         {
             try
