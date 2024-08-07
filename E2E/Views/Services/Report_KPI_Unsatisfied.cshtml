@@ -15,6 +15,7 @@
         <table class="display table table-bordered table-hover nowrap w-100">
             <thead>
                 <tr>
+                    <th>@Html.DisplayNameFor(m => m.Updated)</th>
                     <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
                     <th>@Html.DisplayNameFor(m => m.UserRequest)</th>
                     <th>@Html.DisplayNameFor(m => m.UserAction)</th>
@@ -24,14 +25,15 @@
                 @foreach (var item in Model)
                 {
 
-                    <tr>
-                        <td class="text-wrap">
-                            <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
-                            <a target="_blank" href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
-                        </td>
-                        <td>@Html.DisplayFor(i => item.UserRequest)</td>
-                        <td>@Html.DisplayFor(i => item.UserAction)</td>
-                    </tr>
+                <tr>
+                    <td class="fit">@Html.DisplayFor(i => item.Updated)</td>
+                    <td class="text-wrap">
+                        <small class="font-weight-bold">[@Html.DisplayFor(i => item.Service_Key)]</small><br />
+                        <a target="_blank" href="@Url.Action("ServiceInfomation","Services",new { id = item.Service_Id })">@Html.DisplayFor(i => item.Service_Subject)</a>
+                    </td>
+                    <td class="fit">@Html.DisplayFor(i => item.UserRequest)</td>
+                    <td class="fit">@Html.DisplayFor(i => item.UserAction)</td>
+                </tr>
                 }
             </tbody>
         </table>

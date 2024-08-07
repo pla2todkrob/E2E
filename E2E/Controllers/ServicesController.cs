@@ -1154,7 +1154,7 @@ namespace E2E.Controllers
             Guid departmentId = await GetDepartmentIdAsync(loginId);
             IQueryable<Satisfactions> jobUnsat = db.Satisfactions
                 .Where(w => w.Unsatisfied && w.Create.Year == year && w.Services.Department_Id == departmentId)
-                .OrderBy(o => o.Services.Create);
+                .OrderByDescending(o => o.Create);
             if (month.HasValue)
             {
                 jobUnsat = jobUnsat.Where(w => w.Create.Month <= month.Value);
@@ -1171,7 +1171,8 @@ namespace E2E.Controllers
                     s.Services.Service_Key,
                     s.Services.Service_Subject,
                     ActionUserId = s.Services.Action_User_Id.Value,
-                    RequestUserId = s.Services.User_Id
+                    RequestUserId = s.Services.User_Id,
+                    Updated = s.Services.Update.Value
                 }).ToList();
 
             List<ReportKPI_Unsatisfied> unsatisfieds = interimResults
@@ -1181,7 +1182,8 @@ namespace E2E.Controllers
                     Service_Key = s.Service_Key,
                     Service_Subject = s.Service_Subject,
                     UserAction = master.Users_GetInfomation(s.ActionUserId),
-                    UserRequest = master.Users_GetInfomation(s.RequestUserId)
+                    UserRequest = master.Users_GetInfomation(s.RequestUserId),
+                    Updated = s.Updated
                 }).ToList();
 
             return View(unsatisfieds);
@@ -1204,7 +1206,7 @@ namespace E2E.Controllers
             Guid departmentId = await GetDepartmentIdAsync(loginId);
             IQueryable<Services> services = db.Services
                 .Where(w => w.Update.Value.Year == year && w.Is_OverDue && w.Department_Id == departmentId)
-                .OrderBy(o => o.Create);
+                .OrderByDescending(o => o.Update);
             if (month.HasValue)
             {
                 services = services.Where(w => w.Update.Value.Month <= month.Value);
@@ -1224,6 +1226,7 @@ namespace E2E.Controllers
                     s.System_Statuses.Status_Class,
                     s.System_Statuses.Status_Name,
                     ActionUserId = s.Action_User_Id.Value,
+                    Updated = s.Update.Value
                 }).ToList(); // Execute query and get results into memory
 
             // Then, apply the custom method in-memory
@@ -1235,7 +1238,8 @@ namespace E2E.Controllers
                     Service_Subject = s.Service_Subject,
                     Status_Class = s.Status_Class,
                     Status_Name = s.Status_Name,
-                    User_Name = master.Users_GetInfomation(s.ActionUserId) // Now calling the method in-memory
+                    User_Name = master.Users_GetInfomation(s.ActionUserId),
+                    Updated = s.Updated
                 }).ToList();
 
             return View(overdues);
@@ -2488,7 +2492,7 @@ namespace E2E.Controllers
         {
             var commentComplete = await db.ServiceComments
                 .AsNoTracking()
-                .Where(w => w.Comment_Content.StartsWith("Complete task"))
+                .Where(w => w.Comment_Content.StartsWith("Complete task") && w.Services.Status_Id == 4)
                 .Select(s => new
                 {
                     s.Service_Id,

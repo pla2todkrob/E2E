@@ -15,7 +15,7 @@
         <table class="table table-bordered table-hover table-striped">
             <thead>
                 <tr>
-                    <th>@Html.DisplayNameFor(m => m.Status_Name)</th>
+                    <th>@Html.DisplayNameFor(m => m.Updated)</th>
                     <th>@Html.DisplayNameFor(m => m.Service_Subject)</th>
                     <th>@Html.DisplayNameFor(m => m.User_Name)</th>
                 </tr>
@@ -24,12 +24,12 @@
                 @foreach (var item in Model)
                 {
                 <tr>
-                    <td class="fit text-center"><span class="@item.Status_Class">@Html.DisplayFor(m => item.Status_Name)</span></td>
-                    <td>
+                    <td class="fit">@Html.DisplayFor(m => item.Updated)</td>
+                    <td class="text-wrap">
                         <small class="font-weight-bold">[@Html.DisplayFor(m => item.Service_Key)]</small>&nbsp;
                         <a href="@Url.Action("ServiceInfomation","Services",new { id=item.Service_Id })" title="@Html.DisplayFor(m => item.Service_Subject)" target="_blank">@Html.DisplayFor(m => item.Service_Subject)</a>
                     </td>
-                    <td class="fit text-center">@Html.DisplayFor(m => item.User_Name)</td>
+                    <td class="fit">@Html.DisplayFor(m => item.User_Name)</td>
                 </tr>
                 }
             </tbody>

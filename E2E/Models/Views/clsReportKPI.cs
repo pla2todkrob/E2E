@@ -56,6 +56,7 @@ namespace E2E.Models.Views
 
         [Display(Name = "User")]
         public string User_Name { get; set; }
+        public DateTime Updated { get; set; }
     }
 
     public class ReportKPI_Overview
@@ -101,6 +102,7 @@ namespace E2E.Models.Views
 
         [Display(Name = "Requester")]
         public string UserRequest { get; set; }
+        public DateTime Updated { get; set; }
     }
 
     public class ReportKPI_User
