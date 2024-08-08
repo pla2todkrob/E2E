@@ -1729,7 +1729,7 @@ namespace E2E.Controllers
 
                         Services services = db.Services.Find(item);
                         services.Assign_User_Id = userId;
-                        db.Entry(services).State = System.Data.Entity.EntityState.Modified;
+                        db.Entry(services).State = EntityState.Modified;
                     }
                     if (db.SaveChanges() > 0)
                     {
@@ -2085,7 +2085,7 @@ namespace E2E.Controllers
                 string msg = "Complete task";
                 using (TransactionScope scope = new TransactionScope())
                 {
-                    foreach (var item in db.Services.Where(w => statusId.Contains(w.Status_Id)))
+                    foreach (var item in db.Services.AsNoTracking().Where(w => statusId.Contains(w.Status_Id)))
                     {
                         DateTime completeDate = db.ServiceComments
                             .Where(w => w.Service_Id == item.Service_Id && w.Comment_Content.StartsWith(msg))
@@ -2095,7 +2095,8 @@ namespace E2E.Controllers
                         if (completeDate.Date > item.Service_DueDate)
                         {
                             item.Is_OverDue = true;
-                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                            db.Services.Attach(item);
+                            db.Entry(item).State = EntityState.Modified;
                         }
                     }
 

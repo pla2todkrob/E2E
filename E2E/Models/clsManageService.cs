@@ -996,8 +996,7 @@ namespace E2E.Models
             try
             {
                 bool res = new bool();
-                ServiceFiles serviceFiles = new ServiceFiles();
-                serviceFiles = db.ServiceFiles.Find(id);
+                ServiceFiles serviceFiles = await db.ServiceFiles.FindAsync(id);
 
                 Services services = await db.Services.FindAsync(serviceFiles.Service_Id);
                 services.Service_FileCount -= 1;
@@ -1241,7 +1240,6 @@ namespace E2E.Models
                     }
 
                     users.User_Point -= usePoint;
-                    await db.SaveChangesAsync();
                 }
 
             InsertProcess:
@@ -1275,9 +1273,7 @@ namespace E2E.Models
                 {
                     if (model.Ref_Service_Id.HasValue)
                     {
-                        System_Statuses system_Statuses = await db.System_Statuses
-                            .Where(w => w.Status_Id == 3)
-                            .FirstOrDefaultAsync();
+                        
 
                         Services services = await db.Services.FindAsync(model.Ref_Service_Id);
                         if (services.Status_Id == 2)
@@ -1285,7 +1281,7 @@ namespace E2E.Models
                             services.Status_Id = 3;
                             services.Update = DateTime.Now;
                             await db.SaveChangesAsync();
-
+                            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
                             await AddServiceComment(model.Ref_Service_Id.Value, string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name));
                         }
 
@@ -1382,10 +1378,6 @@ namespace E2E.Models
                     services.Action_User_Id = userId;
                 }
 
-                System_Statuses system_Statuses = await db.System_Statuses
-                    .Where(w => w.Status_Id == 2)
-                    .FirstOrDefaultAsync();
-
                 if (model.WorkRoot_Id.HasValue)
                 {
                     services.WorkRoot_Id = model.WorkRoot_Id;
@@ -1401,11 +1393,12 @@ namespace E2E.Models
                 }
 
                 services.Service_EstimateTime = model.Service_EstimateTime;
-                services.Status_Id = system_Statuses.Status_Id;
+                services.Status_Id = 2;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
+                    System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
                     await AddServiceComment(services.Service_Id, string.Format("Start task, Estimate time about {0} days, Status update to {1}", services.Service_EstimateTime, system_Statuses.Status_Name));
                 }
 
@@ -1455,10 +1448,10 @@ namespace E2E.Models
             {
                 Services services = await db.Services.FindAsync(model.Service_Id);
 
-                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(6);
+                
 
                 services.Update = DateTime.Now;
-                services.Status_Id = system_Statuses.Status_Id;
+                services.Status_Id = 6;
                 db.Entry(services).State = EntityState.Modified;
                 if (await db.SaveChangesAsync() > 0)
                 {
@@ -1466,7 +1459,7 @@ namespace E2E.Models
                     {
                         await AddServiceComment(services.Service_Id, model.Comment_Content);
                     }
-
+                    System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
                     await AddServiceComment(services.Service_Id, string.Format("Cancel task, Status update to {0}", system_Statuses.Status_Name));
                 }
 
@@ -1480,11 +1473,16 @@ namespace E2E.Models
 
         public async Task<bool> Services_SetClose(Services services, bool isAuto = false)
         {
-            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
-            services.Status_Id = system_Statuses.Status_Id;
+
+            // สมมติว่า 'services' ถูกดึงมาด้วย AsNoTracking() และตอนนี้คุณต้องการอัปเดต
+            services.Status_Id = 4; // Set the status as closed
             services.Is_AutoClose = isAuto;
-            db.Entry(services).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+
+            db.Services.Attach(services); // Attach the service as modified
+            db.Entry(services).State = EntityState.Modified; // Explicitly set the state to Modified
+            await db.SaveChangesAsync(); // Save changes
+
+            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
             string commentContent = string.Format("Automatically update status to {0} by system", system_Statuses.Status_Name);
             await AddServiceComment(services.Service_Id, commentContent, services.Action_User_Id);
 
@@ -1513,11 +1511,11 @@ namespace E2E.Models
             Services services = await db.Services.FindAsync(id);
             if (services.Status_Id == 3)
             {
-                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(4);
-                services.Status_Id = system_Statuses.Status_Id;
+                
+                services.Status_Id = 4;
                 db.Entry(services).State = EntityState.Modified;
                 await db.SaveChangesAsync();
-
+                System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
                 string commentContent = string.Format("Status update to {0}", system_Statuses.Status_Name);
                 await AddServiceComment(id, commentContent);
                 if (services.Ref_Service_Id.HasValue)
@@ -1563,7 +1561,6 @@ namespace E2E.Models
         {
             Services services = await db.Services.FindAsync(model.Service_Id);
             DateTime inprogrssDate = services.Update.Value;
-            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(3);
 
             services.Update = DateTime.Now;
             TimeSpan timeDifference = services.Update.Value - inprogrssDate;
@@ -1572,9 +1569,10 @@ namespace E2E.Models
             {
                 services.Is_OverDue = true;
             }
-            services.Status_Id = system_Statuses.Status_Id;
+            services.Status_Id = 3;
             db.Entry(services).State = EntityState.Modified;
             await AddServiceComment(services.Service_Id, model.Comment_Content);
+            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
             string commentContent = string.Format("Complete task, Status update to {0}", system_Statuses.Status_Name);
             await AddServiceComment(services.Service_Id, commentContent);
             commentContent = $"{model.Comment_Content}<br />{commentContent}";
@@ -1644,19 +1642,16 @@ namespace E2E.Models
                 services.Is_FreePoint = true;
                 services.Update = DateTime.Now;
                 db.Entry(services).State = EntityState.Modified;
-                if (await db.SaveChangesAsync() > 0)
-                {
-                    await AddServiceComment(id, "This request is not deducted points.");
-                    int point = await db.System_Priorities
-                            .Where(w => w.Priority_Id == services.Priority_Id)
-                            .Select(s => s.Priority_Point)
-                            .FirstOrDefaultAsync();
-                    await AddServiceComment(id, string.Format("Give back {0} points to {1}", point, master.Users_GetInfomation(services.User_Id)));
-                    Users users = await db.Users.FindAsync(services.User_Id);
-                    users.User_Point += point;
-                    db.Entry(users).State = EntityState.Modified;
-                    await db.SaveChangesAsync();
-                }
+                await AddServiceComment(id, "This request is not deducted points.");
+                int point = await db.System_Priorities
+                        .Where(w => w.Priority_Id == services.Priority_Id)
+                        .Select(s => s.Priority_Point)
+                        .FirstOrDefaultAsync();
+                await AddServiceComment(id, string.Format("Give back {0} points to {1}", point, master.Users_GetInfomation(services.User_Id)));
+                Users users = await db.Users.FindAsync(services.User_Id);
+                users.User_Point += point;
+                db.Entry(users).State = EntityState.Modified;
+                await db.SaveChangesAsync();
 
                 return true;
             }
@@ -1774,14 +1769,14 @@ namespace E2E.Models
         public async Task<bool> Services_SetReject(ServiceComments model, string methodName)
         {
             Services services = await db.Services.FindAsync(model.Service_Id);
-            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(5);
 
             services.Update = DateTime.Now;
-            services.Status_Id = system_Statuses.Status_Id;
+            services.Status_Id = 5;
             db.Entry(services).State = EntityState.Modified;
             await db.SaveChangesAsync();
 
             await AddServiceComment(services.Service_Id, model.Comment_Content);
+            System_Statuses system_Statuses = await db.System_Statuses.FindAsync(services.Status_Id);
             string commentContent = string.Format("Reject task, Status update to {0}", system_Statuses.Status_Name);
             await AddServiceComment(services.Service_Id, commentContent);
             commentContent = $"{model.Comment_Content}<br />{commentContent}";
@@ -2247,9 +2242,16 @@ namespace E2E.Models
 
         public async Task JobDaily()
         {
-            var today = DateTime.Now;
+            var today = DateTime.Now.Date; // Use .Date to ignore time part
+            int[] difRange = { 2, 4, 6 };  // Default range for days since change
+
+            // Calculate eligible update dates based on difRange
+            var eligibleDates = difRange.Select(d => today.AddDays(-d)).ToList();
+
+            // Query the database for services updated on any of the eligible dates
             var services = await db.Services
-                .Where(s => s.Status_Id == 3 && s.Update.HasValue)
+                .AsNoTracking()
+                .Where(s => s.Status_Id == 3 && s.Update.HasValue && eligibleDates.Contains(s.Update.Value.Date))
                 .Select(s => new
                 {
                     s.Service_Id,
@@ -2257,37 +2259,27 @@ namespace E2E.Models
                 })
                 .ToListAsync();
 
+            // Iterate through the filtered services and resend mail
             foreach (var service in services)
             {
-                //daysSinceChange default is 2 4 6
-                int[] difRange = { 2, 4, 6 };
-                //daysSinceChange test is 1 2 3
-                //int[] difRange = { 1, 2, 3 };
-
-                var daysSinceChange = (today.Date - service.UpdateDate.Date).Days;
-
-                if (difRange.Contains(daysSinceChange))
-                {
-                    await clsMail.ResendMail(service.Service_Id);
-                }
+                await clsMail.ResendMail(service.Service_Id);
             }
         }
 
 
+
         public async Task JobMonthly()
         {
+            var startOfCurrentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
             var services = await db.Services
-                .Where(s => s.Status_Id == 3 && s.Update.HasValue && s.Update.Value.Month < DateTime.Now.Month)
+                .AsNoTracking()
+                .Where(s => s.Status_Id == 3 && s.Update.HasValue && s.Update.Value < startOfCurrentMonth)
                 .ToListAsync();
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            {
-                foreach (var service in services)
-                {
-                    await Services_SetClose(service, true);
-                }
-                scope.Complete();
-            }
-            
+
+
+            var tasks = services.Select(service => Services_SetClose(service, true)).ToList();
+            await Task.WhenAll(tasks);
         }
     }
 }

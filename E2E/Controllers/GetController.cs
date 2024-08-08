@@ -58,8 +58,8 @@ namespace E2E.Controllers
         {
             try
             {
-                ClsManageService service = new ClsManageService();
-                await service.JobDaily();
+                ClsManageService clsManageService = new ClsManageService();
+                await clsManageService.JobDaily();
 
                 //currentDay default is 8
                 //currentDay test is 5
@@ -67,10 +67,32 @@ namespace E2E.Controllers
 
                 if (currentDay == 8)
                 {
-                    await service.JobMonthly();
+                    await clsManageService.JobMonthly();
                 }
 
                 return Ok("Notification process completed successfully.");
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IHttpActionResult> CloseSelectedJob(string key)
+        {
+            try
+            {
+                ClsManageService clsManageService = new ClsManageService();
+
+                var service = await db.Services
+                    .AsNoTracking()
+                    .Where(w => w.Service_Key == key)
+                    .FirstOrDefaultAsync();
+
+                var result = await clsManageService.Services_SetClose(service, true);
+
+                return Ok("The desired Job has been closed successfully.");
             }
             catch (Exception ex)
             {

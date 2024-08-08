@@ -883,6 +883,16 @@ namespace E2E.Models
             }
         }
 
+        public bool EmailExistsInAD(string email)
+        {
+            string domainName = ConfigurationManager.AppSettings["DomainName"];
+            using (PrincipalContext context = new PrincipalContext(ContextType.Domain, domainName))
+            {
+                UserPrincipal foundUser = UserPrincipal.FindByIdentity(context, IdentityType.UserPrincipalName, email);
+                return foundUser != null;
+            }
+        }
+
         public async Task<List<Guid>> GetManagementOfDepartment()
         {
             Guid loginId = Guid.Parse(HttpContext.Current.User.Identity.Name);
@@ -1854,6 +1864,7 @@ namespace E2E.Models
         public async Task<bool> Users_AdjustMissing(List<string> userCodeList)
         {
             List<Users> users = await db.Users
+                .AsNoTracking()
                     .Where(w => !userCodeList.Contains(w.User_Code))
                     .ToListAsync();
             if (users.Count > 0)
@@ -1868,6 +1879,7 @@ namespace E2E.Models
                     {
                         item.Active = false;
                         item.Update = DateTime.Now;
+                        db.Users.Attach(item);
                         db.Entry(item).State = EntityState.Modified;
                     }
                 }

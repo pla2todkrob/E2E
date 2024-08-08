@@ -31,6 +31,7 @@ namespace E2E.Controllers
                         {
                             UserDetails userDetails = new UserDetails();
                             userDetails = db.UserDetails
+                                .AsNoTracking()
                                 .Where(w => w.User_Id == users.User_Id)
                                 .FirstOrDefault();
                             string oldPassword = master.Users_Password(clsPassword.OldPassword);

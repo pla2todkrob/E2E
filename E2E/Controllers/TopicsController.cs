@@ -516,7 +516,7 @@ namespace E2E.Controllers
                     .Select(s => s.User_Code)
                     .FirstOrDefault();
 
-                IQueryable<Topics> query = db.Topics.OrderByDescending(o => o.Create).ThenByDescending(t => t.Update);
+                IQueryable<Topics> query = db.Topics.AsNoTracking().OrderByDescending(o => o.Create).ThenByDescending(t => t.Update);
 
                 if (val)
                 {
@@ -525,6 +525,7 @@ namespace E2E.Controllers
                     {
                         item.Topic_Pin = false;
                         item.Topic_Pin_EndDate = null;
+                        db.Topics.Attach(item);
                         db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                         db.SaveChanges();
                     }

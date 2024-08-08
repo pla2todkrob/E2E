@@ -13,6 +13,7 @@ namespace E2E.Models
     {
         private readonly ClsApi clsApi = new ClsApi();
         private readonly ClsContext db = new ClsContext();
+        private readonly ClsManageMaster clsManage = new ClsManageMaster();
 
         public ClsMail()
         {
@@ -86,135 +87,72 @@ namespace E2E.Models
 
         public async Task<bool> SendMail(ClsMail model, HttpFileCollectionBase files = null)
         {
-            EmailAddressAttribute attribute = new EmailAddressAttribute();
-            ClsServiceEmail clsServiceEmail = new ClsServiceEmail();
             string dear = "Dear ";
-
-            List<ReceiveData> receiveDatas = db.UserDetails
-                .Where(w => model.SendTos.Contains(w.User_Id))
-                .Select(s => new ReceiveData()
-                {
-                    Email = s.Users.User_Email,
-                    NameEN = s.Detail_EN_FirstName,
-                    NameTH = s.Detail_TH_FirstName,
-                    FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                    FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                }).ToList();
-
-            if (receiveDatas.Count == 0)
+            var validSendTos = await GetValidEmails(model.SendTos ?? new List<Guid>());
+            if (!validSendTos.Any())
             {
-                return true;
+                return true;  // No valid emails to send to
             }
 
-            List<string> EmailTos = new List<string>();
-            foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
-            {
-                attribute = new EmailAddressAttribute();
-                if (attribute.IsValid(item.Email))
-                {
-                    dear += string.Format("{0}, ", item.FullNameEN);
-                    EmailTos.Add(item.Email);
-                }
-            }
+            var validSendCCs = await GetValidEmails(model.SendCCs ?? new List<Guid>());
+            var validSendBCCs = await GetValidEmails(model.SendBCCs ?? new List<Guid>());
+
+            var emailTos = validSendTos.Select(u => u.Email).ToList();
+            dear += string.Join(", ", validSendTos.Select(u => u.FullNameEN));
             dear = dear.Trim().TrimEnd(',');
 
-            if (EmailTos.Count > 0)
+            ClsServiceEmail clsServiceEmail = new ClsServiceEmail
             {
-                clsServiceEmail.SendTo = EmailTos.ToArray();
-            }
-            else
-            {
-                return true;
-            }
-
-            if (model.SendCCs.Count > 0)
-            {
-                receiveDatas = new List<ReceiveData>();
-                receiveDatas = db.UserDetails
-                .Where(w => model.SendCCs.Contains(w.User_Id))
-                .Select(s => new ReceiveData()
-                {
-                    Email = s.Users.User_Email,
-                    NameEN = s.Detail_EN_FirstName,
-                    NameTH = s.Detail_TH_FirstName,
-                    FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                    FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                }).ToList();
-
-                List<string> EmailCCs = new List<string>();
-                foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
-                {
-                    attribute = new EmailAddressAttribute();
-                    if (attribute.IsValid(item.Email))
-                    {
-                        EmailCCs.Add(item.Email);
-                    }
-                }
-                if (EmailCCs.Count > 0)
-                {
-                    clsServiceEmail.SendCC = EmailCCs.ToArray();
-                }
-            }
-
-            if (model.SendBCCs.Count > 0)
-            {
-                receiveDatas = new List<ReceiveData>();
-                receiveDatas = db.UserDetails
-                .Where(w => model.SendBCCs.Contains(w.User_Id))
-                .Select(s => new ReceiveData()
-                {
-                    Email = s.Users.User_Email,
-                    NameEN = s.Detail_EN_FirstName,
-                    NameTH = s.Detail_TH_FirstName,
-                    FullNameEN = s.Detail_EN_FirstName + " " + s.Detail_EN_LastName,
-                    FullNameTH = s.Detail_TH_FirstName + " " + s.Detail_TH_LastName
-                }).ToList();
-
-                List<string> EmailBCCs = new List<string>();
-                foreach (var item in receiveDatas.Where(w => !string.IsNullOrEmpty(w.Email)))
-                {
-                    attribute = new EmailAddressAttribute();
-                    if (attribute.IsValid(item.Email))
-                    {
-                        EmailBCCs.Add(item.Email);
-                    }
-                }
-
-                if (EmailBCCs.Count > 0)
-                {
-                    clsServiceEmail.SendBCC = EmailBCCs.ToArray();
-                }
-            }
-
-            if (model.AttachPaths.Count > 0)
-            {
-                foreach (var item in model.AttachPaths)
-                {
-                    clsServiceEmail.ClsFileAttaches.Add(new ClsFileAttach() { FilePath = item });
-                }
-            }
-
-            Guid userId = (HttpContext.Current?.User?.Identity?.IsAuthenticated == true)
-                ? Guid.Parse(HttpContext.Current.User.Identity.Name)
-                : model.SendFrom;
-
-            UserDetails userDetails = await db.UserDetails.Where(w => w.User_Id == userId).FirstOrDefaultAsync();
-
-            string strBody = "<html>";
-            strBody += "<head>";
-            strBody += "</head>";
-            strBody += "<body>";
-            strBody += string.Format("<p><b>{0}</b></p>", dear);
-            strBody += model.Body;
-
-            strBody += "</body>";
-            strBody += "</html>";
-
-            clsServiceEmail.Body = strBody;
-            clsServiceEmail.Subject = model.Subject;
-            clsServiceEmail.SendFrom = userDetails.Users.User_Email;
+                SendTo = emailTos.ToArray(),
+                SendCC = validSendCCs.Select(u => u.Email).ToArray(),
+                SendBCC = validSendBCCs.Select(u => u.Email).ToArray(),
+                ClsFileAttaches = model.AttachPaths.Select(p => new ClsFileAttach { FilePath = p }).ToList(),
+                Body = FormatEmailBody(dear, model.Body),
+                Subject = model.Subject,
+                SendFrom = (await GetUserDetails(HttpContext.Current?.User?.Identity?.Name ?? model.SendFrom.ToString())).Users.User_Email
+            };
 
             return await clsApi.SendMail(clsServiceEmail, files);
+        }
+
+        private async Task<List<ReceiveData>> GetValidEmails(List<Guid> userIds)
+        {
+            // Return empty list immediately if there are no user IDs
+            if (userIds == null || !userIds.Any())
+            {
+                return new List<ReceiveData>();
+            }
+
+            // First, get the relevant user details from the database
+            var userDetails = await db.UserDetails
+                .Where(u => userIds.Contains(u.User_Id))
+                .Select(u => new ReceiveData
+                {
+                    Email = u.Users.User_Email,
+                    NameEN = u.Detail_EN_FirstName,
+                    NameTH = u.Detail_TH_FirstName,
+                    FullNameEN = u.Detail_EN_FirstName + " " + u.Detail_EN_LastName,
+                    FullNameTH = u.Detail_TH_FirstName + " " + u.Detail_TH_LastName,
+                    UserCode = u.Users.User_Code
+                }).ToListAsync();
+
+            // Create an instance of EmailAddressAttribute to use for validation
+            var emailValidator = new EmailAddressAttribute();
+
+            // Then filter them in-memory using the custom method and the email validator
+            var validEmails = userDetails.Where(u => emailValidator.IsValid(u.Email) && clsManage.EmailExistsInAD(u.Email)).ToList();
+
+            return validEmails;
+        }
+
+        private string FormatEmailBody(string header, string body)
+        {
+            return $"<html><head></head><body><p><b>{header}</b></p>{body}</body></html>";
+        }
+
+        private async Task<UserDetails> GetUserDetails(string userId)
+        {
+            return await db.UserDetails.FirstOrDefaultAsync(u => u.User_Id.ToString() == userId);
         }
 
         //API Complete
@@ -225,6 +163,7 @@ namespace E2E.Models
             public string FullNameTH { get; set; }
             public string NameEN { get; set; }
             public string NameTH { get; set; }
+            public string UserCode { get; set; }
         }
     }
 }

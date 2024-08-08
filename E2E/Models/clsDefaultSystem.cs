@@ -164,6 +164,7 @@ namespace E2E.Models
                     {
                         int thisYear = DateTime.Today.Year;
                         List<Users> users = db.Users
+                            .AsNoTracking()
                             .Where(w => w.YearSetPoint != thisYear)
                             .ToList();
 
@@ -180,6 +181,7 @@ namespace E2E.Models
                             {
                                 user.User_Point = setPoint;
                                 user.YearSetPoint = thisYear;
+                                db.Users.Attach(user);
                                 db.Entry(user).State = System.Data.Entity.EntityState.Modified;
                             }
                         }
